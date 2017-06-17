@@ -1,6 +1,7 @@
 appnope==0.1.0
 backports.shutil-get-terminal-size==1.0.0
 decorator==4.0.11
+dj-database-url==0.4.2
 Django==1.11.2
 enum34==1.1.6
 ipython==5.4.1
