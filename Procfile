@@ -1,0 +1,1 @@
+web: gunicorn server.wsgi --max-requests 500 --max-requests-jitter 20 --timeout 30 --graceful-timeout 10 --log-file -
