@@ -12,33 +12,17 @@ from zrutils.common.modelutils import get_slugify_value
 
 # Create your models here.
 
-class ZrUserRole(RowInfo):
+class UserRole(RowInfo):
 
     name = models.CharField(max_length=128, unique=True)
 
     def save(self, *args, **kwargs):
         self.name = get_slugify_value(self.name)
 
-        super(ZrUserRole, self).save(*args, **kwargs)
+        super(UserRole, self).save(*args, **kwargs)
 
     class Meta:
         verbose_name_plural = 'ZrUserRole'
-
-    def __unicode__(self):
-        return self.name
-
-
-class ZrCMSUserRole(RowInfo):
-
-    name = models.CharField(max_length=128, unique=True)
-
-    def save(self, *args, **kwargs):
-        self.name = get_slugify_value(self.name)
-
-        super(ZrCMSUserRole, self).save(*args, **kwargs)
-
-    class Meta:
-        verbose_name_plural = 'ZrCMSUserRole'
 
     def __unicode__(self):
         return self.name
@@ -63,11 +47,11 @@ class ZrAdminUser(RowInfo):
     state = models.CharField(max_length=256, null=True, blank=True)
     pincode = models.IntegerField(null=True, blank=True)
     address = models.CharField(max_length=512, null=True, blank=True)
-    role = models.ForeignKey(to=ZrCMSUserRole, related_name='cms_users')
+    role = models.ForeignKey(to=UserRole, related_name='cms_users')
     is_active = models.BooleanField(default=True)
 
     class Meta:
-        verbose_name_plural = 'ZrCMSUsers'
+        verbose_name_plural = 'ZrAdminUser'
 
     def __unicode__(self):
         return '%s - (%s)' % (self.id.username, self.mobile_no)
@@ -81,7 +65,7 @@ class ZrUser(RowInfo):
     pass_word = models.CharField(max_length=256, null=True, blank=True)
     email = models.EmailField(max_length=64, null=True, blank=True)
     gender = models.CharField(max_length=2, choices=GENDER_CHOICES, null=True, blank=True)
-    role = models.ForeignKey(to=ZrUserRole, related_name='zr_users')
+    role = models.ForeignKey(to=UserRole, related_name='zr_users')
 
     city = models.CharField(max_length=256, null=True, blank=True)
     state = models.CharField(max_length=256, null=True, blank=True)

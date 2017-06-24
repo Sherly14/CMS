@@ -8,8 +8,7 @@ from zruser.models import *
 # Register your models here.
 
 
-admin.site.register(ZrUserRole)
-admin.site.register(ZrCMSUserRole)
+admin.site.register(UserRole)
 admin.site.register(KYCDocumentType)
 admin.site.register(ZrAdminUser)
 admin.site.register(ZrUser)
