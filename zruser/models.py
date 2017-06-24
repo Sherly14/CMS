@@ -6,8 +6,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 from zruser.utils.constants import KYC_APPROVAL_CHOICES, GENDER_CHOICES
-from zrutils.common.modelutils import RowInfo
-from zrutils.common.modelutils import get_slugify_value
+from zrutils.common.modelutils import RowInfo, get_slugify_value
 
 
 # Create your models here.
@@ -22,7 +21,7 @@ class UserRole(RowInfo):
         super(UserRole, self).save(*args, **kwargs)
 
     class Meta:
-        verbose_name_plural = 'ZrUserRole'
+        verbose_name_plural = 'UserRoles'
 
     def __unicode__(self):
         return self.name
@@ -40,14 +39,14 @@ class KYCDocumentType(RowInfo):
 
 
 class ZrAdminUser(RowInfo):
-    id = models.OneToOneField(to=User, related_name='zr_cms_user', primary_key=True)
+    id = models.OneToOneField(to=User, related_name='zr_admin_user', primary_key=True)
     mobile_no = models.BigIntegerField(null=True, blank=True)
     gender = models.CharField(max_length=2, choices=GENDER_CHOICES, null=True, blank=True)
     city = models.CharField(max_length=256, null=True, blank=True)
     state = models.CharField(max_length=256, null=True, blank=True)
     pincode = models.IntegerField(null=True, blank=True)
     address = models.CharField(max_length=512, null=True, blank=True)
-    role = models.ForeignKey(to=UserRole, related_name='cms_users')
+    role = models.ForeignKey(to=UserRole, related_name='admin_users')
     is_active = models.BooleanField(default=True)
 
     class Meta:
@@ -104,6 +103,7 @@ class KYCDetail(RowInfo):
     for_user = models.ForeignKey(to=ZrUser, related_name='kyc_details')
     approval_status = models.CharField(max_length=2, choices=KYC_APPROVAL_CHOICES, default=KYC_APPROVAL_CHOICES[0][0])
     by_approved = models.ForeignKey(to=ZrAdminUser, related_name='attached_kyc_details')
+    role = models.ForeignKey(to=UserRole, related_name='submitted_kyc_details')
 
     class Meta:
         verbose_name_plural = 'KYCDetails'
