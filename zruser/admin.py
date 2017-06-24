@@ -11,7 +11,7 @@ from zruser.models import *
 admin.site.register(ZrUserRole)
 admin.site.register(ZrCMSUserRole)
 admin.site.register(KYCDocumentType)
-admin.site.register(ZrCMSUser)
+admin.site.register(ZrAdminUser)
 admin.site.register(ZrUser)
 admin.site.register(KYCDetail)
 admin.site.register(BankDetail)

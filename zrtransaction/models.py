@@ -29,16 +29,34 @@ class TransactionType(RowInfo):
         return '%s' % self.name
 
 
+class Vendor(RowInfo):
+
+    name = models.CharField(max_length=128)
+
+    def save(self, *args, **kwargs):
+        self.name = get_slugify_value(self.name)
+
+        super(Vendor, self).save(*args, **kwargs)
+
+    class Meta:
+        verbose_name_plural = 'Vendors'
+
+    def __unicode__(self):
+        return '%s' % self.name
+
+
 class Transaction(RowInfo):
 
     status = models.CharField(max_length=2, choices=TRANSACTION_STATUS, default=TRANSACTION_STATUS[0][0])
     type = models.ForeignKey(to=TransactionType)
+    vendor = models.ForeignKey(to=Vendor)
     amount = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
-    third_party_txn_id = models.CharField(max_length=128)
+    vendor_txn_id = models.CharField(max_length=128)
 
-    beneficiary = models.ForeignKey(to=ZrUser, related_name='all_transactions')
-    merchant = models.ForeignKey(to=ZrUser, related_name='transactions_list')
-    transaction_json = JSONField()
+    beneficiary = models.ForeignKey(to=ZrUser, related_name='all_transactions', null=True, blank=True)
+    merchant = models.ForeignKey(to=ZrUser, related_name='transactions_list',  null=True, blank=True)
+    transaction_request_json = JSONField(null=True, blank=True)
+    transaction_response_json = JSONField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
         self.amount = Decimal(self.amount).quantize(Decimal("0.00"))

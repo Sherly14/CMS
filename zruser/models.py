@@ -55,7 +55,7 @@ class KYCDocumentType(RowInfo):
         return self.name
 
 
-class ZrCMSUser(RowInfo):
+class ZrAdminUser(RowInfo):
     id = models.OneToOneField(to=User, related_name='zr_cms_user', primary_key=True)
     mobile_no = models.BigIntegerField(null=True, blank=True)
     gender = models.CharField(max_length=2, choices=GENDER_CHOICES, null=True, blank=True)
@@ -78,7 +78,7 @@ class ZrUser(RowInfo):
     mobile_no = models.BigIntegerField(primary_key=True)
     first_name = models.CharField(max_length=128)
     last_name = models.CharField(max_length=128, null=True, blank=True)
-    pass_word = models.CharField(max_length=256)
+    pass_word = models.CharField(max_length=256, null=True, blank=True)
     email = models.EmailField(max_length=64, null=True, blank=True)
     gender = models.CharField(max_length=2, choices=GENDER_CHOICES, null=True, blank=True)
     role = models.ForeignKey(to=ZrUserRole, related_name='zr_users')
@@ -119,7 +119,7 @@ class KYCDetail(RowInfo):
     document_link = models.CharField(max_length=512)
     for_user = models.ForeignKey(to=ZrUser, related_name='kyc_details')
     approval_status = models.CharField(max_length=2, choices=KYC_APPROVAL_CHOICES, default=KYC_APPROVAL_CHOICES[0][0])
-    by_approved = models.ForeignKey(to=ZrCMSUser, related_name='attached_kyc_details')
+    by_approved = models.ForeignKey(to=ZrAdminUser, related_name='attached_kyc_details')
 
     class Meta:
         verbose_name_plural = 'KYCDetails'
