@@ -78,7 +78,7 @@ class ZrUser(RowInfo):
     business_name = models.CharField(max_length=256, null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        self.pass_word = make_password(self.pass_word)
+        # self.pass_word = make_password(self.pass_word)
 
         super(ZrUser, self).save(*args, **kwargs)
 
