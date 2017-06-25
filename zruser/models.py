@@ -58,7 +58,7 @@ class ZrAdminUser(RowInfo):
 
 class ZrUser(RowInfo):
 
-    mobile_no = models.BigIntegerField(primary_key=True)
+    mobile_no = models.BigIntegerField(unique=True, null=False, blank=False)
     first_name = models.CharField(max_length=128)
     last_name = models.CharField(max_length=128, null=True, blank=True)
     pass_word = models.CharField(max_length=256, null=True, blank=True)
@@ -125,3 +125,18 @@ class BankDetail(RowInfo):
 
     def __unicode__(self):
         return '%s - (%s)' % (self.account_no, self.IFSC_code)
+
+
+class OTPDetail(RowInfo):
+
+    challengeId = models.CharField(max_length=64)
+    user = models.ForeignKey(to=ZrUser, related_name='all_otps')
+    mobile_no = models.BigIntegerField(unique=True, null=False, blank=False)
+    expiry = models.DateTimeField(auto_now=True)
+    otp = models.CharField(max_length=64)
+
+    class Meta:
+        verbose_name_plural = 'OTPDetails'
+
+    def __unicode__(self):
+        return '%s - (%s)' % (self.otp, self.mobile_no)
