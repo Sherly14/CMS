@@ -131,7 +131,7 @@ class OTPDetail(RowInfo):
 
     challengeId = models.CharField(max_length=64)
     user = models.ForeignKey(to=ZrUser, related_name='all_otps')
-    mobile_no = models.BigIntegerField(unique=True, null=False, blank=False)
+    mobile_no = models.BigIntegerField()
     expiry = models.DateTimeField()
     otp = models.CharField(max_length=64)
 
