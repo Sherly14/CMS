@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from django.contrib.auth.hashers import make_password, check_password
+from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
 from django.db import models
 
@@ -140,3 +140,16 @@ class OTPDetail(RowInfo):
 
     def __unicode__(self):
         return '%s - (%s)' % (self.otp, self.mobile_no)
+
+
+class MerchantLead(RowInfo):
+
+    name = models.CharField(max_length=128)
+    email = models.EmailField(max_length=64)
+    mobile_no = models.BigIntegerField(unique=True)
+
+    class Meta:
+        verbose_name_plural = 'MerchantLead'
+
+    def __unicode__(self):
+        return '%s - (%s)' % (self.name, self.mobile_no)
