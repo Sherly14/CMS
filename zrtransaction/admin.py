@@ -7,3 +7,6 @@ from zrtransaction.models import *
 
 admin.site.register(Transaction)
 admin.site.register(TransactionType)
+admin.site.register(Vendor)
+admin.site.register(ServiceCircle)
+admin.site.register(ServiceProvider)

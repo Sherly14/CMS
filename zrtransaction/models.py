@@ -67,3 +67,40 @@ class Transaction(RowInfo):
 
     def __unicode__(self):
         return '%s - %s - %s' % (self.status, self.amount, self.type)
+
+
+class ServiceProvider(RowInfo):
+
+    name = models.CharField(max_length=512)
+    code = models.CharField(max_length=256)
+    min_amount = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+    max_amount = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+    is_enabled = models.BooleanField(default=True)
+    transaction_type = models.ForeignKey(to=TransactionType, null=True, blank=True)
+    vendor = models.ForeignKey(to=Vendor, null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        self.min_amount = Decimal(self.min_amount).quantize(Decimal("0.00"))
+        self.max_amount = Decimal(self.max_amount).quantize(Decimal("0.00"))
+        super(ServiceProvider, self).save(*args, **kwargs)
+
+    class Meta:
+        verbose_name_plural = 'ServiceProviders'
+
+    def __unicode__(self):
+        return '%s - %s - %s' % (self.name, self.code, self.is_enabled)
+
+
+class ServiceCircle(RowInfo):
+
+    name = models.CharField(max_length=512)
+    code = models.CharField(max_length=256)
+    is_enabled = models.BooleanField(default=True)
+    transaction_type = models.ForeignKey(to=TransactionType, null=True, blank=True)
+    vendor = models.ForeignKey(to=Vendor, null=True, blank=True)
+
+    class Meta:
+        verbose_name_plural = 'ServiceCircles'
+
+    def __unicode__(self):
+        return '%s - %s - %s' % (self.name, self.code, self.is_enabled)
