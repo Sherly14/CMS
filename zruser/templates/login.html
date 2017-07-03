@@ -26,6 +26,13 @@
 												<input type="submit" name="login-submit" id="login-submit" tabindex="4" class="form-control btn btn-primary" value="Log In">
 											</div>
 										</div>
+										{% if login_form.non_field_errors %}
+											<ul class='form-errors'>
+												{% for error in login_form.non_field_errors %}
+													<li>{{ error }}</li>
+												{% endfor %}
+											</ul>
+										{% endif %}
 									</div>
 								</form>
 							</div>
