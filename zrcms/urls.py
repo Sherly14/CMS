@@ -24,4 +24,6 @@ urlpatterns = [
     url(r'^$', login_view, name='login'),
     url(r'^logout/$', auth_views.logout, {'next_page': 'login'}, name='logout'),
     url(r'^user/', include('zruser.urls', namespace='user')),
+    url(r'^transactions/', include('zrtransaction.urls', namespace='transaction')),
+    url(r'^payment_request/', include('zrpayment.urls', namespace='payment-requests')),
 ]

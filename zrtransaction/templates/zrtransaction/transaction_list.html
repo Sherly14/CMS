@@ -1,0 +1,18 @@
+{% block content %}
+    <h1>Transactions List</h1>
+
+    {% if transaction_list %}
+    <ul>
+
+      {% for transaction in transaction_list %}
+      <li>
+          <p>{{transaction.type}}</p>
+          <!--<p>{{transaction.id}}</p>-->
+      </li>
+      {% endfor %}
+
+    </ul>
+    {% else %}
+      <p>There are no books in the library.</p>
+    {% endif %}       
+{% endblock %}
