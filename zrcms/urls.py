@@ -21,7 +21,7 @@ from zruser.views import login_view
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
-    url(r'^login/$', login_view, name='login'),
+    url(r'^$', login_view, name='login'),
     url(r'^logout/$', auth_views.logout, {'next_page': 'login'}, name='logout'),
     url(r'^user/', include('zruser.urls', namespace='user')),
 ]

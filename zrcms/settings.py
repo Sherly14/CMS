@@ -69,7 +69,7 @@ ROOT_URLCONF = 'zrcms.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(os.path.dirname(BASE_DIR), "templates")],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -148,11 +148,14 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
 
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'  # static folders location in each of the app
 
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'static'),
+    # will not be server from here, long term storage only
+    os.path.join(BASE_DIR, 'static-storage'),
 )
+
+# will get server from here, static-serve
+STATIC_ROOT = os.path.join(BASE_DIR, 'static-serve')
 
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'

@@ -1,0 +1,85 @@
+
+/*column alignments */
+
+.colAlignment{
+	padding:0rem;
+	display:inline-block
+}
+
+.col-md-4{
+	vertical-align: top;
+}
+/*to fill the width full or 80% */
+.fill{
+	width:100%;
+}
+#doc_type{
+	box-shadow: none;
+	padding:0px;
+	margin-right: 1rem;
+}
+.input-80{
+	width:80%;
+}
+/*styling of text for differnt types of heading*/
+.heading-bg{
+	background-color: #E5E5E5;
+	width:100%;
+	padding-left:1rem;
+	margin-bottom: 1rem;
+	font-family:sans-serif;
+	font-weight: 600;
+}
+.heading-right{
+	padding-top: 20px;
+	width:100%;
+	text-align:right;
+	padding-right:3rem;
+	font-size:25px;
+	font-family: sans-serif;
+	font-weight:lighter;
+}
+
+
+/*default padding and margin for row for merchants page*/
+.row{
+	padding-left:2rem;
+	padding-right:0.5rem;
+	padding-bottom:0rem;
+	padding-top:0rem;
+	margin-bottom: 0rem;
+}
+
+
+
+/*margins for different elements*/
+label{
+	padding-left:0.2rem;
+	margin-bottom: 0rem;
+	font-family: sans-serif;
+}
+
+.
+.form-group{
+	margin-bottom: 0rem;
+}
+.margin-top{
+	margin-top:1rem;
+}
+
+#merchant_id{
+	font-family: sans-serif;
+}
+
+.button.yellow{
+	padding:3px 1rem;
+}
+
+.button.yellow.small{
+	font-size:10px;
+}
+
+.button.red{
+	display:block;
+	float:right;
+}

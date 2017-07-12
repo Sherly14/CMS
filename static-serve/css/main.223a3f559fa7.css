@@ -1,0 +1,212 @@
+input[type="text"]{
+    display:block;
+    box-shadow: 2px 3px 10px #E5E5E5;
+    border-style: none;
+    border-radius:5px;
+    padding-left:1rem;
+}
+input[type="tel"]{
+    display:block;
+    box-shadow: 2px 3px 10px #E5E5E5;
+    border-style: none;
+    border-radius:5px;
+    padding-left:1rem;
+}
+input[type="email"]{
+    display:block;
+    box-shadow: 2px 3px 10px #E5E5E5;
+    border-style: none;
+    border-radius:5px;
+    padding-left:1rem;
+}
+input[type="search"]{
+    display:block;
+    box-shadow: 2px 3px 10px #E5E5E5;
+    border-style: none;
+    border-radius:5px;
+    padding-left:1rem;
+}
+
+input[type="button"]{
+    display:block;
+    border-style: none;
+    border-radius: 2px;
+}
+
+input[type="button"].plus{
+    padding:0px;
+    height:50px;
+    width:50px;
+    font-size:200%;
+    border-radius:50%;
+    outline:none;
+    color:white;
+    background-color:red;
+    border:none;
+    box-shadow: none;
+}
+
+input[type="button"].plus:hover{
+    cursor: pointer;
+}
+
+input, textarea{
+    color: #ff0000;
+}
+
+textarea:focus, input:focus {
+    color: #ff0000;
+}
+select{
+    padding-left: 1rem;
+    width:12rem;
+    border:none;
+    border-radius: 5px;
+    text-decoration: none;
+    height:2rem;
+    text-align:center;
+    box-shadow: 2px 3px 10px #E5E5E5;
+}
+
+.textAlignRight {
+    text-align: right;
+}
+
+.textAlignLeft {
+    text-align: left;
+}
+/*table styling*/
+.table td {
+    border : 0px;
+    padding : 0px;
+}
+/*selective styling for td in cardblock*/
+div.card-block td{
+    font-size:1rem;
+    font-weight: normal;
+}
+
+
+body {
+    background-color: rgb(52, 58, 65)
+}
+
+.spanAlignment {
+    display: block;
+}
+
+/*styling for card  and its font */
+.card {
+    box-shadow: 10px 10px 35px rgb(200, 200, 200)
+}
+
+.card-head{
+    font-size:1rem;
+    font-weight:300;
+}
+
+.card-data{
+    font-size:1.3rem;
+    font-weight:500;
+}
+
+.card-block {
+    padding: 0.35rem 1.5rem 1rem 1.5rem;
+}
+
+
+/*stying for buttons and functions*/
+.button{
+    color:white;
+    padding:0.3rem 1rem;
+    border-radius:3px;
+    box-shadow: 2px 3px 10px #E5E5E5
+}
+.button.red{
+    background-color: #DB3725;
+}
+
+.button.green{
+    background-color: green;
+}
+.button.yellow{
+    background-color: #F3A01C;
+}
+
+.button.yellow.resize{
+    padding:0px 4px;
+    margin-bottom: 1rem;
+}
+
+.button:hover{
+    cursor:pointer;
+}
+
+/*adjustments for positioning and size*/
+.leftMargin2{
+    margin: 0px 2px 0px 2px;
+}
+
+
+.dis-ft-r{
+    display:block;
+    float:right;
+}
+
+
+.margin-bot{
+    padding-bottom:2rem;
+}
+
+.mr-5 {
+    margin-bottom: 1rem;
+}
+.margin-top{
+    margin-top:2rem;
+}
+
+.pad-0{
+    padding:0rem;
+}
+
+
+.leftMargin {
+    margin: 0px 20px 0px 20px;
+}
+
+.size10px {
+    font-size: 10px;
+}
+
+.whiteTextColor {
+    color: white !important;
+}
+
+.lightGrayBG {
+    background-color: rgb(231, 231, 231);
+}
+
+.blackTextColor {
+    color: rgb(60, 60, 60)
+}
+
+
+.nav-item:active{
+  background-color:#2E2E2E;
+}
+
+.nav-link{
+  padding-right:20px;
+}
+
+/* style for shadow for input*/
+.dflex.button.yellow{
+    padding:0px;   
+}
+
+.fa.button{
+    box-shadow: none;
+    border-color: rgb(255,255,255);
+    color:red;
+    padding:0rem;
+}
