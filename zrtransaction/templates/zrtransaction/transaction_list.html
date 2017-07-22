@@ -1,18 +1,19 @@
+{% extends 'base.html' %}
+
 {% block content %}
     <h1>Transactions List</h1>
-
     {% if transaction_list %}
-    <ul>
+        <ul>
 
-      {% for transaction in transaction_list %}
-      <li>
-          <p>{{transaction.type}}</p>
-          <!--<p>{{transaction.id}}</p>-->
-      </li>
-      {% endfor %}
+            {% for transaction in transaction_list %}
+                <li>
+                    <p>{{ transaction.type }}</p>
+                    <!--<p>{{transaction.id}}</p>-->
+                </li>
+            {% endfor %}
 
-    </ul>
+        </ul>
     {% else %}
-      <p>There are no books in the library.</p>
-    {% endif %}       
+        <p>There are no books in the library.</p>
+    {% endif %}
 {% endblock %}

@@ -1,5 +1,11 @@
-{% if transaction %}
+{% extends 'base.html' %}
 
-    <h1> {{ transaction }} </h1>
+{% block content %}
 
-{% endif %}
+    {% if transaction %}
+
+        <h1> {{ transaction }} </h1>
+
+    {% endif %}
+
+{% endblock %}

@@ -1,17 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block content %}
 
 
-      {% for merchant in merchant_list %}
-      <li>
-          <p>{{merchant}}</p>
-      </li>
-      {% endfor %}
+    {% for merchant in merchant_list %}
+        <li>
+            <p>{{ merchant }}</p>
+        </li>
+    {% endfor %}
 
-</body>
-</html>
+
+{% endblock %}

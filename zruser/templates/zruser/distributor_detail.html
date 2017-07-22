@@ -1,16 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-{% if distributor %}
+{% block content %}
 
-    <h1> {{ distributor }} </h1>
 
-{% endif %}
+    {% if distributor %}
 
-</body>
-</html>
+        <h1> {{ distributor }} </h1>
+
+    {% endif %}
+
+
+{% endblock %}

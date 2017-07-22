@@ -1,16 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-      {% for payment_request in payment_request_list %}
-      <li>
-          <p>{{payment_request}}</p>
-      </li>
-      {% endfor %}
+{% block content %}
 
-</body>
-</html>
+    {% for payment_request in payment_request_list %}
+        <li>
+            <p>{{ payment_request }}</p>
+        </li>
+    {% endfor %}
+
+
+{% endblock %}
+
