@@ -10,17 +10,17 @@
 
     <meta name="description" content="">
     <meta name="author" content="">
-    <title>zrupee {%  block title %} {%  endblock title %}</title>
+    <title>zrupee {% block title %} {% endblock title %}</title>
 
-    <link rel="stylesheet" href="{%static 'css/vendor/bootstrap.min.css' %}" >
+    <link rel="stylesheet" href="{% static 'css/vendor/bootstrap.min.css' %}">
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <!-- Bootstrap core CSS -->
 
     {% if user.is_authenticated %}
-    <link href="{%static 'css/app/main.css' %}" rel="stylesheet">
-    <link href="{%static 'css/app/for_navbar.css' %}" rel="stylesheet">
-    <link href="{%static 'css/app/for_merchants.css' %}" rel="stylesheet">
-    <link href="{%static 'css/app/for_commissions.css' %}" rel="stylesheet">
+        <link href="{% static 'css/app/main.css' %}" rel="stylesheet">
+        <link href="{% static 'css/app/for_navbar.css' %}" rel="stylesheet">
+        <link href="{% static 'css/app/for_merchants.css' %}" rel="stylesheet">
+        <link href="{% static 'css/app/for_commissions.css' %}" rel="stylesheet">
     {% else %}
 
     {% endif %}
@@ -29,74 +29,76 @@
 
 <body id="page-top">
 
-  {% if user.is_authenticated %}
+{% if user.is_authenticated %}
 
-      <!-- Navigation /starts -->
-        <nav id="mainNav" class="navbar static-top navbar-toggleable-md navbar-inverse bg-inverse">
-    <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarExample" aria-controls="navbarExample"
-    aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-</button>
-<a class="navbar-brand" href="#">Zrupee</a>
-<div class="collapse navbar-collapse" id="navbarExample">
-    <ul class="sidebar-nav navbar-nav">
-        <li class="nav-item ">
-            <a class="nav-link textAlignRight" href="#">Merchants</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link textAlignRight" href="#">Transactions</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link textAlignRight"  href="#">Payment Requests
-            <span class="badge badge-pill badge-outline" style="margin-right:-30px">2</span></a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link textAlignRight " href="#">Commissions</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link textAlignRight " href="#">Reports</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link textAlignRight"></a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link textAlignRight" href="#">Settings</a>
-        </li>
+    <!-- Navigation /starts -->
+    <nav id="mainNav" class="navbar static-top navbar-toggleable-md navbar-inverse bg-inverse">
+        <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+                data-target="#navbarExample" aria-controls="navbarExample"
+                aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <a class="navbar-brand" href="#">Zrupee</a>
+        <div class="collapse navbar-collapse" id="navbarExample">
+            <ul class="sidebar-nav navbar-nav">
+                <li class="nav-item ">
+                    <a class="nav-link textAlignRight" href="#">Merchants</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link textAlignRight" href="#">Transactions</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link textAlignRight" href="#">Payment Requests
+                        <span class="badge badge-pill badge-outline" style="margin-right:-30px">2</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link textAlignRight " href="#">Commissions</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link textAlignRight " href="#">Reports</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link textAlignRight"></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link textAlignRight" href="#">Settings</a>
+                </li>
 
-    </ul>
-    <ul class="navbar-nav">
+            </ul>
+            <ul class="navbar-nav">
 
-        <li class="nav-item"><a class="nav-link whiteTextColor">Pranav Mahanty : 98DFHGTE3
-        </a>
-    </li>
-</ul>
+                <li class="nav-item"><a class="nav-link whiteTextColor">Pranav Mahanty : 98DFHGTE3
+                </a>
+                </li>
+            </ul>
 
-<ul class="navbar-nav ml-auto">
+            <ul class="navbar-nav ml-auto">
 
-    <li class="nav-item leftMargin">
-        <a class="nav-link" href="#">DASHBOARD</a>
-    </li>
-    <li class="nav-item leftMargin">
-        <a class="nav-link" href="#">ADD MERCHANT</a>
-    </li>
-    <li class="nav-item leftMargin">
-        <a class="nav-link" href="{% url 'logout' %}">LOGOUT</a>
-    </li>
-</ul>
-</div>
-</nav>
-      <!-- Navigation /ends -->
+                <li class="nav-item leftMargin">
+                    <a class="nav-link" href="#">DASHBOARD</a>
+                </li>
+                <li class="nav-item leftMargin">
+                    <a class="nav-link" href="#">ADD MERCHANT</a>
+                </li>
+                <li class="nav-item leftMargin">
+                    <a class="nav-link" href="{% url 'logout' %}">LOGOUT</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <!-- Navigation /ends -->
 
-      {% block content %}
+    {% block content %}
 
-      {% endblock %}
-  {% else %}
+    {% endblock %}
 
-      {% block logincontent %}
+{% else %}
 
-      {% endblock %}
+    {% block logincontent %}
 
-  {% endif %}
+    {% endblock %}
+
+{% endif %}
 
 </body>
 
