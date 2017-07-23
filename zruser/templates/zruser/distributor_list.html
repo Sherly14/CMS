@@ -1,15 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    {#    {% for distributor in distributor_list %}#}
-    {#        <li>#}
-    {#            <p>{{ distributor }}</p>#}
-    {#        </li>#}
-    {#    {% endfor %}#}
-
 
     <div class="content-wrapper">
-        <p class="head-right">Merchant Table</p>
+        <p class="head-right">Distributor Table</p>
         <div class="row rm-margin-side">
             <p class="head-left">PERIOD</p>
         </div>
@@ -25,7 +19,7 @@
         <br>
         <div class="row">
             <div class="fine">
-                <p class="head-bg head-bg2">Transactions, Commissions and Taxes<i class="fa fa-chevron-up"
+                <p class="head-bg head-bg2">Distributors List<i class="fa fa-chevron-up"
                                                                                   style="color:white;"></i></p>
             </div>
         </div>
@@ -34,24 +28,27 @@
             <div style="width: 100%;">
                 <table>
                     <tr>
-                        <th>Merchant Id</th>
-                        <th>Merchant Name</th>
+                        <th>Distributor Id</th>
+                        <th>Distributor Name</th>
                         <th>DOJ</th>
                         <th>Mobile No</th>
                         <th>Email Id</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
-                    <tr>
-                        <td>Alfreds Futterkiste</td>
-                        <td>Maria Anders</td>
-                        <td>Germany</td>
-                    </tr>
-                    <tr>
-                        <td>Centro comercial Moctezuma</td>
-                        <td>Francisco Chang</td>
-                        <td>Mexico</td>
-                    </tr>
+                    {% for distributor in distributor_list %}
+                        <tr>
+                            <td>{{ distributor.id }}</td>
+                            <td>{{ distributor.first_name }} {{ distributor.last_name }}</td>
+                            <td>{{ distributor.at_created }}</td>
+                            <td>{{ distributor.mobile_no }}</td>
+                            <td>{{ distributor.email }}</td>
+                            <td>{{ distributor.is_active }}</td>
+{#                            <td>{{ distributor. }}</td>#}
+
+                        </tr>
+
+                    {% endfor %}
                 </table>
             </div>
 

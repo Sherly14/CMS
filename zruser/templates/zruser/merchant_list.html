@@ -2,12 +2,59 @@
 
 {% block content %}
 
+    <div class="content-wrapper">
+        <p class="head-right">Merchant Table</p>
+        <div class="row rm-margin-side">
+            <p class="head-left">PERIOD</p>
+        </div>
+        <div class="row">
+            <div class="d-flex justify-content-between" style="width:90%">
+                <select>
+                    <option>Last Week</option>
+                </select>
+                <input class="search" type="search" name="search" placeholder="search">
+                <input class="button red" type="button" value="DOWNLOAD CSV">
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="fine">
+                <p class="head-bg head-bg2">Merchants<i class="fa fa-chevron-up"
+                                                                                  style="color:white;"></i></p>
+            </div>
+        </div>
+        <div class="row scroll">
 
-    {% for merchant in merchant_list %}
-        <li>
-            <p>{{ merchant }}</p>
-        </li>
-    {% endfor %}
+            <div style="width: 100%;">
+                <table>
+                    <tr>
+                        <th>Merchant Id</th>
+                        <th>Merchant Name</th>
+                        <th>DOJ</th>
+                        <th>Mobile No</th>
+                        <th>Email Id</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    {% for merchant in merchant_list %}
+                        <tr>
+                            <td>{{ merchant.id }}</td>
+                            <td>{{ merchant.first_name }} {{ merchant.last_name }}</td>
+                            <td>{{ merchant.at_created }}</td>
+                            <td>{{ merchant.mobile_no }}</td>
+                            <td>{{ merchant.email }}</td>
+                            <td>{{ merchant.is_active }}</td>
+                            {#                            <td>{{ distributor. }}</td>#}
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
 
+        </div>
+        <br>
 
+        <i class="fa fa-plus-circle fa-4x locate button"></i>
+
+    </div>
+    
 {% endblock %}
