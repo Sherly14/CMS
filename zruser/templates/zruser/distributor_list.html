@@ -1,10 +1,68 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    {% for distributor in distributor_list %}
-        <li>
-            <p>{{ distributor }}</p>
-        </li>
-    {% endfor %}
+    {#    {% for distributor in distributor_list %}#}
+    {#        <li>#}
+    {#            <p>{{ distributor }}</p>#}
+    {#        </li>#}
+    {#    {% endfor %}#}
+
+
+    <div class="content-wrapper">
+        <p class="head-right">Merchant Table</p>
+        <div class="row rm-margin-side">
+            <p class="head-left">PERIOD</p>
+        </div>
+        <div class="row">
+            <div class="d-flex justify-content-between" style="width:90%">
+                <select>
+                    <option>Last Week</option>
+                </select>
+                <input class="search" type="search" name="search" placeholder="search">
+                <input class="button red" type="button" value="DOWNLOAD CSV">
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="fine">
+                <p class="head-bg head-bg2">Transactions, Commissions and Taxes<i class="fa fa-chevron-up"
+                                                                                  style="color:white;"></i></p>
+            </div>
+        </div>
+        <div class="row scroll">
+
+            <div style="width: 100%;">
+                <table>
+                    <tr>
+                        <th>Merchant Id</th>
+                        <th>Merchant Name</th>
+                        <th>DOJ</th>
+                        <th>Mobile No</th>
+                        <th>Email Id</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    <tr>
+                        <td>Alfreds Futterkiste</td>
+                        <td>Maria Anders</td>
+                        <td>Germany</td>
+                    </tr>
+                    <tr>
+                        <td>Centro comercial Moctezuma</td>
+                        <td>Francisco Chang</td>
+                        <td>Mexico</td>
+                    </tr>
+                </table>
+            </div>
+
+        </div>
+        <br>
+
+        <i class="fa fa-plus-circle fa-4x locate button"></i>
+
+    </div>
+
+
+
 
 {% endblock %}
