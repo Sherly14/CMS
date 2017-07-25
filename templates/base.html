@@ -48,10 +48,10 @@
                     <a class="nav-link textAlignRight" href="{% url 'user:merchant' %}">Merchants</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link textAlignRight" href="#">Transactions</a>
+                    <a class="nav-link textAlignRight" href="{% url 'transaction:transaction-list' %}">Transactions</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link textAlignRight" href="#">Payment Requests
+                    <a class="nav-link textAlignRight" href="{% url 'payment-requests:payment-request-list' %}">Payment Requests
                         <span class="badge badge-pill badge-outline" style="margin-right:-30px">2</span></a>
                 </li>
                 <li class="nav-item">

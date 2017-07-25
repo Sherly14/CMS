@@ -1,19 +1,66 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Transactions List</h1>
-    {% if transaction_list %}
-        <ul>
 
-            {% for transaction in transaction_list %}
-                <li>
-                    <p>{{ transaction.type }}</p>
-                    <!--<p>{{transaction.id}}</p>-->
-                </li>
-            {% endfor %}
+    <div class="content-wrapper">
+        <p class="head-right">Transactions Table</p>
+        <div class="row rm-margin-side">
+            <p class="head-left">PERIOD</p>
+        </div>
+        <div class="row">
+            <div class="d-flex justify-content-between" style="width:90%">
+                <select>
+                    <option>Last Week</option>
+                </select>
+                <input class="search" type="search" name="search" placeholder="search">
+                <input class="button red" type="button" value="DOWNLOAD CSV">
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="fine">
+                <p class="head-bg head-bg2">Payment Request List<i class="fa fa-chevron-up"
+                                                                                  style="color:white;"></i></p>
+            </div>
+        </div>
+        <div class="row scroll">
 
-        </ul>
-    {% else %}
-        <p>There are no books in the library.</p>
-    {% endif %}
+            <div style="width: 100%;">
+                <table>
+                    <tr>
+                        <th>Distributor Id</th>
+                        <th>Distributor Name</th>
+                        <th>DOJ</th>
+                        <th>Mobile No</th>
+                        <th>Email Id</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    {% for transaction in transaction_list %}
+                        <tr>
+                            <td>{{ transaction }}</td>
+                            <td>{{ transaction }} {{ transaction }}</td>
+                            <td>{{ transaction }}</td>
+                            <td>{{ transaction }}</td>
+                            <td>{{ transaction }}</td>
+                            <td>{{ transaction }}</td>
+{#                            <td>{{ distributor. }}</td>#}
+
+                        </tr>
+
+                    {% endfor %}
+                </table>
+            </div>
+
+        </div>
+        <br>
+
+        <i class="fa fa-plus-circle fa-4x locate button"></i>
+
+    </div>
+
+
+
+
 {% endblock %}
+
