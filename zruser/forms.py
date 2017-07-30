@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth import authenticate
 from zruser.models import ZrAdminUser, ZrUser
 
+
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=255, required=True)
     password = forms.CharField(widget=forms.PasswordInput, required=True)
@@ -15,6 +16,7 @@ class LoginForm(forms.Form):
         return self.cleaned_data
 
     def login(self, request):
+        print request
         username = self.cleaned_data.get('username')
         password = self.cleaned_data.get('password')
         user = authenticate(username=username, password=password)
@@ -22,13 +24,17 @@ class LoginForm(forms.Form):
 
 
 class MerchantForm(forms.ModelForm):
+
+    def clean(self):
+        print
+
     class Meta:
         model = ZrUser
-        fields = ['mobile_no']
+        fields = ['mobile_no', 'first_name', 'last_name', 'email', 'gender', 'city', 'state', 'pincode']
 
 
 class DistributorForm(forms.ModelForm):
 
     class Meta:
         model = ZrAdminUser
-        fields = []
+        fields = ['mobile_no', 'gender', 'city', 'state', 'pincode']
