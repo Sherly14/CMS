@@ -1,141 +1,140 @@
 {% extends 'base.html' %}
 
-{% block title %} Distributors List {% endblock %}
+{% block title %} Add Merchant {% endblock %}
 
 {% block content %}
 
-        <div class="content-wrapper">
-        <p class="heading-right">Add a Merchant</p>
-        <div class="container-fluid">
-            <div class="row">
-                <p class="heading-bg">PERSONAL DETAILS:</p>
-            </div>
-            <form>
-                <div class="row">
-                    <div class="col-sm-2">
-                        <div class="form-group">
-                            <label for="firstname">First Name</label>
-                            <input class="fill" type="text" id="firstname" placeholder="Ramesh">
-                        </div>
-                    </div>
-                    <div class="col-sm-2">
-                        <div class="form-group">
-                            <label for="lastname">Last Name</label>
-                            <input class="fill" type="text" id="lastname" placeholder="Upadhyay">
-                        </div>
-                    </div>
-                    <div class="col-sm-2">
-                        <div class="form-group">
-                            <label for="phone">Phone No.</label>
-                            <input class="fill" type="tel" id="phone">
-                        </div>
-                    </div>
-                    <div class="col-sm-4">
-                        <div class="form-group">
-                            <label for="email">E-mail ID</label>
-                            <input class="fill" type="email" id="email">
-                        </div>
-                    </div>
-                    <div class="col-sm-2">
-                        <div class="form-group">
-                            <label for="merchant_id">Merchant ID</label>
-                            <span id="merchant_id">98DDFSDE8</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-8">
-                        <div class="form-group">
-                            <label for="business">Business name</label>
-                            <input class="input-80" type="text" id="business">
-                        </div>
-                    </div>
-                    <div class="col-sm-4">
-                        <div class="form-group">
-                            <label for="pan">PAN No.</label>
-                            <input class="input-80" type="text" id="pan">
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label for="address">Address</label>
-                            <input class="fill" type="text" id="address">
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-4">
-                        <div class="form-group">
-                            <label for="city">City</label>
-                            <input class="fill" type="text" id="city">
-                        </div>
-                    </div>
-                    <div class="col-sm-4">
-                        <div class="form-group">
-                            <label for="state">State</label>
-                            <input class="fill" type="text" id="state">
-                        </div>
-                    </div>
-                    <div class="col-sm-4">
-                        <div class="form-group">
-                            <label for="pin">Pincode</label>
-                            <input class="fill" type="text" id="pincode">
-                        </div>
-                    </div>
-                </div>
-            </form>
+<div class="content-wrapper">
+    <p class="heading-right">Add a Merchant</p>
+    {% csrf_token %} {{ form.as_p }}
+    <div class="container-fluid">
+        <div class="row">
+            <p class="heading-bg">PERSONAL DETAILS:</p>
         </div>
-        <div class="container-fluid margin-bot">
-            <div class="col-md-7 colAlignment">
-                <div class="row margin-top">
-                    <p class="heading-bg">KYC PROOFS:</p>
+        <form>
+            <div class="row">
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <label for="firstname">First Name</label>
+                        <input class="fill" type="text" id="firstname" placeholder="Ramesh">
+                    </div>
                 </div>
-                <div class="row">
-                    <label class="fill" for="doc_type">Select Document Type</label>
-                    <!-- <div class="btn-group">
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <label for="lastname">Last Name</label>
+                        <input class="fill" type="text" id="lastname" placeholder="Upadhyay">
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <label for="phone">Phone No.</label>
+                        <input class="fill" type="tel" id="phone">
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="email">E-mail ID</label>
+                        <input class="fill" type="email" id="email">
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <label for="merchant_id">Merchant ID</label>
+                        <span id="merchant_id">98DDFSDE8</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-8">
+                    <div class="form-group">
+                        <label for="business">Business name</label>
+                        <input class="input-80" type="text" id="business">
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="pan">PAN No.</label>
+                        <input class="input-80" type="text" id="pan">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        <input class="fill" type="text" id="address">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        <input class="fill" type="text" id="city">
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        <input class="fill" type="text" id="state">
+                    </div>
+                </div>
+                <div class="col-sm-4">
+                    <div class="form-group">
+                        <label for="pin">Pincode</label>
+                        <input class="fill" type="text" id="pincode">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="container-fluid margin-bot">
+        <div class="col-md-7 colAlignment">
+            <div class="row margin-top">
+                <p class="heading-bg">KYC PROOFS:</p>
+            </div>
+            <div class="row">
+                <label class="fill" for="doc_type">Select Document Type</label>
+                <!-- <div class="btn-group">
                 <button  id="doc_type" type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">select<span class="glyphicon glyphicon-chevron-down"></span></button>
                 <ul class="dropdown-menu">
                     <li><a href="#">doc1</a></li>
                     <li><a href="#">doc2</a></li>
                 </ul>
             </div> -->
-                    <select id="doc_type">
-                        <option value="select1">select</option>
-                        <option value="select2">select2</option>
-                    </select>
-                    <input class="button yellow bg mr-5" type="button" value="upload">
-                </div>
-                <div class="row margin-top">
-                    <div class="col-md-6">
-                        <h5 class="fill">Adhaar Card</span>
-                    <h5><i>Ramesh_Adhaar.pdf</i><i class="fa fa-download" style="margin-left:0.5rem;"></i></h5><span class="fill"></span>
-                        <input class="button yellow small" type="button" value="change">
-                    </div>
-                    <div class="col-md-6">
-                        <h5 class="fill">Registration Certificate</span>
-                        <h5><i>Ramesh_Adhaar.pdf</i><i class="fa fa-download" style="margin-left:0.5rem;"></i></h5><span class="fill"></span>
-                        <input class="button yellow small" type="button" value="change">
-                    </div>
-                </div>
+                <select id="doc_type">
+                    <option value="select1">select</option>
+                    <option value="select2">select2</option>
+                </select>
+                <input class="button yellow bg mr-5" type="button" value="upload">
             </div>
-            <div class="col-md-5 colAlignment" style="float:right;">
-                <div class="row margin-top">
-                    <p class="heading-bg">GST INFO:</p>
+            <div class="row margin-top">
+                <div class="col-md-6">
+                    <h5 class="fill">Adhaar Card</span>
+                    <h5><i>Ramesh_Adhaar.pdf</i><i class="fa fa-download" style="margin-left:0.5rem;"></i></h5><span class="fill"></span>
+                    <input class="button yellow small" type="button" value="change">
                 </div>
-                <div class="row margin-top">
-                    <label class="fill" for="dstin">DSTIN</label>
-                    <input type="text" id="dstin">
-                </div>
-                <div class="fill margin-top" style="padding-left:6.5rem">
-                    <input class="button red" type="button" value="Save & Submit">
+                <div class="col-md-6">
+                    <h5 class="fill">Registration Certificate</span>
+                        <h5><i>Ramesh_Adhaar.pdf</i><i class="fa fa-download" style="margin-left:0.5rem;"></i></h5><span class="fill"></span>
+                    <input class="button yellow small" type="button" value="change">
                 </div>
             </div>
         </div>
+        <div class="col-md-5 colAlignment" style="float:right;">
+            <div class="row margin-top">
+                <p class="heading-bg">GST INFO:</p>
+            </div>
+            <div class="row margin-top">
+                <label class="fill" for="dstin">DSTIN</label>
+                <input type="text" id="dstin">
+            </div>
+            <div class="fill margin-top" style="padding-left:6.5rem">
+                <input class="button red" type="button" value="Save & Submit">
+            </div>
+        </div>
     </div>
-
-
+</div>
 
 
 {% endblock %}
