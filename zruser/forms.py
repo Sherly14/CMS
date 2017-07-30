@@ -1,6 +1,6 @@
 from django import forms
 from django.contrib.auth import authenticate
-
+from zruser.models import ZrAdminUser, ZrUser
 
 class LoginForm(forms.Form):
     username = forms.CharField(max_length=255, required=True)
@@ -19,3 +19,16 @@ class LoginForm(forms.Form):
         password = self.cleaned_data.get('password')
         user = authenticate(username=username, password=password)
         return user
+
+
+class MerchantForm(forms.ModelForm):
+    class Meta:
+        model = ZrUser
+        fields = ['mobile_no']
+
+
+class DistributorForm(forms.ModelForm):
+
+    class Meta:
+        model = ZrAdminUser
+        fields = []

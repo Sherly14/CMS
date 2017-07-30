@@ -1,0 +1,160 @@
+{% extends 'base.html' %}
+
+{% block title %} Distributors List {% endblock %}
+
+{% block content %}
+
+        <div class="content-wrapper py-3" style="padding-left: 0.5rem;">
+        <div class="container-fluid">
+            <!-- Breadcrumbs -->
+            <div class="row">
+                <div class="col-xl-3 col-sm-6 mb-3">
+                    <div class="card card-inverse o-hidden h-100">
+                        <div class="card-block lightGrayBG blackTextColor">
+                            <div class="mr-5">
+                                Calendar Div
+                                <i class="fa fa-calendar dis-ft-r"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-9 col-sm-6 mb-3">
+                    <div class="mr-5 textAlignRight">
+                        Dashboard</div>
+                    <input type="button" value="DOWNLOAD CSV" style="float: right;" class="button red mr-5">
+                </div>
+                <div class="col-xl-3 col-md-3 col-sm-6">
+                    <div class="d-flex justify-content-between">
+                        <input class="button yellow resize" type="button" value="Today">
+                        <input class="button yellow resize" type="button" value="Last Week">
+                        <input class="button yellow resize" type="button" value="Last Month">
+                    </div>
+                </div>
+            </div>
+            <!-- Icon Cards -->
+            <div class="row">
+                <div class="col-xl-3 col-sm-6 mb-3">
+                    <div class="card card-inverse o-hidden h-100">
+                        <div class="card-block lightGrayBG blackTextColor">
+                            <span class="card-head spanAlignment">
+                                Total Commissions</span>
+                            <span class="card-data textAlignRight spanAlignment">
+                                INR 48,000</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-sm-6 mb-3">
+                    <div class="card card-inverse o-hidden h-100">
+                        <div class="card-block lightGrayBG blackTextColor">
+                            <span class="card-head spanAlignment">
+                                Merchants </span>
+                            <span class="card-data textAlignRight spanAlignment">
+                                Total : 127</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-3 col-sm-6 mb-3">
+                    <div class="card card-inverse o-hidden h-100">
+                        <div class="card-block lightGrayBG blackTextColor">
+                            <span class="card-head spanAlignment">
+                                Total Remittance</span>
+                            <span class="card-data textAlignRight spanAlignment">
+                                INR 48,000</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-4 col-sm-6 mb-3">
+                    <div class="card card-inverse o-hidden h-100">
+                        <div class="card-block lightGrayBG blackTextColor">
+                            <div class="mr-5 card-head">
+                                Total Transactions
+                            </div>
+                            <table class="card-data table table-condensed">
+                                <tbody>
+                                    <tr>
+                                        <td>DMT</td>
+                                        <td class="textAlignRight">70</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bills</td>
+                                        <td class="textAlignRight">20</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Recharges</td>
+                                        <td class="textAlignRight">200</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-sm-6 mb-3">
+                    <div class="card card-inverse o-hidden h-100">
+                        <div class="card-block lightGrayBG blackTextColor">
+                            <div class="mr-5 card-head">
+                                Transactions Value
+                            </div>
+                            <table class="card-data table table-condensed">
+                                <tbody>
+                                    <tr>
+                                        <td>DMT</td>
+                                        <td class="textAlignRight">INR 80,000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bills</td>
+                                        <td class="textAlignRight">INR 35,000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Recharges</td>
+                                        <td class="textAlignRight">INR 15,000</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-4 col-sm-6 mb-3">
+                    <div class="card card-inverse o-hidden h-100">
+                        <div class="card-block lightGrayBG blackTextColor">
+                            <div class="mr-5 card-head">
+                                Commissions Value
+                            </div>
+                            <table class="card-data table table-condensed">
+                                <tbody>
+                                    <tr>
+                                        <td>DMT</td>
+                                        <td class="textAlignRight">INR 1,000</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bills</td>
+                                        <td class="textAlignRight">INR 500</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Recharges</td>
+                                        <td class="textAlignRight">INR 2,000</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xl-3 col-sm-6 mb-3">
+                    <div class="card card-block lightGrayBG blackTextColor">
+                        <span class="card-head spanAlignment">
+                                Payment Requests</span>
+                        <span class="card-data textAlignRight spanAlignment">
+                                17</span>
+                    </div>
+                </div>
+                <div class="col-xl-9 col-sm-6 mb-9">
+                    <i class="fa fa-plus-circle fa-4x dis-ft-r button" style="margin-right: 2rem;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
