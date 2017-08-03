@@ -52,8 +52,10 @@ class Transaction(RowInfo):
     vendor = models.ForeignKey(to=Vendor)
     amount = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     vendor_txn_id = models.CharField(max_length=128)
+    txn_id = models.CharField(max_length=128, null=True, blank=True)
 
-    beneficiary = models.ForeignKey(to=ZrUser, related_name='all_transactions', null=True, blank=True)
+    sender = models.CharField(max_length=256, null=True, blank=True)
+    beneficiary = models.CharField(max_length=256, null=True, blank=True)
     merchant = models.ForeignKey(to=ZrUser, related_name='transactions_list',  null=True, blank=True)
     transaction_request_json = JSONField(null=True, blank=True)
     transaction_response_json = JSONField(null=True, blank=True)
