@@ -2,7 +2,7 @@
 from __future__ import unicode_literals
 
 from django.contrib.auth import login
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views.generic import CreateView, DetailView, ListView
 
 from zruser.forms import LoginForm, MerchantForm, DistributorForm
@@ -19,7 +19,7 @@ def login_view(request):
         user = form.login(request)
         if user:
             login(request, user)
-            return render(request, 'user_profile.html')
+            return redirect('user:dashboard')
     return render(request, 'login.html', {'login_form': form})
 
 
