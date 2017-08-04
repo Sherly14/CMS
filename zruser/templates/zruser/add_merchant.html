@@ -4,9 +4,9 @@
 
 {% block content %}
 
+
 <div class="content-wrapper">
     <p class="heading-right">Add a Merchant</p>
-    {% csrf_token %} {{ form.as_p }}
     <div class="container-fluid">
         <div class="row">
             <p class="heading-bg">PERSONAL DETAILS:</p>
@@ -135,6 +135,9 @@
         </div>
     </div>
 </div>
+
+{% endblock %}
+
 
 
 {% endblock %}
