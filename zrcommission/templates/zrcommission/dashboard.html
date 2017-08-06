@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+
+{% block title %} Commissions List {% endblock %}
+
+
+{% block content %}
+
+<div class="content-wrapper">
+    <p class="head-right">Commissions</p>
+    <div class="row">
+        <p class="head-bg">PERSONAL DETAILS:</p>
+    </div>
+    <div class="row">
+        <div class="d-flex justify-content-between resize">
+            <p class="inr">INR 24,576</p>
+            <input class="button red resize" type="button" value="REQUEST CREDIT">
+        </div>
+        <!-- <div class="col-md-3 margin-top">
+            <p class="inr">INR 24,576</p>
+        </div>
+        <div class="col-md-3 margin-top">
+            <input class="button red small" type="button" value="REQUEST CREDIT">
+        </div> -->
+    </div>
+
+    <div class="row rm-margin-side">
+        <p class="head-left">PERIOD</p>
+    </div>
+    <div class="row">
+        <div class="d-flex justify-content-between" style="width:90%" >
+        <!-- <div class="col-md-6 pad-0"> -->
+        <!-- <div class="row pad-0"> -->
+            <!-- <div class="col-md-4 pad-0"> -->
+                <select>
+                    <option>Today</option>
+                    <option>Last Week</option>
+                    <option>Last Month</option>
+                </select>
+            <!-- </div> -->
+            <!-- <div class="col-md-4 pad-0"> -->
+                <input class="search" type="search" name="search" placeholder="search">
+            <!-- </div> -->
+        <!-- </div> -->
+        <!-- </div> -->
+        <!-- <div class="col-md-6 pad-0"> -->
+        <!-- <div class="row"> -->
+        <!-- <div class="col-md-4 pad-0"> -->
+            <input class="button green"  type="button" value="TDS CERTIFICATES">
+        <!-- </div> -->
+        <!-- <div class="col-md-4 pad-0"> -->
+            <input class="button red" type="button" value="DOWNLOAD CSV">
+            <!-- </div> -->
+            <!-- </div> -->
+        <!-- </div> -->
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="fine">
+            <p class="head-bg head-bg2">Transactions, Commissions and Taxes<i class="fa fa-chevron-up" style="color:white;"></i></p>
+        </div>
+    </div>
+    <div class="row scroll">
+
+        <div class="divTable" style="width: 100%;" >
+            <div class="divTableBody">
+                <div class="divTableRow">
+                    <div class="divTableHead" style="color:#DB3725;">my commission after TDS</div>
+                    <div class="divTableHead">Merchant commission</div>
+                    <div class="divTableHead">Merchant ID</div>
+                    <div class="divTableHead">name</div>
+                    <div class="divTableHead">Dispute</div>
+                </div>
+                <div class="divTableRow">
+                    <div class="divTableCell line"></div>
+                    <div class="divTableCell line"></div>
+                    <div class="divTableCell line"></div>
+                    <div class="divTableCell line"></div>
+                    <div class="divTableCell line"></div>
+                </div>
+                <div class="divTableRow">
+                    <div class="divTableCell">&nbsp;</div>
+                    <div class="divTableCell">&nbsp;</div>
+                    <div class="divTableCell">&nbsp;</div>
+                    <div class="divTableCell">&nbsp;</div>
+                    <div class="divTableCell">
+                        <input type="button" class="button green" value="Raise">
+                    </div>
+                </div>
+                <div class="divTableRow">
+                    <div class="divTableCell">&nbsp;</div>
+                    <div class="divTableCell">&nbsp;</div>
+                    <div class="divTableCell">&nbsp;</div>
+                    <div class="divTableCell">&nbsp;</div>
+                    <div class="divTableCell"><input type="button" class="button green" value="Raise"></div>
+                </div>
+                <div class="divTableRow">
+                    <div class="divTableCell">&nbsp;</div>
+                    <div class="divTableCell">&nbsp;</div>
+                    <div class="divTableCell">&nbsp;</div>
+                    <div class="divTableCell">&nbsp;</div>
+                    <div class="divTableCell">&nbsp;</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <br>
+    <div class="row">
+        <div class="fine">
+            <p class="head-bg head-bg2">Previous Commission Credit<i class="fa fa-chevron-up" style="color:white;"></i></p>
+        </div>
+    </div>
+    <div class="row scroll">
+
+        <div class="divTable" style="width: 100%;" >
+            <div class="divTableBody">
+
+                <div class="divTableRow">
+                    <div class="divTableCell" style="color:#DB3725">Date</div>
+                    <div class="divTableCell">Amount</div>
+                    <div class="divTableCell">TDS Deduction</div>
+                    <div class="divTableCell">Amount after Deduction</div>
+                </div>
+                <div class="divTableRow">
+                    <div class="divTableCell line"></div>
+                    <div class="divTableCell line"></div>
+                    <div class="divTableCell line"></div>
+                    <div class="divTableCell line"></div>
+                    <div class="divTableCell line"></div>
+                </div>
+                <div class="divTableRow">
+                    <div class="divTableHead">&nbsp;</div>
+                    <div class="divTableHead">&nbsp;</div>
+                    <div class="divTableHead">&nbsp;</div>
+                    <div class="divTableHead">&nbsp;</div>
+                </div>
+                <div class="divTableRow">
+                    <div class="divTableCell">&nbsp;</div>
+                    <div class="divTableCell">&nbsp;</div>
+                    <div class="divTableCell">&nbsp;</div>
+                    <div class="divTableCell">&nbsp;</div>
+                </div>
+                <div class="divTableRow">
+                    <div class="divTableCell">&nbsp;</div>
+                    <div class="divTableCell">&nbsp;</div>
+                    <div class="divTableCell">&nbsp;</div>
+                    <div class="divTableCell">&nbsp;</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <i class="fa fa-plus-circle fa-4x locate button"></i>
+
+
+
+
+
+
+{% endblock %}
