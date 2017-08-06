@@ -48,6 +48,7 @@ class ZrAdminUser(RowInfo):
     address = models.CharField(max_length=512, null=True, blank=True)
     role = models.ForeignKey(to=UserRole, related_name='admin_users')
     is_active = models.BooleanField(default=True)
+    zr_user = models.OneToOneField(to='zruser.ZrUser', related_name='zr_user', blank=True, null=True)
 
     class Meta:
         verbose_name_plural = 'ZrAdminUser'
