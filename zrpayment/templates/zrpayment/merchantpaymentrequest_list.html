@@ -7,7 +7,7 @@
     <div class="content-wrapper">
         <p class="head-right">Payment Request Table</p>
         <div class="row rm-margin-side">
-            <p class="head-left">PERIOD</p>
+            <p class="head-left">STATUS</p>
         </div>
         <div class="row">
             <div class="d-flex justify-content-between" style="width:90%">
@@ -21,41 +21,92 @@
             </div>
         </div>
         <br>
-        <div class="row">
-            <div class="fine">
-                <p class="head-bg head-bg2">Payment Request List<i class="fa fa-chevron-up"
-                                                                                  style="color:white;"></i></p>
+        <div>
+            <div class="row">
+                <div class="fine">
+                    <p class="head-bg head-bg2">New Requests<i class="fa fa-chevron-up"
+                                                                                      style="color:white;"></i></p>
+                </div>
             </div>
-        </div>
-        <div class="row scroll">
+            <div class="row scroll">
 
-            <div style="width: 100%;">
-                <table>
-                    <tr>
-                        <th>Distributor Id</th>
-                        <th>Distributor Name</th>
-                        <th>DOJ</th>
-                        <th>Mobile No</th>
-                        <th>Email Id</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                    {% for payment_request in payment_request_list %}
+                <div style="width: 100%;">
+                    <table>
                         <tr>
-                            <td>{{ payment_request }}</td>
-                            <td>{{ payment_request }} {{ distributor }}</td>
-                            <td>{{ payment_request }}</td>
-                            <td>{{ payment_request }}</td>
-                            <td>{{ payment_request }}</td>
-                            <td>{{ payment_request }}</td>
+                            <th>Date</th>
+                            <th>Type</th> {# DMT or Non DMT#}
+                            <th>Amount</th>
+                            <th>Payment Mode</th>
+                            <th>Merchant Name</th>
+                            <th>Merchant Id</th>
+                            <th>Ref Id</th>
+                            <th>Actions</th>
                         </tr>
+                        {% for payment_request in payment_request_list %}
+                            <tr>
+                                <td>{{ payment_request }}</td>
+                                <td>{{ payment_request }} {{ distributor }}</td>
+                                <td>{{ payment_request }}</td>
+                                <td>{{ payment_request }}</td>
+                                <td>{{ payment_request }}</td>
+                                <td>{{ payment_request }}</td>
+                            </tr>
 
-                    {% endfor %}
-                </table>
+                        {% endfor %}
+                    </table>
+                </div>
+
             </div>
-
+            <br>
         </div>
-        <br>
+        <div class="row rm-margin-side">
+            <p class="head-left">STATUS</p>
+        </div>
+        <div class="row">
+            <div class="d-flex justify-content-between" style="width:90%">
+                <select>
+                    <option>Approved</option>
+                    <option>Reject</option>
+                </select>
+            </div>
+        </div>
+        <div>
+            <div class="row" style="margin-top: 20px">
+                <div class="fine">
+                    <p class="head-bg head-bg2">List of Old Requests<i class="fa fa-chevron-up"
+                                                                                      style="color:white;"></i></p>
+                </div>
+            </div>
+            <div class="row scroll">
+
+                <div style="width: 100%;">
+                    <table>
+                        <tr>
+                            <th>Distributor Id</th>
+                            <th>Distributor Name</th>
+                            <th>DOJ</th>
+                            <th>Mobile No</th>
+                            <th>Email Id</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        {% for payment_request in payment_request_list %}
+                            <tr>
+                                <td>{{ payment_request }}</td>
+                                <td>{{ payment_request }} {{ distributor }}</td>
+                                <td>{{ payment_request }}</td>
+                                <td>{{ payment_request }}</td>
+                                <td>{{ payment_request }}</td>
+                                <td>{{ payment_request }}</td>
+                            </tr>
+
+                        {% endfor %}
+                    </table>
+                </div>
+
+            </div>
+            <br>
+        </div>
     </div>
 
 
