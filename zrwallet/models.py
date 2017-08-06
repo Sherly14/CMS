@@ -14,7 +14,7 @@ from zrutils.common.modelutils import RowInfo
 
 class Wallet(RowInfo):
 
-    merchant = models.ForeignKey(to=ZrUser)
+    merchant = models.OneToOneField(to=ZrUser, related_name='wallet', primary_key=True)
     dmt_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     non_dmt_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
 
