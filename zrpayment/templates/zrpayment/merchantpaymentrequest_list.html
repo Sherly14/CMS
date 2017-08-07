@@ -58,7 +58,7 @@
                                 <td>{{ payment_request.merchant_ref_no }}</td>
                                 {% if request.user.is_superuser %}
                                     {% if payment_request.is_admin_approved == None %}
-                                        <td><input type="button" class="button green" value="Approve"></td>
+                                        <td><input type="button" class="button green payment" value="Approve" onclick="approve_payment_req({{ payment_request.pk }})"></td>
                                     {% elif payment_request.is_admin_approved == False %}
                                         <td>Rejected</td>
                                     {% else %}
@@ -66,7 +66,7 @@
                                     {% endif %}
                                 {% elif request.user.zr_admin_user.role.name == "DISTRIBUTOR" %}
                                     {% if payment_request.is_distributor_approved == None %}
-                                        <td><input type="button" class="button green" value="Approve"></td>
+                                        <td><input type="button" class="button green payment" value="Approve" onclick="approve_payment_req({{ payment_request.pk }})"></td>
                                     {% elif payment_request.is_admin_approved == False %}
                                         <td>Rejected</td>
                                     {% else %}
@@ -107,6 +107,10 @@
         function timespan_filter() {
             var input = document.getElementById("timespan-filter");
             window.location = "{{ request.path }}?filter=" + input.value;
+        }
+
+        function approve_payment_req(id) {
+            window.location = "{{ request.path }}?payment-approve=" + id;
         }
     </script>
 

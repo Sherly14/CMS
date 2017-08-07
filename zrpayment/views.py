@@ -59,6 +59,21 @@ class MerchantPaymentRequestListView(ListView):
     paginate_by = 10
 
     def get_context_data(self, **kwargs):
+        payment_approved = self.request.GET.get('payment-approve')
+        if payment_approved:
+            if self.request.user.is_superuser:
+                MerchantPaymentRequest.objects.filter(
+                    id=payment_approved
+                ).update(
+                    is_admin_approved=True
+                )
+            elif self.request.user.zr_admin_user.role.name == 'DISTRIBUTOR':
+                MerchantPaymentRequest.objects.filter(
+                    id=payment_approved
+                ).update(
+                    is_distributor_approved=True
+                )
+
         context = super(MerchantPaymentRequestListView, self).get_context_data(**kwargs)
 
         queryset = self.get_queryset()
