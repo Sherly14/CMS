@@ -11,10 +11,10 @@
         </div>
         <div class="row">
             <div class="d-flex justify-content-between" style="width:90%">
-                <select>
-                    <option>Today</option>
-                    <option>Last Week</option>
-                    <option>Last Month</option>
+                <select id="timespan-filter" onchange="timespan_filter()">
+                    <option value="today" {% if filter_by == "today" %} selected {% endif %}>Today</option>
+                    <option value="last_week" {% if filter_by == "last_week" %} selected {% endif %}>Last Week</option>
+                    <option value="last_month" {% if filter_by == "last_month" %} selected {% endif %}>Last Month</option>
                 </select>
                 <input class="search" type="search" name="search" placeholder="search">
                 <input class="button red" type="button" value="DOWNLOAD CSV">
@@ -44,18 +44,58 @@
                         </tr>
                         {% for payment_request in payment_request_list %}
                             <tr>
-                                <td>{{ payment_request }}</td>
-                                <td>{{ payment_request }}</td>
-                                <td>{{ payment_request }}</td>
-                                <td>{{ payment_request }}</td>
-                                <td>{{ payment_request }}</td>
-                                <td>{{ payment_request }}</td>
-                                <td>{{ payment_request }}</td>
-                                <td><input type="button" class="button green" value="Approve"></td>
+                                <td>{{ payment_request.at_created }}</td>
+                                <td>TYPE</td>
+                                <td>{{ payment_request.amount }}</td>
+                                <td>{{ payment_request.merchant_payment_mode }}</td>
+                                <td>
+                                    {{ payment_request.merchant.first_name }}
+                                    {% if payment_request.merchant.last_name %}
+                                        {{ payment_request.merchant.last_name }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ payment_request.merchant.id }}</td>
+                                <td>{{ payment_request.merchant_ref_no }}</td>
+                                {% if request.user.is_superuser %}
+                                    {% if payment_request.is_admin_approved == None %}
+                                        <td><input type="button" class="button green" value="Approve"></td>
+                                    {% elif payment_request.is_admin_approved == False %}
+                                        <td>Rejected</td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                {% elif request.user.zr_admin_user.role.name == "DISTRIBUTOR" %}
+                                    {% if payment_request.is_distributor_approved == None %}
+                                        <td><input type="button" class="button green" value="Approve"></td>
+                                    {% elif payment_request.is_admin_approved == False %}
+                                        <td>Rejected</td>
+                                    {% else %}
+                                        <td></td>
+                                    {% endif %}
+                                {% else %}
+                                    <td></td>
+                                {% endif %}
                             </tr>
 
                         {% endfor %}
                     </table>
+
+                    <br />
+                    {% if is_paginated %}
+                        <div class="pagination">
+                            <span class="page-links">
+                                {% if page_obj.has_previous %}
+                                    <a href="/payment_request?page={{ page_obj.previous_page_number }}">previous</a>
+                                {% endif %}
+                                <span class="page-current">
+                                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                                </span>
+                                {% if page_obj.has_next %}
+                                    <a href="/payment_request?page={{ page_obj.next_page_number }}">next</a>
+                                {% endif %}
+                            </span>
+                        </div>
+                    {% endif %}
                 </div>
 
             </div>
@@ -63,7 +103,12 @@
         </div>
     </div>
 
-
+    <script>
+        function timespan_filter() {
+            var input = document.getElementById("timespan-filter");
+            window.location = "{{ request.path }}?filter=" + input.value;
+        }
+    </script>
 
 
 {% endblock %}
