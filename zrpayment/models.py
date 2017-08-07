@@ -5,7 +5,6 @@ from decimal import Decimal
 
 from django.db import models
 
-from zrpayment.utils.constants import PAYMENT_REQUEST_STATUS
 from zruser.models import ZrUser
 from zrutils.common.modelutils import RowInfo, get_slugify_value
 
@@ -42,9 +41,8 @@ class MerchantPaymentRequest(RowInfo):
     distributor_payment_mode = models.ForeignKey(to=PaymentMode, related_name='distributor_requests',
                                                  null=True, blank=True)
     distributor_ref_no = models.CharField(max_length=20, null=True, blank=True)
-    merchant_status = models.CharField(max_length=2, choices=PAYMENT_REQUEST_STATUS, null=True, blank=True)
-    distributor_status = models.CharField(max_length=2, choices=PAYMENT_REQUEST_STATUS, null=True, blank=True)
-
+    is_distributor_approved = models.NullBooleanField()
+    is_admin_approved = models.NullBooleanField()
     comments = models.TextField(max_length=1024, null=True, blank=True)
 
     def save(self, *args, **kwargs):
