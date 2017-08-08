@@ -23,7 +23,6 @@
             </div>
         </div>
         <br>
-        <div>
             <div class="row">
                 <div class="fine">
                     <p class="head-bg head-bg2">DMT Transactions<i class="fa fa-chevron-up"
@@ -36,105 +35,27 @@
                     <table>
                         <tr>
                             <th>Merchant Id</th>
-                            <th>Sender IFSC</th>
-                            <th>Sender A/c</th>
-                            <th>Sender Mobile</th>
-                            <th>Benificiary Mobile</th>
+                            <th>Vendor Txn Id</th>
+                            <th>status</th>
+                            <th>Amount</th>
+                            <th>Type</th>
                             <th>Amount</th>
                         </tr>
                         {% for transaction in transaction_list %}
                             <tr>
-                                <td>{{ transaction }}</td>
-                                <td>{{ transaction }} {{ transaction }}</td>
-                                <td>{{ transaction }}</td>
-                                <td>{{ transaction }}</td>
-                                <td>{{ transaction }}</td>
-                                <td>{{ transaction }}</td>
-    {#                            <td>{{ distributor. }}</td>#}
-
+                                <td>{{ transaction.merchant.id }}</td>
+                                <td>{{ transaction.vendor_txn_id }}</td>
+                                <td>{{ transaction.get_status_display }}</td>
+                                <td>{{ transaction.amount }}</td>
+                                <td>{{ transaction.type }}</td>
+                                <td>{{ transaction.amount }}</td>
                             </tr>
-
                         {% endfor %}
                     </table>
                 </div>
 
             </div>
             <br>
-        <div>
-        <div>
-            <div class="row">
-                <div class="fine">
-                    <p class="head-bg head-bg2">Bill Pay Transactions<i class="fa fa-chevron-up"
-                                                                                      style="color:white;"></i></p>
-                </div>
-            </div>
-            <div class="row scroll">
-
-                <div style="width: 100%;">
-                    <table>
-                        <tr>
-                            <th>Merchant Id</th>
-                            <th>Bill type</th>
-                            <th>Customer Mobile No</th>
-                            <th>Amount</th>
-                        </tr>
-                        {% for transaction in transaction_list %}
-                            <tr>
-                                <td>{{ transaction }}</td>
-                                <td>{{ transaction }} {{ transaction }}</td>
-                                <td>{{ transaction }}</td>
-                                <td>{{ transaction }}</td>
-                                <td>{{ transaction }}</td>
-                                <td>{{ transaction }}</td>
-    {#                            <td>{{ distributor. }}</td>#}
-
-                            </tr>
-
-                        {% endfor %}
-                    </table>
-                </div>
-
-            </div>
-            <br>
-        <div>
-        <div>
-            <div class="row">
-                <div class="fine">
-                    <p class="head-bg head-bg2">Recharge Transactions<i class="fa fa-chevron-up"
-                                                                                      style="color:white;"></i></p>
-                </div>
-            </div>
-            <div class="row scroll">
-
-                <div style="width: 100%;">
-                    <table>
-                        <tr>
-                            <th>Merchant Id</th>
-                            <th>Service Provider</th>
-                            <th>Customer Mobile</th>
-                            <th>Circle</th>
-                            <th>Plan Id</th>
-                            <th>Amount</th>
-                        </tr>
-                        {% for transaction in transaction_list %}
-                            <tr>
-                                <td>{{ transaction }}</td>
-                                <td>{{ transaction }} {{ transaction }}</td>
-                                <td>{{ transaction }}</td>
-                                <td>{{ transaction }}</td>
-                                <td>{{ transaction }}</td>
-                                <td>{{ transaction }}</td>
-    {#                            <td>{{ distributor. }}</td>#}
-
-                            </tr>
-
-                        {% endfor %}
-                    </table>
-                </div>
-
-            </div>
-            <br>
-        <div>
     </div>
 
 

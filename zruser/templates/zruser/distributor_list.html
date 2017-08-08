@@ -32,22 +32,30 @@
             <div style="width: 100%;">
                 <table>
                     <tr>
+                        <th>Distributor Id</th>
+                        <th>Distributor Name</th>
+                        <th>DOJ</th>
                         <th>Mobile No</th>
                         <th>Email</th>
-                        <th>State</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
                     {% for distributor in distributor_list %}
                         <tr>
+{#                            <td>{{ distributor.id }}</td>#}
+{#                            <td>{{ distributor.first_name }} {{ distributor.last_name |default_if_none:""}}</td>#}
+{#                            <td>{{ distributor.state }}</td>#}
+{#                            <td>{{ distributor.email }}</td>#}
+{#                            <td>{{ distributor.is_active }}</td>#}
+{#                            <td>{{ distributor. }}</td>#}
+
                             <td>{{ distributor.id }}</td>
-                            <td>{{ distributor.first_name }} {{ distributor.last_name }}</td>
-                            <td>{{ distributor.last_name }}</td>
+                            <td>{{ distributor.first_name }} {{ distributor.last_name|default_if_none:""}}</td>
+                            <td>{{ distributor.at_created }}</td>
                             <td>{{ distributor.mobile_no }}</td>
                             <td>{{ distributor.email }}</td>
                             <td>{{ distributor.is_active }}</td>
-{#                            <td>{{ distributor. }}</td>#}
-
+                            <td>Action</td>
                         </tr>
 
                     {% endfor %}
