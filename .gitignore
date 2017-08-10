@@ -7,4 +7,4 @@ media
 *.log
 logfile
 .vscode
-
+env
