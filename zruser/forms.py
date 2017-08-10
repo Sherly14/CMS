@@ -1,6 +1,8 @@
+import re
+
 from django import forms
 from django.contrib.auth import authenticate
-from zruser.models import ZrAdminUser, ZrUser
+from zruser.models import ZrAdminUser, ZrUser, BankDetail
 
 
 class LoginForm(forms.Form):
@@ -23,14 +25,39 @@ class LoginForm(forms.Form):
         return user
 
 
-class MerchantForm(forms.ModelForm):
+class MerchantDistributorForm(forms.ModelForm):
+    mobile_no = forms.CharField(widget=forms.TextInput(attrs={'type': 'tel'}))
+    pincode = forms.CharField(widget=forms.TextInput())
+
+    def clean_mobile_no(self):
+        mobile_no = self.cleaned_data['mobile_no']
+        if ZrUser.objects.filter(mobile_no=mobile_no).count():
+            raise forms.ValidationError('Mobile number already exist')
+
+        if not mobile_no.isdigit():
+            raise forms.ValidationError('Invalid mobile number')
+
+        return mobile_no
 
     def clean(self):
-        print
+        form_data = self.cleaned_data
 
     class Meta:
         model = ZrUser
-        fields = ['mobile_no', 'first_name', 'last_name', 'email', 'gender', 'city', 'state', 'pincode']
+        fields = [
+            'mobile_no', 'first_name', 'last_name', 'email', 'gender', 'city',
+            'state', 'pincode', 'address_line_1', 'address_line_2',
+            'business_name', 'pan_no'
+        ]
+
+
+class BankDetailForm(forms.ModelForm):
+    class Meta:
+        model = BankDetail
+        fields = [
+            'account_no', 'IFSC_code', 'account_name', 'bank_name',
+            'bank_city'
+        ]
 
 
 class DistributorForm(forms.ModelForm):

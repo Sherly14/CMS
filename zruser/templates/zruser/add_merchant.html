@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load widget_tweaks %}
 
 {% block title %} Add Merchant {% endblock %}
 
@@ -11,30 +12,42 @@
         <div class="row">
             <p class="heading-bg">PERSONAL DETAILS:</p>
         </div>
-        <form>
+        <form id="add-merchant-form" method="POST">
             <div class="row">
                 <div class="col-sm-2">
                     <div class="form-group">
                         <label for="firstname">First Name</label>
-                        <input class="fill" type="text" id="firstname" placeholder="Ramesh">
+                        {{ merchant_form.first_name|attr:"id:firstname"|attr:"class:fill" }}
+                        {% if merchant_form.first_name.errors %}
+                            {{ merchant_form.first_name.errors }}
+                        {% endif %}
                     </div>
                 </div>
                 <div class="col-sm-2">
                     <div class="form-group">
                         <label for="lastname">Last Name</label>
-                        <input class="fill" type="text" id="lastname" placeholder="Upadhyay">
+                        {{ merchant_form.last_name|attr:"id:lastname"|attr:"class:fill" }}
+                        {% if merchant_form.last_name.errors %}
+                            {{ merchant_form.last_name.errors }}
+                        {% endif %}
                     </div>
                 </div>
                 <div class="col-sm-2">
                     <div class="form-group">
                         <label for="phone">Phone No.</label>
-                        <input class="fill" type="tel" id="phone">
+                        {{ merchant_form.mobile_no|attr:"id:phone"|attr:"class:fill" }}
+                        {% if merchant_form.mobile_no.errors %}
+                            {{ merchant_form.mobile_no.errors }}
+                        {% endif %}
                     </div>
                 </div>
                 <div class="col-sm-4">
                     <div class="form-group">
                         <label for="email">E-mail ID</label>
-                        <input class="fill" type="email" id="email">
+                        {{ merchant_form.email|attr:"id:email"|attr:"class:fill" }}
+                        {% if merchant_form.email.errors %}
+                            {{ merchant_form.email.errors }}
+                        {% endif %}
                     </div>
                 </div>
 {#                <div class="col-sm-2">#}
@@ -48,13 +61,19 @@
                 <div class="col-sm-8">
                     <div class="form-group">
                         <label for="business">Business name</label>
-                        <input class="input-80" type="text" id="business">
+                        {{ merchant_form.business_name|attr:"id:business"|attr:"class:input-80" }}
+                        {% if merchant_form.business_name.errors %}
+                            {{ merchant_form.business_name.errors }}
+                        {% endif %}
                     </div>
                 </div>
                 <div class="col-sm-4">
                     <div class="form-group">
                         <label for="pan">PAN No.</label>
-                        <input class="input-80" type="text" id="pan">
+                        {{ merchant_form.pan_no|attr:"id:pan"|attr:"class:input-80" }}
+                        {% if merchant_form.pan_no.errors %}
+                            {{ merchant_form.pan_no.errors }}
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -62,7 +81,10 @@
                 <div class="col-md-12">
                     <div class="form-group">
                         <label for="address">Address</label>
-                        <input class="fill" type="text" id="address">
+                        {{ merchant_form.address_line_1|attr:"class:fill"|attr:"id:address" }}
+                        {% if merchant_form.address_line_1.errors %}
+                            {{ merchant_form.address_line_1.errors }}
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -70,52 +92,71 @@
                 <div class="col-sm-4">
                     <div class="form-group">
                         <label for="city">City</label>
-                        <input class="fill" type="text" id="city">
+                        {{ merchant_form.city|attr:"class:fill"|attr:"id:city" }}
+                        {% if merchant_form.city.errors %}
+                            {{ merchant_form.city.errors }}
+                        {% endif %}
                     </div>
                 </div>
                 <div class="col-sm-4">
                     <div class="form-group">
                         <label for="state">State</label>
-                        <input class="fill" type="text" id="state">
+                        {{ merchant_form.state|attr:"class:fill"|attr:"id:state" }}
+                        {% if merchant_form.state.errors %}
+                            {{ merchant_form.state.errors }}
+                        {% endif %}
                     </div>
                 </div>
                 <div class="col-sm-4">
                     <div class="form-group">
-                        <label for="pin">Pincode</label>
-                        <input class="fill" type="text" id="pincode">
+                        <label for="pincode">Pincode</label>
+                        {{ merchant_form.pincode|attr:"class:fill"|attr:"id:pincode" }}
+                        {% if merchant_form.pincode.errors %}
+                            {{ merchant_form.pincode.errors }}
+                        {% endif %}
                     </div>
                 </div>
             </div>
-        </form>
     </div>
     <div class="container-fluid">
         <div class="row">
             <p class="heading-bg">BANK DETAILS:</p>
         </div>
-        <form>
             <div class="row">
                 <div class="col-sm-2">
                     <div class="form-group">
-                        <label for="firstname">Account Name</label>
-                        <input class="fill" type="text" id="acno" >
+                        <label for="acname">Account Name</label>
+                        {{ bank_detail_form.account_name|attr:"id:acname"|attr:"class:fill" }}
+                        {% if bank_detail_form.account_name.errors %}
+                            {{ bank_detail_form.account_name.errors }}
+                        {% endif %}
                     </div>
                 </div>
                 <div class="col-sm-2">
                     <div class="form-group">
-                        <label for="lastname">Account No</label>
-                        <input class="fill" type="text" id="lastname">
+                        <label for="acno">Account No</label>
+                        {{ bank_detail_form.account_no|attr:"id:acno"|attr:"class:fill" }}
+                        {% if bank_detail_form.account_no.errors %}
+                            {{ bank_detail_form.account_no.errors }}
+                        {% endif %}
                     </div>
                 </div>
                 <div class="col-sm-2">
                     <div class="form-group">
-                        <label for="phone">IFSC Code</label>
-                        <input class="fill" type="tel" id="phone">
+                        <label for="ifsc_code">IFSC Code</label>
+                        {{ bank_detail_form.IFSC_code|attr:"id:ifsc_code"|attr:"class:fill" }}
+                        {% if bank_detail_form.IFSC_code.errors %}
+                            {{ bank_detail_form.IFSC_code.errors }}
+                        {% endif %}
                     </div>
                 </div>
                 <div class="col-sm-4">
                     <div class="form-group">
-                        <label for="email">Bank City</label>
-                        <input class="fill" type="text">
+                        <label for="bank_city">Bank City</label>
+                        {{ bank_detail_form.bank_city|attr:"id:bank_city"|attr:"class:fill" }}
+                        {% if bank_detail_form.bank_city.errors %}
+                            {{ bank_detail_form.bank_city.errors }}
+                        {% endif %}
                     </div>
                 </div>
 {#                <div class="col-sm-2">#}
@@ -128,12 +169,14 @@
             <div class="row">
                 <div class="col-sm-8">
                     <div class="form-group">
-                        <label for="business">Bank name</label>
-                        <input class="input-80" type="text" id="business">
+                        <label for="bank_name">Bank name</label>
+                        {{ bank_detail_form.bank_name|attr:"id:bank_name"|attr:"class:input-80" }}
+                        {% if bank_detail_form.bank_name.errors %}
+                            {{ bank_detail_form.bank_name.errors }}
+                        {% endif %}
                     </div>
                 </div>
             </div>
-        </form>
     </div>
     <div class="container-fluid margin-bot">
         <div class="col-md-7 colAlignment">
@@ -155,18 +198,18 @@
                 </select>
                 <input class="button yellow bg mr-5" type="button" value="upload">
             </div>
-            <div class="row margin-top">
-                <div class="col-md-6">
-                    <h5 class="fill">Adhaar Card</span>
-                    <h5><i>Ramesh_Adhaar.pdf</i><i class="fa fa-download" style="margin-left:0.5rem;"></i></h5><span class="fill"></span>
-                    <input class="button yellow small" type="button" value="change">
-                </div>
-                <div class="col-md-6">
-                    <h5 class="fill">Registration Certificate</span>
-                        <h5><i>Ramesh_Adhaar.pdf</i><i class="fa fa-download" style="margin-left:0.5rem;"></i></h5><span class="fill"></span>
-                    <input class="button yellow small" type="button" value="change">
-                </div>
-            </div>
+            <!--<div class="row margin-top">-->
+                <!--<div class="col-md-6">-->
+                    <!--<h5 class="fill">Adhaar Card</span>-->
+                    <!--<h5><i>Ramesh_Adhaar.pdf</i><i class="fa fa-download" style="margin-left:0.5rem;"></i></h5><span class="fill"></span>-->
+                    <!--<input class="button yellow small" type="button" value="change">-->
+                <!--</div>-->
+                <!--<div class="col-md-6">-->
+                    <!--<h5 class="fill">Registration Certificate</span>-->
+                        <!--<h5><i>Ramesh_Adhaar.pdf</i><i class="fa fa-download" style="margin-left:0.5rem;"></i></h5><span class="fill"></span>-->
+                    <!--<input class="button yellow small" type="button" value="change">-->
+                <!--</div>-->
+            <!--</div>-->
         </div>
         <div class="col-md-5 colAlignment" style="float:right;">
             <div class="row margin-top">
@@ -177,10 +220,19 @@
                 <input type="text" id="dstin">
             </div>
             <div class="fill margin-top" style="padding-left:6.5rem">
-                <input class="button red" type="button" value="Save & Submit">
+                <input class="button red" type="submit" value="Save & Submit">
             </div>
         </div>
+
+        {% csrf_token %}
+        </form>
     </div>
 </div>
+
+<script>
+function submit_merchant_form() {
+    document.getElementById("add-merchant-form").submit();
+}
+</script>
 
 {% endblock %}

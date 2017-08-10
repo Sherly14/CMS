@@ -48,7 +48,8 @@ PROJECT_APPS = [
 
 EXTERNAL_APPS = [
     'rest_framework',
-    'corsheaders'
+    'corsheaders',
+    'widget_tweaks',
 ]
 
 INSTALLED_APPS = INTERNAL_APPS + PROJECT_APPS + EXTERNAL_APPS
