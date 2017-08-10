@@ -29,6 +29,13 @@ class MerchantDistributorForm(forms.ModelForm):
     mobile_no = forms.CharField(widget=forms.TextInput(attrs={'type': 'tel'}))
     pincode = forms.CharField(widget=forms.TextInput())
 
+    def clean_pan_no(self):
+        pan_no = self.cleaned_data['pan_no']
+        if pan_no:
+            return pan_no.upper()
+
+        return pan_no
+
     def clean_mobile_no(self):
         mobile_no = self.cleaned_data['mobile_no']
         if ZrUser.objects.filter(mobile_no=mobile_no).count():
