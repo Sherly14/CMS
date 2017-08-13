@@ -31,6 +31,16 @@ class KYCDocumentType(RowInfo):
 
     name = models.CharField(max_length=128)
 
+    @staticmethod
+    def get_document_types_form_choices():
+        kyc_doc_types = []
+        for doc_type in KYCDocumentType.objects.all():
+            kyc_doc_types.append(
+                (doc_type, doc_type,)
+            )
+
+        return kyc_doc_types
+
     class Meta:
         verbose_name_plural = 'KYCDocumentTypes'
 
@@ -78,6 +88,7 @@ class ZrUser(RowInfo):
     is_mobile_verified = models.BooleanField(default=False)
     business_name = models.CharField(max_length=256, null=True, blank=True)
     pan_no = models.CharField(max_length=10, null=True, blank=True)
+    gstin = models.CharField(max_length=20, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         # self.pass_word = make_password(self.pass_word)
@@ -100,11 +111,11 @@ class ZrUser(RowInfo):
 class KYCDetail(RowInfo):
 
     type = models.ForeignKey(to=KYCDocumentType, related_name='all_kyc_details')
-    document_id = models.CharField(max_length=20)
+    document_id = models.CharField(max_length=50)
     document_link = models.CharField(max_length=512)
     for_user = models.ForeignKey(to=ZrUser, related_name='kyc_details')
     approval_status = models.CharField(max_length=2, choices=KYC_APPROVAL_CHOICES, default=KYC_APPROVAL_CHOICES[0][0])
-    by_approved = models.ForeignKey(to=ZrAdminUser, related_name='attached_kyc_details')
+    by_approved = models.ForeignKey(to=ZrAdminUser, related_name='attached_kyc_details', null=True)
     role = models.ForeignKey(to=UserRole, related_name='submitted_kyc_details')
 
     class Meta:

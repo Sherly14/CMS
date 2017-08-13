@@ -193,10 +193,15 @@
                 </ul>
             </div> -->
                 <select id="doc_type">
-                    <option value="select1">select</option>
-                    <option value="select2">select2</option>
-                </select>
-                <input class="button yellow bg mr-5" type="button" value="upload">
+                    {% for doc_type in kyc_doc_types %}
+                        <option value="{{ doc_type }}">{{ doc_type }}</option>
+                    {% endfor %}
+               - </select>
+                <input type="file" id="kyc-file" style="display:none;">
+                <input class="button yellow bg mr-5" type="button" value="upload" id="upload-kyc-btn" onclick="upload_kyc_doc()">
+                <p id="file-err-msg" style="display:none;"></p>
+            </div>
+            <div class="row margin-top" id="kyc-docs">
             </div>
             <!--<div class="row margin-top">-->
                 <!--<div class="col-md-6">-->
@@ -216,23 +221,168 @@
                 <p class="heading-bg">GST INFO:</p>
             </div>
             <div class="row margin-top">
-                <label class="fill" for="dstin">GSTIN</label>
-                <input type="text" id="dstin">
+                <label class="fill" for="gstin">GSTIN</label>
+                {{ merchant_form.gstin|attr:"id:gstin" }}
+                {% if merchant_form.gstin.errors %}
+                    {{ merchant_form.gstin.errors }}
+                {% endif %}
             </div>
             <div class="fill margin-top" style="padding-left:6.5rem">
                 <input class="button red" type="submit" value="Save & Submit">
             </div>
         </div>
-
         {% csrf_token %}
         </form>
     </div>
 </div>
 
+<script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.12.min.js"></script>
+<script src="http://underscorejs.org/underscore-min.js"></script>
+<script type="text/undercore-template" id="upload-kyc-doc">
+    <div class="col-md-6" id="<%=div_id%>">
+        <h5 class="fill"><%=document_type%></span>
+        <h5><i><%=document_name%></i>
+            <a class="kyc-href" href="<%=file_download_url%>" target="_blank">
+                <i class="fa fa-download kyc-href" style="margin-left:0.5rem;"></i>
+            </a>
+        </h5><span class="fill">
+            </span>
+        <input class="button yellow small remove-kyc" doc_type="<%=document_type%>" type="button" value="Remove">
+    </div>
+</script>
+
+<script type="text/undercore-template" id="form-hidden-input">
+    <input type="hidden" id="<%=id%>" name="<%=id%>" value="<%=value%>" >
+</script>
+
 <script>
+    window.uploaded_kycs = []
+    function upload_kyc_doc() {
+        $('#kyc-file').val('').clone(true)
+        $('#file-err-msg').hide();
+        console.log("fsdf");
+        $("#kyc-file").trigger('click');
+    }
+
+    $('#doc_type').on('change', function(){
+        $('#kyc-file').val('')
+    })
+</script>
+<script>
+function generate_kyc_file_name(doc_type, ext) {
+    var milliseconds = (new Date).getTime();
+    return doc_type.replace(' ', '-') + '-' + milliseconds + '-' + Math.floor((Math.random() * 10000) + 1) + '.' + ext
+}
+
+function sendFile() {
+    console.log("Uploading file");
+    // get the reference to the actual file in the input
+    var theFormFile = $('#kyc-file')[0].files[0];
+
+    ext = $('#kyc-file').val().split('.').pop().toLowerCase()
+    file_name = generate_kyc_file_name($('#doc_type').val(), ext)
+    var s3 = new AWS.S3({
+      accessKeyId: 'AKIAI4Y5NO3K36LXYYVQ',
+      secretAccessKey: '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',
+      endpoint: 'https://s3.ap-south-1.amazonaws.com',
+      signatureVersion: 'v4',
+      region: 'ap-south-1'
+    });
+
+    var uploadPreSignedUrl = s3.getSignedUrl('putObject', {
+        Bucket: 'zrupee-kyc-documents',
+        Key: file_name,
+        ACL: 'authenticated-read',
+        // This must match with your ajax contentType parameter
+        ContentType: 'binary/octet-stream'
+
+        /* then add all the rest of your parameters to AWS puttObect here */
+    });
+
+    var downloadPreSignedUrl = s3.getSignedUrl('getObject', {
+        Bucket: 'zrupee-kyc-documents',
+        Key: file_name,
+        /* set a fixed type, or calculate your mime type from the file extension */
+        /* and all the rest of your parameters to AWS getObect here */
+    });
+
+    $.ajax({
+      type: 'PUT',
+      url: uploadPreSignedUrl,
+      // Content type must much with the parameter you signed your URL with
+      contentType: 'binary/octet-stream',
+      // this flag is important, if not set, it will try to send data as a form
+      processData: false,
+      // the actual file is sent raw
+      data: theFormFile,
+    }).done(function() {
+        $('#kyc-docs').append(
+            _.template($('#upload-kyc-doc').html())(
+                {
+                    document_type: $('#doc_type').val(),
+                    document_name: $('#kyc-file').val().split('\\').pop(),
+                    file_download_url: downloadPreSignedUrl,
+                    div_id: $('#doc_type').val().replace(' ', '')
+                }
+            )
+        )
+        window.uploaded_kycs.push($('#doc_type').val())
+
+        hidden_content = $('#form-hidden-input').html()
+        content = _.template(hidden_content)({
+            id: $('#doc_type').val().replace(' ', '-'),
+            value: downloadPreSignedUrl
+        });
+        $('#add-merchant-form').prepend(content)
+
+        document_id_content = _.template(hidden_content)({
+            id: 'doc_id' + '-' + $('#doc_type').val().replace(' ', '-'),
+            value: file_name
+        });
+        $('#add-merchant-form').prepend(document_id_content)
+        console.log(content)
+    }).fail(function() {
+      alert('File NOT uploaded');
+      console.log( arguments);
+    });
+
+    return downloadPreSignedUrl;
+}
+
 function submit_merchant_form() {
     document.getElementById("add-merchant-form").submit();
 }
-</script>
 
+$("#kyc-file").change(function(e) {
+    console.log("File control change event.")
+    ext = $('#kyc-file').val().split('.').pop().toLowerCase()
+
+    doc_type = $('#doc_type').val()
+    if($.inArray(doc_type, window.uploaded_kycs) != -1) {
+        $("#file-err-msg").html('Document already uploaded')
+        $("#file-err-msg").show()
+        console.log("Document already uploaded");
+        return
+    }
+
+    if($.inArray(ext, ['pdf','png','jpg','jpeg']) == -1) {
+        $("#file-err-msg").html('Invalid file type')
+        $("#file-err-msg").show()
+        console.log("Invalid doc type");
+    } else {
+        sendFile()
+    }
+});
+
+$('#kyc-docs').on('click', '.remove-kyc', function(e) {
+    parent_div = $(this).parent()
+    doc_type = $(this).attr('doc_type')
+
+    parent_div.remove()
+    window.uploaded_kycs = window.uploaded_kycs.filter(item => item != doc_type)
+    $("#file-err-msg").val('')
+    $("#file-err-msg").hide()
+});
+
+</script>
 {% endblock %}

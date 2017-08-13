@@ -2,7 +2,7 @@ import re
 
 from django import forms
 from django.contrib.auth import authenticate
-from zruser.models import ZrAdminUser, ZrUser, BankDetail
+from zruser.models import ZrAdminUser, ZrUser, BankDetail, KYCDocumentType
 
 
 class LoginForm(forms.Form):
@@ -46,15 +46,12 @@ class MerchantDistributorForm(forms.ModelForm):
 
         return mobile_no
 
-    def clean(self):
-        form_data = self.cleaned_data
-
     class Meta:
         model = ZrUser
         fields = [
             'mobile_no', 'first_name', 'last_name', 'email', 'gender', 'city',
             'state', 'pincode', 'address_line_1', 'address_line_2',
-            'business_name', 'pan_no'
+            'business_name', 'pan_no', 'gstin'
         ]
 
 
