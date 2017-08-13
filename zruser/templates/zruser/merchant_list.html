@@ -11,12 +11,13 @@
         </div>
         <div class="row">
             <div class="d-flex justify-content-between" style="width:90%">
-                <select>
-                    <option>Today</option>
-                    <option>Last Week</option>
-                    <option>Last Month</option>
+                <select id="period">
+                    <option value="Today" {% if filter_by == "Today" %}selected{% endif %}>Today</option>
+                    <option value="Last Week" {% if filter_by == "Last-Week" %}selected{% endif %}>Last Week</option>
+                    <option value="Last Month" {% if filter_by == "Last-Month" %}selected{% endif %}>Last Month</option>
                 </select>
-                <input class="search" type="search" name="search" placeholder="search">
+                <input class="search" id="search-txt" type="search" name="search" placeholder="search" value="{{ q }}">
+                <input class="button red" type="button" value="Search" id="search-btn">
                 <input class="button red" type="button" value="DOWNLOAD CSV">
             </div>
         </div>
@@ -48,29 +49,52 @@
                             <td>{{ merchant.at_created }}</td>
                             <td>{{ merchant.mobile_no }}</td>
                             <td>{{ merchant.email }}</td>
-                            <td>{{ merchant.is_active }}</td>
-                            <td><button>Active</button></td>
+                            <td>{% if merchant.is_active %}Active{% else %}Inactive{% endif %}</td>
+                            <td>
+                                {% if merchant.is_active %}
+                                    <a href='{% url "user:merchant-list" %}?activate={{ merchant.id }}'>Activate</a>
+                                {% else %}
+                                    <a href='{% url "user:merchant-list" %}?disable={{ merchant.id }}'>Disable</a>
+                                {% endif %}
+                            </td>
                         </tr>
                         {% endfor %}
                     {% else %}
                         {% for map in merchant_map %}
                         <tr>
                             <td>{{ map.merchant.id }}</td>
-                            <td>{{ map.merchant.first_name }} {{ merchant.last_name }}</td>
+                            <td>{{ map.merchant.first_name }} {{ merchant.last_name|default_if_none:""}}</td>
                             <td>{{ map.merchant.at_created }}</td>
                             <td>{{ map.merchant.mobile_no }}</td>
                             <td>{{ map.merchant.email }}</td>
-                            <td>{{ map.merchant.is_active }}</td>
-                            <td><button>Active</button></td>
+                            <td>{% if merchant.is_active %}Active{% else %}Inactive{% endif %}</td>
                         </tr>
                         {% endfor %}
                     {% endif %}
                 </table>
             </div>
 
+            {% if has_prev_page %}
+                <a href="{% url "user:merchant-list" %}?{{prev_page_qs}}" >Prev</a>
+            {% endif %}
+
+            {% if has_next_page %}
+                <a href="{% url "user:merchant-list" %}?{{next_page_qs}}" >Next</a>
+            {% endif %}
+
         </div>
         <br>
 
     </div>
-    
+
+<script>
+    $('#search-btn').click(function(){
+        window.location.assign(window.location.pathname + '?q=' + $('#search-txt').val())
+    })
+
+    $('#period').click(function() {
+        period_val = $(this).val()
+        window.location.assign(window.location.pathname + '?filter=' + period_val.replace(' ', '-'))
+    })
+</script>
 {% endblock %}

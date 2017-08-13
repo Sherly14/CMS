@@ -11,6 +11,7 @@ class DistributorMerchant(RowInfo):
 
     distributor = models.ForeignKey(to=ZrUser, related_name='all_merchant_mappings')
     merchant = models.ForeignKey(to=ZrUser, related_name='distributor_mappings')
+    is_attaches_to_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
 
     class Meta:
