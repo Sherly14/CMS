@@ -69,7 +69,7 @@ class MerchantListView(ListView):
                 if not zruser:
                     raise Http404
 
-                zruser.is_active = False
+                zruser.is_active = True
                 zruser.save(update_fields=['is_active'])
 
             if disable:
@@ -77,7 +77,7 @@ class MerchantListView(ListView):
                 if not zruser:
                     raise Http404
 
-                zruser.is_active = True
+                zruser.is_active = False
                 zruser.save(update_fields=['is_active'])
 
             if q:
@@ -189,6 +189,94 @@ class DistributorListView(ListView):
     template_name = 'zruser/distributor_list.html'
     queryset = ZrUser.objects.filter(role__name=DISTRIBUTOR)
     context_object_name = 'distributor_list'
+    paginate_by = 1
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(DistributorListView, self).get_context_data()
+        activate = self.request.GET.get('activate')
+        disable = self.request.GET.get('disable')
+        queryset = self.get_queryset()
+        q = self.request.GET.get('q')
+        filter = self.request.GET.get('filter')
+        pg_no = self.request.GET.get('page_no', 1)
+
+        if activate:
+            zruser = ZrUser.objects.filter(id=activate).last()
+            if not zruser:
+                raise Http404
+
+            zruser.is_active = True
+            zrmappings_models.DistributorMerchant.objects.filter(
+                distributor=zruser
+            ).update(
+                is_attaches_to_admin=False
+            )
+            dj_user = zruser.zr_user
+            dj_user.is_active = True
+            dj_user.save(update_fields=['is_active'])
+            zruser.save(update_fields=['is_active'])
+
+        if disable:
+            zruser = ZrUser.objects.filter(id=disable).last()
+            if not zruser:
+                raise Http404
+
+            zruser.is_active = False
+            zrmappings_models.DistributorMerchant.objects.filter(
+                distributor=zruser
+            ).update(
+                is_attaches_to_admin=True
+            )
+            dj_user = zruser.zr_user
+            dj_user.is_active = False
+            dj_user.save(update_fields=['is_active'])
+            zruser.save(update_fields=['is_active'])
+
+        if q:
+            context['queryset'] = queryset.filter(
+                first_name__contains=q,
+            )
+            context['q'] = q
+        else:
+            context['queryset'] = queryset
+
+        if filter == 'Today':
+            context['queryset'] = queryset.filter(at_created__gte=datetime.datetime.now().date())
+            context['filter_by'] = filter
+        elif filter == 'Last-Week':
+            context['queryset'] = queryset.filter(at_created__range=last_week_range())
+            context['filter_by'] = filter
+        elif filter == 'Last-Month':
+            context['queryset'] = queryset.filter(at_created__range=last_month())
+            context['filter_by'] = filter
+
+        p = Paginator(context['queryset'], self.paginate_by)
+        try:
+            page = p.page(pg_no)
+        except EmptyPage:
+            raise Http404
+
+        context['queryset'] = page.object_list
+        query_string = {}
+        if q:
+            query_string['q'] = q
+
+        if filter:
+            query_string['filter'] = filter
+
+        if page.has_next():
+            query_string['page_no'] = page.next_page_number()
+            context['next_page_qs'] = urlencode(query_string)
+            context['has_next_page'] = page.has_next()
+        if page.has_previous():
+            query_string['page_no'] = page.previous_page_number()
+            context['prev_page_qs'] = urlencode(query_string)
+            context['has_prev_page'] = page.has_previous()
+
+        return context
+
+    def get_queryset(self):
+        return ZrUser.objects.filter(role__name=DISTRIBUTOR).order_by('-at_created')
 
 
 class DashBoardView(ListView):
