@@ -37,8 +37,26 @@ class MerchantDetailView(DetailView):
 
 class MerchantListView(ListView):
     template_name = 'zruser/merchant_list.html'
-    queryset = ZrUser.objects.filter(role__name=MERCHANT)
     context_object_name = 'merchant_list'
+    paginate_by = 10
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(MerchantListView, self).get_context_data(*args, **kwargs)
+        queryset = self.get_queryset()
+
+        if self.request.user.is_superuser:
+            context['queryset'] = queryset
+            context['is_queryset'] = True
+        elif self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
+            context['merchant_map'] = self.request.user.zr_admin_user.zr_user.all_merchant_mappings.filter(
+                is_active=True,
+            )
+            context['is_queryset'] = False
+
+        return context
+
+    def get_queryset(self):
+        return ZrUser.objects.filter(role__name=MERCHANT)
 
 
 class DistributorDetailView(DetailView):

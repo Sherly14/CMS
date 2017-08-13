@@ -43,9 +43,11 @@
         <a class="navbar-brand" href="#">Zrupee</a>
         <div class="collapse navbar-collapse" id="navbarExample">
             <ul class="sidebar-nav navbar-nav">
+                {% if request.user.is_superuser %}
                 <li class="nav-item ">
                     <a class="nav-link textAlignRight" href="{% url 'user:distributor-list' %}">Distributors</a>
                 </li>
+                {% endif %}
                 <li class="nav-item ">
                     <a class="nav-link textAlignRight" href="{% url 'user:merchant-list' %}">Merchants</a>
                 </li>

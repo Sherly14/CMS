@@ -40,7 +40,8 @@
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
-                    {% for merchant in merchant_list %}
+                    {% if is_queryset %}
+                        {% for merchant in queryset %}
                         <tr>
                             <td>{{ merchant.id }}</td>
                             <td>{{ merchant.first_name }} {{ merchant.last_name }}</td>
@@ -48,9 +49,22 @@
                             <td>{{ merchant.mobile_no }}</td>
                             <td>{{ merchant.email }}</td>
                             <td>{{ merchant.is_active }}</td>
-                            {#                            <td>{{ distributor. }}</td>#}
+                            <td><button>Active</button></td>
                         </tr>
-                    {% endfor %}
+                        {% endfor %}
+                    {% else %}
+                        {% for map in merchant_map %}
+                        <tr>
+                            <td>{{ map.merchant.id }}</td>
+                            <td>{{ map.merchant.first_name }} {{ merchant.last_name }}</td>
+                            <td>{{ map.merchant.at_created }}</td>
+                            <td>{{ map.merchant.mobile_no }}</td>
+                            <td>{{ map.merchant.email }}</td>
+                            <td>{{ map.merchant.is_active }}</td>
+                            <td><button>Active</button></td>
+                        </tr>
+                        {% endfor %}
+                    {% endif %}
                 </table>
             </div>
 
