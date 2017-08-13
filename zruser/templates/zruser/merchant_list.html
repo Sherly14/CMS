@@ -44,7 +44,7 @@
                         {% for merchant in queryset %}
                         <tr>
                             <td>{{ merchant.id }}</td>
-                            <td>{{ merchant.first_name }} {{ merchant.last_name }}</td>
+                            <td>{{ merchant.first_name }} {{ merchant.last_name|default_if_none:""}}</td>
                             <td>{{ merchant.at_created }}</td>
                             <td>{{ merchant.mobile_no }}</td>
                             <td>{{ merchant.email }}</td>
