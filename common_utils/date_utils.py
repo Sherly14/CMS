@@ -1,5 +1,3 @@
-__author__ = 'hitul'
-
 import calendar
 import datetime
 
