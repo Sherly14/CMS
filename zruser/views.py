@@ -47,7 +47,7 @@ class MerchantDetailView(DetailView):
 class MerchantListView(ListView):
     template_name = 'zruser/merchant_list.html'
     context_object_name = 'merchant_list'
-    paginate_by = 1
+    paginate_by = 10
 
     def get_context_data(self, *args, **kwargs):
         context = super(MerchantListView, self).get_context_data(*args, **kwargs)
@@ -89,12 +89,18 @@ class MerchantListView(ListView):
                 context['queryset'] = queryset
 
             if filter == 'Today':
+                if 'queryset' in context:
+                    queryset = context['queryset']
                 context['queryset'] = queryset.filter(at_created__gte=datetime.datetime.now().date())
                 context['filter_by'] = filter
             elif filter == 'Last-Week':
+                if 'queryset' in context:
+                    queryset = context['queryset']
                 context['queryset'] = queryset.filter(at_created__range=last_week_range())
                 context['filter_by'] = filter
             elif filter == 'Last-Month':
+                if 'queryset' in context:
+                    queryset = context['queryset']
                 context['queryset'] = queryset.filter(at_created__range=last_month())
                 context['filter_by'] = filter
 
@@ -189,7 +195,7 @@ class DistributorListView(ListView):
     template_name = 'zruser/distributor_list.html'
     queryset = ZrUser.objects.filter(role__name=DISTRIBUTOR)
     context_object_name = 'distributor_list'
-    paginate_by = 1
+    paginate_by = 10
 
     def get_context_data(self, *args, **kwargs):
         context = super(DistributorListView, self).get_context_data()
@@ -241,12 +247,18 @@ class DistributorListView(ListView):
             context['queryset'] = queryset
 
         if filter == 'Today':
+            if 'queryset' in context:
+                queryset = context['queryset']
             context['queryset'] = queryset.filter(at_created__gte=datetime.datetime.now().date())
             context['filter_by'] = filter
         elif filter == 'Last-Week':
+            if 'queryset' in context:
+                queryset = context['queryset']
             context['queryset'] = queryset.filter(at_created__range=last_week_range())
             context['filter_by'] = filter
         elif filter == 'Last-Month':
+            if 'queryset' in context:
+                queryset = context['queryset']
             context['queryset'] = queryset.filter(at_created__range=last_month())
             context['filter_by'] = filter
 

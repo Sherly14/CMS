@@ -52,9 +52,9 @@
                             <td>{% if merchant.is_active %}Active{% else %}Inactive{% endif %}</td>
                             <td>
                                 {% if merchant.is_active %}
-                                    <a href='{% url "user:merchant-list" %}?activate={{ merchant.id }}'>Activate</a>
-                                {% else %}
                                     <a href='{% url "user:merchant-list" %}?disable={{ merchant.id }}'>Disable</a>
+                                {% else %}
+                                    <a href='{% url "user:merchant-list" %}?activate={{ merchant.id }}'>Activate</a>
                                 {% endif %}
                             </td>
                         </tr>
@@ -89,10 +89,15 @@
 
 <script>
     $('#search-btn').click(function(){
-        window.location.assign(window.location.pathname + '?q=' + $('#search-txt').val())
+        {% if filter_by %}
+            url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}"
+        {% else %}
+            url = window.location.pathname + "?q=" + $('#search-txt').val()
+        {% endif %}
+        window.location.assign(url)
     })
 
-    $('#period').click(function() {
+    $('#period').change(function() {
         period_val = $(this).val()
         window.location.assign(window.location.pathname + '?filter=' + period_val.replace(' ', '-'))
     })

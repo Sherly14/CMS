@@ -84,10 +84,15 @@
 
 <script>
     $('#search-btn').click(function(){
-        window.location.assign(window.location.pathname + '?q=' + $('#search-txt').val())
+        {% if filter_by %}
+            url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}"
+        {% else %}
+            url = window.location.pathname + "?q=" + $('#search-txt').val()
+        {% endif %}
+        window.location.assign(url)
     })
 
-    $('#period').click(function() {
+    $('#period').change(function() {
         period_val = $(this).val()
         window.location.assign(window.location.pathname + '?filter=' + period_val.replace(' ', '-'))
     })
