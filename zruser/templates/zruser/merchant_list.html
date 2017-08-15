@@ -18,7 +18,7 @@
                 </select>
                 <input class="search" id="search-txt" type="search" name="search" placeholder="search" value="{{ q }}">
                 <input class="button red" type="button" value="Search" id="search-btn">
-                <input class="button red" type="button" value="DOWNLOAD CSV">
+                <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
             </div>
         </div>
         <br>
@@ -67,7 +67,7 @@
                             <td>{{ map.merchant.at_created }}</td>
                             <td>{{ map.merchant.mobile_no }}</td>
                             <td>{{ map.merchant.email }}</td>
-                            <td>{% if merchant.is_active %}Active{% else %}Inactive{% endif %}</td>
+                            <td>{% if map.merchant.is_active %}Active{% else %}Inactive{% endif %}</td>
                         </tr>
                         {% endfor %}
                     {% endif %}
@@ -104,6 +104,11 @@
             url += '&q={{ q }}'
         {% endif %}
 
+        window.location.assign(url)
+    })
+
+    $('#csv-download').click(function(){
+        url = "{% url "user:merchant-csv" %}" + window.location.search
         window.location.assign(url)
     })
 </script>

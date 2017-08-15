@@ -18,7 +18,7 @@
                 </select>
                 <input class="search" id="search-txt" type="search" name="search" placeholder="search" value="{% if q %}{{ q }}{% endif %}">
                 <input type="button" id="search-btn" class="button red" value="Search">
-                <input class="button red" type="button" value="DOWNLOAD CSV">
+                <input class="button red" type="button" value="DOWNLOAD CSV" id="download-csv" >
             </div>
         </div>
         <br>
@@ -142,6 +142,11 @@
         {% else %}
             url = window.location.pathname + "?q=" + $('#search-txt').val()
         {% endif %}
+        window.location.assign(url)
+    })
+
+    $('#download-csv').click(function(){
+        url = '{% url "payment-requests:payment-request-csv" %}' + window.location.search
         window.location.assign(url)
     })
 </script>

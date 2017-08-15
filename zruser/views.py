@@ -2,8 +2,11 @@
 from __future__ import unicode_literals
 
 import datetime
+import csv
+
 from urllib import urlencode
 
+from django.http import HttpResponse
 from django.contrib.auth import login
 from django.shortcuts import render, redirect
 from django.views.generic import CreateView, DetailView, ListView
@@ -44,6 +47,92 @@ class MerchantDetailView(DetailView):
     context_object_name = 'merchant'
 
 
+def get_merchant_qs(request):
+    queryset = ZrUser.objects.filter(role__name=MERCHANT).order_by('-at_created')
+    q = request.GET.get('q')
+    filter = request.GET.get('filter')
+
+    if request.user.is_superuser:
+        if q:
+            queryset = queryset.filter(
+                first_name__contains=q,
+            )
+
+        if filter == 'Today':
+            queryset = queryset.filter(at_created__gte=datetime.datetime.now().date())
+        elif filter == 'Last-Week':
+            queryset = queryset.filter(at_created__range=last_week_range())
+        elif filter == 'Last-Month':
+            queryset = queryset.filter(at_created__range=last_month())
+
+        return queryset
+    elif request.user.zr_admin_user.role.name == DISTRIBUTOR:
+        queryset = request.user.zr_admin_user.zr_user.all_merchant_mappings.filter(
+            is_active=True
+        ).order_by('-at_created')
+        if q:
+            queryset = queryset.filter(
+                merchant__first_name__contains=q,
+            )
+        else:
+            queryset = queryset
+
+        if filter == 'Today':
+            queryset = queryset.filter(
+                at_created__gte=datetime.datetime.now().date()
+            )
+        elif filter == 'Last-Week':
+            queryset = queryset.filter(
+                at_created__range=last_week_range()
+            )
+        elif filter == 'Last-Month':
+            queryset = request.user.zr_admin_user.zr_user.all_merchant_mappings.filter(
+                at_created__range=last_month()
+            )
+
+    return queryset
+
+
+def get_merchant_csv(request):
+    merchant_qs = get_merchant_qs(request)
+    pg_no = request.GET.get('page_no', 1)
+
+    p = Paginator(merchant_qs, DistributorListView.paginate_by)
+    try:
+        page = p.page(pg_no)
+    except EmptyPage:
+        raise Http404
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="merchants.csv"'
+    writer = csv.writer(response)
+    writer.writerow([
+        'Merchant Id',
+        'Merchant Name',
+        'DOJ',
+        'Mobile No',
+        'Email',
+        'Status'
+    ])
+
+    for merchant in page.object_list:
+        if not request.user.is_superuser:
+            merchant = merchant.merchant
+
+        writer.writerow(
+            [
+                merchant.id,
+                merchant.first_name,
+                merchant.at_created,
+                merchant.mobile_no,
+                merchant.email,
+                'Active' if merchant.is_active else 'Inactive'
+            ]
+        )
+
+    return response
+
+
 class MerchantListView(ListView):
     template_name = 'zruser/merchant_list.html'
     context_object_name = 'merchant_list'
@@ -59,6 +148,11 @@ class MerchantListView(ListView):
             pg_no = 1
         filter = self.request.GET.get('filter')
         context['is_queryset'] = False
+        if q:
+            context['q'] = q
+
+        if filter:
+            context['filter_by'] = filter
 
         if self.request.user.is_superuser:
             activate = self.request.GET.get('activate')
@@ -80,31 +174,9 @@ class MerchantListView(ListView):
                 zruser.is_active = False
                 zruser.save(update_fields=['is_active'])
 
-            if q:
-                context['queryset'] = queryset.filter(
-                    first_name__contains=q,
-                )
-                context['q'] = q
-            else:
-                context['queryset'] = queryset
+            context['queryset'] = queryset
 
-            if filter == 'Today':
-                if 'queryset' in context:
-                    queryset = context['queryset']
-                context['queryset'] = queryset.filter(at_created__gte=datetime.datetime.now().date())
-                context['filter_by'] = filter
-            elif filter == 'Last-Week':
-                if 'queryset' in context:
-                    queryset = context['queryset']
-                context['queryset'] = queryset.filter(at_created__range=last_week_range())
-                context['filter_by'] = filter
-            elif filter == 'Last-Month':
-                if 'queryset' in context:
-                    queryset = context['queryset']
-                context['queryset'] = queryset.filter(at_created__range=last_month())
-                context['filter_by'] = filter
-
-            p = Paginator(context['queryset'], self.paginate_by)
+            p = Paginator(queryset, self.paginate_by)
             try:
                 page = p.page(pg_no)
             except EmptyPage:
@@ -129,29 +201,7 @@ class MerchantListView(ListView):
 
             context['is_queryset'] = True
         elif self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
-            queryset = self.request.user.zr_admin_user.zr_user.all_merchant_mappings.filter(
-                is_active=True
-            ).order_by('-at_created')
-            if q:
-                context['merchant_map'] = queryset.filter(
-                    merchant__first_name__contains=q,
-                )
-            else:
-                context['merchant_map'] = queryset
-
-            if filter == 'Today':
-                context['merchant_map'] = queryset.filter(
-                    at_created__gte=datetime.datetime.now().date()
-                )
-            elif filter == 'Last-Week':
-                context['merchant_map'] = queryset.filter(
-                    at_created__range=last_week_range()
-                )
-            elif filter == 'Last-Month':
-                context['merchant_map'] = self.request.user.zr_admin_user.zr_user.all_merchant_mappings.filter(
-                    at_created__range=last_month()
-                )
-
+            context['merchant_map'] = queryset
             p = Paginator(context['merchant_map'], self.paginate_by)
             try:
                 page = p.page(pg_no)
@@ -177,18 +227,66 @@ class MerchantListView(ListView):
                 context['has_prev_page'] = page.has_previous()
 
             context['is_queryset'] = False
-            context['filter_by'] = filter
 
         return context
 
     def get_queryset(self):
-        return ZrUser.objects.filter(role__name=MERCHANT).order_by('-at_created')
+        return get_merchant_qs(self.request)
 
 
 class DistributorDetailView(DetailView):
     template_name = 'zruser/distributor_detail.html'
     queryset = ZrUser.objects.filter(role__name=DISTRIBUTOR)
     context_object_name = 'distributor'
+
+
+def get_distributor_qs(request):
+    queryset = ZrUser.objects.filter(role__name=DISTRIBUTOR).order_by('-at_created')
+    q = request.GET.get('q')
+    filter = request.GET.get('filter')
+
+    if q:
+        queryset = queryset.filter(
+            first_name__contains=q,
+        )
+
+    if filter == 'Today':
+        queryset = queryset.filter(at_created__gte=datetime.datetime.now().date())
+    elif filter == 'Last-Week':
+        queryset = queryset.filter(at_created__range=last_week_range())
+    elif filter == 'Last-Month':
+        queryset = queryset.filter(at_created__range=last_month())
+
+    return queryset
+
+
+def download_distributor_list_csv(request):
+    distributor_qs = get_distributor_qs(request)
+    pg_no = request.GET.get('page_no', 1)
+
+    p = Paginator(distributor_qs, DistributorListView.paginate_by)
+    try:
+        page = p.page(pg_no)
+    except EmptyPage:
+        raise Http404
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="distributors.csv"'
+    writer = csv.writer(response)
+    writer.writerow([
+        'Distributor Id', 'Distributor Name', 'DOJ', 'Mobile', 'Email', 'Status'
+    ])
+    for distributor in page.object_list:
+        writer.writerow([
+            distributor.id,
+            distributor.first_name,
+            distributor.at_created,
+            distributor.mobile_no,
+            distributor.email,
+            'Active' if distributor.is_active else 'Inactive'
+        ])
+
+    return response
 
 
 class DistributorListView(ListView):
@@ -239,29 +337,12 @@ class DistributorListView(ListView):
             zruser.save(update_fields=['is_active'])
 
         if q:
-            context['queryset'] = queryset.filter(
-                first_name__contains=q,
-            )
             context['q'] = q
-        else:
-            context['queryset'] = queryset
 
-        if filter == 'Today':
-            if 'queryset' in context:
-                queryset = context['queryset']
-            context['queryset'] = queryset.filter(at_created__gte=datetime.datetime.now().date())
-            context['filter_by'] = filter
-        elif filter == 'Last-Week':
-            if 'queryset' in context:
-                queryset = context['queryset']
-            context['queryset'] = queryset.filter(at_created__range=last_week_range())
-            context['filter_by'] = filter
-        elif filter == 'Last-Month':
-            if 'queryset' in context:
-                queryset = context['queryset']
-            context['queryset'] = queryset.filter(at_created__range=last_month())
+        if filter:
             context['filter_by'] = filter
 
+        context['queryset'] = queryset
         p = Paginator(context['queryset'], self.paginate_by)
         try:
             page = p.page(pg_no)
@@ -288,7 +369,7 @@ class DistributorListView(ListView):
         return context
 
     def get_queryset(self):
-        return ZrUser.objects.filter(role__name=DISTRIBUTOR).order_by('-at_created')
+        return get_distributor_qs(self.request)
 
 
 class DashBoardView(ListView):

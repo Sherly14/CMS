@@ -18,7 +18,7 @@
                 </select>
                 <input class="search" id="search-txt" type="search" name="search" placeholder="search" value="{{ q }}">
                 <input class="button red" type="button" value="Search" id="search-btn">
-                <input class="button red" type="button" value="DOWNLOAD CSV">
+                <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
             </div>
         </div>
         <br>
@@ -98,6 +98,11 @@
         {% if q %}
             url += "&q={{ q }}"
         {% endif %}
+        window.location.assign(url)
+    })
+
+    $('#csv-download').click(function(){
+        url = "{% url "user:distributor-csv" %}" + window.location.search
         window.location.assign(url)
     })
 </script>
