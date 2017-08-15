@@ -5,6 +5,7 @@ import datetime
 import calendar
 
 from datetime import timedelta
+from django.db.models import Q
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 from django.core.paginator import Paginator, PageNotAnInteger, PageNotAnInteger, EmptyPage
@@ -24,6 +25,9 @@ class MerchantPaymentRequestListView(ListView):
 
     def get_context_data(self, **kwargs):
         payment_approved = self.request.GET.get('payment-approve')
+        filter_by = self.request.GET.get('filter')
+        q = self.request.GET.get('q')
+
         if payment_approved:
             if self.request.user.is_superuser:
                 MerchantPaymentRequest.objects.filter(
@@ -42,9 +46,9 @@ class MerchantPaymentRequestListView(ListView):
 
         queryset = self.get_queryset()
         if not queryset:
+            context['filter_by'] = filter_by
+            context['q'] = q
             return context
-
-        filter_by = self.request.GET.get('filter')
 
         paginator = Paginator(queryset, self.paginate_by)
         page = self.request.GET.get('page', 1)
@@ -56,10 +60,13 @@ class MerchantPaymentRequestListView(ListView):
 
         context['page_obj'] = queryset
         context['filter_by'] = filter_by
+        context['q'] = q
         return context
 
     def get_queryset(self):
         filter_by = self.request.GET.get('filter')
+        q = self.request.GET.get('q')
+
         queryset = []
         if self.request.user.is_superuser:
             queryset = MerchantPaymentRequest.objects.all()
@@ -68,6 +75,16 @@ class MerchantPaymentRequestListView(ListView):
                 distributor=self.request.user.zr_admin_user
             )
 
+        if q:
+            query = Q(
+                merchant_payment_mode__name__contains=q
+            ) | Q(
+                distributor__first_name__contains=q
+            ) | Q(
+                merchant__first_name__contains=q
+            )
+            queryset = queryset.filter(query)
+
         if filter_by == 'last_week':
             queryset = queryset.filter(at_created__range=last_week_range())
         elif filter_by == 'last_month':
@@ -75,4 +92,4 @@ class MerchantPaymentRequestListView(ListView):
         elif filter_by == 'today':
             queryset = queryset.filter(at_created__date__gte=datetime.date.today())
 
-        return queryset
+        return queryset.order_by('-at_created')

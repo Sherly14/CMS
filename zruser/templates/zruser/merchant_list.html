@@ -99,7 +99,12 @@
 
     $('#period').change(function() {
         period_val = $(this).val()
-        window.location.assign(window.location.pathname + '?filter=' + period_val.replace(' ', '-'))
+        url = window.location.pathname + '?filter=' + period_val.replace(' ', '-')
+        {% if q %}
+            url += '&q={{ q }}'
+        {% endif %}
+
+        window.location.assign(url)
     })
 </script>
 {% endblock %}
