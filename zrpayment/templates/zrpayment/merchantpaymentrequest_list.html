@@ -11,13 +11,14 @@
         </div>
         <div class="row">
             <div class="d-flex justify-content-between" style="width:90%">
-                <select id="timespan-filter" onchange="timespan_filter()">
+                <select id="timespan-filter" >
                     <option value="today" {% if filter_by == "today" %} selected {% endif %}>Today</option>
                     <option value="last_week" {% if filter_by == "last_week" %} selected {% endif %}>Last Week</option>
                     <option value="last_month" {% if filter_by == "last_month" %} selected {% endif %}>Last Month</option>
                 </select>
-                <input class="search" type="search" name="search" placeholder="search">
-                <input class="button red" type="button" value="DOWNLOAD CSV">
+                <input class="search" id="search-txt" type="search" name="search" placeholder="search" value="{% if q %}{{ q }}{% endif %}">
+                <input type="button" id="search-btn" class="button red" value="Search">
+                <input class="button red" type="button" value="DOWNLOAD CSV" id="download-csv" >
             </div>
         </div>
         <br>
@@ -85,13 +86,25 @@
                         <div class="pagination">
                             <span class="page-links">
                                 {% if page_obj.has_previous %}
-                                    <a href="/payment_request?page={{ page_obj.previous_page_number }}">previous</a>
+                                    {% if filter_by and q %}
+                                        <a href="/payment_request?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}">previous</a>
+                                    {% elif q %}
+                                        <a href="/payment_request?page={{ page_obj.previous_page_number }}&q={{ q }}">previous</a>
+                                    {% elif filter_by %}
+                                        <a href="/payment_request?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}">previous</a>
+                                    {% endif %}
                                 {% endif %}
                                 <span class="page-current">
                                     Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
                                 </span>
                                 {% if page_obj.has_next %}
-                                    <a href="/payment_request?page={{ page_obj.next_page_number }}">next</a>
+                                    {% if filter_by and q %}
+                                        <a href="/payment_request?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}">next</a>
+                                    {% elif q %}
+                                        <a href="/payment_request?page={{ page_obj.next_page_number }}&q={{ q }}">next</a>
+                                    {% elif filter_by %}
+                                        <a href="/payment_request?page={{ page_obj.next_page_number }}&filter={{ filter_by }}">next</a>
+                                    {% endif %}
                                 {% endif %}
                             </span>
                         </div>
@@ -104,10 +117,16 @@
     </div>
 
     <script>
-        function timespan_filter() {
-            var input = document.getElementById("timespan-filter");
-            window.location = "{{ request.path }}?filter=" + input.value;
-        }
+        $("#timespan-filter").change(
+            function() {
+                var input = document.getElementById("timespan-filter");
+                url = "{{ request.path }}?filter=" + input.value;
+                {% if q %}
+                    url += "&q={{ q }}";
+                {% endif %}
+                window.location = url
+            }
+        )
 
         function approve_payment_req(id) {
             window.location = "{{ request.path }}?payment-approve=" + id;
@@ -115,4 +134,20 @@
     </script>
 
 
+<script>
+    $('#search-btn').click(function(){
+        search = $('#search-txt').val()
+        {% if filter_by %}
+            url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}"
+        {% else %}
+            url = window.location.pathname + "?q=" + $('#search-txt').val()
+        {% endif %}
+        window.location.assign(url)
+    })
+
+    $('#download-csv').click(function(){
+        url = '{% url "payment-requests:payment-request-csv" %}' + window.location.search
+        window.location.assign(url)
+    })
+</script>
 {% endblock %}

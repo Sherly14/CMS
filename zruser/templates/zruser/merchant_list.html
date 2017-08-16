@@ -18,7 +18,7 @@
                 </select>
                 <input class="search" id="search-txt" type="search" name="search" placeholder="search" value="{{ q }}">
                 <input class="button red" type="button" value="Search" id="search-btn">
-                <input class="button red" type="button" value="DOWNLOAD CSV">
+                <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
             </div>
         </div>
         <br>
@@ -52,9 +52,9 @@
                             <td>{% if merchant.is_active %}Active{% else %}Inactive{% endif %}</td>
                             <td>
                                 {% if merchant.is_active %}
-                                    <a href='{% url "user:merchant-list" %}?activate={{ merchant.id }}'>Activate</a>
-                                {% else %}
                                     <a href='{% url "user:merchant-list" %}?disable={{ merchant.id }}'>Disable</a>
+                                {% else %}
+                                    <a href='{% url "user:merchant-list" %}?activate={{ merchant.id }}'>Activate</a>
                                 {% endif %}
                             </td>
                         </tr>
@@ -67,7 +67,7 @@
                             <td>{{ map.merchant.at_created }}</td>
                             <td>{{ map.merchant.mobile_no }}</td>
                             <td>{{ map.merchant.email }}</td>
-                            <td>{% if merchant.is_active %}Active{% else %}Inactive{% endif %}</td>
+                            <td>{% if map.merchant.is_active %}Active{% else %}Inactive{% endif %}</td>
                         </tr>
                         {% endfor %}
                     {% endif %}
@@ -89,12 +89,27 @@
 
 <script>
     $('#search-btn').click(function(){
-        window.location.assign(window.location.pathname + '?q=' + $('#search-txt').val())
+        {% if filter_by %}
+            url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}"
+        {% else %}
+            url = window.location.pathname + "?q=" + $('#search-txt').val()
+        {% endif %}
+        window.location.assign(url)
     })
 
-    $('#period').click(function() {
+    $('#period').change(function() {
         period_val = $(this).val()
-        window.location.assign(window.location.pathname + '?filter=' + period_val.replace(' ', '-'))
+        url = window.location.pathname + '?filter=' + period_val.replace(' ', '-')
+        {% if q %}
+            url += '&q={{ q }}'
+        {% endif %}
+
+        window.location.assign(url)
+    })
+
+    $('#csv-download').click(function(){
+        url = "{% url "user:merchant-csv" %}" + window.location.search
+        window.location.assign(url)
     })
 </script>
 {% endblock %}
