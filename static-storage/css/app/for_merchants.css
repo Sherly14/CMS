@@ -14,9 +14,11 @@
 	width:100%;
 }
 #doc_type{
-	box-shadow: none;
-	padding:0px;
-	margin-right: 1rem;
+	margin-left: 1rem;
+    margin-right: 1rem;
+    border-radius: 3px;
+    background-color: #e7e7e7;
+    box-shadow: 0 7px 13px 0 rgba(0, 0, 0, 0.05);
 }
 .input-80{
 	width:80%;
@@ -25,19 +27,20 @@
 .heading-bg{
 	background-color: #E5E5E5;
 	width:100%;
-	padding-left:1rem;
+	padding:0.2rem 0rem 0.1rem 1.2rem;
 	margin-bottom: 1rem;
 	font-family:sans-serif;
-	font-weight: 600;
+	font-weight: 500;
+	letter-spacing: 0.2rem;
 }
 .heading-right{
 	padding-top: 20px;
 	width:100%;
 	text-align:right;
-	padding-right:3rem;
 	font-size:25px;
 	font-family: sans-serif;
-	font-weight:lighter;
+	font-weight:100;
+	letter-spacing: 0.1rem;
 }
 
 
@@ -54,9 +57,15 @@
 
 /*margins for different elements*/
 label{
-	padding-left:0.2rem;
-	margin-bottom: 0rem;
-	font-family: sans-serif;
+	padding-left: 0.2rem;
+    margin-bottom: 1rem;
+    font-family: sans-serif;
+    font-size: 17px;
+    line-height: 0.25;
+    letter-spacing: 0.6px;
+    color: #313131;
+    font-weight: 500;
+
 }
 
 .
@@ -72,7 +81,9 @@ label{
 }
 
 .button.yellow{
-	padding:3px 1rem;
+	border-radius: 3px;
+    background-color: #eb9b1c;
+    box-shadow: 0 16px 39.6px 0.4px rgba(0, 0, 0, 0.2)
 }
 
 .button.yellow.small{
@@ -82,4 +93,14 @@ label{
 .button.red{
 	display:block;
 	float:right;
+	border: none;
+	box-shadow: 0 10px 27px 0 rgba(0, 0, 0, 0.13);
+}
+
+.merchantid{
+	font-family: sans-serif;
+    font-size: 17px;
+    letter-spacing: 1px;
+    color: #626262;
+    font-weight: 100;
 }
