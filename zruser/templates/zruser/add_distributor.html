@@ -6,9 +6,9 @@
 {% block content %}
 
 
-<div class="content-wrapper">
+<div class="content-wrapper py-2" style="padding-left: 0.5rem; padding-right: 4rem">
     <p class="heading-right">Add a Distributor</p>
-    <div class="container-fluid">
+    <div class="container-fluid" style="position: relative;">
         <div class="row">
             <p class="heading-bg">PERSONAL DETAILS:</p>
         </div>
@@ -89,7 +89,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-sm-4">
+                <div class="col-sm-3">
                     <div class="form-group">
                         <label for="city">City</label>
                         {{ merchant_form.city|attr:"class:fill"|attr:"id:city" }}
@@ -98,7 +98,7 @@
                         {% endif %}
                     </div>
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-3">
                     <div class="form-group">
                         <label for="state">State</label>
                         {{ merchant_form.state|attr:"class:fill"|attr:"id:state" }}
@@ -107,7 +107,7 @@
                         {% endif %}
                     </div>
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-3">
                     <div class="form-group">
                         <label for="pincode">Pincode</label>
                         {{ merchant_form.pincode|attr:"class:fill"|attr:"id:pincode" }}
@@ -125,7 +125,7 @@
             <div class="row">
                 <div class="col-sm-2">
                     <div class="form-group">
-                        <label for="acname">Account Name</label>
+                        <label for="acname">A/c Name</label>
                         {{ bank_detail_form.account_name|attr:"id:acname"|attr:"class:fill" }}
                         {% if bank_detail_form.account_name.errors %}
                             {{ bank_detail_form.account_name.errors }}
@@ -134,7 +134,7 @@
                 </div>
                 <div class="col-sm-2">
                     <div class="form-group">
-                        <label for="acno">Account No</label>
+                        <label for="acno">A/c No</label>
                         {{ bank_detail_form.account_no|attr:"id:acno"|attr:"class:fill" }}
                         {% if bank_detail_form.account_no.errors %}
                             {{ bank_detail_form.account_no.errors }}
@@ -143,7 +143,7 @@
                 </div>
                 <div class="col-sm-2">
                     <div class="form-group">
-                        <label for="ifsc_code">IFSC Code</label>
+                        <label for="ifsc_code">IFSC #</label>
                         {{ bank_detail_form.IFSC_code|attr:"id:ifsc_code"|attr:"class:fill" }}
                         {% if bank_detail_form.IFSC_code.errors %}
                             {{ bank_detail_form.IFSC_code.errors }}
