@@ -18,6 +18,7 @@ urlpatterns += [
     url(r'^distributor_create/$', DistributorCreateView.as_view(), name='distributor-create'),
     url(r'^distributor_csv/$', zr_user_views.download_distributor_list_csv, name="distributor-csv"),
 
+    url(r'^kyc_requests/$', zr_user_views.KYCRequestsView.as_view(), name='kyc-requests'),
 
     url(r'^merchant_list/$', MerchantListView.as_view(), name='merchant-list'),
     url(r'^merchant_details/(?P<pk>\d+)/$', MerchantDetailView.as_view(), name='merchant-details'),

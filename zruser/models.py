@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import boto3
+
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
 from django.db import models
+from django.conf import settings as dj_settings
 
 from zruser.utils.constants import KYC_APPROVAL_CHOICES, GENDER_CHOICES
 from zrutils.common.modelutils import RowInfo, get_slugify_value
@@ -120,6 +123,22 @@ class KYCDetail(RowInfo):
 
     class Meta:
         verbose_name_plural = 'KYCDetails'
+
+    def get_download_url(self):
+        s3 = boto3.client(
+            's3', aws_access_key_id=dj_settings.S3_AWS_SEC_KEY_ID,
+            aws_secret_access_key=dj_settings.S3_AWS_SEC_KEY_SECRET,
+            region_name='ap-south-1'
+        )
+        generated_url = s3.generate_presigned_url(
+            ClientMethod='get_object',
+            Params={
+                'Bucket': 'zrupee-kyc-documents',
+                'Key': self.document_id
+            }
+        )
+
+        return generated_url
 
     def __unicode__(self):
         return '%s - (%s)' % (self.type, self.for_user)

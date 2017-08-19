@@ -24,6 +24,7 @@ from zruser import forms as zr_user_form
 from zruser.models import ZrUser, UserRole, ZrAdminUser, KYCDocumentType, KYCDetail
 from zrmapping import models as zrmappings_models
 from common_utils.date_utils import last_month, last_week_range
+from utils import constants
 
 
 MERCHANT = 'MERCHANT'
@@ -232,6 +233,38 @@ class MerchantListView(ListView):
 
     def get_queryset(self):
         return get_merchant_qs(self.request)
+
+
+class KYCRequestsView(ListView):
+    template_name = 'zruser/kyc-requests.html'
+    context_object_name = 'kyc_requests'
+    paginate_by = 10
+
+    def get_queryset(self):
+        approve = self.request.GET.get('approve')
+        reject = self.request.GET.get('approve')
+
+        if approve or reject:
+            if not ZrUser.objects.filter(id=approve or reject).last():
+                raise Http404
+            else:
+                status = None
+                if approve:
+                    status = constants.KYC_APPROVAL_CHOICES[1][0]
+                elif reject:
+                    status = constants.KYC_APPROVAL_CHOICES[2][0]
+
+                zruser = ZrUser.objects.filter(id=approve).last()
+                zruser.kyc_details.all().update(
+                    approval_status=status
+                )
+                zruser.is_kyc_verified = True
+                zruser.save(update_fields=['is_kyc_verified'])
+
+        queryset = ZrUser.objects.filter(
+            is_kyc_verified=False
+        ).order_by('-at_created')
+        return queryset
 
 
 class DistributorDetailView(DetailView):
