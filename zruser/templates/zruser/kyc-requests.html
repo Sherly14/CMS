@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+
+{% block title %} Merchants List {% endblock %}
+
+{% block content %}
+
+    <div class="content-wrapper">
+        <p class="head-right">Merchant Table</p>
+        <div class="row rm-margin-side">
+            <p class="head-left">PERIOD</p>
+        </div>
+        <div class="row">
+            <div class="d-flex justify-content-between" style="width:90%">
+                <select id="period">
+                    <option value="Today" {% if filter_by == "Today" %}selected{% endif %}>Today</option>
+                    <option value="Last Week" {% if filter_by == "Last-Week" %}selected{% endif %}>Last Week</option>
+                    <option value="Last Month" {% if filter_by == "Last-Month" %}selected{% endif %}>Last Month</option>
+                </select>
+                <input class="search" id="search-txt" type="search" name="search" placeholder="search" value="{{ q }}">
+                <input class="button red" type="button" value="Search" id="search-btn">
+                <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
+            </div>
+        </div>
+        <br>
+        <div class="row">
+            <div class="fine">
+                <p class="head-bg head-bg2">Merchants<i class="fa fa-chevron-up"
+                                                                                  style="color:white;"></i></p>
+            </div>
+        </div>
+        <div class="row scroll">
+
+            <div style="width: 100%;">
+                <table>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Doj</th>
+                        <th>KYC1</th>
+                        <th>KYC1 Type</th>
+                        <th>KYC2</th>
+                        <th>KYC2 Type</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                    {% for kyc_req in object_list %}
+                    <tr>
+                        <th>{{ kyc_req.first_name }} {% if kyc_req.last_name %}{{ kyc_req.last_name }}{% endif %} </th>
+                        <th>{{ kyc_req.role.name }}</th>
+                        <th>{{ kyc_req.at_created|date:"d/m/Y" }}</th>
+                        {% for kyc in kyc_req.kyc_details.all %}
+                            <th><a href="{{ kyc.get_download_url }}">Url</a></th>
+                            <th>{{ kyc.type }}</th>
+                        {% endfor %}
+                        {% if kyc_req.kyc_details.all.count == 1 %}
+                            <th></th>
+                            <th></th>
+                        {% endif %}
+                        {% if kyc_req.kyc_details.all.count == 0 %}
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        {% endif %}
+                        <th>
+                            {% if kyc_req.kyc_details.last.approval_status == 'I' %}
+                                In Process
+                            {% elif kyc_req.kyc_details.last.approval_status == 'A' %}
+                                Approved
+                            {% elif kyc_req.kyc_details.last.approval_status == 'R' %}
+                                Rejected
+                            {% endif %}
+                        </th>
+                        <th>
+                            {% if kyc_req.kyc_details.all.count %}
+                                <a href='{% url "user:kyc-requests" %}?approve={{ kyc_req.id }}'>Approve</a>
+                                <a href='{% url "user:kyc-requests" %}?reject={{ kyc_req.id }}'>Reject</a>
+                            {% endif %}
+                        </th>
+                    </tr>
+                    {% endfor %}
+                </table>
+                {% if is_paginated %}
+                  <nav>
+                    <ul class="pagination">
+                      {% if page_obj.has_previous %}
+                        <li>
+                          <a href="?page={{ page_obj.previous_page_number }}">
+                            <span>Previous</span>
+                          </a>
+                        </li>
+                      {% else %}
+                        <li class="disabled">
+                          <a href="#">
+                            <span>Previous</span>
+                          </a>
+                        </li>
+                      {% endif %}
+
+                      {% if page_obj.has_next %}
+                        <li>
+                          <a href="?page={{ page_obj.next_page_number }}">
+                            <span>Next</span>
+                          </a>
+                        </li>
+                      {% else %}
+                        <li {% if not page_obj.has_next %}class="disabled"{% endif %}>
+                          <a href="#">
+                            <span>Next</span>
+                          </a>
+                        </li>
+                      {% endif %}
+                    </ul>
+                  </nav>
+                {% endif %}
+            </div>
+
+        </div>
+        <br>
+
+    </div>
+{% endblock %}
