@@ -11,6 +11,10 @@
     color: #DC3826;
     border: 2px solid #DC3826;
     background-color: transparent;
+    position: absolute;
+    right: 70px;
+    top: 15px;
+    border-radius: 11px;
 }
 
 /*background of top nav bar*/
@@ -125,7 +129,7 @@ body.fixed-nav {
       flex-direction: column;
       height: 100vh;
       margin-top: 150px;
-      margin-left: -70px;
+      /*margin-left: -70px;*/
       padding-bottom: 56px;
       background: transparent;
       -webkit-flex-direction: column;
@@ -133,14 +137,18 @@ body.fixed-nav {
       #mainNav .navbar-collapse .navbar-nav.sidebar-nav > .nav-item {
         width: 250px;
         padding: 0; }
-        #mainNav .navbar-collapse .navbar-nav.sidebar-nav > .nav-item > .nav-link {
-          padding: 1rem 4rem 1rem 0rem;}
-        #mainNav .navbar-collapse .navbar-nav.sidebar-nav > .nav-item > .nav-link.active {
-          background-color: #2E2E2E;
-          border-radius: 2rem;
-          padding: 1rem 2rem 1rem 0rem;}        
-        #mainNav .navbar-collapse .navbar-nav.sidebar-nav > .nav-item .sidebar-second-level,
-        #mainNav .navbar-collapse .navbar-nav.sidebar-nav > .nav-item .sidebar-third-level {
+      #mainNav .navbar-collapse .navbar-nav.sidebar-nav > .nav-item > .nav-link {
+        font-weight: 100;
+        font-family: sans-serif;
+        font-size: 0.8rem;
+        padding: 1rem 7rem 1rem 0rem;}
+      #mainNav .navbar-collapse .navbar-nav.sidebar-nav > .nav-item > .nav-link.active {
+        background-color: #2E2E2E;
+        /*border-radius: 2rem;*/
+        /*padding: 1rem 2rem 1rem 0rem;*/
+        margin-right: 1.3rem}
+      #mainNav .navbar-collapse .navbar-nav.sidebar-nav > .nav-item .sidebar-second-level,
+      #mainNav .navbar-collapse .navbar-nav.sidebar-nav > .nav-item .sidebar-third-level {
           padding-left: 0;
           list-style: none;
           background: #292b2c; }

@@ -6,9 +6,9 @@
 {% block content %}
 
 
-<div class="content-wrapper">
+<div class="content-wrapper py-2" style="padding-left: 0.5rem; padding-right: 4rem">
     <p class="heading-right">Add a Merchant</p>
-    <div class="container-fluid">
+    <div class="container-fluid" style="position: relative;">
         <div class="row">
             <p class="heading-bg">PERSONAL DETAILS:</p>
         </div>
@@ -89,7 +89,7 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-sm-4">
+                <div class="col-sm-3">
                     <div class="form-group">
                         <label for="city">City</label>
                         {{ merchant_form.city|attr:"class:fill"|attr:"id:city" }}
@@ -98,7 +98,7 @@
                         {% endif %}
                     </div>
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-3">
                     <div class="form-group">
                         <label for="state">State</label>
                         {{ merchant_form.state|attr:"class:fill"|attr:"id:state" }}
@@ -107,7 +107,7 @@
                         {% endif %}
                     </div>
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-3">
                     <div class="form-group">
                         <label for="pincode">Pincode</label>
                         {{ merchant_form.pincode|attr:"class:fill"|attr:"id:pincode" }}

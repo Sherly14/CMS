@@ -4,73 +4,88 @@
 
 {% block content %}
 
-        <div class="content-wrapper py-3" style="padding-left: 0.5rem;">
-        <div class="container-fluid">
+            <div class="content-wrapper py-5" style="padding-left: 0.5rem;">
+
+        <div class="container-fluid" style="position: relative;">
+
             <!-- Breadcrumbs -->
             <div class="row">
                 <div class="col-xl-3 col-sm-6 mb-3">
-                    <div class="card card-inverse o-hidden h-100">
+                    <div class="period">PERIOD</div>
+                    <div class="card card-inverse o-hidden h-100" style="height: 45px !important;margin-bottom: 20px;">
                         <div class="card-block lightGrayBG blackTextColor">
-                            <div class="mr-5">
-                                Calendar Div
+                                <div class="calenderEntry">
+                                24/1/2017 - 24/2/2017
                                 <i class="fa fa-calendar dis-ft-r"></i>
-                            </div>
+                                    <i class="fa fa-chevron-down dis-ft-down"></i>
+                                </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="d-flex justify-content-between">
+                            <input class="button yellow resize" type="button" value="Today" >
+                            <input class="button yellow resize" type="button" value="Last Week"  >
+                            <input class="button yellow resize" type="button" value="Last Month" >
                         </div>
                     </div>
                 </div>
                 <div class="col-xl-9 col-sm-6 mb-3">
-                    <div class="mr-5 textAlignRight">
-                        Dashboard</div>
-                    <input type="button" value="DOWNLOAD CSV" style="float: right;" class="button red mr-5">
-                </div>
-                <div class="col-xl-3 col-md-3 col-sm-6">
-                    <div class="d-flex justify-content-between">
-                        <input class="button yellow resize" type="button" value="Today">
-                        <input class="button yellow resize" type="button" value="Last Week">
-                        <input class="button yellow resize" type="button" value="Last Month">
-                    </div>
+                    <div class="mr-5 textAlignRight dashboard">Dashboard</div>
+                    <input type="button" value="DOWNLOAD CSV" style="float: right;" class ="button red downloadcsv mr-5">
                 </div>
             </div>
+
             <!-- Icon Cards -->
-            <div class="row">
+            <div class="row" style="margin-bottom: 2.5rem">
                 <div class="col-xl-3 col-sm-6 mb-3">
                     <div class="card card-inverse o-hidden h-100">
                         <div class="card-block lightGrayBG blackTextColor">
-                            <span class="card-head spanAlignment">
+
+
+                        <span class="card-head spanAlignment">
                                 Total Commissions</span>
-                            <span class="card-data textAlignRight spanAlignment">
+                        <span class="card-data textAlignRight spanAlignment">
                                 INR 48,000</span>
-                        </div>
+                    </div>
+
                     </div>
                 </div>
                 <div class="col-xl-3 col-sm-6 mb-3">
                     <div class="card card-inverse o-hidden h-100">
                         <div class="card-block lightGrayBG blackTextColor">
-                            <span class="card-head spanAlignment">
+
+                        <span class="card-head spanAlignment">
                                 Merchants </span>
-                            <span class="card-data textAlignRight spanAlignment">
+                        <span class="card-data textAlignRight spanAlignment">
                                 Total : 127</span>
-                        </div>
+                    </div>
+
                     </div>
                 </div>
                 <div class="col-xl-3 col-sm-6 mb-3">
                     <div class="card card-inverse o-hidden h-100">
                         <div class="card-block lightGrayBG blackTextColor">
-                            <span class="card-head spanAlignment">
+
+
+                        <span class="card-head spanAlignment">
                                 Total Remittance</span>
-                            <span class="card-data textAlignRight spanAlignment">
+                        <span class="card-data textAlignRight spanAlignment">
                                 INR 48,000</span>
-                        </div>
+                    </div>
+
                     </div>
                 </div>
+
             </div>
-            <div class="row">
+            <div class="row" style="margin-bottom: 2.5rem">
                 <div class="col-xl-4 col-sm-6 mb-3">
                     <div class="card card-inverse o-hidden h-100">
                         <div class="card-block lightGrayBG blackTextColor">
+
                             <div class="mr-5 card-head">
                                 Total Transactions
                             </div>
+
                             <table class="card-data table table-condensed">
                                 <tbody>
                                     <tr>
@@ -80,22 +95,32 @@
                                     <tr>
                                         <td>Bills</td>
                                         <td class="textAlignRight">20</td>
+
+
                                     </tr>
                                     <tr>
                                         <td>Recharges</td>
                                         <td class="textAlignRight">200</td>
+
+
                                     </tr>
+
+
                                 </tbody>
                             </table>
                         </div>
+
                     </div>
                 </div>
+
                 <div class="col-xl-4 col-sm-6 mb-3">
                     <div class="card card-inverse o-hidden h-100">
                         <div class="card-block lightGrayBG blackTextColor">
+
                             <div class="mr-5 card-head">
                                 Transactions Value
                             </div>
+
                             <table class="card-data table table-condensed">
                                 <tbody>
                                     <tr>
@@ -105,22 +130,34 @@
                                     <tr>
                                         <td>Bills</td>
                                         <td class="textAlignRight">INR 35,000</td>
+
+
                                     </tr>
                                     <tr>
                                         <td>Recharges</td>
                                         <td class="textAlignRight">INR 15,000</td>
+
+
                                     </tr>
+
+
+
+
                                 </tbody>
                             </table>
                         </div>
+
                     </div>
                 </div>
+
                 <div class="col-xl-4 col-sm-6 mb-3">
                     <div class="card card-inverse o-hidden h-100">
                         <div class="card-block lightGrayBG blackTextColor">
+
                             <div class="mr-5 card-head">
                                 Commissions Value
                             </div>
+
                             <table class="card-data table table-condensed">
                                 <tbody>
                                     <tr>
@@ -130,28 +167,42 @@
                                     <tr>
                                         <td>Bills</td>
                                         <td class="textAlignRight">INR 500</td>
+
+
                                     </tr>
                                     <tr>
                                         <td>Recharges</td>
                                         <td class="textAlignRight">INR 2,000</td>
+
+
                                     </tr>
+
+
+
+
                                 </tbody>
                             </table>
                         </div>
+
                     </div>
                 </div>
+
+
             </div>
-            <div class="row">
+            <div class="row" style="margin-bottom: 2.5rem">
                 <div class="col-xl-3 col-sm-6 mb-3">
                     <div class="card card-block lightGrayBG blackTextColor">
+
+
                         <span class="card-head spanAlignment">
                                 Payment Requests</span>
                         <span class="card-data textAlignRight spanAlignment">
                                 17</span>
                     </div>
+
+
                 </div>
             </div>
         </div>
-    </div>
 
 {% endblock %}
