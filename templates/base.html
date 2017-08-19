@@ -48,6 +48,13 @@
                     <a class="nav-link textAlignRight" href="{% url 'user:distributor-list' %}">Distributors</a>
                 </li>
                 {% endif %}
+
+                {% if request.user.zr_admin_user.role.name == "CHECKER" or request.user.is_superuser %}
+                <li class="nav-item ">
+                    <a class="nav-link textAlignRight" href="{% url 'user:kyc-requests' %}">KYC Requests</a>
+                </li>
+                {% endif %}
+
                 <li class="nav-item ">
                     <a class="nav-link textAlignRight" href="{% url 'user:merchant-list' %}">Merchants</a>
                 </li>
