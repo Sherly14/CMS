@@ -114,7 +114,7 @@ class ZrUser(RowInfo):
 class KYCDetail(RowInfo):
 
     type = models.ForeignKey(to=KYCDocumentType, related_name='all_kyc_details')
-    document_id = models.CharField(max_length=50, null=True)
+    document_id = models.CharField(max_length=50, null=True, blank=True)
     document_link = models.CharField(max_length=512)
     for_user = models.ForeignKey(to=ZrUser, related_name='kyc_details')
     approval_status = models.CharField(max_length=2, choices=KYC_APPROVAL_CHOICES, default=KYC_APPROVAL_CHOICES[0][0])
