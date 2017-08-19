@@ -118,7 +118,7 @@ class KYCDetail(RowInfo):
     document_link = models.CharField(max_length=512)
     for_user = models.ForeignKey(to=ZrUser, related_name='kyc_details')
     approval_status = models.CharField(max_length=2, choices=KYC_APPROVAL_CHOICES, default=KYC_APPROVAL_CHOICES[0][0])
-    by_approved = models.ForeignKey(to=ZrAdminUser, related_name='attached_kyc_details', null=True)
+    by_approved = models.ForeignKey(to=ZrAdminUser, related_name='attached_kyc_details', null=True, blank=True)
     role = models.ForeignKey(to=UserRole, related_name='submitted_kyc_details')
 
     class Meta:
