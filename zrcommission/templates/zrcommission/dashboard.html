@@ -6,24 +6,50 @@
 
 {% block content %}
 
-<div class="content-wrapper">
+<div class="content-wrapper py-2" style="padding-left: 0.5rem; padding-right: 4rem">
     <p class="head-right">Commissions</p>
+    <div class="row" style="position: relative;">
+        <p class="head-bg">My Commission Balance:</p>
+    </div>
+    <div class="row">
+        <div class="d-flex justify-content-between resize">
+            <p class="inr">INR 24,576</p>
+            <input class="button red resize" type="button" value="REQUEST CREDIT">
+        </div>
+        <!-- <div class="col-md-3 margin-top">
+            <p class="inr">INR 24,576</p>
+        </div>
+        <div class="col-md-3 margin-top">
+            <input class="button red small" type="button" value="REQUEST CREDIT">
+        </div> -->
+    </div>
+
     <div class="row rm-margin-side">
         <p class="head-left">PERIOD</p>
     </div>
-    <div class="row">
-        <div class="d-flex justify-content-between" style="width:90%" >
+    <div class="row" style="padding: 0rem 1.5rem 0rem 3.5rem;">
+        <div class="d-flex justify-content-between" style="width:100%" >
         <!-- <div class="col-md-6 pad-0"> -->
         <!-- <div class="row pad-0"> -->
             <!-- <div class="col-md-4 pad-0"> -->
-                <select>
-                    <option>Today</option>
-                    <option>Last Week</option>
-                    <option>Last Month</option>
-                </select>
+                <!--<select>-->
+                    <!--<option>Last Week</option>-->
+                <!--</select>-->
+            <div class="card card-inverse o-hidden h-100" style="height: 36px !important;width: 235px;">
+                        <div class="card-block lightGrayBG blackTextColor">
+                                <div class="periodEntry">
+                                Last Week
+                                <i class="fa fa-calendar per-ft-r"></i>
+                                    <i class="fa fa-chevron-down per-ft-down"></i>
+                                </div>
+                        </div>
+                    </div>
             <!-- </div> -->
             <!-- <div class="col-md-4 pad-0"> -->
-                <input class="search" type="search" name="search" placeholder="search">
+            <div style="position: relative;">
+                <input class="search" type="search" name="search" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+            </div>
             <!-- </div> -->
         <!-- </div> -->
         <!-- </div> -->
@@ -48,25 +74,194 @@
     <div class="row scroll">
 
         <div class="divTable" style="width: 100%;" >
-            <div class="divTableBody">
-                <div class="divTableRow">
-                    <div class="divTableHead" style="color:#DB3725;">my commission after TDS</div>
-                    <div class="divTableHead">Merchant commission</div>
-                    <div class="divTableHead">Merchant ID</div>
-                    <div class="divTableHead">name</div>
-                </div>
-                <div class="divTableRow">
-                    <div class="divTableCell line">23</div>
-                    <div class="divTableCell line">12</div>
-                    <div class="divTableCell line">zyx</div>
-                    <div class="divTableCell line">merhcant 1</div>
-                </div>
-                <div class="divTableRow">
-                    <div class="divTableCell">&nbsp;</div>
-                    <div class="divTableCell">&nbsp;</div>
-                    <div class="divTableCell">&nbsp;</div>
-                    <div class="divTableCell">&nbsp;</div>
-                </div>
+            <div id="constrainer">
+            <div class="scrolltable">
+                <table class='header'>
+                    <thead>
+                        <th style="color:#DB3725;">My Commission After TDS</th>
+                        <th>Merchant commission</th>
+                        <th>Merchant ID</th>
+                        <th>Name</th>
+                        <th>Dispute</th>
+                    </thead>
+                </table>
+       <div class="body">
+           <table style="width: 100%">
+               <tbody>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td><input type="button" class="button green" value="Raise" style="height: 23px;font-size: 11px;"></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td><input type="button" class="button green" value="Raise" style="height: 23px;font-size: 11px;"></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+               </tbody>
+           </table>
+       </div>
+       </div>
             </div>
         </div>
 

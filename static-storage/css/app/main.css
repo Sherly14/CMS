@@ -124,6 +124,10 @@ body {
 }
 .button.red{
     background-color: #DB3725;
+    box-shadow: 0 10px 27px 0 rgba(0, 0, 0, 0.13);
+    font-family: sans-serif;
+    font-weight: 100;
+    border-radius: 3px;
 }
 
 .button.downloadcsv{
@@ -136,6 +140,10 @@ body {
 
 .button.green{
     background-color: green;
+    font-family: sans-serif;
+    font-weight: 100;
+    border-radius: 3px;
+    box-shadow: 0 10px 27px 0 rgba(0, 0, 0, 0.13);
 }
 .button.yellow{
     background-color: #F3A01C;
@@ -225,7 +233,7 @@ body {
 
 /* style for shadow for input*/
 .dflex.button.yellow{
-    padding:0px;   
+    padding:0px;
 }
 
 .fa.button{
