@@ -54,7 +54,7 @@ class Transaction(RowInfo):
     vendor_txn_id = models.CharField(max_length=128)
     txn_id = models.CharField(max_length=128)
 
-    customer = models.CharField(max_length=256, null=True, blank=True)
+    customer = models.CharField(max_length=256)
     beneficiary = models.CharField(max_length=256, null=True, blank=True)
     user = models.ForeignKey(to=ZrUser, related_name='transactions_list')
     transaction_request_json = JSONField(null=True, blank=True)

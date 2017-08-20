@@ -151,6 +151,7 @@ class BankDetail(RowInfo):
     bank_name = models.CharField(max_length=20, null=True, blank=True)
     bank_city = models.CharField(max_length=256, null=True, blank=True)
     for_user = models.ForeignKey(to=ZrUser, null=True, blank=True)
+    is_verified = models.BooleanField(default=False)
 
     class Meta:
         verbose_name_plural = 'BankDetails'

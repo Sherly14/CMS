@@ -39,6 +39,8 @@ class SenderBeneficiary(RowInfo):
     sender = models.ForeignKey(to=ZrUser, related_name='beneficiary_mappings')
     beneficiary = models.ForeignKey(to=ZrUser, related_name='sender_mapping')
     is_active = models.BooleanField(default=False)
+    eko_sender_id = models.CharField(max_length=255, null=True, blank=True)
+    eko_beneficiary_id = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
         verbose_name_plural = 'SenderBeneficiaryMappings'
