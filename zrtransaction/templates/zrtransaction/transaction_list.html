@@ -18,7 +18,10 @@
                     <option>Last Week</option>
                     <option>Last Month</option>
                 </select>
-                <input class="search" type="search" name="search" placeholder="search">
+                <div style="position: relative;">
+                    <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                    <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                </div>
                 <input class="button red" type="button" value="DOWNLOAD CSV">
             </div>
         </div>

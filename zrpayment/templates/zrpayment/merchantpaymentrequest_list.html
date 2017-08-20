@@ -16,7 +16,10 @@
                     <option value="last_week" {% if filter_by == "last_week" %} selected {% endif %}>Last Week</option>
                     <option value="last_month" {% if filter_by == "last_month" %} selected {% endif %}>Last Month</option>
                 </select>
-                <input class="search" id="search-txt" type="search" name="search" placeholder="search" value="{% if q %}{{ q }}{% endif %}">
+                <div style="position: relative;">
+                    <input class="search" id="search-txt" type="search" name="search" value="{% if q %}{{ q }}{% endif %}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                    <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                </div>
                 <input type="button" id="search-btn" class="button red" value="Search">
                 <input class="button red" type="button" value="DOWNLOAD CSV" id="download-csv" >
             </div>
