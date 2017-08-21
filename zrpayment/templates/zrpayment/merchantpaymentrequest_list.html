@@ -60,7 +60,7 @@
                                 </td>
                                 <td>{{ payment_request.merchant.id }}</td>
                                 <td>{{ payment_request.merchant_ref_no }}</td>
-                                {% if request.user.is_superuser %}
+                                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
                                     {% if payment_request.is_admin_approved == None %}
                                         <td><input type="button" class="button green payment" value="Approve" onclick="approve_payment_req({{ payment_request.pk }})"></td>
                                     {% elif payment_request.is_admin_approved == False %}

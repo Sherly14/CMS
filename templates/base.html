@@ -43,13 +43,13 @@
         <a class="navbar-brand" href="#">Zrupee</a>
         <div class="collapse navbar-collapse" id="navbarExample">
             <ul class="sidebar-nav navbar-nav">
-                {% if request.user.is_superuser %}
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF"%}
                 <li class="nav-item ">
                     <a class="nav-link textAlignRight" href="{% url 'user:distributor-list' %}">Distributors</a>
                 </li>
                 {% endif %}
 
-                {% if request.user.zr_admin_user.role.name == "CHECKER" or request.user.is_superuser %}
+                {% if request.user.zr_admin_user.role.name == "CHECKER" or request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
                 <li class="nav-item ">
                     <a class="nav-link textAlignRight" href="{% url 'user:kyc-requests' %}">KYC Requests</a>
                 </li>
@@ -89,13 +89,13 @@
                     <a class="nav-link wheatTextColor" href="{% url 'user:dashboard' %}">Dashboard</a>
                 </li>
 
-                {% if request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.is_superuser %}
+                {% if request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF"%}
                 <li class="nav-item leftMargin headerText">
                     <a class="nav-link wheatTextColor" href="{% url 'user:merchant-create' %}">Add Merchant</a>
                 </li>
                 {% endif %}
 
-                {% if request.user.is_superuser %}
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
                 <li class="nav-item leftMargin headerText">
                     <a class="nav-link wheatTextColor" href="{% url 'user:distributor-create' %}">Add Distributor</a>
                 </li>

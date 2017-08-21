@@ -30,6 +30,7 @@ from utils import constants
 MERCHANT = 'MERCHANT'
 DISTRIBUTOR = 'DISTRIBUTOR'
 BENEFICIARY = 'BENEFICIARY'
+ADMINSTAFF = 'ADMINSTAFF'
 
 
 def login_view(request):
@@ -53,7 +54,7 @@ def get_merchant_qs(request):
     q = request.GET.get('q')
     filter = request.GET.get('filter')
 
-    if request.user.is_superuser:
+    if request.user.is_superuser or request.user.zr_admin_user.role.name == ADMINSTAFF:
         if q:
             queryset = queryset.filter(
                 first_name__contains=q,
@@ -155,7 +156,7 @@ class MerchantListView(ListView):
         if filter:
             context['filter_by'] = filter
 
-        if self.request.user.is_superuser:
+        if self.request.user.is_superuser or self.request.user.zr_admin_user.role.name == ADMINSTAFF:
             activate = self.request.GET.get('activate')
             disable = self.request.GET.get('disable')
 
@@ -581,7 +582,7 @@ class MerchantCreateView(View):
         distributor = None
         if request.user.zr_admin_user.role.name == DISTRIBUTOR:
             distributor = request.user.zr_admin_user.zr_user
-        elif request.user.is_superuser:
+        elif request.user.is_superuser or request.user.zr_admin_user.role.name == ADMINSTAFF:
             distributor = ZrUser.objects.filter(first_name='zuser').last()
             if not distributor:
                 raise Exception("Default distributor zuser not found in database")

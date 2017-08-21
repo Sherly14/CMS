@@ -24,9 +24,9 @@ def get_merchant_payment_qs(request):
     q = request.GET.get('q')
 
     queryset = []
-    if request.user.is_superuser:
+    if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF":
         queryset = MerchantPaymentRequest.objects.all()
-    elif request.user.zr_admin_user.role == 'DISTRIBUTOR':
+    elif request.user.zr_admin_user.role.name == 'DISTRIBUTOR':
         queryset = MerchantPaymentRequest.objects.filter(
             distributor=request.user.zr_admin_user
         )
@@ -101,7 +101,7 @@ class MerchantPaymentRequestListView(ListView):
         q = self.request.GET.get('q')
 
         if payment_approved:
-            if self.request.user.is_superuser:
+            if self.request.user.is_superuser or self.request.user.zr_admin_user.role.name == 'ADMINSTAFF':
                 MerchantPaymentRequest.objects.filter(
                     id=payment_approved
                 ).update(
