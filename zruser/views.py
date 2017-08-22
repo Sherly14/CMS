@@ -471,7 +471,7 @@ class DistributorCreateView(CreateView):
 
         merchant_zr_user = merchant_form.save(commit=False)
         merchant_zr_user.role = UserRole.objects.filter(name=DISTRIBUTOR).last()
-        password = '%s%s' % (merchant_zr_user.pan_no.lower(), merchant_zr_user.first_name[:4].lower())
+        password = '%s%s' % (merchant_zr_user.pan_no.lower().strip(), merchant_zr_user.first_name[:4].lower().strip())
         merchant_zr_user.pass_word = password
         merchant_zr_user.save()
 
