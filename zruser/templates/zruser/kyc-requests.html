@@ -48,24 +48,24 @@
                     </tr>
                     {% for kyc_req in object_list %}
                     <tr>
-                        <th>{{ kyc_req.first_name }} {% if kyc_req.last_name %}{{ kyc_req.last_name }}{% endif %} </th>
-                        <th>{{ kyc_req.role.name }}</th>
-                        <th>{{ kyc_req.at_created|date:"d/m/Y" }}</th>
+                        <td>{{ kyc_req.first_name }} {% if kyc_req.last_name %}{{ kyc_req.last_name }}{% endif %} </td>
+                        <td>{{ kyc_req.role.name }}</td>
+                        <td>{{ kyc_req.at_created|date:"d/m/Y" }}</td>
                         {% for kyc in kyc_req.kyc_details.all %}
-                            <th><a href="{{ kyc.get_download_url }}">Download</a></th>
-                            <th>{{ kyc.type }}</th>
+                            <td><a href="{{ kyc.get_download_url }}">Download</a></td>
+                            <td>{{ kyc.type }}</td>
                         {% endfor %}
                         {% if kyc_req.kyc_details.all.count == 1 %}
-                            <th></th>
-                            <th></th>
+                            <td></td>
+                            <td></td>
                         {% endif %}
                         {% if kyc_req.kyc_details.all.count == 0 %}
-                            <th></th>
-                            <th></th>
-                            <th></th>
-                            <th></th>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
                         {% endif %}
-                        <th>
+                        <td>
                             {% if kyc_req.kyc_details.last.approval_status == 'I' %}
                                 In Process
                             {% elif kyc_req.kyc_details.last.approval_status == 'A' %}
@@ -73,13 +73,13 @@
                             {% elif kyc_req.kyc_details.last.approval_status == 'R' %}
                                 Rejected
                             {% endif %}
-                        </th>
-                        <th>
+                        </td>
+                        <td>
                             {% if kyc_req.kyc_details.all.count %}
                                 <a href='{% url "user:kyc-requests" %}?approve={{ kyc_req.id }}'>Approve</a>
                                 <a href='{% url "user:kyc-requests" %}?reject={{ kyc_req.id }}'>Reject</a>
                             {% endif %}
-                        </th>
+                        </td>
                     </tr>
                     {% endfor %}
                 </table>

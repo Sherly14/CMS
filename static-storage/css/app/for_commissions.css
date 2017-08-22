@@ -246,7 +246,15 @@ p i.fa{
 	width: 100%;
 }
 
-th, td {
+td {
+    padding-left: 20px;
+    text-align: right;
+	font-size: 12px;
+	padding-top: 15px;
+}
+
+th {
+    border-bottom: 1px solid black;
     padding-left: 20px;
     text-align: right;
 	font-size: 12px;
