@@ -1,3 +1,7 @@
+* {
+    font-family: 'Open Sans', sans-serif;
+}
+
 input[type="text"]{
     display:block;
     box-shadow: 2px 5px 11px #f3f1f1;
