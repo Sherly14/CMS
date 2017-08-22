@@ -31,7 +31,6 @@ from utils import constants
 MERCHANT = 'MERCHANT'
 DISTRIBUTOR = 'DISTRIBUTOR'
 BENEFICIARY = 'BENEFICIARY'
-ADMINSTAFF = 'ADMINSTAFF'
 
 
 def login_view(request):
