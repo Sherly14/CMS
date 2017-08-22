@@ -11,7 +11,9 @@ from django.core.paginator import Paginator, PageNotAnInteger
 from django.http import HttpResponse
 
 from zrpayment.models import MerchantPaymentRequest
+from zrwallet import models as zrwallet_models
 from common_utils.date_utils import last_month, last_week_range
+from common_utils.user_utils import is_user_superuser
 
 
 class MerchantPaymentRequestDetailView(DetailView):
@@ -24,7 +26,7 @@ def get_merchant_payment_qs(request):
     q = request.GET.get('q')
 
     queryset = []
-    if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF":
+    if is_user_superuser(request):
         queryset = MerchantPaymentRequest.objects.all()
     elif request.user.zr_admin_user.role.name == 'DISTRIBUTOR':
         queryset = MerchantPaymentRequest.objects.filter(
@@ -101,12 +103,25 @@ class MerchantPaymentRequestListView(ListView):
         q = self.request.GET.get('q')
 
         if payment_approved:
-            if self.request.user.is_superuser or self.request.user.zr_admin_user.role.name == 'ADMINSTAFF':
-                MerchantPaymentRequest.objects.filter(
-                    id=payment_approved
-                ).update(
-                    is_admin_approved=True
-                )
+            if is_user_superuser(self.request):
+                merchant_payment_request = MerchantPaymentRequest.objects.filter(id=payment_approved).last()
+                if merchant_payment_request:
+                    merchant_payment_request.is_admin_approved = True
+                    merchant_payment_request.save(update_fields=['is_admin_approved'])
+
+                    zr_wallet, _ = zrwallet_models.Wallet.objects.get_or_create(
+                        merchant=MerchantPaymentRequest.objects.get(
+                            id=payment_approved
+                        ).merchant
+                    )
+                    zr_wallet.dmt_balance += merchant_payment_request.dmt_amount
+                    zr_wallet.non_dmt_balance += merchant_payment_request.non_dmt_amount
+                    zr_wallet.save(
+                        update_fields=[
+                            'dmt_balance',
+                            'non_dmt_balance'
+                        ]
+                    )
             elif self.request.user.zr_admin_user.role.name == 'DISTRIBUTOR':
                 MerchantPaymentRequest.objects.filter(
                     id=payment_approved

@@ -22,6 +22,7 @@ from django.shortcuts import redirect
 
 from zruser import forms as zr_user_form
 from zruser.models import ZrUser, UserRole, ZrAdminUser, KYCDocumentType, KYCDetail
+from zrwallet import models as zrwallet_models
 from zrmapping import models as zrmappings_models
 from common_utils.date_utils import last_month, last_week_range
 from common_utils.user_utils import is_user_superuser
@@ -156,7 +157,7 @@ class MerchantListView(ListView):
         if filter:
             context['filter_by'] = filter
 
-        if is_user_superuser(request):
+        if is_user_superuser(self.request):
             activate = self.request.GET.get('activate')
             disable = self.request.GET.get('disable')
 
@@ -604,5 +605,6 @@ class MerchantCreateView(View):
                 role=merchant_zr_user.role
             )
 
+        zrwallet_models.Wallet.objects.create(merchant=merchant_zr_user)
         #TODO: Update below url resolution to reverse.
         return HttpResponseRedirect('/user/merchant_list/')
