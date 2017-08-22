@@ -52,7 +52,7 @@
                         <th>{{ kyc_req.role.name }}</th>
                         <th>{{ kyc_req.at_created|date:"d/m/Y" }}</th>
                         {% for kyc in kyc_req.kyc_details.all %}
-                            <th><a href="{{ kyc.get_download_url }}">Url</a></th>
+                            <th><a href="{{ kyc.get_download_url }}">Download</a></th>
                             <th>{{ kyc.type }}</th>
                         {% endfor %}
                         {% if kyc_req.kyc_details.all.count == 1 %}
