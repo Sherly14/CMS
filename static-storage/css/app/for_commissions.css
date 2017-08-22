@@ -19,6 +19,7 @@ p.head-right{
     font-size: 25px;
     font-weight: 100;
     letter-spacing: 0.1rem;
+    padding-right: 50px;
 }
 p.head-left{
 	font-size: 1em;
@@ -151,6 +152,7 @@ p.head-bg2{
 	background-clip:content-box;
 	background-color: #F4F3F3;
 	height:400px;
+    padding-right: 50px;
 }
 /*scroll bar styling &&stillneedswork*/
 
@@ -245,7 +247,8 @@ p i.fa{
 }
 
 th, td {
-    text-align: center;
-	font-size: 14px;
+    padding-left: 20px;
+    text-align: right;
+	font-size: 12px;
 	padding-top: 15px;
 }
