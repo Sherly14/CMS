@@ -24,6 +24,7 @@ from zruser import forms as zr_user_form
 from zruser.models import ZrUser, UserRole, ZrAdminUser, KYCDocumentType, KYCDetail
 from zrmapping import models as zrmappings_models
 from common_utils.date_utils import last_month, last_week_range
+from common_utils.user_utils import is_user_superuser
 from utils import constants
 
 
@@ -54,7 +55,7 @@ def get_merchant_qs(request):
     q = request.GET.get('q')
     filter = request.GET.get('filter')
 
-    if request.user.is_superuser or request.user.zr_admin_user.role.name == ADMINSTAFF:
+    if is_user_superuser(request):
         if q:
             queryset = queryset.filter(
                 first_name__contains=q,
@@ -118,7 +119,7 @@ def get_merchant_csv(request):
     ])
 
     for merchant in page.object_list:
-        if not request.user.is_superuser:
+        if not is_user_superuser(request):
             merchant = merchant.merchant
 
         writer.writerow(
@@ -156,7 +157,7 @@ class MerchantListView(ListView):
         if filter:
             context['filter_by'] = filter
 
-        if self.request.user.is_superuser or self.request.user.zr_admin_user.role.name == ADMINSTAFF:
+        if is_user_superuser(request):
             activate = self.request.GET.get('activate')
             disable = self.request.GET.get('disable')
 
@@ -582,7 +583,7 @@ class MerchantCreateView(View):
         distributor = None
         if request.user.zr_admin_user.role.name == DISTRIBUTOR:
             distributor = request.user.zr_admin_user.zr_user
-        elif request.user.is_superuser or request.user.zr_admin_user.role.name == ADMINSTAFF:
+        elif is_user_superuser(request):
             distributor = ZrUser.objects.filter(first_name='zuser').last()
             if not distributor:
                 raise Exception("Default distributor zuser not found in database")
