@@ -11,7 +11,7 @@ class DistributorMerchant(RowInfo):
 
     distributor = models.ForeignKey(to=ZrUser, related_name='all_merchant_mappings')
     merchant = models.ForeignKey(to=ZrUser, related_name='distributor_mappings')
-    is_attaches_to_admin = models.BooleanField(default=False)
+    is_attached_to_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
 
     class Meta:
@@ -60,4 +60,33 @@ class MerchantBeneficiary(RowInfo):
 
     def __unicode__(self):
         return '%s - %s' % (self.merchant, self.beneficiary)
+
+
+class SubDistributorMerchant(RowInfo):
+
+    sub_distributor = models.ForeignKey(to=ZrUser, related_name='merchant_sub_mappings')
+    merchant = models.ForeignKey(to=ZrUser, related_name='sub_distributor_mappings')
+    is_attached_to_admin = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name_plural = 'SubDistributorMerchantMappings'
+
+    def __unicode__(self):
+        return '%s - %s' % (self.sub_distributor, self.merchant)
+
+
+class DistributorSubDistributor(RowInfo):
+
+    distributor = models.ForeignKey(to=ZrUser, related_name='sub_dist_dist_mappings')
+    sub_distributor = models.ForeignKey(to=ZrUser, related_name='dist_sub_dist_mappings')
+    is_attached_to_admin = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name_plural = 'DistributorSubDistributorMappings'
+
+    def __unicode__(self):
+        return '%s - %s' % (self.distributor, self.sub_distributor)
+
 
