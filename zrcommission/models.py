@@ -5,6 +5,7 @@ from decimal import Decimal
 
 from django.db import models
 
+from zrcommission.utils.constants import COMMISSION_CHOICES
 from zrtransaction.models import Transaction, TransactionType, Vendor
 from zruser.models import ZrUser
 from zrutils.common.modelutils import RowInfo
@@ -37,24 +38,25 @@ class Commission(RowInfo):
         return '%s - zrupee_commission com%s' % (self.transaction, self.zrupee_commission)
 
 
-class CommissionPercentage(RowInfo):
+class CommissionStructure(RowInfo):
 
-    distributor = models.ForeignKey(to=ZrUser, related_name='commission_percentage')
+    distributor = models.ForeignKey(to=ZrUser, related_name='commission_structures')
     transaction_type = models.ForeignKey(to=TransactionType)
     transaction_vendor = models.ForeignKey(to=Vendor)
-    distributor_percentage = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
-    merchant_percentage = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
-    zrupee_percentage = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
+    commission_type = models.CharField(max_length=2, choices=COMMISSION_CHOICES)
+    for_distributor = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
+    for_merchant = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
+    for_zrupee = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
 
     def save(self, *args, **kwargs):
-        self.merchant_commission = Decimal(self.merchant_commission).quantize(Decimal("0.00"))
-        self.distributor_commission = Decimal(self.distributor_commission).quantize(Decimal("0.00"))
-        self.zrupee_percentage = Decimal(self.zrupee_percentage).quantize(Decimal("0.00"))
+        self.for_merchant = Decimal(self.for_merchant).quantize(Decimal("0.00"))
+        self.for_distributor = Decimal(self.for_distributor).quantize(Decimal("0.00"))
+        self.for_zrupee = Decimal(self.for_zrupee).quantize(Decimal("0.00"))
 
-        super(CommissionPercentage, self).save(*args, **kwargs)
+        super(CommissionStructure, self).save(*args, **kwargs)
 
     class Meta:
-        verbose_name_plural = 'CommissionPercentages'
+        verbose_name_plural = 'CommissionStructures'
 
     def __unicode__(self):
-        return '%s - distributor_commission %s' % (self.distributor, self.distributor_commission)
+        return '%s - distributor_commission %s' % (self.distributor, self.for_zrupee)
