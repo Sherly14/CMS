@@ -6,7 +6,7 @@ from decimal import Decimal
 from django.db import models
 
 from zrcommission.utils.constants import COMMISSION_CHOICES
-from zrtransaction.models import Transaction, TransactionType, Vendor
+from zrtransaction.models import Transaction, TransactionType, Vendor, ServiceProvider
 from zruser.models import ZrUser
 from zrutils.common.modelutils import RowInfo
 
@@ -16,18 +16,38 @@ from zrutils.common.modelutils import RowInfo
 class Commission(RowInfo):
 
     transaction = models.ForeignKey(to=Transaction, related_name='commissions')
-    merchant = models.ForeignKey(to=ZrUser, null=True, blank=True, related_name='merchant_commission')
-    distributor = models.ForeignKey(to=ZrUser, null=True, blank=True, related_name='distributor_commission')
-    merchant_commission = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
-    distributor_commission = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
-    zrupee_commission = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
-    government_tax = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+
+    merchant = models.ForeignKey(to=ZrUser, null=True, blank=True, related_name='merchant_commissions')
+    distributor = models.ForeignKey(to=ZrUser, null=True, blank=True, related_name='distributor_commissions')
+    sub_distributor = models.ForeignKey(to=ZrUser, null=True, blank=True, related_name='sub_distributor_commissions')
+
+    merchant_commission = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    distributor_commission = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    sub_distributor_commission = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+
+    merchant_tds = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
+    distributor_tds = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
+    sub_distributor_tds = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
+
+    merchant_gst = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
+    distributor_gst = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
+    sub_distributor_gst = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
+
+    zrupee_commission = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     def save(self, *args, **kwargs):
-        self.distributor_commission = Decimal(self.distributor_commission).quantize(Decimal("0.00"))
-        self.merchant_commission = Decimal(self.merchant_commission).quantize(Decimal("0.00"))
+        self.merchant_commission = Decimal(self.distributor_commission).quantize(Decimal("0.00"))
+        self.distributor_commission = Decimal(self.merchant_commission).quantize(Decimal("0.00"))
+        self.sub_distributor_commission = Decimal(self.zrupee_commission).quantize(Decimal("0.00"))
         self.zrupee_commission = Decimal(self.zrupee_commission).quantize(Decimal("0.00"))
-        self.government_tax = Decimal(self.government_tax).quantize(Decimal("0.00"))
+
+        self.merchant_tds = Decimal(self.merchant_tds).quantize(Decimal("0.0000"))
+        self.distributor_tds = Decimal(self.distributor_tds).quantize(Decimal("0.0000"))
+        self.sub_distributor_tds = Decimal(self.sub_distributor_tds).quantize(Decimal("0.0000"))
+
+        self.merchant_gst = Decimal(self.merchant_gst).quantize(Decimal("0.0000"))
+        self.distributor_gst = Decimal(self.distributor_gst).quantize(Decimal("0.0000"))
+        self.sub_distributor_gst = Decimal(self.sub_distributor_gst).quantize(Decimal("0.0000"))
 
         super(Commission, self).save(*args, **kwargs)
 
@@ -38,25 +58,62 @@ class Commission(RowInfo):
         return '%s - zrupee_commission com%s' % (self.transaction, self.zrupee_commission)
 
 
-class CommissionStructure(RowInfo):
+class BillPayCommissionStructure(RowInfo):
 
     distributor = models.ForeignKey(to=ZrUser, related_name='commission_structures')
     transaction_type = models.ForeignKey(to=TransactionType)
     transaction_vendor = models.ForeignKey(to=Vendor)
+    service_provider = models.ForeignKey(to=ServiceProvider)
     commission_type = models.CharField(max_length=2, choices=COMMISSION_CHOICES)
-    for_distributor = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
-    for_merchant = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
-    for_zrupee = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
+    net_margin = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
+    commission_for_zrupee = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
+    commission_for_distributor = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
+    commission_for_sub_distributor = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
+    commission_for_merchant = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
+    tds_value = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
+    is_chargable = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        self.for_merchant = Decimal(self.for_merchant).quantize(Decimal("0.00"))
-        self.for_distributor = Decimal(self.for_distributor).quantize(Decimal("0.00"))
-        self.for_zrupee = Decimal(self.for_zrupee).quantize(Decimal("0.00"))
+        self.commission_for_zrupee = Decimal(self.commission_for_zrupee).quantize(Decimal("0.00"))
+        self.commission_for_distributor = Decimal(self.commission_for_distributor).quantize(Decimal("0.00"))
+        self.commission_for_merchant = Decimal(self.commission_for_merchant).quantize(Decimal("0.00"))
+        self.commission_for_sub_distributor = Decimal(self.commission_for_sub_distributor).quantize(Decimal("0.00"))
 
-        super(CommissionStructure, self).save(*args, **kwargs)
+        super(BillPayCommissionStructure, self).save(*args, **kwargs)
 
     class Meta:
-        verbose_name_plural = 'CommissionStructures'
+        verbose_name_plural = 'BillPayCommissionStructure'
 
     def __unicode__(self):
         return '%s - distributor_commission %s' % (self.distributor, self.for_zrupee)
+
+
+class DMTCommissionStructure(RowInfo):
+
+    distributor = models.ForeignKey(to=ZrUser, related_name='dmt_commission_structures')
+    transaction_type = models.ForeignKey(to=TransactionType)
+    transaction_vendor = models.ForeignKey(to=Vendor)
+    service_provider = models.ForeignKey(to=ServiceProvider)
+    commission_type = models.CharField(max_length=2, choices=COMMISSION_CHOICES)
+    net_margin = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
+    commission_for_zrupee = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
+    commission_for_distributor = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
+    commission_for_sub_distributor = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
+    commission_for_merchant = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
+    tds_value = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
+    is_chargable = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        self.commission_for_zrupee = Decimal(self.commission_for_zrupee).quantize(Decimal("0.00"))
+        self.commission_for_distributor = Decimal(self.commission_for_distributor).quantize(Decimal("0.00"))
+        self.commission_for_merchant = Decimal(self.commission_for_merchant).quantize(Decimal("0.00"))
+        self.commission_for_sub_distributor = Decimal(self.commission_for_sub_distributor).quantize(Decimal("0.00"))
+
+        super(DMTCommissionStructure, self).save(*args, **kwargs)
+
+    class Meta:
+        verbose_name_plural = 'DMTCommissionStructure'
+
+    def __unicode__(self):
+        return '%s - net margin %s' % (self.distributor, self.net_margin)
+
