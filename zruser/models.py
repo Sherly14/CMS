@@ -93,6 +93,8 @@ class ZrUser(RowInfo):
     pan_no = models.CharField(max_length=10, null=True, blank=True)
     gstin = models.CharField(max_length=20, null=True, blank=True)
 
+    UPIID = models.CharField(max_length=256, null=True, blank=True)
+
     def save(self, *args, **kwargs):
         # self.pass_word = make_password(self.pass_word)
 

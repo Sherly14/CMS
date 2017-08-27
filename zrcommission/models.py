@@ -101,6 +101,7 @@ class DMTCommissionStructure(RowInfo):
     commission_for_sub_distributor = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
     commission_for_merchant = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
     tds_value = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
+    gst_value = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
     is_chargable = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):

@@ -60,6 +60,8 @@ class Transaction(RowInfo):
     transaction_request_json = JSONField(null=True, blank=True)
     transaction_response_json = JSONField(null=True, blank=True)
 
+    additional_charges = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+
     def save(self, *args, **kwargs):
         self.amount = Decimal(self.amount).quantize(Decimal("0.00"))
         super(Transaction, self).save(*args, **kwargs)
