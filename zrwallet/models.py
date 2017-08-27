@@ -32,3 +32,32 @@ class Wallet(RowInfo):
         self.non_dmt_balance = Decimal(self.non_dmt_balance).quantize(Decimal("0.00"))
 
         super(Wallet, self).save(*args, **kwargs)
+
+
+# Create your models here.
+
+class WalletTransactions(RowInfo):
+
+    wallet = models.ForeignKey(to=Wallet, related_name='transactions')
+    dmt_final_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+    dmt_initial_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+
+    non_dmt_initial_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+    non_dmt_final_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+
+    is_success = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name_plural = 'Wallets'
+
+    def get_total_balance(self):
+        return self.dmt_balance + self.non_dmt_balance
+
+    def __unicode__(self):
+        return '%s - %s' % (self.merchant, self.get_total_balance())
+
+    def save(self, *args, **kwargs):
+        self.dmt_balance = Decimal(self.dmt_balance).quantize(Decimal("0.00"))
+        self.non_dmt_balance = Decimal(self.non_dmt_balance).quantize(Decimal("0.00"))
+
+        super(Wallet, self).save(*args, **kwargs)
