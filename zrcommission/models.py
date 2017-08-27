@@ -17,37 +17,38 @@ class Commission(RowInfo):
 
     transaction = models.ForeignKey(to=Transaction, related_name='commissions')
 
-    merchant = models.ForeignKey(to=ZrUser, null=True, blank=True, related_name='merchant_commissions')
-    distributor = models.ForeignKey(to=ZrUser, null=True, blank=True, related_name='distributor_commissions')
-    sub_distributor = models.ForeignKey(to=ZrUser, null=True, blank=True, related_name='sub_distributor_commissions')
+    commission_user = models.ForeignKey(to=ZrUser, null=True, blank=True, related_name='all_commissions')
+    # distributor = models.ForeignKey(to=ZrUser, null=True, blank=True, related_name='distributor_commissions')
+    # sub_distributor = models.ForeignKey(to=ZrUser, null=True, blank=True, related_name='sub_distributor_commissions')
 
-    merchant_commission = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    distributor_commission = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    sub_distributor_commission = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    user_commission = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    # distributor_commission = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    # sub_distributor_commission = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
-    merchant_tds = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
-    distributor_tds = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
-    sub_distributor_tds = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
+    user_tds = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
+    # distributor_tds = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
+    # sub_distributor_tds = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
 
-    merchant_gst = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
-    distributor_gst = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
-    sub_distributor_gst = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
-
-    zrupee_commission = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    user_gst = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
+    # distributor_gst = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
+    # sub_distributor_gst = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
+    net_commission = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
+    # zrupee_commission = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     def save(self, *args, **kwargs):
-        self.merchant_commission = Decimal(self.distributor_commission).quantize(Decimal("0.00"))
-        self.distributor_commission = Decimal(self.merchant_commission).quantize(Decimal("0.00"))
-        self.sub_distributor_commission = Decimal(self.zrupee_commission).quantize(Decimal("0.00"))
-        self.zrupee_commission = Decimal(self.zrupee_commission).quantize(Decimal("0.00"))
+        self.user_commission = Decimal(self.user_commission).quantize(Decimal("0.00"))
+        # self.distributor_commission = Decimal(self.merchant_commission).quantize(Decimal("0.00"))
+        # self.sub_distributor_commission = Decimal(self.zrupee_commission).quantize(Decimal("0.00"))
 
-        self.merchant_tds = Decimal(self.merchant_tds).quantize(Decimal("0.0000"))
-        self.distributor_tds = Decimal(self.distributor_tds).quantize(Decimal("0.0000"))
-        self.sub_distributor_tds = Decimal(self.sub_distributor_tds).quantize(Decimal("0.0000"))
+        # self.zrupee_commission = Decimal(self.zrupee_commission).quantize(Decimal("0.00"))
 
-        self.merchant_gst = Decimal(self.merchant_gst).quantize(Decimal("0.0000"))
-        self.distributor_gst = Decimal(self.distributor_gst).quantize(Decimal("0.0000"))
-        self.sub_distributor_gst = Decimal(self.sub_distributor_gst).quantize(Decimal("0.0000"))
+        self.user_tds = Decimal(self.user_tds).quantize(Decimal("0.0000"))
+        # self.distributor_tds = Decimal(self.distributor_tds).quantize(Decimal("0.0000"))
+        # self.sub_distributor_tds = Decimal(self.sub_distributor_tds).quantize(Decimal("0.0000"))
+
+        self.user_gst = Decimal(self.user_gst).quantize(Decimal("0.0000"))
+        # self.distributor_gst = Decimal(self.distributor_gst).quantize(Decimal("0.0000"))
+        # self.sub_distributor_gst = Decimal(self.sub_distributor_gst).quantize(Decimal("0.0000"))
 
         super(Commission, self).save(*args, **kwargs)
 
@@ -55,7 +56,7 @@ class Commission(RowInfo):
         verbose_name_plural = 'Commissions'
 
     def __unicode__(self):
-        return '%s - zrupee_commission com%s' % (self.transaction, self.zrupee_commission)
+        return '%s - zrupee_commission com%s' % (self.transaction, self.net_commission)
 
 
 class BillPayCommissionStructure(RowInfo):
