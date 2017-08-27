@@ -39,25 +39,19 @@ class Wallet(RowInfo):
 class WalletTransactions(RowInfo):
 
     wallet = models.ForeignKey(to=Wallet, related_name='transactions')
-    dmt_final_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
-    dmt_initial_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+    dmt_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
 
-    non_dmt_initial_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
-    non_dmt_final_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
-
+    non_dmt_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     is_success = models.BooleanField(default=False)
 
     class Meta:
-        verbose_name_plural = 'Wallets'
-
-    def get_total_balance(self):
-        return self.dmt_balance + self.non_dmt_balance
+        verbose_name_plural = 'WalletTransactions'
 
     def __unicode__(self):
-        return '%s - %s' % (self.merchant, self.get_total_balance())
+        return '%s' % (self.wallet)
 
     def save(self, *args, **kwargs):
         self.dmt_balance = Decimal(self.dmt_balance).quantize(Decimal("0.00"))
         self.non_dmt_balance = Decimal(self.non_dmt_balance).quantize(Decimal("0.00"))
 
-        super(Wallet, self).save(*args, **kwargs)
+        super(WalletTransactions, self).save(*args, **kwargs)
