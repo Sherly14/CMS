@@ -91,19 +91,14 @@ class BillPayCommissionStructure(RowInfo):
 
 class DMTCommissionStructure(RowInfo):
 
-    distributor = models.ForeignKey(to=ZrUser, related_name='dmt_commission_structures')
-    transaction_type = models.ForeignKey(to=TransactionType)
     transaction_vendor = models.ForeignKey(to=Vendor)
-    service_provider = models.ForeignKey(to=ServiceProvider)
-    commission_type = models.CharField(max_length=2, choices=COMMISSION_CHOICES)
-    net_margin = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
+    customer_fee = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
     commission_for_zrupee = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
     commission_for_distributor = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
     commission_for_sub_distributor = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
     commission_for_merchant = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
     tds_value = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
     gst_value = models.DecimalField(max_digits=3, decimal_places=3, default=0.00)
-    is_chargable = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         self.commission_for_zrupee = Decimal(self.commission_for_zrupee).quantize(Decimal("0.00"))
@@ -117,5 +112,5 @@ class DMTCommissionStructure(RowInfo):
         verbose_name_plural = 'DMTCommissionStructure'
 
     def __unicode__(self):
-        return '%s - net margin %s' % (self.distributor, self.net_margin)
+        return '%s - net margin %s' % (self.transaction_vendor, self.customer_fee)
 
