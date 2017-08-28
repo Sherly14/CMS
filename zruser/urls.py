@@ -2,7 +2,7 @@ from django.conf.urls import url
 from rest_framework.routers import DefaultRouter
 
 from zruser.views import DistributorDetailView, DistributorListView, MerchantListView, MerchantDetailView, \
-    DistributorCreateView, MerchantCreateView, DashBoardView
+    DistributorCreateView, MerchantCreateView, DashBoardView, SubDistributorCreateView
 from zruser.viewsets import MerchantLeadViewSet
 from zruser import views as zr_user_views
 
@@ -18,7 +18,7 @@ urlpatterns += [
     url(r'^distributor_create/$', DistributorCreateView.as_view(), name='distributor-create'),
     url(r'^distributor_csv/$', zr_user_views.download_distributor_list_csv, name="distributor-csv"),
 
-    url(r'^sub_distributor_create/$', DistributorCreateView.as_view(), name='sub-distributor-create'),
+    url(r'^sub_distributor_create/$', SubDistributorCreateView.as_view(), name='sub-distributor-create'),
 
     url(r'^kyc_requests/$', zr_user_views.KYCRequestsView.as_view(), name='kyc-requests'),
 

@@ -31,6 +31,7 @@ from utils import constants
 
 MERCHANT = 'MERCHANT'
 DISTRIBUTOR = 'DISTRIBUTOR'
+SUBDISTRIBUTOR = 'SUBDISTRIBUTOR'
 BENEFICIARY = 'BENEFICIARY'
 
 
@@ -507,11 +508,6 @@ class DistributorCreateView(CreateView):
         #TODO: Update below url resolution to reverse.
         return HttpResponseRedirect('/user/distributor_list/')
 
-    # template_name = 'zruser/add_distributor.html'
-    # form_class = zr_user_form.DistributorForm
-    # queryset = ZrUser.objects.filter(role__name=DISTRIBUTOR)
-    # context_object_name = 'distributor'
-
 
 class MerchantCreateView(View):
     template_name = 'zruser/add_merchant.html'
@@ -607,5 +603,102 @@ class MerchantCreateView(View):
             )
 
         zrwallet_models.Wallet.objects.create(merchant=merchant_zr_user)
-        #TODO: Update below url resolution to reverse.
+        # TODO: Update below url resolution to reverse.
         return HttpResponseRedirect('/user/merchant_list/')
+
+
+class SubDistributorCreateView(CreateView):
+    template_name = 'zruser/add_sub_distributor.html'
+    kyc_doc_types = KYCDocumentType.objects.all().values_list('name', flat=True)
+
+    def get(self, request):
+        merchant_form = zr_user_form.MerchantDistributorForm()
+        bank_detail_form = zr_user_form.BankDetailForm()
+
+        return render(
+            request, self.template_name,
+            {
+                'merchant_form': merchant_form,
+                'bank_detail_form': bank_detail_form,
+                'kyc_doc_types': self.kyc_doc_types
+            }
+        )
+
+    @transaction.atomic
+    def post(self, request):
+        merchant_form = zr_user_form.MerchantDistributorForm(data=request.POST)
+        bank_detail_form = zr_user_form.BankDetailForm(data=request.POST)
+
+        if not merchant_form.is_valid():
+            return render(
+                request, self.template_name,
+                {
+                    'merchant_form': merchant_form,
+                    'bank_detail_form': bank_detail_form,
+                    'kyc_doc_types': self.kyc_doc_types
+                }
+            )
+
+        if not bank_detail_form.is_valid():
+            return render(
+                request, self.template_name,
+                {
+                    'merchant_form': merchant_form,
+                    'bank_detail_form': bank_detail_form,
+                    'kyc_doc_types': self.kyc_doc_types
+                }
+            )
+
+        kyc_docs = []
+        for doc_type in KYCDocumentType.objects.all().values_list('name', flat=True):
+            doc_type_name = doc_type.replace(' ', '-')
+            doc_type_id = '-'.join(['doc_id', doc_type_name])
+
+            if doc_type_name in request.POST:
+                kyc_docs.append(
+                    {
+                        'doc_url': request.POST.get(doc_type_name),
+                        'doc_id': request.POST.get(doc_type_id),
+                        'doc_type': doc_type_name.replace('-', ' ')
+                    }
+                )
+
+        merchant_zr_user = merchant_form.save(commit=False)
+        print merchant_zr_user.__dict__
+        print 'merchant_zr_user.first_name', merchant_zr_user.first_name
+        merchant_zr_user.role = UserRole.objects.filter(name=SUBDISTRIBUTOR).last()
+        password = '%s%s' % (merchant_zr_user.pan_no.lower().strip(), merchant_zr_user.first_name[:3].lower().strip())
+        merchant_zr_user.pass_word = password
+        merchant_zr_user.save()
+
+        dj_user = dj_auth_models.User.objects.create_user(
+            merchant_zr_user.mobile_no,
+            email=merchant_zr_user.email,
+            password=password
+        )
+        bank_detail = bank_detail_form.save()
+        bank_detail.for_user = merchant_zr_user
+        bank_detail.save(update_fields=['for_user'])
+
+        ZrAdminUser.objects.create(
+            id=dj_user,
+            mobile_no=merchant_zr_user.mobile_no,
+            city=merchant_zr_user.city,
+            state=merchant_zr_user.state,
+            pincode=merchant_zr_user.pincode,
+            address=merchant_zr_user.address_line_1,
+            role=merchant_zr_user.role,
+            zr_user=merchant_zr_user
+        )
+
+        for doc in kyc_docs:
+            KYCDetail.objects.create(
+                type=KYCDocumentType.objects.get(name=doc['doc_type']),
+                document_id=doc['doc_id'],
+                document_link=doc['doc_url'],
+                for_user=merchant_zr_user,
+                role=merchant_zr_user.role
+            )
+
+        # TODO: Update below url resolution to reverse.
+        return HttpResponseRedirect('/user/distributor_list/')
