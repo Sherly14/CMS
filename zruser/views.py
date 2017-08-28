@@ -595,6 +595,11 @@ class MerchantCreateView(View):
             distributor = ZrUser.objects.filter(first_name='zuser').last()
             if not distributor:
                 raise Exception("Default distributor zuser not found in database")
+            zrmappings_models.DistributorMerchant.objects.create(
+                distributor=distributor,
+                merchant=merchant_zr_user,
+                is_active=True
+            )
         else:
             raise Exception("Request user must be superuser of distributor")
 
@@ -701,6 +706,17 @@ class SubDistributorCreateView(CreateView):
                 sub_distributor=merchant_zr_user,
                 is_active=True
             )
+        elif is_user_superuser(request):
+            distributor = ZrUser.objects.filter(first_name='zuser').last()
+            if not distributor:
+                raise Exception("Default distributor zuser not found in database")
+            zrmappings_models.DistributorMerchant.objects.create(
+                distributor=distributor,
+                sub_distributor=merchant_zr_user,
+                is_active=True
+            )
+        else:
+            raise Exception("Request user must be superuser of distributor")
 
         for doc in kyc_docs:
             KYCDetail.objects.create(
