@@ -505,7 +505,7 @@ class DistributorCreateView(CreateView):
                 role=merchant_zr_user.role
             )
 
-        #TODO: Update below url resolution to reverse.
+        #  TODO: Update below url resolution to reverse.
         return HttpResponseRedirect('/user/distributor_list/')
 
 
@@ -577,21 +577,26 @@ class MerchantCreateView(View):
         bank_detail.for_user = merchant_zr_user
         bank_detail.save(update_fields=['for_user'])
 
-        distributor = None
         if request.user.zr_admin_user.role.name == DISTRIBUTOR:
             distributor = request.user.zr_admin_user.zr_user
+            zrmappings_models.DistributorMerchant.objects.create(
+                distributor=distributor,
+                merchant=merchant_zr_user,
+                is_active=True
+            )
+        elif request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
+            distributor = request.user.zr_admin_user.zr_user
+            zrmappings_models.SubDistributorMerchant.objects.create(
+                sub_distributor=distributor,
+                merchant=merchant_zr_user,
+                is_active=True
+            )
         elif is_user_superuser(request):
             distributor = ZrUser.objects.filter(first_name='zuser').last()
             if not distributor:
                 raise Exception("Default distributor zuser not found in database")
         else:
             raise Exception("Request user must be superuser of distributor")
-
-        zrmappings_models.DistributorMerchant.objects.create(
-            distributor=distributor,
-            merchant=merchant_zr_user,
-            is_active=True
-        )
 
         for doc in kyc_docs:
             KYCDetail.objects.create(
@@ -664,8 +669,6 @@ class SubDistributorCreateView(CreateView):
                 )
 
         merchant_zr_user = merchant_form.save(commit=False)
-        print merchant_zr_user.__dict__
-        print 'merchant_zr_user.first_name', merchant_zr_user.first_name
         merchant_zr_user.role = UserRole.objects.filter(name=SUBDISTRIBUTOR).last()
         password = '%s%s' % (merchant_zr_user.pan_no.lower().strip(), merchant_zr_user.first_name[:3].lower().strip())
         merchant_zr_user.pass_word = password
@@ -690,6 +693,14 @@ class SubDistributorCreateView(CreateView):
             role=merchant_zr_user.role,
             zr_user=merchant_zr_user
         )
+
+        if request.user.zr_admin_user.role.name == DISTRIBUTOR:
+            distributor = request.user.zr_admin_user.zr_user
+            zrmappings_models.DistributorSubDistributor.objects.create(
+                distributor=distributor,
+                sub_distributor=merchant_zr_user,
+                is_active=True
+            )
 
         for doc in kyc_docs:
             KYCDetail.objects.create(
