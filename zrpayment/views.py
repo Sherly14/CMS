@@ -30,14 +30,14 @@ def get_merchant_payment_qs(request):
         queryset = MerchantPaymentRequest.objects.all()
     elif request.user.zr_admin_user.role.name == 'DISTRIBUTOR':
         queryset = MerchantPaymentRequest.objects.filter(
-            distributor=request.user.zr_admin_user
+            supervisor=request.user.zr_admin_user
         )
 
     if q:
         query = Q(
             merchant_payment_mode__name__contains=q
         ) | Q(
-            distributor__first_name__contains=q
+            supervisor__first_name__contains=q
         ) | Q(
             merchant__first_name__contains=q
         )
@@ -122,11 +122,12 @@ class MerchantPaymentRequestListView(ListView):
                             'non_dmt_balance'
                         ]
                     )
-            elif self.request.user.zr_admin_user.role.name == 'DISTRIBUTOR':
+            elif self.request.user.zr_admin_user.role.name == 'DISTRIBUTOR' or \
+                            self.request.user.zr_admin_user.role.name == 'SUBDISTRIBUTOR':
                 MerchantPaymentRequest.objects.filter(
                     id=payment_approved
                 ).update(
-                    is_distributor_approved=True
+                    is_supervisor_approved=True
                 )
 
         context = super(MerchantPaymentRequestListView, self).get_context_data(**kwargs)

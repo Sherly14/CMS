@@ -30,7 +30,7 @@ class PaymentMode(RowInfo):
 class MerchantPaymentRequest(RowInfo):
 
     merchant = models.ForeignKey(to=ZrUser, related_name='merchant_payment_requests')
-    distributor = models.ForeignKey(to=ZrUser, related_name='distributor_payment_requests')
+    supervisor = models.ForeignKey(to=ZrUser, related_name='distributor_payment_requests')
     amount = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     dmt_amount = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     non_dmt_amount = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
@@ -41,7 +41,7 @@ class MerchantPaymentRequest(RowInfo):
     distributor_payment_mode = models.ForeignKey(to=PaymentMode, related_name='distributor_requests',
                                                  null=True, blank=True)
     distributor_ref_no = models.CharField(max_length=20, null=True, blank=True)
-    is_distributor_approved = models.NullBooleanField()
+    is_supervisor_approved = models.NullBooleanField()
     is_admin_approved = models.NullBooleanField()
     comments = models.TextField(max_length=1024, null=True, blank=True)
 
