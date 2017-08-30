@@ -372,7 +372,7 @@ class DistributorListView(ListView):
             zrmappings_models.DistributorMerchant.objects.filter(
                 distributor=zruser
             ).update(
-                is_attaches_to_admin=False
+                is_attached_to_admin=False
             )
             dj_user = zruser.zr_user
             dj_user.is_active = True
@@ -388,7 +388,7 @@ class DistributorListView(ListView):
             zrmappings_models.DistributorMerchant.objects.filter(
                 distributor=zruser
             ).update(
-                is_attaches_to_admin=True
+                is_attached_to_admin=True
             )
             dj_user = zruser.zr_user
             dj_user.is_active = False
