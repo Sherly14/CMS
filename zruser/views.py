@@ -90,7 +90,30 @@ def get_merchant_qs(request):
                 at_created__range=last_week_range()
             )
         elif filter == 'Last-Month':
-            queryset = request.user.zr_admin_user.zr_user.all_merchant_mappings.filter(
+            queryset = queryset.filter(
+                at_created__range=last_month()
+            )
+    elif request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
+        queryset = request.user.zr_admin_user.zr_user.merchant_sub_mappings.filter(
+            is_active=True
+        ).order_by('-at_created')
+        if q:
+            queryset = queryset.filter(
+                merchant__first_name__contains=q,
+            )
+        else:
+            queryset = queryset
+
+        if filter == 'Today':
+            queryset = queryset.filter(
+                at_created__gte=datetime.datetime.now().date()
+            )
+        elif filter == 'Last-Week':
+            queryset = queryset.filter(
+                at_created__range=last_week_range()
+            )
+        elif filter == 'Last-Month':
+            queryset = queryset.filter(
                 at_created__range=last_month()
             )
 

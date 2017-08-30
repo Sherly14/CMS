@@ -80,7 +80,7 @@
             </ul>
             <ul class="navbar-nav">
 
-                <li class="nav-item"><a class="nav-link wheatTextColor headerTextName">{{ request.user.username.upper }} - {{ request.user.zr_admin_user.role }}
+                <li class="nav-item"><a class="nav-link wheatTextColor headerTextName">{{ request.user.username.upper }} - {{ request.user.zr_admin_user.role.name }}
                 </a>
                 </li>
             </ul>
@@ -91,7 +91,7 @@
                     <a class="nav-link wheatTextColor" href="{% url 'user:dashboard' %}">Dashboard</a>
                 </li>
 
-                {% if request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF"%}
+                {% if request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" or request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF"%}
                 <li class="nav-item leftMargin headerText">
                     <a class="nav-link wheatTextColor" href="{% url 'user:merchant-create' %}">Add Merchant</a>
                 </li>
