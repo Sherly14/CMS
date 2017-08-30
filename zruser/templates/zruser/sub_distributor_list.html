@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+
+{% block title %} Sub-Distributors List {% endblock %}
+
+{% block content %}
+
+    <div class="content-wrapper">
+        <p class="head-right">Sub-Distributor Table</p>
+        <div class="row rm-margin-side">
+            <p class="head-left">PERIOD</p>
+        </div>
+        <div class="row">
+            <div class="d-flex justify-content-between" style="width:90%">
+                <select id="period">
+                    <option value="Today" {% if filter_by == "Today" %}selected{% endif %}>Today</option>
+                    <option value="Last Week" {% if filter_by == "Last-Week" %}selected{% endif %}>Last Week</option>
+                    <option value="Last Month" {% if filter_by == "Last-Month" %}selected{% endif %}>Last Month</option>
+                </select>
+                <div style="position: relative;">
+                    <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                    <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                </div>
+                <input class="button red" type="button" value="Search" id="search-btn">
+                <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
+            </div>
+        </div>
+        <br>
+        <div class="row" style="padding-right: 50px;">
+            <div class="fine">
+                <p class="head-bg head-bg2">List of Sub-Distributors</p>
+            </div>
+        </div>
+        <div class="row scroll">
+
+            <div style="width: 100%;">
+                <table>
+                    <tr>
+                        <th>Sub-Distributor Id</th>
+                        <th>Sub-Distributor Name</th>
+                        <th>DOJ</th>
+                        <th>Mobile No</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    {% for subdistributor in queryset %}
+                        <tr>
+{#                            <td>{{ distributor.id }}</td>#}
+{#                            <td>{{ distributor.first_name }} {{ distributor.last_name |default_if_none:""}}</td>#}
+{#                            <td>{{ distributor.state }}</td>#}
+{#                            <td>{{ distributor.email }}</td>#}
+{#                            <td>{{ distributor.is_active }}</td>#}
+{#                            <td>{{ distributor. }}</td>#}
+
+                            <td>{{ subdistributor.id }}</td>
+                            <td>{{ subdistributor.first_name }} {{ subdistributor.last_name|default_if_none:""}}</td>
+                            <td>{{ subdistributor.at_created }}</td>
+                            <td>{{ subdistributor.mobile_no }}</td>
+                            <td>{{ subdistributor.email }}</td>
+                            <td>{% if subdistributor.is_active %}Active{% else %}Inactive{% endif %}</td>
+                            <td>
+                                {% if subdistributor.is_active %}
+                                    <a href='{% url "user:sub-distributor-list" %}?disable={{ subdistributor.id }}'>Disable</a>
+                                {% else %}
+                                    <a href='{% url "user:sub-distributor-list" %}?activate={{ subdistributor.id }}'>Activate</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                    {% endfor %}
+                </table>
+            </div>
+
+            {% if has_prev_page %}
+                <a href="{% url "user:sub-distributor-list" %}?{{prev_page_qs}}" >Prev</a>
+            {% endif %}
+
+            {% if has_next_page %}
+                <a href="{% url "user:sub-distributor-list" %}?{{next_page_qs}}" >Next</a>
+            {% endif %}
+
+        </div>
+        <br>
+
+    </div>
+
+<script>
+    $('#search-btn').click(function(){
+        {% if filter_by %}
+            url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}"
+        {% else %}
+            url = window.location.pathname + "?q=" + $('#search-txt').val()
+        {% endif %}
+        window.location.assign(url)
+    })
+
+    $('#period').change(function() {
+        period_val = $(this).val()
+        url = window.location.pathname + '?filter=' + period_val.replace(' ', '-')
+        {% if q %}
+            url += "&q={{ q }}"
+        {% endif %}
+        window.location.assign(url)
+    })
+
+    $('#csv-download').click(function(){
+        url = "{% url "user:distributor-csv" %}" + window.location.search
+        window.location.assign(url)
+    })
+</script>
+{% endblock %}
