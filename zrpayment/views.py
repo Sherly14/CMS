@@ -30,7 +30,7 @@ def get_merchant_payment_qs(request):
         queryset = MerchantPaymentRequest.objects.all()
     elif request.user.zr_admin_user.role.name == 'DISTRIBUTOR':
         queryset = MerchantPaymentRequest.objects.filter(
-            supervisor=request.user.zr_admin_user
+            supervisor=request.user.zr_admin_user.zr_user
         )
 
     if q:
