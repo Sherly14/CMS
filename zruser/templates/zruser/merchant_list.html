@@ -20,6 +20,7 @@
                     <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
                     <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
                 </div>
+                <a class="nav-link" href="{% url 'user:merchant-list' %}">Reset filters</a>
                 <input class="button red" type="button" value="Search" id="search-btn">
                 <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
             </div>

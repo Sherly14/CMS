@@ -513,6 +513,17 @@ class DistributorCreateView(CreateView):
                     }
                 )
 
+        if not kyc_docs:
+            return render(
+                request, self.template_name,
+                {
+                    'merchant_form': merchant_form,
+                    'bank_detail_form': bank_detail_form,
+                    'kyc_doc_types': self.kyc_doc_types,
+                    'kyc_error': 'KYC details are mandatory'
+                }
+            )
+
         merchant_zr_user = merchant_form.save(commit=False)
         merchant_zr_user.role = UserRole.objects.filter(name=DISTRIBUTOR).last()
         password = '%s%s' % (merchant_zr_user.pan_no.lower().strip(), merchant_zr_user.first_name[:4].lower().strip())
@@ -564,7 +575,7 @@ class MerchantCreateView(View):
             {
                 'merchant_form': merchant_form,
                 'bank_detail_form': bank_detail_form,
-                'kyc_doc_types': self.kyc_doc_types
+                'kyc_doc_types': self.kyc_doc_types,
             }
         )
 
@@ -595,7 +606,7 @@ class MerchantCreateView(View):
                     'merchant_form': merchant_form,
                     'bank_detail_form': bank_detail_form,
                     'kyc_doc_type': None,
-                    'kyc_doc_types': self.kyc_doc_types
+                    'kyc_doc_types': self.kyc_doc_types,
                 }
             )
 
@@ -606,7 +617,18 @@ class MerchantCreateView(View):
                     'merchant_form': merchant_form,
                     'bank_detail_form': bank_detail_form,
                     'document_type_form': document_type_form,
-                    'kyc_doc_types': self.kyc_doc_types
+                    'kyc_doc_types': self.kyc_doc_types,
+                }
+            )
+
+        if not kyc_docs:
+            return render(
+                request, self.template_name,
+                {
+                    'merchant_form': merchant_form,
+                    'bank_detail_form': bank_detail_form,
+                    'kyc_doc_types': self.kyc_doc_types,
+                    'kyc_error': 'KYC details are mandatory',
                 }
             )
 
@@ -715,6 +737,17 @@ class SubDistributorCreateView(CreateView):
                         'doc_type': doc_type_name.replace('-', ' ')
                     }
                 )
+
+        if not kyc_docs:
+            return render(
+                request, self.template_name,
+                {
+                    'merchant_form': merchant_form,
+                    'bank_detail_form': bank_detail_form,
+                    'kyc_doc_types': self.kyc_doc_types,
+                    'kyc_error': 'KYC details are mandatory'
+                }
+            )
 
         merchant_zr_user = merchant_form.save(commit=False)
         merchant_zr_user.role = UserRole.objects.filter(name=SUBDISTRIBUTOR).last()

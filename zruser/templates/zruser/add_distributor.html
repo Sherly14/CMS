@@ -199,7 +199,12 @@
                - </select>
                 <input type="file" id="kyc-file" style="display:none;">
                 <input class="button yellow bg mr-5" type="button" value="upload" id="upload-kyc-btn" onclick="upload_kyc_doc()">
-                <p id="file-err-msg" style="display:none;"></p>
+                <p id="file-err-msg" style="display:none;">
+                    {% if kyc_error %}
+                        <h6 style="color:red">{{ kyc_error }}</h6>
+                    {% endif %}
+                </p>
+
             </div>
             <div class="row margin-top" id="kyc-docs">
             </div>

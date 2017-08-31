@@ -72,7 +72,9 @@ class ZrAdminUser(RowInfo):
 
 class ZrUser(RowInfo):
 
-    mobile_no = models.BigIntegerField(unique=True, null=False, blank=False)
+    mobile_no = models.BigIntegerField(
+        unique=True, null=False, blank=False,
+    )
     first_name = models.CharField(max_length=128)
     last_name = models.CharField(max_length=128, null=True, blank=True)
     pass_word = models.CharField(max_length=256, null=True, blank=True)
@@ -89,8 +91,8 @@ class ZrUser(RowInfo):
     is_active = models.BooleanField(default=True)
     is_kyc_verified = models.BooleanField(default=False)
     is_mobile_verified = models.BooleanField(default=False)
-    business_name = models.CharField(max_length=256, null=True, blank=True)
-    pan_no = models.CharField(max_length=10, null=True, blank=True)
+    business_name = models.CharField(max_length=256)
+    pan_no = models.CharField(max_length=10)
     gstin = models.CharField(max_length=20, null=True, blank=True)
 
     UPIID = models.CharField(max_length=256, null=True, blank=True)

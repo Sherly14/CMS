@@ -7,7 +7,7 @@
 
 
 <div class="content-wrapper py-2" style="padding-left: 0.5rem; padding-right: 4rem">
-    <p class="heading-right">Add a Distributor</p>
+    <p class="heading-right">Add a Sub Distributor</p>
     <div class="container-fluid" style="position: relative;">
         <div class="row">
             <p class="heading-bg">PERSONAL DETAILS:</p>
@@ -199,7 +199,11 @@
                - </select>
                 <input type="file" id="kyc-file" style="display:none;">
                 <input class="button yellow bg mr-5" type="button" value="upload" id="upload-kyc-btn" onclick="upload_kyc_doc()">
-                <p id="file-err-msg" style="display:none;"></p>
+                <p id="file-err-msg" style="display:none;">
+                    {% if kyc_error %}
+                        <h6 style="color:red">{{ kyc_error }}</h6>
+                    {% endif %}
+                </p>
             </div>
             <div class="row margin-top" id="kyc-docs">
             </div>

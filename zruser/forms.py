@@ -26,7 +26,11 @@ class LoginForm(forms.Form):
 
 
 class MerchantDistributorForm(forms.ModelForm):
-    mobile_no = forms.CharField(widget=forms.TextInput(attrs={'type': 'tel'}))
+    mobile_no = forms.CharField(
+        widget=forms.TextInput(attrs={'type': 'tel'}),
+        max_length=10,
+        min_length=10
+    )
     pincode = forms.CharField(widget=forms.TextInput())
 
     def clean_pan_no(self):
@@ -46,12 +50,21 @@ class MerchantDistributorForm(forms.ModelForm):
 
         return mobile_no
 
+    def __init__(self, *args, **kwargs):
+        if kwargs.get('merchant'):
+            self.Meta.fields.append('upi_id')
+            _ = kwargs.pop('upi_id')
+
+        super(MerchantDistributorForm, self).__init__(
+            *args, **kwargs
+        )
+
     class Meta:
         model = ZrUser
         fields = [
             'mobile_no', 'first_name', 'last_name', 'email', 'gender', 'city',
             'state', 'pincode', 'address_line_1', 'address_line_2',
-            'business_name', 'pan_no', 'gstin'
+            'business_name', 'pan_no', 'gstin', 'UPIID'
         ]
 
 
