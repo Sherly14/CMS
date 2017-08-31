@@ -71,7 +71,7 @@ class BillPayCommissionStructure(RowInfo):
     commission_for_distributor = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
     commission_for_sub_distributor = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
     commission_for_merchant = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
-    tds_value = models.DecimalField(max_digits=6, decimal_places=6, default=0.00)
+    tds_value = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
     is_chargable = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
