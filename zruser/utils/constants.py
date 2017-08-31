@@ -9,3 +9,5 @@ KYC_APPROVAL_CHOICES = (
     ('A', 'Approved'),
     ('R', 'Rejected')
 )
+
+DEFAULT_DISTRIBUTOR_MOBILE_NUMBER = '9999999999'

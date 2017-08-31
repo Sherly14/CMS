@@ -1,33 +1,26 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import datetime
 import csv
-
+import datetime
 from urllib import urlencode
 
-from django.http import HttpResponse
-from django.contrib.auth import login
-from django.shortcuts import render, redirect
-from django.views.generic import CreateView, DetailView, ListView
-from django.views import View
-from django.http import HttpResponseRedirect
-from django.contrib.auth import models as dj_auth_models
-from django.core.paginator import EmptyPage
-from django.http import Http404
+from django.contrib.auth import login, models as dj_auth_models
+from django.core.paginator import EmptyPage, Paginator
 from django.db import transaction
-from django.core.paginator import Paginator
-from django.urls import reverse
-from django.shortcuts import redirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.shortcuts import redirect, render
+from django.views import View
+from django.views.generic import CreateView, DetailView, ListView
 
-from zruser import forms as zr_user_form
-from zruser.models import ZrUser, UserRole, ZrAdminUser, KYCDocumentType, KYCDetail
-from zrwallet import models as zrwallet_models
-from zrmapping import models as zrmappings_models
 from common_utils.date_utils import last_month, last_week_range
 from common_utils.user_utils import is_user_superuser
 from utils import constants
-
+from zrmapping import models as zrmappings_models
+from zruser import forms as zr_user_form
+from zruser.models import ZrUser, UserRole, ZrAdminUser, KYCDocumentType, KYCDetail
+from zruser.utils.constants import DEFAULT_DISTRIBUTOR_MOBILE_NUMBER
+from zrwallet import models as zrwallet_models
 
 MERCHANT = 'MERCHANT'
 DISTRIBUTOR = 'DISTRIBUTOR'
@@ -657,7 +650,7 @@ class MerchantCreateView(View):
                 is_active=True
             )
         elif is_user_superuser(request):
-            distributor = ZrUser.objects.filter(first_name='zuser').last()
+            distributor = ZrUser.objects.filter(mobile_no=DEFAULT_DISTRIBUTOR_MOBILE_NUMBER).last()
             if not distributor:
                 raise Exception("Default distributor zuser not found in database")
             zrmappings_models.DistributorMerchant.objects.create(
@@ -783,7 +776,7 @@ class SubDistributorCreateView(CreateView):
                 is_active=True
             )
         elif is_user_superuser(request):
-            distributor = ZrUser.objects.filter(first_name='zuser').last()
+            distributor = ZrUser.objects.filter(mobile_no=DEFAULT_DISTRIBUTOR_MOBILE_NUMBER).last()
             if not distributor:
                 raise Exception("Default distributor zuser not found in database")
             zrmappings_models.DistributorMerchant.objects.create(
