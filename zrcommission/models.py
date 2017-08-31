@@ -86,7 +86,7 @@ class BillPayCommissionStructure(RowInfo):
         verbose_name_plural = 'BillPayCommissionStructure'
 
     def __unicode__(self):
-        return '%s - distributor_commission %s' % (self.distributor, self.for_zrupee)
+        return '%s - net_margin %s' % (self.distributor, self.net_margin)
 
 
 class DMTCommissionStructure(RowInfo):
