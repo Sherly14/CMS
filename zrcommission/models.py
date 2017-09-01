@@ -8,10 +8,15 @@ from django.db import models
 from zrcommission.utils.constants import COMMISSION_CHOICES
 from zrtransaction.models import Transaction, TransactionType, Vendor, ServiceProvider
 from zruser.models import ZrUser
+from zrmapping import models as zr_mappings
 from zrutils.common.modelutils import RowInfo
 
 
 # Create your models here.
+
+def get_merchant_from_distributor(distributor):
+    pass
+
 
 class Commission(RowInfo):
 
@@ -51,6 +56,18 @@ class Commission(RowInfo):
         # self.sub_distributor_gst = Decimal(self.sub_distributor_gst).quantize(Decimal("0.0000"))
 
         super(Commission, self).save(*args, **kwargs)
+
+    def get_commission_without_comm(self):
+        return '%.2f' % (float(self.net_commission) - float(self.user_tds))
+
+    def get_merchant_commission(self):
+        comm = Commission.objects.filter(
+            transaction=self.transaction, commission_user__role__name='MERCHANT'
+        ).last()
+        if comm:
+            return comm.net_commission
+        else:
+            return None
 
     class Meta:
         verbose_name_plural = 'Commissions'

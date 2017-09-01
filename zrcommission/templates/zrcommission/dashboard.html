@@ -5,7 +5,6 @@
 
 
 {% block content %}
-
 <div class="content-wrapper py-2" style="padding-left: 0.5rem; padding-right: 4rem">
     <p class="head-right">Commissions</p>
     <div class="row" style="position: relative;">
@@ -13,8 +12,7 @@
     </div>
     <div class="row">
         <div class="d-flex justify-content-between resize">
-            <p class="inr">INR 24,576</p>
-            <input class="button red resize" type="button" value="REQUEST CREDIT">
+            <p class="inr">INR {% if total_commission %} {{ total_commission }} {% else %} 0 {% endif %}</p>
         </div>
         <!-- <div class="col-md-3 margin-top">
             <p class="inr">INR 24,576</p>
@@ -56,9 +54,10 @@
         <!-- <div class="col-md-6 pad-0"> -->
         <!-- <div class="row"> -->
         <!-- <div class="col-md-4 pad-0"> -->
-            <input class="button green"  type="button" value="TDS CERTIFICATES">
         <!-- </div> -->
         <!-- <div class="col-md-4 pad-0"> -->
+            <input class="button red" type="button" value="Search">
+            <a href='{% url "commission:display-commission" %}' >Reseat filters</a>
             <input class="button red" type="button" value="DOWNLOAD CSV">
             <!-- </div> -->
             <!-- </div> -->
@@ -82,182 +81,19 @@
                         <th>Merchant commission</th>
                         <th>Merchant ID</th>
                         <th>Name</th>
-                        <th>Dispute</th>
                     </thead>
                 </table>
        <div class="body">
            <table style="width: 100%">
                <tbody>
+               {% for com in commissions %}
                     <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td><input type="button" class="button green" value="Raise" style="height: 23px;font-size: 11px;"></td>
+                        <td>{{ com.get_commission_without_comm }}</td>
+                        <td>{{ com.get_merchant_commission }}</td>
+                        <td>{{ com.transaction.user.pk }}</td>
+                        <td>{{ com.transaction.user.first_name }} {% if com.transaction.user.last_name %}{{ com.transaction.user.last_name }}{% endif %}</td>
                     </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td><input type="button" class="button green" value="Raise" style="height: 23px;font-size: 11px;"></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
+               {% endfor %}
                </tbody>
            </table>
        </div>
