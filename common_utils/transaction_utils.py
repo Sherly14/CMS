@@ -63,7 +63,6 @@ def calculate_commission():
     for transaction in zr_transaction_models.Transaction.objects.filter(
         # is_commission_created=False
     ):
-        import ipdb; ipdb.set_trace()
         # Calculate for Merchant, Distributor, SubDistributor, Zrupee.
         sp = transaction.service_provider
         merchant = transaction.user
@@ -151,3 +150,32 @@ def calculate_commission():
         transaction.is_commission_created = True
         transaction.save(update_fields=['is_commission_created'])
         print(transaction)
+
+
+def calculate_zrupee_user_commission():
+    total_commission = None
+    for transaction in zr_transaction_models.Transaction.objects.all():
+        sp = transaction.service_provider
+        merchant = transaction.user
+
+        distributor = get_main_distributor_from_merchant(merchant)
+        bill_pay_comm = zr_commission_models.BillPayCommissionStructure.objects.filter(
+            distributor=distributor,
+            service_provider=sp
+        ).last()
+        if not bill_pay_comm:
+            raise Exception("CommissionStructure not found for transaction (%s)" % transaction.pk)
+
+        commission_amt = 0
+        tds_value = 0
+        user_gst = 0
+        if bill_pay_comm.commission_type == 'P':
+            commission_amt = (bill_pay_comm.commission_for_zrupee * transaction.amount) / 100
+            tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
+            user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
+        elif bill_pay_comm.commission_type == 'F':
+            commission_amt = bill_pay_comm.commission_for_zrupee
+            tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
+            user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
+
+        total_commission += commission_amt

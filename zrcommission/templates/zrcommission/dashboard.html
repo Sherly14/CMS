@@ -34,18 +34,23 @@
                     <!--<option>Last Week</option>-->
                 <!--</select>-->
             <div class="card card-inverse o-hidden h-100" style="height: 36px !important;width: 235px;">
-                        <div class="card-block lightGrayBG blackTextColor">
-                                <div class="periodEntry">
-                                Last Week
-                                <i class="fa fa-calendar per-ft-r"></i>
-                                    <i class="fa fa-chevron-down per-ft-down"></i>
-                                </div>
-                        </div>
+                        <!--<div class="card-block lightGrayBG blackTextColor">-->
+                                <!--<div class="periodEntry">-->
+                                <!--Last Week-->
+                                <!--<i class="fa fa-calendar per-ft-r"></i>-->
+                                    <!--<i class="fa fa-chevron-down per-ft-down"></i>-->
+                                <!--</div>-->
+                        <!--</div>-->
+                    <select id="period">
+                        <option value="today" {% if period == "today" %}selected{% endif %}>Today</option>
+                        <option value="last-week" {% if period == "last-week" %}selected{% endif %}>Last week</option>
+                        <option value="last-month" {% if period == "last-month" %}selected{% endif %}>Last month</option>
+                    </select>
                     </div>
             <!-- </div> -->
             <!-- <div class="col-md-4 pad-0"> -->
             <div style="position: relative;">
-                <input class="search" type="search" name="search" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                <input id="search-txt" {% if search %}value={{ search }}{% endif %} class="search" type="search" name="search" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
                 <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
             </div>
             <!-- </div> -->
@@ -56,7 +61,7 @@
         <!-- <div class="col-md-4 pad-0"> -->
         <!-- </div> -->
         <!-- <div class="col-md-4 pad-0"> -->
-            <input class="button red" type="button" value="Search">
+            <input class="button red" type="button" value="Search" id="search">
             <a href='{% url "commission:display-commission" %}' >Reseat filters</a>
             <input class="button red" type="button" value="DOWNLOAD CSV">
             <!-- </div> -->
@@ -86,7 +91,7 @@
        <div class="body">
            <table style="width: 100%">
                <tbody>
-               {% for com in commissions %}
+               {% for com in commissions.object_list %}
                     <tr>
                         <td>{{ com.get_commission_without_comm }}</td>
                         <td>{{ com.get_merchant_commission }}</td>
@@ -102,6 +107,63 @@
         </div>
 
     </div>
+    {% if commissions.has_previous %}
+        {% if qs %}
+            <a href='{% url "commission:display-commission" %}?{{ qs }}&pg-no={{ commissions.previous_page_number }}'>Prev</a>
+        {% else %}
+            <a href='{% url "commission:display-commission" %}?pg-no={{ commissions.previous_page_number }}'>Prev</a>
+        {% endif %}
+    {% endif %}
+    {% if commissions.has_next %}
+        {% if qs %}
+            <a href='{% url "commission:display-commission" %}?{{ qs }}&pg-no={{ commissions.next_page_number }}'>Prev</a>
+        {% else %}
+            <a href='{% url "commission:display-commission" %}?pg-no={{ commissions.next_page_number }}'>Next</a>
+        {% endif %}
+    {% endif %}
     <br>
 
+    <script>
+        $('#search').click(function(){
+            if($('#search-txt').val() == ''){
+                return
+            }
+            qs = "{{ qs }}"
+            {% if qs %}
+                url = "{% url "commission:display-commission" %}?{{ qs }}"
+            {% else %}
+                url = "{% url "commission:display-commission" %}"
+            {% endif %}
+
+            if(qs != '') {
+                url += '&q=' + $('#search-txt').val()
+                window.location.assign(url)
+            } else {
+                url += '?q=' + $('#search-txt').val()
+                window.location.assign(url)
+            }
+            console.log(qs)
+        });
+    </script>
+
+    <script>
+        $("#period").change(function() {
+            period = $(this).val()
+            qs = "{{ qs }}"
+            {% if qs %}
+                url = "{% url "commission:display-commission" %}?{{ qs }}"
+            {% else %}
+                url = "{% url "commission:display-commission" %}"
+            {% endif %}
+
+            if(qs != '') {
+                url += '&period=' + period
+                window.location.assign(url)
+            } else {
+                url += '?period=' + period
+                window.location.assign(url)
+            }
+            console.log(qs)
+        })
+    </script>
 {% endblock %}
