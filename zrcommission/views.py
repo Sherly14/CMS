@@ -2,10 +2,13 @@
 from __future__ import unicode_literals
 from __future__ import unicode_literals
 
+import csv
 import urllib
 import datetime
 
 from django.views.generic import ListView
+from django.http import Http404
+from django.http import HttpResponse
 
 from zrcommission.models import Commission
 from common_utils import transaction_utils
@@ -26,6 +29,38 @@ def get_commission_qs(comm_display):
     return Commission.objects.filter(
         commission_user=req_usr.zr_user
     )
+
+
+def get_commission_display_qs(request):
+    period = request.GET.get('period')
+    search = request.GET.get('q')
+
+    req_usr = request.user.zr_admin_user
+    queryset = Commission.objects.all().order_by('-at_created')
+    if user_utils.is_user_superuser(request):
+        if search:
+            queryset = queryset.filter(
+                commission_user__mobile_no__contains=search
+            ).order_by('-at_created')
+    else:
+        if search:
+            queryset =Commission.objects.filter(
+                commission_user=req_usr.zr_user,
+                commission_user__mobile_no__contains=search
+            )
+        else:
+            queryset = Commission.objects.filter(
+                commission_user=req_usr.zr_user
+            )
+
+    if period == 'today':
+        queryset = queryset.filter(at_created=datetime.datetime.now().date())
+    elif period == 'last-week':
+        queryset = queryset.filter(at_created__range=date_utils.last_week_range())
+    elif period == 'last-month':
+        queryset = queryset.filter(at_created__range=date_utils.last_month())
+
+    return queryset
 
 
 class CommissionDisplay(ListView):
@@ -82,33 +117,42 @@ class CommissionDisplay(ListView):
         return context
 
     def get_queryset(self):
-        pg_no = self.request.GET.get('pg-no')
-        period = self.request.GET.get('period')
-        search = self.request.GET.get('q')
-
-        req_usr = self.request.user.zr_admin_user
-        queryset = Commission.objects.all().order_by('-at_created')
-        if user_utils.is_user_superuser(self.request):
-            if search:
-                queryset = queryset.filter(
-                    commission_user__mobile_no__contains=search
-                ).order_by('-at_created')
-        else:
-            if search:
-                queryset =Commission.objects.filter(
-                    commission_user=req_usr.zr_user,
-                    commission_user__mobile_no__contains=search
-                )
-            else:
-                queryset = Commission.objects.filter(
-                    commission_user=req_usr.zr_user
-                )
-
-        if period == 'today':
-            queryset = queryset.filter(at_created=datetime.datetime.now().date())
-        elif period == 'last-week':
-            queryset = queryset.filter(at_created__range=date_utils.last_week_range())
-        elif period == 'last-month':
-            queryset = queryset.filter(at_created__range=date_utils.last_month())
-
+        queryset = get_commission_display_qs( self.request)
         return queryset
+
+
+def get_comission_csv(request):
+    commission_qs = get_commission_display_qs(request)
+    pg_no = request.GET.get('pg-no', 1)
+
+    p = Paginator(commission_qs, CommissionDisplay.paginated_by)
+    try:
+        page = p.page(pg_no)
+    except:
+        raise Http404
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="commissions.csv"'
+    writer = csv.writer(response)
+    writer.writerow([
+        'My Commission After TDS',
+        'Merchant commission',
+        'Merchant ID',
+        'Name'
+    ])
+
+    for commission in page.object_list:
+        name = [commission.transaction.user.first_name]
+        if commission.transaction.user.last_name:
+            name.append(commission.transaction.user.last_name)
+
+        writer.writerow(
+            [
+                commission.get_commission_without_comm(),
+                commission.get_merchant_commission(),
+                commission.transaction.user.pk,
+                ' '.join(name)
+            ]
+        )
+
+    return response
