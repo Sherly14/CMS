@@ -1,3 +1,5 @@
+import decimal
+
 from zrtransaction import models as zr_transaction_models
 from zrmapping import models as zr_mapping_models
 from zrcommission import models as zr_commission_models
@@ -153,7 +155,7 @@ def calculate_commission():
 
 
 def calculate_zrupee_user_commission():
-    total_commission = None
+    total_commission = decimal.Decimal(0.00)
     for transaction in zr_transaction_models.Transaction.objects.all():
         sp = transaction.service_provider
         merchant = transaction.user

@@ -881,4 +881,3 @@ class SubDistributorListView(ListView):
 
     def get_queryset(self):
         return get_sub_distributor_qs(self.request)
-
