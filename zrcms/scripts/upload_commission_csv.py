@@ -70,15 +70,17 @@ for index, df in exl.iterrows():
         comm_struct = comm_models.BillPayCommissionStructure.objects.get_or_create(
             distributor=dist,
             service_provider=sp_instance,
-            commission_type=comm_type,
-            net_margin=4.0,
-            commission_for_zrupee=10,
-            commission_for_distributor=10,
-            commission_for_sub_distributor=10,
-            commission_for_merchant=70,
-            gst_value=0,
-            tds_value=5,
-            is_chargable=False,
+            defaults={
+                "commission_type": comm_type,
+                "net_margin": net_margin,
+                "commission_for_zrupee": 10,
+                "commission_for_distributor": 10,
+                "commission_for_sub_distributor": 10,
+                "commission_for_merchant": 70,
+                "gst_value": 0,
+                "tds_value": 5,
+                "is_chargable": False,
+            }
         )
     print(index)
 
@@ -108,14 +110,16 @@ for index, df in exl.iterrows():
         comm_struct = comm_models.BillPayCommissionStructure.objects.get_or_create(
             distributor=dist,
             service_provider=sp_instance,
-            commission_type='F',
-            net_margin=5,
-            commission_for_zrupee=zrupe_comm,
-            commission_for_distributor=distr_comm,
-            commission_for_sub_distributor=sub_distr_comm,
-            commission_for_merchant=agent_distr_comm,
-            gst_value=0,
-            tds_value=5,
-            is_chargable=False,
+            defaults={
+                "commission_type": 'F',
+                "net_margin": 5,
+                "commission_for_zrupee": zrupe_comm,
+                "commission_for_distributor": distr_comm,
+                "commission_for_sub_distributor": sub_distr_comm,
+                "commission_for_merchant": agent_distr_comm,
+                "gst_value": 0,
+                "tds_value": 5,
+                "is_chargable": False
+            }
         )
     print(index)

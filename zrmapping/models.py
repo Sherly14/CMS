@@ -88,5 +88,3 @@ class DistributorSubDistributor(RowInfo):
 
     def __unicode__(self):
         return '%s - %s' % (self.distributor, self.sub_distributor)
-
-

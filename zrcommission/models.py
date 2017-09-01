@@ -60,17 +60,15 @@ class Commission(RowInfo):
 
 
 class BillPayCommissionStructure(RowInfo):
-
     distributor = models.ForeignKey(to=ZrUser, related_name='commission_structures')
-    transaction_type = models.ForeignKey(to=TransactionType)
-    transaction_vendor = models.ForeignKey(to=Vendor)
-    service_provider = models.ForeignKey(to=ServiceProvider)
+    service_provider = models.ForeignKey(to=ServiceProvider, related_name='bill_commission_structure')
     commission_type = models.CharField(max_length=2, choices=COMMISSION_CHOICES)
     net_margin = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
     commission_for_zrupee = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
     commission_for_distributor = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
     commission_for_sub_distributor = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
     commission_for_merchant = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
+    gst_value = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
     tds_value = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
     is_chargable = models.BooleanField(default=False)
 
