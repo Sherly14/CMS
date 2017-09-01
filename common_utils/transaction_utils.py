@@ -177,3 +177,5 @@ def calculate_zrupee_user_commission():
             commission_amt = bill_pay_comm.commission_for_zrupee
 
         total_commission += commission_amt
+
+    return '%.2f' % total_commission
