@@ -469,13 +469,13 @@ class DashBoardView(ListView):
         zr_admin_user = self.request.user.zr_admin_user
         if self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
             context["total_merchants"] = zrmappings_models.DistributorMerchant.objects.filter(
-                distributor=zr_admin_user.zruser
+                distributor=zr_admin_user.zr_user
             ).count()
             if zr_admin_user.zr_user:
                 context['total_payment_request'] = zr_admin_user.zr_user.distributor_payment_requests.all().count()
         elif self.request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
             context["total_merchants"] = zrmappings_models.DistributorMerchant.objects.filter(
-                distributor=zr_admin_user.zruser
+                distributor=zr_admin_user.zr_user
             ).count()
             if zr_admin_user.zr_user:
                 context['total_payment_request'] = zr_admin_user.zr_user.distributor_payment_requests.all().count()
