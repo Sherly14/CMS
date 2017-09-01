@@ -50,6 +50,7 @@
 
                     </div>
                 </div>
+                {% if total_merchants %}
                 <div class="col-xl-3 col-sm-6 mb-3">
                     <div class="card card-inverse o-hidden h-100">
                         <div class="card-block lightGrayBG blackTextColor">
@@ -57,11 +58,12 @@
                         <span class="card-head spanAlignment">
                                 Merchants </span>
                         <span class="card-data textAlignRight spanAlignment">
-                                Total : 127</span>
+                                Total : {{ total_merchants }}</span>
                     </div>
 
                     </div>
                 </div>
+                {% endif %}
                 <div class="col-xl-3 col-sm-6 mb-3">
                     <div class="card card-inverse o-hidden h-100">
                         <div class="card-block lightGrayBG blackTextColor">
@@ -187,18 +189,19 @@
                     </div>
                 </div>
 
-
             </div>
             <div class="row" style="margin-bottom: 2.5rem">
                 <div class="col-xl-3 col-sm-6 mb-3">
+                    {% if total_payment_request %}
                     <div class="card card-block lightGrayBG blackTextColor">
 
 
                         <span class="card-head spanAlignment">
                                 Payment Requests</span>
                         <span class="card-data textAlignRight spanAlignment">
-                                17</span>
+                                {{ total_payment_request }}</span>
                     </div>
+                    {% endif %}
 
 
                 </div>

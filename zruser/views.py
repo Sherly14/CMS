@@ -444,10 +444,46 @@ class DistributorListView(ListView):
         return get_distributor_qs(self.request)
 
 
+from common_utils import transaction_utils
+from zrcommission import models as commission_models
+from django.db.models import Sum
+from django.db.models import F
 class DashBoardView(ListView):
     template_name = 'zruser/user_dashboard.html'
     queryset = ZrUser.objects.filter(role__name=DISTRIBUTOR)
     context_object_name = 'distributor_list'
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(DashBoardView, self).get_context_data(*args, **kwargs)
+        total_commission = 0
+        if is_user_superuser(self.request):
+            total_commission = transaction_utils.calculate_zrupee_user_commission()
+        else:
+            req_usr = self.request.user.zr_admin_user
+            total_commission = commission_models.Commission.objects.filter(
+                commission_user=req_usr.zr_user
+            ).aggregate(commission=Sum(
+                F('net_commission') + (F('user_tds') * F('net_commission')) / 100
+            ))['commission']
+
+        zr_admin_user = self.request.user.zr_admin_user
+        if self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
+            context["total_merchants"] = zrmappings_models.DistributorMerchant.objects.filter(
+                distributor=zr_admin_user.zruser
+            ).count()
+            if zr_admin_user.zr_user:
+                context['total_payment_request'] = zr_admin_user.zr_user.distributor_payment_requests.all().count()
+        elif self.request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
+            context["total_merchants"] = zrmappings_models.DistributorMerchant.objects.filter(
+                distributor=zr_admin_user.zruser
+            ).count()
+            if zr_admin_user.zr_user:
+                context['total_payment_request'] = zr_admin_user.zr_user.distributor_payment_requests.all().count()
+        elif self.request.user.zr_admin_user.role.name == MERCHANT:
+            if zr_admin_user.zr_user:
+                context['total_payment_request'] = zr_admin_user.zr_user.merchant_payment_requests.all().count()
+
+        return context
 
 
 class DistributorCreateView(CreateView):
