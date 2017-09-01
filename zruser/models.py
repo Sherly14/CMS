@@ -149,7 +149,13 @@ class KYCDetail(RowInfo):
 
 
 class BankDetail(RowInfo):
+    BANK_ACCOUNT_TYPES = (
+        ('S', 'Savings Account'),
+        ('C', 'Current Account'),
+    )
+
     account_no = models.CharField(max_length=20)
+    account_type = models.CharField(max_length=2, choices=BANK_ACCOUNT_TYPES)
     IFSC_code = models.CharField(max_length=20)
     account_name = models.CharField(max_length=128)
     bank_name = models.CharField(max_length=20, null=True, blank=True)

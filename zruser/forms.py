@@ -64,7 +64,7 @@ class MerchantDistributorForm(forms.ModelForm):
         fields = [
             'mobile_no', 'first_name', 'last_name', 'email', 'gender', 'city',
             'state', 'pincode', 'address_line_1', 'address_line_2',
-            'business_name', 'pan_no', 'gstin', 'UPIID'
+            'business_name', 'pan_no', 'gstin', 'UPIID',
         ]
 
 
@@ -73,7 +73,7 @@ class BankDetailForm(forms.ModelForm):
         model = BankDetail
         fields = [
             'account_no', 'IFSC_code', 'account_name', 'bank_name',
-            'bank_city'
+            'bank_city', 'account_type'
         ]
 
 

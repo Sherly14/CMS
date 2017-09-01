@@ -171,11 +171,7 @@ def calculate_zrupee_user_commission():
         user_gst = 0
         if bill_pay_comm.commission_type == 'P':
             commission_amt = (bill_pay_comm.commission_for_zrupee * transaction.amount) / 100
-            tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
-            user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
         elif bill_pay_comm.commission_type == 'F':
             commission_amt = bill_pay_comm.commission_for_zrupee
-            tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
-            user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
 
         total_commission += commission_amt
