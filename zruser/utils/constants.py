@@ -4,6 +4,12 @@ GENDER_CHOICES = (
     ('O', 'Others')
 )
 
+BANK_ACCOUNT_CHOICES = (
+    ('S', 'Savings'),
+    ('C', 'Current'),
+    ('O', 'Others')
+)
+
 KYC_APPROVAL_CHOICES = (
     ('I', 'In Process'),
     ('A', 'Approved'),
