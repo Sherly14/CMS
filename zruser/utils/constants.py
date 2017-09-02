@@ -4,10 +4,15 @@ GENDER_CHOICES = (
     ('O', 'Others')
 )
 
-BANK_ACCOUNT_CHOICES = (
-    ('S', 'Savings'),
-    ('C', 'Current'),
-    ('O', 'Others')
+BANK_ACCOUNT_TYPES = (
+    ('S', 'Savings Account'),
+    ('C', 'Current Account'),
+)
+
+BANK_CHANNEL_TYPES = (
+    (0, 'ALL'),
+    (1, 'NEFT'),
+    (2, 'IMPS'),
 )
 
 KYC_APPROVAL_CHOICES = (

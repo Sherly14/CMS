@@ -2,13 +2,12 @@
 from __future__ import unicode_literals
 
 import boto3
-
+from django.conf import settings as dj_settings
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
 from django.db import models
-from django.conf import settings as dj_settings
 
-from zruser.utils.constants import KYC_APPROVAL_CHOICES, GENDER_CHOICES
+from zruser.utils.constants import KYC_APPROVAL_CHOICES, GENDER_CHOICES, BANK_ACCOUNT_TYPES, BANK_CHANNEL_TYPES
 from zrutils.common.modelutils import RowInfo, get_slugify_value
 
 
@@ -149,13 +148,10 @@ class KYCDetail(RowInfo):
 
 
 class BankDetail(RowInfo):
-    BANK_ACCOUNT_TYPES = (
-        ('S', 'Savings Account'),
-        ('C', 'Current Account'),
-    )
 
     account_no = models.CharField(max_length=20)
     account_type = models.CharField(max_length=2, choices=BANK_ACCOUNT_TYPES)
+    channel = models.IntegerField(choices=BANK_CHANNEL_TYPES, default=BANK_CHANNEL_TYPES[1][0])
     IFSC_code = models.CharField(max_length=20)
     account_name = models.CharField(max_length=128)
     bank_name = models.CharField(max_length=20, null=True, blank=True)
