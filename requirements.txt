@@ -25,3 +25,4 @@ wcwidth==0.1.7
 whitenoise==3.3.0
 django-widget-tweaks==1.4.1
 boto3==1.4.6
+requests==2.18.4
