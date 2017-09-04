@@ -175,6 +175,22 @@
                             {{ bank_detail_form.bank_name.errors }}
                         {% endif %}
                     </div>
+
+                    <div class="form-group">
+                        <label for="UPIID">UPI ID</label>
+                        {{ merchant_form.UPIID|attr:"id:UPIID"|attr:"class:input-80" }}
+                        {% if merchant_form.UPIID.errors %}
+                            {{ merchant_form.UPIID.errors }}
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="account_type">Bank account type</label>
+                        {{ bank_detail_form.account_type|attr:"id:account_type"|attr:"class:input-80" }}
+                        {% if bank_detail_form.account_type.errors %}
+                            {{ bank_detail_form.account_type.errors }}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
     </div>
