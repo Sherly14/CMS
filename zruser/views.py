@@ -26,6 +26,8 @@ MERCHANT = 'MERCHANT'
 DISTRIBUTOR = 'DISTRIBUTOR'
 SUBDISTRIBUTOR = 'SUBDISTRIBUTOR'
 BENEFICIARY = 'BENEFICIARY'
+CHECKER='CHECKER'
+ADMINSTAFF = 'ADMINSTAFF'
 
 
 def login_view(request):
@@ -34,7 +36,13 @@ def login_view(request):
         user = form.login(request)
         if user:
             login(request, user)
-            return redirect('user:dashboard')
+            if user.zr_admin_user.role.name == CHECKER:
+                return redirect('user:kyc-requests')
+            elif user.zr_admin_user.role.name == ADMINSTAFF:
+                return redirect('user:distributor-create')
+            else:
+                return redirect('user:dashboard')
+
     return render(request, 'login.html', {'login_form': form})
 
 

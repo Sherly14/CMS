@@ -73,9 +73,11 @@
                     <a class="nav-link textAlignRight" href="{% url 'payment-requests:payment-request-list' %}">Payment Requests</a>
                     <span class="badge badge-pill badge-outline">2</span></a>
                 </li>
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
                 <li class="nav-item">
                     <a class="nav-link textAlignRight " href="{% url 'commission:display-commission' %}">Commissions</a>
                 </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link textAlignRight"></a>
                 </li>
@@ -92,10 +94,11 @@
             </ul>
 
             <ul class="navbar-nav ml-auto">
-
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
                 <li class="nav-item leftMargin headerText">
                     <a class="nav-link wheatTextColor" href="{% url 'user:dashboard' %}">Dashboard</a>
                 </li>
+                {% endif %}
 
                 {% if request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" or request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF"%}
                 <li class="nav-item leftMargin headerText">
