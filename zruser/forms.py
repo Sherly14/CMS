@@ -37,8 +37,8 @@ class MerchantDistributorForm(forms.ModelForm):
         pan_no = self.cleaned_data['pan_no']
         if pan_no:
             return pan_no.upper()
-
-        return pan_no
+        else:
+            raise forms.ValidationError('PAN number is compulsory')
 
     def clean_mobile_no(self):
         mobile_no = self.cleaned_data['mobile_no']
