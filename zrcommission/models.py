@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from decimal import Decimal
+from decimal import Decimal, getcontext, Context
 
 from django.db import models
 
@@ -84,10 +84,18 @@ class BillPayCommissionStructure(RowInfo):
     is_default = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
-        self.commission_for_zrupee = Decimal(self.commission_for_zrupee).quantize(Decimal("0.00"))
-        self.commission_for_distributor = Decimal(self.commission_for_distributor).quantize(Decimal("0.00"))
-        self.commission_for_merchant = Decimal(self.commission_for_merchant).quantize(Decimal("0.00"))
-        self.commission_for_sub_distributor = Decimal(self.commission_for_sub_distributor).quantize(Decimal("0.00"))
+        self.commission_for_zrupee = Decimal(
+            self.commission_for_zrupee
+        ).quantize(Decimal("0.000"), context=Context(prec=10))
+        self.commission_for_distributor = Decimal(
+            self.commission_for_distributor
+        ).quantize(Decimal("0.000"), context=Context(prec=10))
+        self.commission_for_merchant = Decimal(
+            self.commission_for_merchant
+        ).quantize(Decimal("0.000"), context=Context(prec=10))
+        self.commission_for_sub_distributor = Decimal(
+            self.commission_for_sub_distributor
+        ).quantize(Decimal("0.00"), context=Context(prec=10))
 
         super(BillPayCommissionStructure, self).save(*args, **kwargs)
 

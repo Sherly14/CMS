@@ -4,6 +4,7 @@ import django
 import uuid
 import decimal
 
+
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(cur_dir, '..'))  # NOQA
 sys.path.append(os.path.join(cur_dir, '..', '..'))
@@ -16,7 +17,6 @@ from zrcommission import models as comm_models
 from zrtransaction import models as transaction_models
 from zruser import models as user_models
 
-
 MERCHANT = 'MERCHANT'
 DISTRIBUTOR = 'DISTRIBUTOR'
 SUBDISTRIBUTOR = 'SUBDISTRIBUTOR'
@@ -25,84 +25,90 @@ BENEFICIARY = 'BENEFICIARY'
 
 # for sheet in ['Non collection', 'Collection INR 5']:
 exl = pd.read_excel(
-    '/home/hitul/Downloads/zrupee.xls',
-    sheetname='Sheet4',
-    header=1
+    '/home/hitul/Downloads/bill-payment.xls',
+    sheetname='Recharge_Non Collection',
+    skiprows=4
 )
-vendor = transaction_models.Vendor.objects.get(name='EKO')
+vendor, _ = transaction_models.Vendor.objects.get_or_create(name='EKO')
 for index, df in exl.iterrows():
-    transaction_type = transaction_models.TransactionType.objects.get_or_create(
-        name=df['Type'].strip()
-    )
-    sp_instance = transaction_models.ServiceProvider.objects.create(
-        name=df['Service Provider'],
-        vendor=vendor,
-        code=str(uuid.uuid4()),
-        is_enabled=True,
-        transaction_type=transaction_type
+    service_provider = df[1].strip()
+    transaction_type = df[2].strip()
+    net_margin = df[3]
+
+    transaction_type, _ = transaction_models.TransactionType.objects.get_or_create(
+        name=transaction_type
     )
 
-    distributors = user_models.ZrUser.objects.filter(
-        role__name=DISTRIBUTOR
+    sp_instance, _ = transaction_models.ServiceProvider.objects.get_or_create(
+        name=service_provider,
+        transaction_type=transaction_type,
+        defaults={
+            "vendor": vendor,
+            "code": str(uuid.uuid4()),
+            "is_enabled": True,
+        }
     )
+
     comm_type = 'P'
-    if not isinstance(df['Margin (NET of TDS)'], float) and 'Rs' in df['Margin (NET of TDS)']:
+    if not isinstance(net_margin, float) and not isinstance(net_margin, int) and 'Rs' in net_margin:
         comm_type = 'F'
-
-    if comm_type == 'P':
-        df['Margin (NET of TDS)'] = df['Margin (NET of TDS)'] * 100
 
     if comm_type == 'P':
         zrupe_comm = 10.00
         distr_comm = 10.00
         sub_distr_comm = 10.00
         agent_distr_comm = 70.00
-    elif comm_type == 'F':
-        zrupe_comm = float(df['Zrupee (10%) upto 2 decimals '].replace('Rs', '').replace(' ', ''))
-        distr_comm = float(df['Distributor Gross Distributor Margin upto 2 decimals'].replace('Rs', '').replace(' ', ''))
-        sub_distr_comm = float(df['Sub Distributor Gross Distributor Margin'].replace('Rs', '').replace(' ', ''))
-        agent_distr_comm = float(df['Agent  Margin'].replace('Rs', '').replace(' ', ''))
-
-    if not isinstance(df['Margin (NET of TDS)'], float):
-        net_margin = int(df['Margin (NET of TDS)'].replace('Rs', '').replace('%', '').replace(' ', ''))
-    else:
-        net_margin = df['Margin (NET of TDS)']
-
-    net_margin = '%.2f' % net_margin
-    net_margin = decimal.Decimal(net_margin)
-    for dist in distributors:
-        comm_struct = comm_models.BillPayCommissionStructure.objects.get_or_create(
-            distributor=dist,
-            service_provider=sp_instance,
-            defaults={
-                "commission_type": comm_type,
-                "net_margin": net_margin,
-                "commission_for_zrupee": 10,
-                "commission_for_distributor": 10,
-                "commission_for_sub_distributor": 10,
-                "commission_for_merchant": 70,
-                "gst_value": 0,
-                "tds_value": 5,
-                "is_chargable": False,
-            }
+        net_margin = round(
+            decimal.Decimal(net_margin),
+            3
         )
+    elif comm_type == 'F':
+        net_margin = decimal.Decimal(net_margin.lower().replace('rs', '').replace(',', '').strip())
+        zrupe_comm = (net_margin * decimal.Decimal(10)) / decimal.Decimal(100)
+        distr_comm = (net_margin * decimal.Decimal(10)) / decimal.Decimal(100)
+        sub_distr_comm = (net_margin * decimal.Decimal(10)) / decimal.Decimal(100)
+        agent_distr_comm = (net_margin * decimal.Decimal(70)) / decimal.Decimal(100)
+
+    comm_struct, _ = comm_models.BillPayCommissionStructure.objects.get_or_create(
+        distributor=None,
+        service_provider=sp_instance,
+        defaults={
+            "commission_type": comm_type,
+            "net_margin": net_margin,
+            "commission_for_zrupee": 10,
+            "commission_for_distributor": 10,
+            "commission_for_sub_distributor": 10,
+            "commission_for_merchant": 70,
+            "gst_value": 0,
+            "tds_value": 5,
+            "is_chargable": False,
+            "is_default": True
+        }
+    )
     print(index)
 
+
 exl = pd.read_excel(
-    '/home/hitul/Downloads/zrupee.xls',
-    sheetname='Sheet5',
-    header=1
+    '/home/hitul/Downloads/bill-payment.xls',
+    sheetname='Bill Payment_Collection INR 5',
+    skiprows=2
 )
 for index, df in exl.iterrows():
-    sp_instance = transaction_models.ServiceProvider.objects.create(
-        name=df['Service'],
-        vendor=vendor,
-        code=str(uuid.uuid4()),
-        is_enabled=True
+    service_provider = df[0]
+    transaction_type = df[1]
+
+    transaction_type, _ = transaction_models.TransactionType.objects.get_or_create(
+        name=transaction_type
     )
 
-    distributors = user_models.ZrUser.objects.filter(
-        role__name=DISTRIBUTOR
+    sp_instance, _ = transaction_models.ServiceProvider.objects.get_or_create(
+        name=service_provider,
+        transaction_type=transaction_type,
+        defaults={
+            "vendor": vendor,
+            "code": str(uuid.uuid4()),
+            "is_enabled": True,
+        }
     )
 
     zrupe_comm = 3
@@ -110,20 +116,20 @@ for index, df in exl.iterrows():
     sub_distr_comm = 1
     agent_distr_comm = 0
 
-    for dist in distributors:
-        comm_struct = comm_models.BillPayCommissionStructure.objects.get_or_create(
-            distributor=dist,
-            service_provider=sp_instance,
-            defaults={
-                "commission_type": 'F',
-                "net_margin": 5,
-                "commission_for_zrupee": zrupe_comm,
-                "commission_for_distributor": distr_comm,
-                "commission_for_sub_distributor": sub_distr_comm,
-                "commission_for_merchant": agent_distr_comm,
-                "gst_value": 0,
-                "tds_value": 5,
-                "is_chargable": False
-            }
-        )
+    comm_struct = comm_models.BillPayCommissionStructure.objects.get_or_create(
+        distributor=None,
+        service_provider=sp_instance,
+        defaults={
+            "commission_type": 'F',
+            "net_margin": 5,
+            "commission_for_zrupee": zrupe_comm,
+            "commission_for_distributor": distr_comm,
+            "commission_for_sub_distributor": sub_distr_comm,
+            "commission_for_merchant": agent_distr_comm,
+            "gst_value": 0,
+            "tds_value": 5,
+            "is_chargable": False,
+            "is_default": True
+        }
+    )
     print(index)
