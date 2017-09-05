@@ -1,5 +1,7 @@
 import decimal
 
+from django.db import transaction as dj_transaction
+
 from zrtransaction import models as zr_transaction_models
 from zrmapping import models as zr_mapping_models
 from zrcommission import models as zr_commission_models
@@ -61,6 +63,7 @@ def get_sub_distributor_from_merchant(merchant):
     return sub_distr
 
 
+@dj_transaction.atomic
 def calculate_commission():
     for transaction in zr_transaction_models.Transaction.objects.filter(
         is_commission_created=False
