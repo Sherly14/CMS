@@ -63,7 +63,7 @@ def get_sub_distributor_from_merchant(merchant):
 
 def calculate_commission():
     for transaction in zr_transaction_models.Transaction.objects.filter(
-        # is_commission_created=False
+        is_commission_created=False
     ):
         merchant = transaction.user
         if transaction.source == zr_transaction_models.Transaction.BP:
