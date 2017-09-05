@@ -586,7 +586,8 @@ class DistributorCreateView(CreateView):
             role=merchant_zr_user.role,
             zr_user=merchant_zr_user
         )
-
+        from zrtransaction import models as zr_transaction_models
+        zr_transaction_models.BillPayCommissionStructure.objects.filter()
         for doc in kyc_docs:
             KYCDetail.objects.create(
                 type=KYCDocumentType.objects.get(name=doc['doc_type']),

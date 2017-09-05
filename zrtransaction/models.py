@@ -6,6 +6,7 @@ from decimal import Decimal
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 
+from zrcommission import models as zc
 from zrtransaction.utils.constants import TRANSACTION_STATUS
 from zruser.models import ZrUser
 from zrutils.common.modelutils import RowInfo, get_slugify_value
@@ -68,11 +69,18 @@ class ServiceProvider(RowInfo):
 
 
 class Transaction(RowInfo):
+    BP = 'BP'
+    DMT = 'DMT'
+    TRANSACTION_SOURCES = (
+        (DMT, 'DMT'),
+        (BP, 'BillPayment'),
+    )
 
     status = models.CharField(max_length=2, choices=TRANSACTION_STATUS, default=TRANSACTION_STATUS[0][0])
     type = models.ForeignKey(to=TransactionType)
     vendor = models.ForeignKey(to=Vendor)
     service_provider = models.ForeignKey(to=ServiceProvider, null=True, blank=True)
+    source = models.CharField(max_length=3, choices=TRANSACTION_SOURCES)
     amount = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     vendor_txn_id = models.CharField(max_length=128)
     txn_id = models.CharField(max_length=128)
