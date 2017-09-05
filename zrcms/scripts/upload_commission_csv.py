@@ -31,11 +31,15 @@ exl = pd.read_excel(
 )
 vendor = transaction_models.Vendor.objects.get(name='EKO')
 for index, df in exl.iterrows():
+    transaction_type = transaction_models.TransactionType.objects.get_or_create(
+        name=df['Type'].strip()
+    )
     sp_instance = transaction_models.ServiceProvider.objects.create(
         name=df['Service Provider'],
         vendor=vendor,
         code=str(uuid.uuid4()),
-        is_enabled=True
+        is_enabled=True,
+        transaction_type=transaction_type
     )
 
     distributors = user_models.ZrUser.objects.filter(

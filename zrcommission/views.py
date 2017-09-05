@@ -36,7 +36,7 @@ def get_commission_display_qs(request):
     search = request.GET.get('q')
 
     req_usr = request.user.zr_admin_user
-    queryset = Commission.objects.all().order_by('-at_created')
+    queryset = Commission.objects.filter(commission_user=None).order_by('-at_created')
     if user_utils.is_user_superuser(request):
         if search:
             queryset = queryset.filter(
@@ -76,7 +76,11 @@ class CommissionDisplay(ListView):
         context = super(CommissionDisplay, self).get_context_data(*args, **kwargs)
         if user_utils.is_user_superuser(self.request):
             context['commissions'] = self.get_queryset()
-            context['total_commission'] = transaction_utils.calculate_zrupee_user_commission()
+            context['total_commission'] = '%.2f' % Commission.objects.filter(
+                commission_user=None
+            ).aggregate(commission=Sum(
+                F('net_commission') + (F('user_tds') * F('net_commission')) / 100
+            ))['commission']
         else:
             req_usr = self.request.user.zr_admin_user
             context['total_commission'] = Commission.objects.filter(
@@ -117,7 +121,7 @@ class CommissionDisplay(ListView):
         return context
 
     def get_queryset(self):
-        queryset = get_commission_display_qs( self.request)
+        queryset = get_commission_display_qs(self.request)
         return queryset
 
 

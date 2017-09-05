@@ -6,21 +6,14 @@ from decimal import Decimal
 from django.db import models
 
 from zrcommission.utils.constants import COMMISSION_CHOICES
-from zrtransaction.models import Transaction, TransactionType, Vendor, ServiceProvider
 from zruser.models import ZrUser
 from zrmapping import models as zr_mappings
 from zrutils.common.modelutils import RowInfo
 
 
-# Create your models here.
-
-def get_merchant_from_distributor(distributor):
-    pass
-
-
 class Commission(RowInfo):
 
-    transaction = models.ForeignKey(to=Transaction, related_name='commissions')
+    transaction = models.ForeignKey(to='zrtransaction.Transaction', related_name='commissions')
 
     commission_user = models.ForeignKey(to=ZrUser, null=True, blank=True, related_name='all_commissions')
     # distributor = models.ForeignKey(to=ZrUser, null=True, blank=True, related_name='distributor_commissions')
@@ -30,14 +23,14 @@ class Commission(RowInfo):
     # distributor_commission = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     # sub_distributor_commission = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
-    user_tds = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
+    user_tds = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     # distributor_tds = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
     # sub_distributor_tds = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
 
-    user_gst = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
+    user_gst = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     # distributor_gst = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
     # sub_distributor_gst = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
-    net_commission = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
+    net_commission = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     # zrupee_commission = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
     def save(self, *args, **kwargs):
@@ -78,7 +71,7 @@ class Commission(RowInfo):
 
 class BillPayCommissionStructure(RowInfo):
     distributor = models.ForeignKey(to=ZrUser, related_name='commission_structures')
-    service_provider = models.ForeignKey(to=ServiceProvider, related_name='bill_commission_structure')
+    service_provider = models.ForeignKey(to='zrtransaction.ServiceProvider', related_name='bill_commission_structure')
     commission_type = models.CharField(max_length=2, choices=COMMISSION_CHOICES)
     net_margin = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
     commission_for_zrupee = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
@@ -88,6 +81,7 @@ class BillPayCommissionStructure(RowInfo):
     gst_value = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
     tds_value = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
     is_chargable = models.BooleanField(default=False)
+    is_default = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         self.commission_for_zrupee = Decimal(self.commission_for_zrupee).quantize(Decimal("0.00"))
@@ -106,11 +100,8 @@ class BillPayCommissionStructure(RowInfo):
 
 class DMTCommissionStructure(RowInfo):
 
-    transaction_vendor = models.ForeignKey(to=Vendor)
+    transaction_vendor = models.ForeignKey(to='zrtransaction.Vendor')
     customer_fee = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
-    min_charge = models.DecimalField(max_digits=6, decimal_places=3, default=10.00)
-    minimum_amount = models.DecimalField(max_digits=8, decimal_places=3, default=0.00)
-    maximum_amount = models.DecimalField(max_digits=8, decimal_places=3, default=0.00)
     commission_for_zrupee = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
     commission_for_distributor = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
     commission_for_sub_distributor = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
