@@ -9,6 +9,7 @@ from zrtransaction.utils.constants import POLL_EXCLUDED_STATUS, TX_STATUS_AWAITE
     TX_STATUS_REFUND_PENDING, TX_STATUS_REFUNDED, TX_STATUS_SUCCESS, TRANSACTION_STATUS_SUCCESS, \
     TRANSACTION_STATUS_FAILURE, TRANSACTION_STATUS_REFUND_PENDING, \
     TRANSACTION_STATUS_REFUNDED
+from zrwallet.models import WalletTransactions
 
 
 class Command(BaseCommand):
@@ -39,7 +40,30 @@ class Command(BaseCommand):
                     transaction.status = TRANSACTION_STATUS_REFUND_PENDING
                     transaction.save()
                 elif response_data['data']['tx_status'] == TX_STATUS_REFUNDED:
-                    amount_refunded
+                    merchant_wallet = transaction.user.wallet
+                    refund_amount = transaction.amount + transaction.additional_charges
+
+                    wallet_log = WalletTransactions()
+                    wallet_log.wallet = merchant_wallet
+                    wallet_log.transaction = transaction
+
+                    if transaction.type.name.upper() == 'DMT':
+                        merchant_wallet.dmt_balance += refund_amount
+                        merchant_wallet.save(
+                            update_fields=[
+                                'dmt_balance'
+                            ]
+                        )
+                        wallet_log.dmt_balance = refund_amount
+                    else:
+                        merchant_wallet.non_dmt_balance += refund_amount
+                        merchant_wallet.save(
+                            update_fields=[
+                                'non_dmt_balance'
+                            ]
+                        )
+                        wallet_log.non_dmt_balance = refund_amount
+                    wallet_log.save()
                     transaction.status = TRANSACTION_STATUS_REFUNDED
                     transaction.save()
 

@@ -6,6 +6,7 @@ from decimal import Decimal
 
 from django.db import models
 
+from zrtransaction.models import Transaction
 from zruser.models import ZrUser
 from zrutils.common.modelutils import RowInfo
 
@@ -39,6 +40,7 @@ class Wallet(RowInfo):
 class WalletTransactions(RowInfo):
 
     wallet = models.ForeignKey(to=Wallet, related_name='transactions')
+    transaction = models.ForeignKey(to=Transaction, related_name='transaction_logs')
     dmt_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
 
     non_dmt_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
