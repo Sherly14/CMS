@@ -70,7 +70,7 @@ class Commission(RowInfo):
 
 
 class BillPayCommissionStructure(RowInfo):
-    distributor = models.ForeignKey(to=ZrUser, related_name='commission_structures')
+    distributor = models.ForeignKey(to=ZrUser, related_name='commission_structures', null=True, blank=True)
     service_provider = models.ForeignKey(to='zrtransaction.ServiceProvider', related_name='bill_commission_structure')
     commission_type = models.CharField(max_length=2, choices=COMMISSION_CHOICES)
     net_margin = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)

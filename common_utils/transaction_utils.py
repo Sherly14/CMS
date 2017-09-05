@@ -67,7 +67,19 @@ def calculate_commission():
     ):
         merchant = transaction.user
         if transaction.source == zr_transaction_models.Transaction.BP:
+            distributor = get_main_distributor_from_merchant(merchant)
             sp = transaction.service_provider
+            bill_pay_comm = zr_commission_models.BillPayCommissionStructure.objects.filter(
+                distributor=distributor,
+                service_provider=sp
+            ).last()
+            if not bill_pay_comm:
+                bill_pay_comm = zr_commission_models.BillPayCommissionStructure.objects.filter(
+                    service_provider=sp,
+                    is_default=True
+                ).last()
+            if not bill_pay_comm:
+                raise Exception("CommissionStructure not found for transaction (%s)" % transaction.pk)
         elif transaction.source == zr_transaction_models.Transaction.DMT:
             dmt_commission_struct = zr_commission_models.DMTCommissionStructure.objects.last()
             if not dmt_commission_struct:
@@ -78,13 +90,6 @@ def calculate_commission():
         # For merchant
         distributor = get_main_distributor_from_merchant(merchant)
         if transaction.source == zr_transaction_models.Transaction.BP:
-            bill_pay_comm = zr_commission_models.BillPayCommissionStructure.objects.filter(
-                distributor=distributor,
-                service_provider=sp
-            ).last()
-            if not bill_pay_comm:
-                raise Exception("CommissionStructure not found for transaction (%s)" % transaction.pk)
-
             commission_amt = 0
             tds_value = 0
             user_gst = 0
