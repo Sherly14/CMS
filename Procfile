@@ -1,1 +1,1 @@
-web: gunicorn zrcms.wsgi --max-requests 500 --max-requests-jitter 20 --timeout 30 --graceful-timeout 10 --log-file -
+web: newrelic-admin run-program gunicorn zrcms.wsgi --max-requests 500 --max-requests-jitter 20 --timeout 30 --graceful-timeout 10 --log-file -
