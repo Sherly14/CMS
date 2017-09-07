@@ -54,20 +54,20 @@ for index, df in exl.iterrows():
         comm_type = 'F'
 
     if comm_type == 'P':
-        zrupe_comm = 10.00
-        distr_comm = 10.00
-        sub_distr_comm = 10.00
-        agent_distr_comm = 70.00
+        zrupe_comm = decimal.Decimal(df[5])
+        distr_comm = decimal.Decimal(df[7])
+        sub_distr_comm = decimal.Decimal(df[14])
+        agent_distr_comm = decimal.Decimal(df[20])
         net_margin = round(
             decimal.Decimal(net_margin),
             3
         )
     elif comm_type == 'F':
         net_margin = decimal.Decimal(net_margin.lower().replace('rs', '').replace(',', '').strip())
-        zrupe_comm = (net_margin * decimal.Decimal(10)) / decimal.Decimal(100)
-        distr_comm = (net_margin * decimal.Decimal(10)) / decimal.Decimal(100)
-        sub_distr_comm = (net_margin * decimal.Decimal(10)) / decimal.Decimal(100)
-        agent_distr_comm = (net_margin * decimal.Decimal(70)) / decimal.Decimal(100)
+        zrupe_comm = decimal.Decimal(df[5])
+        distr_comm = decimal.Decimal(df[7])
+        sub_distr_comm = decimal.Decimal(df[14])
+        agent_distr_comm = decimal.Decimal(df[20])
 
     comm_struct, _ = comm_models.BillPayCommissionStructure.objects.get_or_create(
         distributor=None,
@@ -79,10 +79,10 @@ for index, df in exl.iterrows():
             "commission_for_distributor": 10,
             "commission_for_sub_distributor": 10,
             "commission_for_merchant": 70,
-            "gst_value": 0,
-            "tds_value": 5,
+            "gst_value": 15.93,
+            "tds_value": 0.4425,
             "is_chargable": False,
-            "is_default": True
+            "is_default": True,
         }
     )
     print(index)
@@ -126,9 +126,9 @@ for index, df in exl.iterrows():
             "commission_for_distributor": distr_comm,
             "commission_for_sub_distributor": sub_distr_comm,
             "commission_for_merchant": agent_distr_comm,
-            "gst_value": 0,
-            "tds_value": 5,
-            "is_chargable": False,
+            "gst_value": 15.93,
+            "tds_value": 0.4425,
+            "is_chargable": True,
             "is_default": True
         }
     )
