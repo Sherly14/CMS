@@ -9,14 +9,17 @@ def add_dmt_comm_structure(apps, schema_editor):
     DMTCommissionStructure = apps.get_model('zrcommission', 'DMTCommissionStructure')
     Vendor = apps.get_model('zrtransaction', 'Vendor')
     dmt_structure = DMTCommissionStructure.objects.create(
-        transaction_vendor=Vendor.objects.get(name='EKO'),
+        transaction_vendor=Vendor.objects.get(name='INSTANT_PAY'),
         customer_fee=1,
         commission_for_zrupee=25,
         commission_for_distributor=10,
         commission_for_sub_distributor=10,
         commission_for_merchant=55,
-        tds_value=15.93,
-        gst_value=4.425
+        tds_value=4.237,
+        gst_value=15.2532,
+        is_enabled=True,
+        is_default=True,
+        commission_type='P'
     )
     print(dmt_structure)
 
