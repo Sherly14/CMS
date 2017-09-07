@@ -36,7 +36,7 @@ comm_models.DMTCommissionStructure.objects.filter(id=3).update(
     tds_value=decimal.Decimal('4.237'),
     gst_value=decimal.Decimal('15.2532')
 )
-vendor, _ = transaction_models.Vendor.objects.filter(name='INSTANT_PAY').last()
+vendor = transaction_models.Vendor.objects.filter(name='INSTANT_PAY').last()
 for index, df in exl.iterrows():
     service_provider = df[1].strip()
     transaction_type = get_slugify_value(df[2].strip())
