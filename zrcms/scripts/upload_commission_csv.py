@@ -89,7 +89,7 @@ for index, df in exl.iterrows():
 
 
 exl = pd.read_excel(
-    '/home/hitul/Downloads/bill-payment.xls',
+    os.path.join(cur_dir, 'bill-payment.xls'),
     sheetname='Bill Payment_Collection INR 5',
     skiprows=2
 )
