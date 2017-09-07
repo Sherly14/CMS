@@ -28,3 +28,4 @@ boto3==1.4.6
 requests==2.18.4
 newrelic==2.90.0.75
 pandas
+xlrd
