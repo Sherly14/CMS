@@ -15,6 +15,13 @@ class Commission(RowInfo):
 
     transaction = models.ForeignKey(to='zrtransaction.Transaction', related_name='commissions')
 
+    bill_payment_comm_structure = models.ForeignKey(
+        to='zrcommission.BillPayCommissionStructure', related_name='bill_pay_commissions', null=True
+    )
+    dmt_comm_structure = models.ForeignKey(
+        to='zrcommission.DMTCommissionStructure', related_name='dmt_commissions', null=True
+    )
+
     commission_user = models.ForeignKey(to=ZrUser, null=True, blank=True, related_name='all_commissions')
     # distributor = models.ForeignKey(to=ZrUser, null=True, blank=True, related_name='distributor_commissions')
     # sub_distributor = models.ForeignKey(to=ZrUser, null=True, blank=True, related_name='sub_distributor_commissions')
@@ -82,6 +89,7 @@ class BillPayCommissionStructure(RowInfo):
     tds_value = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
     is_chargable = models.BooleanField(default=False)
     is_default = models.BooleanField(default=False)
+    is_enabled = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
         self.commission_for_zrupee = Decimal(
@@ -107,8 +115,16 @@ class BillPayCommissionStructure(RowInfo):
 
 
 class DMTCommissionStructure(RowInfo):
-
+    distributor = models.ForeignKey(
+        to=ZrUser,
+        related_name='dmt_commission_structures',
+        null=True,
+        blank=True
+    )
     transaction_vendor = models.ForeignKey(to='zrtransaction.Vendor')
+    min_charge = models.DecimalField(max_digits=6, decimal_places=3, default=10.00)
+    minimum_amount = models.DecimalField(max_digits=8, decimal_places=3, default=0.00)
+    maximum_amount = models.DecimalField(max_digits=8, decimal_places=3, default=0.00)
     customer_fee = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
     commission_for_zrupee = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
     commission_for_distributor = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
@@ -116,6 +132,8 @@ class DMTCommissionStructure(RowInfo):
     commission_for_merchant = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
     tds_value = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
     gst_value = models.DecimalField(max_digits=6, decimal_places=3, default=0.00)
+    is_enabled = models.BooleanField(default=True)
+    is_default = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         self.commission_for_zrupee = Decimal(self.commission_for_zrupee).quantize(Decimal("0.00"))
