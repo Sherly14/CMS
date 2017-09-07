@@ -91,6 +91,7 @@ class ZrUser(RowInfo):
     is_kyc_verified = models.BooleanField(default=False)
     is_mobile_verified = models.BooleanField(default=False)
     business_name = models.CharField(max_length=256, null=True, blank=True)
+    residence_address = models.CharField(max_length=256, null=True, blank=True)
     pan_no = models.CharField(max_length=10, null=True, blank=True)
     gstin = models.CharField(max_length=20, null=True, blank=True)
 

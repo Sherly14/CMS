@@ -76,11 +76,12 @@ class CommissionDisplay(ListView):
         context = super(CommissionDisplay, self).get_context_data(*args, **kwargs)
         if user_utils.is_user_superuser(self.request):
             context['commissions'] = self.get_queryset()
-            context['total_commission'] = '%.2f' % Commission.objects.filter(
+            total_commission = Commission.objects.filter(
                 commission_user=None
             ).aggregate(commission=Sum(
                 F('net_commission') + (F('user_tds') * F('net_commission')) / 100
             ))['commission']
+            context['total_commission'] = '%.2f' % total_commission if total_commission else 0
         else:
             req_usr = self.request.user.zr_admin_user
             context['total_commission'] = Commission.objects.filter(

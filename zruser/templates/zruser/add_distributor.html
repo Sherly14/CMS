@@ -88,6 +88,19 @@
                     </div>
                 </div>
             </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="residence_address">Residence Address</label>
+                        {{ merchant_form.residence_address|attr:"class:fill"|attr:"id:residence_address" }}
+                        {% if merchant_form.residence_address.errors %}
+                            {{ merchant_form.residence_address.errors }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
             <div class="row">
                 <div class="col-sm-3">
                     <div class="form-group">

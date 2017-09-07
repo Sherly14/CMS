@@ -50,6 +50,13 @@ class MerchantDistributorForm(forms.ModelForm):
 
         return mobile_no
 
+    def clean_residence_address(self):
+        residence_addr = self.cleaned_data['residence_address']
+        if not residence_addr:
+            raise forms.ValidationError('Field value cannot be empty')
+
+        return residence_addr
+
     def __init__(self, *args, **kwargs):
         if kwargs.get('merchant'):
             self.Meta.fields.append('upi_id')
@@ -64,7 +71,7 @@ class MerchantDistributorForm(forms.ModelForm):
         fields = [
             'mobile_no', 'first_name', 'last_name', 'email', 'gender', 'city',
             'state', 'pincode', 'address_line_1', 'address_line_2',
-            'business_name', 'pan_no', 'gstin', 'UPIID',
+            'business_name', 'pan_no', 'gstin', 'UPIID', 'residence_address'
         ]
 
 

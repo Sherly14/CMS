@@ -73,7 +73,7 @@ class Transaction(RowInfo):
     type = models.ForeignKey(to=TransactionType)
     vendor = models.ForeignKey(to=Vendor)
     service_provider = models.ForeignKey(to=ServiceProvider, null=True, blank=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+    amount = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
     vendor_txn_id = models.CharField(max_length=128)
     txn_id = models.CharField(max_length=128)
 

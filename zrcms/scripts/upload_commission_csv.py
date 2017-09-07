@@ -16,6 +16,7 @@ import pandas as pd
 from zrcommission import models as comm_models
 from zrtransaction import models as transaction_models
 from zruser import models as user_models
+from zrutils.common.modelutils import get_slugify_value
 
 MERCHANT = 'MERCHANT'
 DISTRIBUTOR = 'DISTRIBUTOR'
@@ -29,10 +30,17 @@ exl = pd.read_excel(
     sheetname='Recharge_Non Collection',
     skiprows=4
 )
-vendor, _ = transaction_models.Vendor.objects.get_or_create(name='EKO')
+
+comm_models.DMTCommissionStructure.objects.filter(id=3).update(
+    is_default=True, commission_type='P',
+    tds_value=decimal.Decimal('4.237'),
+    gst_value=decimal.Decimal('15.2532')
+)
+transaction_models.Vendor.objects.filter(name='EKO').update(name='Instant pay')
+vendor, _ = transaction_models.Vendor.objects.get_or_create(name='Instant pay')
 for index, df in exl.iterrows():
     service_provider = df[1].strip()
-    transaction_type = df[2].strip()
+    transaction_type = get_slugify_value(df[2].strip())
     net_margin = df[3]
 
     transaction_type, _ = transaction_models.TransactionType.objects.get_or_create(
@@ -44,7 +52,7 @@ for index, df in exl.iterrows():
         transaction_type=transaction_type,
         defaults={
             "vendor": vendor,
-            "code": str(uuid.uuid4()),
+            "code": "",
             "is_enabled": True,
         }
     )
@@ -79,8 +87,8 @@ for index, df in exl.iterrows():
             "commission_for_distributor": 10,
             "commission_for_sub_distributor": 10,
             "commission_for_merchant": 70,
-            "gst_value": 15.93,
-            "tds_value": 0.4425,
+            "gst_value": decimal.Decimal(15.2532),
+            "tds_value": decimal.Decimal(4.237),
             "is_chargable": False,
             "is_default": True,
         }
@@ -88,14 +96,13 @@ for index, df in exl.iterrows():
     print(index)
 
 
-exl = pd.read_excel(
-    os.path.join(cur_dir, 'bill-payment.xls'),
-    sheetname='Bill Payment_Collection INR 5',
-    skiprows=2
-)
-for index, df in exl.iterrows():
-    service_provider = df[0]
-    transaction_type = df[1]
+from xlrd import open_workbook
+wb = open_workbook(os.path.join(cur_dir, 'bill-payment.xls'))
+sheet = wb.sheet_by_name('Bill Payment_Collection INR 5')
+
+for row in range(2, sheet.nrows):
+    service_provider = sheet.cell_value(row, 0)
+    transaction_type = get_slugify_value(sheet.cell_value(row, 1))
 
     transaction_type, _ = transaction_models.TransactionType.objects.get_or_create(
         name=transaction_type
@@ -106,7 +113,7 @@ for index, df in exl.iterrows():
         transaction_type=transaction_type,
         defaults={
             "vendor": vendor,
-            "code": str(uuid.uuid4()),
+            "code": "",
             "is_enabled": True,
         }
     )
@@ -126,10 +133,10 @@ for index, df in exl.iterrows():
             "commission_for_distributor": distr_comm,
             "commission_for_sub_distributor": sub_distr_comm,
             "commission_for_merchant": agent_distr_comm,
-            "gst_value": 15.93,
-            "tds_value": 0.4425,
+            "gst_value": decimal.Decimal(15.2532),
+            "tds_value": decimal.Decimal(4.237),
             "is_chargable": True,
             "is_default": True
         }
     )
-    print(index)
+    print(row)
