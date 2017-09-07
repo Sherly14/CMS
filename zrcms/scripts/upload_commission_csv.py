@@ -25,7 +25,7 @@ BENEFICIARY = 'BENEFICIARY'
 
 # for sheet in ['Non collection', 'Collection INR 5']:
 exl = pd.read_excel(
-    '/home/hitul/Downloads/bill-payment.xls',
+    os.path.join(cur_dir, 'bill-payment.xls'),
     sheetname='Recharge_Non Collection',
     skiprows=4
 )
