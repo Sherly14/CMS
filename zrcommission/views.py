@@ -110,7 +110,7 @@ class CommissionDisplay(ListView):
 
             gst_amt = Commission.objects.filter(
                 commission_user=req_usr.zr_user
-            ).aggregate(gst_amt=Sum('gst_amt'))['gst_amt']
+            ).aggregate(gst_amt=Sum('user_gst'))['gst_amt']
 
             tds_amt = Commission.objects.filter(
                 commission_user=req_usr.zr_user
