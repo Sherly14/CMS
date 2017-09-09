@@ -465,7 +465,11 @@ class DashBoardView(ListView):
         context = super(DashBoardView, self).get_context_data(*args, **kwargs)
         total_commission = 0
         if is_user_superuser(self.request):
-            total_commission = transaction_utils.calculate_zrupee_user_commission()
+            total_commission = commission_models.Commission.objects.filter(
+                commission_user=None
+            ).aggregate(commission=Sum(
+                F('net_commission') + (F('user_tds') * F('net_commission')) / 100
+            ))['commission']
         else:
             req_usr = self.request.user.zr_admin_user
             total_commission = commission_models.Commission.objects.filter(

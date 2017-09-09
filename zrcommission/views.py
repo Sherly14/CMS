@@ -44,7 +44,7 @@ def get_commission_display_qs(request):
             ).order_by('-at_created')
     else:
         if search:
-            queryset =Commission.objects.filter(
+            queryset = Commission.objects.filter(
                 commission_user=req_usr.zr_user,
                 commission_user__mobile_no__contains=search
             )

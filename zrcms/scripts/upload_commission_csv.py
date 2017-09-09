@@ -36,7 +36,7 @@ comm_models.DMTCommissionStructure.objects.filter(id=3).update(
     tds_value=decimal.Decimal('4.237'),
     gst_value=decimal.Decimal('15.2532')
 )
-vendor = transaction_models.Vendor.objects.filter(name='INSTANT_PAY').last()
+vendor = transaction_models.Vendor.objects.get_or_create(name='EKO').last()
 for index, df in exl.iterrows():
     service_provider = df[1].strip()
     transaction_type = get_slugify_value(df[2].strip())
@@ -98,7 +98,7 @@ for index, df in exl.iterrows():
 from xlrd import open_workbook
 wb = open_workbook(os.path.join(cur_dir, 'bill-payment.xls'))
 sheet = wb.sheet_by_name('Bill Payment_Collection INR 5')
-
+vendor = transaction_models.Vendor.objects.get_or_create(name='EKO').last()
 for row in range(2, sheet.nrows):
     service_provider = sheet.cell_value(row, 0)
     transaction_type = get_slugify_value(sheet.cell_value(row, 1))
