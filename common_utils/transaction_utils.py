@@ -63,7 +63,15 @@ def get_sub_distributor_from_merchant(merchant):
     return sub_distr
 
 
+def get_merchants_from_distributor(distributor):
+    mapping = zr_mapping_models.DistributorMerchant.objects.filter(
+        distributor=distributor
+    )
+    return mapping.values('merchant', flat=True)
+
+
 TRANSACTION_TYPE_DMT = 'DMT'
+
 
 @dj_transaction.atomic
 def calculate_commission():
@@ -90,12 +98,19 @@ def calculate_commission():
                 raise Exception("CommissionStructure not found for transaction (%s)" % transaction.pk)
         else:
             dmt_commission_struct = zr_commission_models.DMTCommissionStructure.objects.filter(
-                is_enabled=True, is_default=True
+                is_enabled=True, is_default=True, distributor=distributor
             ).last()
+
+            if not dmt_commission_struct:
+                dmt_commission_struct = zr_commission_models.DMTCommissionStructure.objects.filter(
+                    is_enabled=True, is_default=True
+                ).last()
             if not dmt_commission_struct:
                 raise Exception("DMT structure not found")
 
             customer_fee = (transaction.amount * dmt_commission_struct.customer_fee) / 100
+            if customer_fee < dmt_commission_struct.min_charge:
+                customer_fee = dmt_commission_struct.customer_fee
 
         # For merchant
         distributor = get_main_distributor_from_merchant(merchant)
@@ -104,7 +119,10 @@ def calculate_commission():
             tds_value = 0
             user_gst = 0
             if bill_pay_comm.commission_type == 'P':
-                commission_amt = (bill_pay_comm.commission_for_merchant * transaction.amount) / 100
+                if bill_pay_comm.is_chargable:
+                    commission_amt = transaction.additional_charges
+
+                commission_amt = (bill_pay_comm.commission_for_merchant * commission_amt) / 100
                 tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
                 user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
             elif bill_pay_comm.commission_type == 'F':
@@ -140,7 +158,10 @@ def calculate_commission():
                 commission_for_distributor += bill_pay_comm.commission_for_sub_distributor
 
             if bill_pay_comm.commission_type == 'P':
-                commission_amt = (bill_pay_comm.commission_for_distributor * transaction.amount) / 100
+                if bill_pay_comm.is_chargable:
+                    commission_amt = transaction.additional_charges
+
+                commission_amt = (bill_pay_comm.commission_for_distributor * commission_amt) / 100
                 tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
                 user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
             elif bill_pay_comm.commission_type == 'F':
@@ -175,7 +196,10 @@ def calculate_commission():
                 tds_value = 0
                 user_gst = 0
                 if bill_pay_comm.commission_type == 'P':
-                    commission_amt = (bill_pay_comm.commission_for_sub_distributor * transaction.amount) / 100
+                    if bill_pay_comm.is_chargable:
+                        commission_amt = transaction.additional_charges
+
+                    commission_amt = (bill_pay_comm.commission_for_sub_distributor * commission_amt) / 100
                     tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
                     user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
                 elif bill_pay_comm.commission_type == 'F':
@@ -205,7 +229,10 @@ def calculate_commission():
         user_gst = 0
         if not transaction.type.name == TRANSACTION_TYPE_DMT:
             if bill_pay_comm.commission_type == 'P':
-                commission_amt = (bill_pay_comm.commission_for_sub_distributor * transaction.amount) / 100
+                if bill_pay_comm.is_chargable:
+                    commission_amt = transaction.additional_charges
+
+                commission_amt = (bill_pay_comm.commission_for_sub_distributor * commission_amt) / 100
                 tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
                 user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
             elif bill_pay_comm.commission_type == 'F':

@@ -12,7 +12,9 @@
     </div>
     <div class="row">
         <div class="d-flex justify-content-between resize">
-            <p class="inr">INR {% if total_commission %} {{ total_commission }} {% else %} 0 {% endif %}</p>
+            <p class="inr">Total Commission INR {% if total_commission %} {{ total_commission }} {% else %} 0 {% endif %}</p>
+            <p class="inr">Total Commission without TDS INR {% if tds_commission %} {{ tds_commission }} {% else %} 0 {% endif %}</p>
+            <p class="inr">Total Commission without GST {% if gst_commission %} {{ gst_commission }} {% else %} 0 {% endif %}</p>
         </div>
         <!-- <div class="col-md-3 margin-top">
             <p class="inr">INR 24,576</p>

@@ -81,7 +81,25 @@ class CommissionDisplay(ListView):
             ).aggregate(commission=Sum(
                 F('net_commission') + (F('user_tds') * F('net_commission')) / 100
             ))['commission']
+
+            gst_amt = Commission.objects.filter(
+                commission_user=None
+            ).aggregate(gst_amt=Sum('user_gst'))['gst_amt']
+
+            tds_amt = Commission.objects.filter(
+                commission_user=None
+            ).aggregate(tds_amt=Sum('user_tds'))['tds_amt']
+
             context['total_commission'] = '%.2f' % total_commission if total_commission else 0
+            if not total_commission:
+                total_commission = 0
+
+            if total_commission == 0:
+                context['tds_commission'] = 0
+                context['gst_commission'] = 0
+            else:
+                context['tds_commission'] = '%.2f' % total_commission - tds_amt
+                context['gst_commission'] = '%.2f' % total_commission - gst_amt
         else:
             req_usr = self.request.user.zr_admin_user
             context['total_commission'] = Commission.objects.filter(
@@ -89,10 +107,28 @@ class CommissionDisplay(ListView):
             ).aggregate(commission=Sum(
                 F('net_commission') + (F('user_tds') * F('net_commission')) / 100
             ))['commission']
-            if context['total_commission']:
+
+            gst_amt = Commission.objects.filter(
+                commission_user=req_usr.zr_user
+            ).aggregate(gst_amt=Sum('gst_amt'))['gst_amt']
+
+            tds_amt = Commission.objects.filter(
+                commission_user=req_usr.zr_user
+            ).aggregate(tds_amt=Sum('user_tds'))['tds_amt']
+
+            total_commission = '%.2f' % context['total_commission'] if context['total_commission'] else 0
+
+            if total_commission:
                 context['total_commission'] = '%.2f' % context['total_commission']
             else:
                 context['total_commission'] = 0
+
+            if total_commission == 0:
+                context['tds_commission'] = 0
+                context['gst_commission'] = 0
+            else:
+                context['tds_commission'] = '%.2f' % total_commission - tds_amt
+                context['gst_commission'] = '%.2f' % total_commission - gst_amt
 
         context['period'] = period
         context['search'] = search

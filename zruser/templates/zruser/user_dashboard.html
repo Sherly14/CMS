@@ -21,11 +21,12 @@
 {#                                </div>#}
 {#                        </div>#}
 {#                    </div>#}
+                    <a href="{% url "user:dashboard" %}" >Reset filters</a>
                     <div>
                         <div class="d-flex justify-content-between">
-                            <input class="button yellow resize" type="button" value="Today" >
-                            <input class="button yellow resize" type="button" value="Last Week"  >
-                            <input class="button yellow resize" type="button" value="Last Month" >
+                            <input class="button yellow resize" type="button" value="Today" id="today">
+                            <input class="button yellow resize" type="button" value="Last Week"  id="last-week">
+                            <input class="button yellow resize" type="button" value="Last Month" id="last-month">
                         </div>
                     </div>
                 </div>
@@ -45,7 +46,7 @@
                         <span class="card-head spanAlignment">
                                 Total Commissions</span>
                         <span class="card-data textAlignRight spanAlignment">
-                                INR 48,000</span>
+                                INR {{ total_commission }}</span>
                     </div>
 
                     </div>
@@ -92,22 +93,14 @@
                                 <tbody>
                                     <tr>
                                         <td>DMT</td>
-                                        <td class="textAlignRight">70</td>
+                                        <td class="textAlignRight">{{ total_dmt_transactions }}</td>
                                     </tr>
                                     <tr>
                                         <td>Bills</td>
-                                        <td class="textAlignRight">20</td>
+                                        <td class="textAlignRight">{{ total_bill_pay_transactions }}</td>
 
 
                                     </tr>
-                                    <tr>
-                                        <td>Recharges</td>
-                                        <td class="textAlignRight">200</td>
-
-
-                                    </tr>
-
-
                                 </tbody>
                             </table>
                         </div>
@@ -127,23 +120,12 @@
                                 <tbody>
                                     <tr>
                                         <td>DMT</td>
-                                        <td class="textAlignRight">INR 80,000</td>
+                                        <td class="textAlignRight">INR {{ dmt_transaction_value }}</td>
                                     </tr>
                                     <tr>
                                         <td>Bills</td>
-                                        <td class="textAlignRight">INR 35,000</td>
-
-
+                                        <td class="textAlignRight">INR {{ bill_pay_transaction_value }}</td>
                                     </tr>
-                                    <tr>
-                                        <td>Recharges</td>
-                                        <td class="textAlignRight">INR 15,000</td>
-
-
-                                    </tr>
-
-
-
 
                                 </tbody>
                             </table>
@@ -164,24 +146,12 @@
                                 <tbody>
                                     <tr>
                                         <td>DMT</td>
-                                        <td class="textAlignRight">INR 1,000</td>
+                                        <td class="textAlignRight">INR {{ dmt_commission_value }}</td>
                                     </tr>
                                     <tr>
                                         <td>Bills</td>
-                                        <td class="textAlignRight">INR 500</td>
-
-
+                                        <td class="textAlignRight">INR {{ total_bill_pay_commission_value }}</td>
                                     </tr>
-                                    <tr>
-                                        <td>Recharges</td>
-                                        <td class="textAlignRight">INR 2,000</td>
-
-
-                                    </tr>
-
-
-
-
                                 </tbody>
                             </table>
                         </div>
@@ -208,4 +178,17 @@
             </div>
         </div>
 
+    <script>
+        $('#today').click(function() {
+            window.location.assign('{% url "user:dashboard" %}?period=today')
+        });
+
+        $('#last-week').click(function() {
+            window.location.assign('{% url "user:dashboard" %}?period=last-week')
+        });
+
+        $('#last-month').click(function() {
+            window.location.assign('{% url "user:dashboard" %}?period=last-month')
+        });
+    </script>
 {% endblock %}

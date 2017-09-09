@@ -454,6 +454,8 @@ class DistributorListView(ListView):
 
 from common_utils import transaction_utils
 from zrcommission import models as commission_models
+from zrtransaction import models as transaction_models
+from common_utils import date_utils
 from django.db.models import Sum
 from django.db.models import F
 class DashBoardView(ListView):
@@ -462,32 +464,149 @@ class DashBoardView(ListView):
     context_object_name = 'distributor_list'
 
     def get_context_data(self, *args, **kwargs):
+        period = self.request.GET.get('period')
+        dt_filter = {}
+        if period == 'today':
+            dt_filter['at_created'] = datetime.datetime.now().date()
+        elif period == 'last-week':
+            dt_filter['at_created__range'] = date_utils.last_week_range()
+        elif period == 'last-month':
+            dt_filter['at_created__range'] = date_utils.last_month()
+
         context = super(DashBoardView, self).get_context_data(*args, **kwargs)
         total_commission = 0
         if is_user_superuser(self.request):
             total_commission = commission_models.Commission.objects.filter(
-                commission_user=None
+                commission_user=None,
+                **dt_filter
             ).aggregate(commission=Sum(
                 F('net_commission') + (F('user_tds') * F('net_commission')) / 100
             ))['commission']
         else:
             req_usr = self.request.user.zr_admin_user
             total_commission = commission_models.Commission.objects.filter(
-                commission_user=req_usr.zr_user
+                commission_user=req_usr.zr_user,
+                **dt_filter
             ).aggregate(commission=Sum(
                 F('net_commission') + (F('user_tds') * F('net_commission')) / 100
             ))['commission']
 
+        total_commission = total_commission if total_commission else 0
+        context['total_commission'] = total_commission
+
+        if is_user_superuser(self.request):
+            '''
+            Total transactions
+            '''
+            context["total_dmt_transactions"] = transaction_models.Transaction.objects.filter(
+                type__name='DMT',
+                **dt_filter
+            ).count()
+            context["total_bill_pay_transactions"] = transaction_models.Transaction.objects.exclude(
+                type__name='DMT'
+            ).count()
+
+            '''
+            Total transaction value
+            '''
+            context["dmt_transaction_value"] = transaction_models.Transaction.objects.filter(
+                type__name='DMT',
+                **dt_filter
+            ).aggregate(
+                value=Sum('amount')
+            )['value']
+            context["dmt_transaction_value"] = context["dmt_transaction_value"] if context["dmt_transaction_value"] else 0
+            context["bill_pay_transaction_value"] = transaction_models.Transaction.objects.filter(
+                **dt_filter
+            ).exclude(
+                type__name='DMT'
+            ).aggregate(
+                value=Sum('amount')
+            )['value']
+            context["bill_pay_transaction_value"] = context["bill_pay_transaction_value"] if context["bill_pay_transaction_value"] else 0
+
+            '''
+            Total commission value
+            '''
+            context["dmt_commission_value"] = commission_models.Commission.objects.filter(
+                transaction__type__name='DMT',
+                commission_user=None,
+                **dt_filter
+            ).aggregate(
+                value=Sum('user_commission')
+            )['value']
+            context["dmt_commission_value"] = context["dmt_commission_value"] if context["dmt_commission_value"] else 0
+            context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
+                commission_user=None,
+                **dt_filter
+            ).exclude(
+                transaction__type__name='DMT',
+            ).aggregate(
+                value=Sum('user_commission')
+            )['value']
+            context["total_bill_pay_commission_value"] = context["total_bill_pay_commission_value"] if context["total_bill_pay_commission_value"] else 0
+        else:
+            merchants = transaction_utils.get_merchants_from_distributor(
+                self.request.user.zr_admin_user.zr_user
+            )
+
+            context["total_dmt_transactions"] = transaction_models.Transaction.objects.filter(
+                user__in=merchants,
+                type__name='DMT',
+                **dt_filter
+            ).count()
+            context["total_bill_pay_transactions"] = transaction_models.Transaction.objects.filter(
+                **dt_filter
+            ).exclude(
+                user__in=merchants,
+                type__name='DMT'
+            ).count()
+
+            context["dmt_transaction_value"] = transaction_models.Transaction.objects.filter(
+                user__in=merchants,
+                type__name='DMT',
+                **dt_filter
+            ).aggregate(
+                value=Sum('amount')
+            )['value']
+            context["dmt_transaction_value"] = context["dmt_transaction_value"] if context["dmt_transaction_value"] else 0
+            context["bill_pay_transaction_value"] = transaction_models.Transaction.objects.filter(
+                user__in=merchants,
+                **dt_filter
+            ).exclude(
+                type__name='DMT'
+            ).aggregate(
+                value=Sum('amount')
+            )['value']
+
+            context["bill_pay_transaction_value"] = context["bill_pay_transaction_value"] if context["bill_pay_transaction_value"] else 0
+            context["dmt_commission_value"] = commission_models.Commission.objects.filter(
+                transaction__type__name='DMT',
+                commission_user=self.request.user.zr_admin_user.zr_user
+            ).aggregate(
+                value=Sum('user_commission')
+            )['value']
+            context["dmt_commission_value"] = context["dmt_commission_value"] if context["dmt_commission_value"] else 0
+            context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
+                commission_user=self.request.user.zr_admin_user.zr_user,
+                **dt_filter
+            ).exclude(
+                transaction__type__name='DMT',
+            ).aggregate(
+                value=Sum('user_commission')
+            )['value']
+            context["total_bill_pay_commission_value"] = context["total_bill_pay_commission_value"] if context["total_bill_pay_commission_value"] else 0
+
         zr_admin_user = self.request.user.zr_admin_user
         if self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
             context["total_merchants"] = zrmappings_models.DistributorMerchant.objects.filter(
-                distributor=zr_admin_user.zr_user
+                distributor=zr_admin_user.zr_user,
             ).count()
             if zr_admin_user.zr_user:
                 context['total_payment_request'] = zr_admin_user.zr_user.distributor_payment_requests.all().count()
         elif self.request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
             context["total_merchants"] = zrmappings_models.DistributorMerchant.objects.filter(
-                distributor=zr_admin_user.zr_user
+                distributor=zr_admin_user.zr_user,
             ).count()
             if zr_admin_user.zr_user:
                 context['total_payment_request'] = zr_admin_user.zr_user.distributor_payment_requests.all().count()
