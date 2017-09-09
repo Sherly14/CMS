@@ -98,11 +98,15 @@ def calculate_commission():
                 raise Exception("CommissionStructure not found for transaction (%s)" % transaction.pk)
         else:
             dmt_commission_struct = zr_commission_models.DMTCommissionStructure.objects.filter(
-                is_enabled=True, is_default=True, distributor=distributor
+                is_enabled=True, is_default=True, distributor=distributor,
+                minimum_amount__gte=transaction.amount,
+                maximum_amount__lte=transaction.amount
             ).last()
 
             if not dmt_commission_struct:
                 dmt_commission_struct = zr_commission_models.DMTCommissionStructure.objects.filter(
+                    minimum_amount__gte=transaction.amount,
+                    maximum_amount__lte=transaction.amount,
                     is_enabled=True, is_default=True
                 ).last()
             if not dmt_commission_struct:
