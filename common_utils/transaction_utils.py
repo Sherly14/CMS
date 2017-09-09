@@ -125,6 +125,8 @@ def calculate_commission():
             if bill_pay_comm.commission_type == 'P':
                 if bill_pay_comm.is_chargable:
                     commission_amt = transaction.additional_charges
+                else:
+                    commission_amt = transaction.amount
 
                 commission_amt = (bill_pay_comm.commission_for_merchant * commission_amt) / 100
                 tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
@@ -164,6 +166,8 @@ def calculate_commission():
             if bill_pay_comm.commission_type == 'P':
                 if bill_pay_comm.is_chargable:
                     commission_amt = transaction.additional_charges
+                else:
+                    commission_amt = transaction.amount
 
                 commission_amt = (bill_pay_comm.commission_for_distributor * commission_amt) / 100
                 tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
@@ -202,6 +206,8 @@ def calculate_commission():
                 if bill_pay_comm.commission_type == 'P':
                     if bill_pay_comm.is_chargable:
                         commission_amt = transaction.additional_charges
+                    else:
+                        commission_amt = transaction.amount
 
                     commission_amt = (bill_pay_comm.commission_for_sub_distributor * commission_amt) / 100
                     tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
@@ -235,6 +241,8 @@ def calculate_commission():
             if bill_pay_comm.commission_type == 'P':
                 if bill_pay_comm.is_chargable:
                     commission_amt = transaction.additional_charges
+                else:
+                    commission_amt = transaction.amount
 
                 commission_amt = (bill_pay_comm.commission_for_sub_distributor * commission_amt) / 100
                 tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
