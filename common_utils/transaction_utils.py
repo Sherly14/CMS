@@ -67,7 +67,7 @@ def get_merchants_from_distributor(distributor):
     mapping = zr_mapping_models.DistributorMerchant.objects.filter(
         distributor=distributor
     )
-    return mapping.values('merchant', flat=True)
+    return mapping.values_list('merchant', flat=True)
 
 
 TRANSACTION_TYPE_DMT = 'DMT'

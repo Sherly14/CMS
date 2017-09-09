@@ -551,19 +551,19 @@ class DashBoardView(ListView):
             )
 
             context["total_dmt_transactions"] = transaction_models.Transaction.objects.filter(
-                user__in=merchants,
+                user__id__in=merchants,
                 type__name='DMT',
                 **dt_filter
             ).count()
             context["total_bill_pay_transactions"] = transaction_models.Transaction.objects.filter(
                 **dt_filter
             ).exclude(
-                user__in=merchants,
+                user__id__in=merchants,
                 type__name='DMT'
             ).count()
 
             context["dmt_transaction_value"] = transaction_models.Transaction.objects.filter(
-                user__in=merchants,
+                user__id__in=merchants,
                 type__name='DMT',
                 **dt_filter
             ).aggregate(
@@ -571,7 +571,7 @@ class DashBoardView(ListView):
             )['value']
             context["dmt_transaction_value"] = context["dmt_transaction_value"] if context["dmt_transaction_value"] else 0
             context["bill_pay_transaction_value"] = transaction_models.Transaction.objects.filter(
-                user__in=merchants,
+                user__id__in=merchants,
                 **dt_filter
             ).exclude(
                 type__name='DMT'
