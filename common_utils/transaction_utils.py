@@ -99,18 +99,18 @@ def calculate_commission():
         else:
             dmt_commission_struct = zr_commission_models.DMTCommissionStructure.objects.filter(
                 is_enabled=True, is_default=True, distributor=distributor,
-                minimum_amount__gte=transaction.amount,
-                maximum_amount__lte=transaction.amount
+                minimum_amount__lte=transaction.amount,
+                maximum_amount__gte=transaction.amount
             ).last()
 
             if not dmt_commission_struct:
                 dmt_commission_struct = zr_commission_models.DMTCommissionStructure.objects.filter(
-                    minimum_amount__gte=transaction.amount,
-                    maximum_amount__lte=transaction.amount,
+                    minimum_amount__lte=transaction.amount,
+                    maximum_amount__gte=transaction.amount,
                     is_enabled=True, is_default=True
                 ).last()
             if not dmt_commission_struct:
-                raise Exception("DMT structure not found")
+                raise Exception("DMT structure not found for transaction(%s)")
 
             customer_fee = (transaction.amount * dmt_commission_struct.customer_fee) / 100
             if customer_fee < dmt_commission_struct.min_charge:
