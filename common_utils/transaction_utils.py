@@ -81,8 +81,8 @@ def calculate_commission():
         merchant = transaction.user
         bill_pay_comm = None
         dmt_commission_struct = None
+        distributor = get_main_distributor_from_merchant(merchant)
         if not transaction.type.name == TRANSACTION_TYPE_DMT:
-            distributor = get_main_distributor_from_merchant(merchant)
             sp = transaction.service_provider
             bill_pay_comm = zr_commission_models.BillPayCommissionStructure.objects.filter(
                 distributor=distributor,
