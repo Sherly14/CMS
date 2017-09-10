@@ -40,6 +40,9 @@ class Commission(RowInfo):
     net_commission = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
     # zrupee_commission = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
 
+    def gross_amount(self):
+        return self.net_commission - (self.user_gst + self.user_tds)
+
     def save(self, *args, **kwargs):
         self.user_commission = Decimal(self.user_commission).quantize(Decimal("0.0000"), context=Context(prec=10))
         # self.distributor_commission = Decimal(self.merchant_commission).quantize(Decimal("0.00"))

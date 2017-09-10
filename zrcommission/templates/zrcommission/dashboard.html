@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 
-
 {% block title %} Commissions List {% endblock %}
 
 
@@ -12,9 +11,7 @@
     </div>
     <div class="row">
         <div class="d-flex justify-content-between resize">
-            <p class="inr">Total Commission INR {% if total_commission %} {{ total_commission }} {% else %} 0 {% endif %}</p>
-            <p class="inr">Total Commission without TDS INR {% if tds_commission %} {{ tds_commission }} {% else %} 0 {% endif %}</p>
-            <p class="inr">Total Commission without GST {% if gst_commission %} {{ gst_commission }} {% else %} 0 {% endif %}</p>
+            <p class="inr">Net Commission INR {% if total_commission %} {{ total_commission }} {% else %} 0 {% endif %}</p>
         </div>
         <!-- <div class="col-md-3 margin-top">
             <p class="inr">INR 24,576</p>
@@ -84,10 +81,13 @@
             <div class="scrolltable">
                 <table class='header'>
                     <thead>
-                        <th style="color:#DB3725;">My Commission After TDS</th>
-                        <th>Merchant commission</th>
-                        <th>Merchant ID</th>
-                        <th>Name</th>
+                        <th>Transaction ID</th>
+                        <th>Tr. Amount</th>
+                        <th>Tr. Type</th>
+                        <th>Gross Commission</th>
+                        <th>TDS amount</th>
+                        <th>GST amount</th>
+                        <th>Net Commission</th>
                     </thead>
                 </table>
        <div class="body">
@@ -95,10 +95,13 @@
                <tbody>
                {% for com in commissions.object_list %}
                     <tr>
-                        <td>{{ com.get_commission_without_comm }}</td>
-                        <td>{{ com.get_merchant_commission }}</td>
-                        <td>{{ com.transaction.user.pk }}</td>
-                        <td>{{ com.transaction.user.first_name }} {% if com.transaction.user.last_name %}{{ com.transaction.user.last_name }}{% endif %}</td>
+                        <td>{{ com.transaction_id }}</td>
+                        <td>{{ com.transaction.amount }}</td>
+                        <td>{{ com.transaction.type }}</td>
+                        <td>{{ com.gross_amount }}</td>
+                        <td>{{ com.user_tds }}</td>
+                        <td>{{ com.user_gst }}</td>
+                        <td>{{ com.net_commission }}</td>
                     </tr>
                {% endfor %}
                </tbody>
