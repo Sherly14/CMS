@@ -29,9 +29,7 @@ for row in range(2, sheet.nrows):
     code = sheet.cell_value(row, 1)
 
     transaction_type_code = transaction_models.TransactionType.objects.filter(name=code).last()
-    if transaction_type_code:
-        transaction_type_code.delete()
-    else:
+    if not transaction_type_code:
         continue
 
     transaction_type = transaction_models.TransactionType.objects.get(name=transaction_type)
