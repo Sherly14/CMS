@@ -76,7 +76,8 @@ TRANSACTION_TYPE_DMT = 'DMT'
 @dj_transaction.atomic
 def calculate_commission():
     for transaction in zr_transaction_models.Transaction.objects.filter(
-        is_commission_created=False
+        is_commission_created=False,
+        status='S'
     ):
         merchant = transaction.user
         bill_pay_comm = None

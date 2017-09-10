@@ -31,29 +31,33 @@ exl = pd.read_excel(
     skiprows=4
 )
 
-comm_models.DMTCommissionStructure.objects.filter(id=3).update(
-    is_default=True, commission_type='P',
-    tds_value=decimal.Decimal('4.237'),
-    gst_value=decimal.Decimal('15.2532')
+comm_models.BillPayCommissionStructure.objects.all().update(
+    is_enabled=False
 )
-vendor = transaction_models.Vendor.objects.get_or_create(name='EKO').last()
+vendor, _ = transaction_models.Vendor.objects.get_or_create(name='EKO')
 for index, df in exl.iterrows():
     service_provider = df[1].strip()
-    transaction_type = get_slugify_value(df[2].strip())
-    net_margin = df[3]
+    code = df[2].strip()
+    transaction_type = get_slugify_value(df[3].strip())
+    net_margin = df[4]
 
     transaction_type, _ = transaction_models.TransactionType.objects.get_or_create(
         name=transaction_type
     )
 
-    sp_instance, _ = transaction_models.ServiceProvider.objects.get_or_create(
+    transaction_models.ServiceProvider.objects.filter(
+        name=service_provider,
+        transaction_type=transaction_type
+    ).update(
+        is_enabled=False
+    )
+
+    sp_instance = transaction_models.ServiceProvider.objects.create(
         name=service_provider,
         transaction_type=transaction_type,
-        defaults={
-            "vendor": vendor,
-            "code": "",
-            "is_enabled": True,
-        }
+        vendor=vendor,
+        code=code,
+        is_enabled=True
     )
 
     comm_type = 'P'
@@ -61,8 +65,8 @@ for index, df in exl.iterrows():
         comm_type = 'F'
 
     if comm_type == 'P':
-        zrupe_comm = decimal.Decimal(df[5])
-        distr_comm = decimal.Decimal(df[7])
+        zrupe_comm = decimal.Decimal(df[6])
+        distr_comm = decimal.Decimal(df[8])
         sub_distr_comm = decimal.Decimal(df[14])
         agent_distr_comm = decimal.Decimal(df[20])
         net_margin = round(
@@ -90,6 +94,7 @@ for index, df in exl.iterrows():
             "tds_value": decimal.Decimal(4.237),
             "is_chargable": False,
             "is_default": True,
+            "is_enabled": True
         }
     )
     print(index)
@@ -98,23 +103,28 @@ for index, df in exl.iterrows():
 from xlrd import open_workbook
 wb = open_workbook(os.path.join(cur_dir, 'bill-payment.xls'))
 sheet = wb.sheet_by_name('Bill Payment_Collection INR 5')
-vendor = transaction_models.Vendor.objects.get_or_create(name='EKO').last()
 for row in range(2, sheet.nrows):
     service_provider = sheet.cell_value(row, 0)
     transaction_type = get_slugify_value(sheet.cell_value(row, 1))
+    code = sheet.cell_value(row, 1)
 
     transaction_type, _ = transaction_models.TransactionType.objects.get_or_create(
         name=transaction_type
     )
 
-    sp_instance, _ = transaction_models.ServiceProvider.objects.get_or_create(
+    transaction_models.ServiceProvider.objects.filter(
+        name=service_provider,
+        transaction_type=transaction_type
+    ).update(
+        is_enabled=False
+    )
+
+    sp_instance = transaction_models.ServiceProvider.objects.create(
         name=service_provider,
         transaction_type=transaction_type,
-        defaults={
-            "vendor": vendor,
-            "code": "",
-            "is_enabled": True,
-        }
+        vendor=vendor,
+        code=code,
+        is_enabled=True
     )
 
     zrupe_comm = 3
