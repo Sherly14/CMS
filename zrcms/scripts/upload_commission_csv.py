@@ -80,22 +80,20 @@ for index, df in exl.iterrows():
         sub_distr_comm = decimal.Decimal(df[14])
         agent_distr_comm = decimal.Decimal(df[20])
 
-    comm_struct, _ = comm_models.BillPayCommissionStructure.objects.get_or_create(
+    comm_struct = comm_models.BillPayCommissionStructure.objects.create(
         distributor=None,
         service_provider=sp_instance,
-        defaults={
-            "commission_type": comm_type,
-            "net_margin": net_margin,
-            "commission_for_zrupee": 10,
-            "commission_for_distributor": 10,
-            "commission_for_sub_distributor": 10,
-            "commission_for_merchant": 70,
-            "gst_value": decimal.Decimal(15.2532),
-            "tds_value": decimal.Decimal(4.237),
-            "is_chargable": False,
-            "is_default": True,
-            "is_enabled": True
-        }
+        commission_type=comm_type,
+        net_margin=net_margin,
+        commission_for_zrupee=10,
+        commission_for_distributor=10,
+        commission_for_sub_distributor=10,
+        commission_for_merchant=70,
+        gst_value=decimal.Decimal(15.2532),
+        tds_value=decimal.Decimal(4.237),
+        is_chargable=False,
+        is_default=True,
+        is_enabled=True
     )
     print(index)
 
@@ -132,20 +130,18 @@ for row in range(2, sheet.nrows):
     sub_distr_comm = 1
     agent_distr_comm = 0
 
-    comm_struct = comm_models.BillPayCommissionStructure.objects.get_or_create(
+    comm_struct = comm_models.BillPayCommissionStructure.objects.create(
         distributor=None,
         service_provider=sp_instance,
-        defaults={
-            "commission_type": 'F',
-            "net_margin": 5,
-            "commission_for_zrupee": zrupe_comm,
-            "commission_for_distributor": distr_comm,
-            "commission_for_sub_distributor": sub_distr_comm,
-            "commission_for_merchant": agent_distr_comm,
-            "gst_value": decimal.Decimal(15.2532),
-            "tds_value": decimal.Decimal(4.237),
-            "is_chargable": True,
-            "is_default": True
-        }
+        commission_type='F',
+        net_margin=5,
+        commission_for_zrupee=zrupe_comm,
+        commission_for_distributor=distr_comm,
+        commission_for_sub_distributor=sub_distr_comm,
+        commission_for_merchant=agent_distr_comm,
+        gst_value=decimal.Decimal(15.2532),
+        tds_value=decimal.Decimal(4.237),
+        is_chargable=True,
+        is_default=True
     )
     print(row)
