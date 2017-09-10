@@ -105,7 +105,7 @@ wb = open_workbook(os.path.join(cur_dir, 'bill-payment.xls'))
 sheet = wb.sheet_by_name('Bill Payment_Collection INR 5')
 for row in range(2, sheet.nrows):
     service_provider = sheet.cell_value(row, 0)
-    transaction_type = get_slugify_value(sheet.cell_value(row, 1))
+    transaction_type = get_slugify_value(sheet.cell_value(row, 2))
     code = sheet.cell_value(row, 1)
 
     transaction_type, _ = transaction_models.TransactionType.objects.get_or_create(

@@ -83,6 +83,7 @@ def calculate_commission():
         bill_pay_comm = None
         dmt_commission_struct = None
         distributor = get_main_distributor_from_merchant(merchant)
+
         if not transaction.type.name == TRANSACTION_TYPE_DMT:
             sp = transaction.service_provider
             bill_pay_comm = zr_commission_models.BillPayCommissionStructure.objects.filter(
@@ -150,7 +151,7 @@ def calculate_commission():
                 "net_commission": commission_amt + user_gst - tds_value,
                 "bill_payment_comm_structure": bill_pay_comm,
                 "dmt_comm_structure": dmt_commission_struct,
-                "user_commission": commission_amt
+                "user_commission": (commission_amt * decimal.Decimal(84.745)) / 100
             }
         )
 
@@ -199,7 +200,7 @@ def calculate_commission():
                 "net_commission": commission_amt + user_gst - tds_value,
                 "bill_payment_comm_structure": bill_pay_comm,
                 "dmt_comm_structure": dmt_commission_struct,
-                "user_commission": commission_amt
+                "user_commission": (commission_amt * decimal.Decimal(84.745)) / 100
             }
         )
 
@@ -236,14 +237,12 @@ def calculate_commission():
                     "net_commission": commission_amt + user_gst - tds_value,
                     "bill_payment_comm_structure": bill_pay_comm,
                     "dmt_comm_structure": dmt_commission_struct,
-                    "user_commission": commission_amt
+                    "user_commission": (commission_amt * decimal.Decimal(84.745)) / 100
                 }
             )
 
         # For zrupee
         commission_amt = 0
-        tds_value = 0
-        user_gst = 0
         if not transaction.type.name == TRANSACTION_TYPE_DMT:
             if bill_pay_comm.commission_type == 'P':
                 if bill_pay_comm.is_chargable:
@@ -252,24 +251,18 @@ def calculate_commission():
                     commission_amt = transaction.amount
 
                 commission_amt = (bill_pay_comm.commission_for_zrupee * commission_amt) / 100
-                tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
-                user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
             elif bill_pay_comm.commission_type == 'F':
                 commission_amt = bill_pay_comm.commission_for_zrupee
-                tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
-                user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
         else:
             commission_amt = (customer_fee * dmt_commission_struct.commission_for_zrupee) / 100
-            tds_value = (commission_amt * dmt_commission_struct.tds_value) / 100
-            user_gst = (commission_amt * dmt_commission_struct.gst_value) / 100
 
         zr_commission_models.Commission.objects.get_or_create(
             transaction=transaction,
             commission_user=None,
             defaults={
-                "user_tds": tds_value,
-                "user_gst": user_gst,
-                "net_commission": commission_amt + user_gst - tds_value,
+                "user_tds": 0,
+                "user_gst": 0,
+                "net_commission": commission_amt,
                 "bill_payment_comm_structure": bill_pay_comm,
                 "dmt_comm_structure": dmt_commission_struct,
                 "user_commission": commission_amt
