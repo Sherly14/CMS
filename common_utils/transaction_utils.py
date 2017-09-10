@@ -149,7 +149,8 @@ def calculate_commission():
                 "user_gst": user_gst,
                 "net_commission": commission_amt,
                 "bill_payment_comm_structure": bill_pay_comm,
-                "dmt_comm_structure": dmt_commission_struct
+                "dmt_comm_structure": dmt_commission_struct,
+                "user_commission": commission_amt - (user_gst + tds_value)
             }
         )
 
@@ -194,7 +195,8 @@ def calculate_commission():
                 "user_gst": user_gst,
                 "net_commission": commission_amt,
                 "bill_payment_comm_structure": bill_pay_comm,
-                "dmt_comm_structure": dmt_commission_struct
+                "dmt_comm_structure": dmt_commission_struct,
+                "user_commission": commission_amt - (user_gst + tds_value)
             }
         )
 
@@ -230,7 +232,8 @@ def calculate_commission():
                     "user_gst": user_gst,
                     "net_commission": commission_amt,
                     "bill_payment_comm_structure": bill_pay_comm,
-                    "dmt_comm_structure": dmt_commission_struct
+                    "dmt_comm_structure": dmt_commission_struct,
+                    "user_commission": commission_amt - (user_gst + tds_value)
                 }
             )
 
@@ -265,7 +268,8 @@ def calculate_commission():
                 "user_gst": user_gst,
                 "net_commission": commission_amt,
                 "bill_payment_comm_structure": bill_pay_comm,
-                "dmt_comm_structure": dmt_commission_struct
+                "dmt_comm_structure": dmt_commission_struct,
+                "user_commission": commission_amt - (user_gst + tds_value)
             }
         )
 
