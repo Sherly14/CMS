@@ -159,29 +159,32 @@ def calculate_commission():
         commission_amt = 0
         tds_value = 0
         user_gst = 0
-        commission_for_distributor = bill_pay_comm.commission_for_distributor
-
-        if not sub_distr:
-            commission_for_distributor += bill_pay_comm.commission_for_sub_distributor
+        commission_for_distributor = 0
 
         if not transaction.type.name == TRANSACTION_TYPE_DMT:
+            if sub_distr:
+                commission_for_distributor = bill_pay_comm.commission_for_distributor
+            else:
+                commission_for_distributor = bill_pay_comm.commission_for_distributor + bill_pay_comm.commission_for_sub_distributor
+
             if bill_pay_comm.commission_type == 'P':
                 if bill_pay_comm.is_chargable:
                     commission_amt = transaction.additional_charges
                 else:
                     commission_amt = transaction.amount
 
-                commission_amt = (bill_pay_comm.commission_for_distributor * commission_amt) / 100
+                commission_amt = (commission_for_distributor * commission_amt) / 100
                 tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
                 user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
             elif bill_pay_comm.commission_type == 'F':
-                commission_amt = bill_pay_comm.commission_for_distributor
+                commission_amt = commission_for_distributor
                 tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
                 user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
         else:
-            commission_for_distributor = dmt_commission_struct.commission_for_distributor
-            if not sub_distr:
-                commission_for_distributor += dmt_commission_struct.commission_for_sub_distributor
+            if sub_distr:
+                commission_for_distributor = dmt_commission_struct.commission_for_distributor
+            else:
+                commission_for_distributor = dmt_commission_struct.commission_for_distributor + dmt_commission_struct.commission_for_sub_distributor
 
             commission_amt = (customer_fee * commission_for_distributor) / 100
             tds_value = (commission_amt * dmt_commission_struct.tds_value) / 100
