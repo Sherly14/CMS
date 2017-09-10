@@ -94,7 +94,8 @@ def calculate_commission():
             if not bill_pay_comm:
                 bill_pay_comm = zr_commission_models.BillPayCommissionStructure.objects.filter(
                     is_default=True,
-                    is_enabled=True
+                    is_enabled=True,
+                    service_provider=sp,
                 ).last()
             if not bill_pay_comm:
                 raise Exception("CommissionStructure not found for transaction (%s)" % transaction.pk)
