@@ -115,7 +115,7 @@ def calculate_commission():
 
             customer_fee = (transaction.amount * dmt_commission_struct.customer_fee) / 100
             if customer_fee < dmt_commission_struct.min_charge:
-                customer_fee = dmt_commission_struct.customer_fee
+                customer_fee = dmt_commission_struct.min_charge
 
         # For merchant
         distributor = get_main_distributor_from_merchant(merchant)
@@ -147,10 +147,10 @@ def calculate_commission():
             defaults={
                 "user_tds": tds_value,
                 "user_gst": user_gst,
-                "net_commission": commission_amt,
+                "net_commission": commission_amt + user_gst - tds_value,
                 "bill_payment_comm_structure": bill_pay_comm,
                 "dmt_comm_structure": dmt_commission_struct,
-                "user_commission": commission_amt - (user_gst + tds_value)
+                "user_commission": commission_amt
             }
         )
 
@@ -159,12 +159,12 @@ def calculate_commission():
         commission_amt = 0
         tds_value = 0
         user_gst = 0
-        commission_for_distributor = 0
+        commission_for_distributor = bill_pay_comm.commission_for_distributor
+
+        if not sub_distr:
+            commission_for_distributor += bill_pay_comm.commission_for_sub_distributor
 
         if not transaction.type.name == TRANSACTION_TYPE_DMT:
-            if sub_distr:
-                commission_for_distributor += bill_pay_comm.commission_for_sub_distributor
-
             if bill_pay_comm.commission_type == 'P':
                 if bill_pay_comm.is_chargable:
                     commission_amt = transaction.additional_charges
@@ -180,7 +180,7 @@ def calculate_commission():
                 user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
         else:
             commission_for_distributor = dmt_commission_struct.commission_for_distributor
-            if sub_distr:
+            if not sub_distr:
                 commission_for_distributor += dmt_commission_struct.commission_for_sub_distributor
 
             commission_amt = (customer_fee * commission_for_distributor) / 100
@@ -193,10 +193,10 @@ def calculate_commission():
             defaults={
                 "user_tds": tds_value,
                 "user_gst": user_gst,
-                "net_commission": commission_amt,
+                "net_commission": commission_amt + user_gst - tds_value,
                 "bill_payment_comm_structure": bill_pay_comm,
                 "dmt_comm_structure": dmt_commission_struct,
-                "user_commission": commission_amt - (user_gst + tds_value)
+                "user_commission": commission_amt
             }
         )
 
@@ -230,10 +230,10 @@ def calculate_commission():
                 defaults={
                     "user_tds": tds_value,
                     "user_gst": user_gst,
-                    "net_commission": commission_amt,
+                    "net_commission": commission_amt + user_gst - tds_value,
                     "bill_payment_comm_structure": bill_pay_comm,
                     "dmt_comm_structure": dmt_commission_struct,
-                    "user_commission": commission_amt - (user_gst + tds_value)
+                    "user_commission": commission_amt
                 }
             )
 
@@ -248,11 +248,11 @@ def calculate_commission():
                 else:
                     commission_amt = transaction.amount
 
-                commission_amt = (bill_pay_comm.commission_for_sub_distributor * commission_amt) / 100
+                commission_amt = (bill_pay_comm.commission_for_zrupee * commission_amt) / 100
                 tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
                 user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
             elif bill_pay_comm.commission_type == 'F':
-                commission_amt = bill_pay_comm.commission_for_sub_distributor
+                commission_amt = bill_pay_comm.commission_for_zrupee
                 tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
                 user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
         else:
@@ -266,10 +266,10 @@ def calculate_commission():
             defaults={
                 "user_tds": tds_value,
                 "user_gst": user_gst,
-                "net_commission": commission_amt,
+                "net_commission": commission_amt + user_gst - tds_value,
                 "bill_payment_comm_structure": bill_pay_comm,
                 "dmt_comm_structure": dmt_commission_struct,
-                "user_commission": commission_amt - (user_gst + tds_value)
+                "user_commission": commission_amt
             }
         )
 
