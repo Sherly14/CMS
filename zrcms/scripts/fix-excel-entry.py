@@ -42,6 +42,12 @@ for index, df in exl.iterrows():
         code=code,
         is_enabled=True
     ).last()
+    print(comm_models.BillPayCommissionStructure.objects.filter(
+        distributor=None,
+        service_provider=sp_instance,
+        is_enabled=True,
+        is_default=True
+    ))
     comm_struct = comm_models.BillPayCommissionStructure.objects.filter(
         distributor=None,
         service_provider=sp_instance,
