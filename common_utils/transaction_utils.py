@@ -119,6 +119,9 @@ def calculate_commission():
             if customer_fee < dmt_commission_struct.min_charge:
                 customer_fee = dmt_commission_struct.min_charge
 
+        if transaction.pk == 80:
+            import pdb; pdb.set_trace()
+
         # For merchant
         distributor = get_main_distributor_from_merchant(merchant)
         if not transaction.type.name == TRANSACTION_TYPE_DMT:
