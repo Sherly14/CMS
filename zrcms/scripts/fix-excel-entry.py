@@ -27,9 +27,10 @@ exl = pd.read_excel(
 
 for index, df in exl.iterrows():
     for cs in comm_models.BillPayCommissionStructure.objects.filter(
-        service_provider__code=df[2]
+        service_provider__code=df[2],
+        service_provider__name=df[1]
     ):
-        if cs and cs.commission_type == 'P':
+        if cs.commission_type == 'P':
             if cs.pk == 884:
                 import pdb; pdb.set_trace()
 
