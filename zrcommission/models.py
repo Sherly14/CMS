@@ -95,18 +95,18 @@ class BillPayCommissionStructure(RowInfo):
     is_enabled = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
-        self.commission_for_zrupee = Decimal(
-            self.commission_for_zrupee
-        ).quantize(Decimal("0.000"), context=Context(prec=10))
-        self.commission_for_distributor = Decimal(
-            self.commission_for_distributor
-        ).quantize(Decimal("0.000"), context=Context(prec=10))
-        self.commission_for_merchant = Decimal(
-            self.commission_for_merchant
-        ).quantize(Decimal("0.000"), context=Context(prec=10))
-        self.commission_for_sub_distributor = Decimal(
-            self.commission_for_sub_distributor
-        ).quantize(Decimal("0.00"), context=Context(prec=10))
+        # self.commission_for_zrupee = Decimal(
+        #     self.commission_for_zrupee
+        # ).quantize(Decimal("0.000"), context=Context(prec=10))
+        # self.commission_for_distributor = Decimal(
+        #     self.commission_for_distributor
+        # ).quantize(Decimal("0.000"), context=Context(prec=10))
+        # self.commission_for_merchant = Decimal(
+        #     self.commission_for_merchant
+        # ).quantize(Decimal("0.000"), context=Context(prec=10))
+        # self.commission_for_sub_distributor = Decimal(
+        #     self.commission_for_sub_distributor
+        # ).quantize(Decimal("0.00"), context=Context(prec=10))
 
         super(BillPayCommissionStructure, self).save(*args, **kwargs)
 
