@@ -31,9 +31,6 @@ for index, df in exl.iterrows():
         service_provider__name=df[1]
     ):
         if cs.commission_type == 'P':
-            if cs.pk == 884:
-                import pdb; pdb.set_trace()
-
             cs.net_margin = df[4] * 100
             cs.save()
 
