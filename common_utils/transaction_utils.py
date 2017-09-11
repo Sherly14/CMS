@@ -151,7 +151,7 @@ def calculate_commission():
             defaults={
                 "user_tds": tds_value,
                 "user_gst": user_gst,
-                "net_commission": commission_amt + user_gst - tds_value,
+                "net_commission": (commission_amt + user_gst) - tds_value,
                 "bill_payment_comm_structure": bill_pay_comm,
                 "dmt_comm_structure": dmt_commission_struct,
                 "user_commission": commission_amt
@@ -203,7 +203,7 @@ def calculate_commission():
             defaults={
                 "user_tds": tds_value,
                 "user_gst": user_gst,
-                "net_commission": commission_amt + user_gst - tds_value,
+                "net_commission": (commission_amt + user_gst) - tds_value,
                 "bill_payment_comm_structure": bill_pay_comm,
                 "dmt_comm_structure": dmt_commission_struct,
                 "user_commission": commission_amt
@@ -243,7 +243,7 @@ def calculate_commission():
                 defaults={
                     "user_tds": tds_value,
                     "user_gst": user_gst,
-                    "net_commission": commission_amt + user_gst - tds_value,
+                    "net_commission": (commission_amt + user_gst) - tds_value,
                     "bill_payment_comm_structure": bill_pay_comm,
                     "dmt_comm_structure": dmt_commission_struct,
                     "user_commission": commission_amt
