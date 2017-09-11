@@ -132,7 +132,7 @@ def calculate_commission():
                 if bill_pay_comm.is_chargable:
                     commission_amt = transaction.additional_charges
                 else:
-                    commission_amt = transaction.amount
+                    commission_amt = (transaction.amount * bill_pay_comm.net_margin) / 100
 
                 commission_amt = (bill_pay_comm.commission_for_merchant * commission_amt) / 100
                 commission_amt = (commission_amt * decimal.Decimal(84.745)) / 100
@@ -178,7 +178,7 @@ def calculate_commission():
                 if bill_pay_comm.is_chargable:
                     commission_amt = transaction.additional_charges
                 else:
-                    commission_amt = transaction.amount
+                    commission_amt = (transaction.amount * bill_pay_comm.net_margin) / 100
 
                 commission_amt = (commission_for_distributor * commission_amt) / 100
                 commission_amt = (commission_amt * decimal.Decimal(84.745)) / 100
@@ -223,7 +223,7 @@ def calculate_commission():
                     if bill_pay_comm.is_chargable:
                         commission_amt = transaction.additional_charges
                     else:
-                        commission_amt = transaction.amount
+                        commission_amt = (transaction.amount * bill_pay_comm.net_margin) / 100
 
                     commission_amt = (bill_pay_comm.commission_for_sub_distributor * commission_amt) / 100
                     commission_amt = (commission_amt * decimal.Decimal(84.745)) / 100
@@ -260,7 +260,7 @@ def calculate_commission():
                 if bill_pay_comm.is_chargable:
                     commission_amt = transaction.additional_charges
                 else:
-                    commission_amt = transaction.amount
+                    commission_amt = (transaction.amount * bill_pay_comm.net_margin) / 100
 
                 commission_amt = (bill_pay_comm.commission_for_zrupee * commission_amt) / 100
             elif bill_pay_comm.commission_type == 'F':
