@@ -132,6 +132,7 @@ def calculate_commission():
                     commission_amt = transaction.amount
 
                 commission_amt = (bill_pay_comm.commission_for_merchant * commission_amt) / 100
+                commission_amt = (commission_amt * decimal.Decimal(84.745)) / 100
                 tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
                 user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
             elif bill_pay_comm.commission_type == 'F':
@@ -140,6 +141,7 @@ def calculate_commission():
                 user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
         else:
             commission_amt = (customer_fee * dmt_commission_struct.commission_for_merchant) / 100
+            commission_amt = (commission_amt * decimal.Decimal(84.745)) / 100
             tds_value = (commission_amt * dmt_commission_struct.tds_value) / 100
             user_gst = (commission_amt * dmt_commission_struct.gst_value) / 100
 
@@ -152,7 +154,7 @@ def calculate_commission():
                 "net_commission": commission_amt + user_gst - tds_value,
                 "bill_payment_comm_structure": bill_pay_comm,
                 "dmt_comm_structure": dmt_commission_struct,
-                "user_commission": (commission_amt * decimal.Decimal(84.745)) / 100
+                "user_commission": commission_amt
             }
         )
 
@@ -176,10 +178,12 @@ def calculate_commission():
                     commission_amt = transaction.amount
 
                 commission_amt = (commission_for_distributor * commission_amt) / 100
+                commission_amt = (commission_amt * decimal.Decimal(84.745)) / 100
                 tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
                 user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
             elif bill_pay_comm.commission_type == 'F':
                 commission_amt = commission_for_distributor
+                commission_amt = (commission_amt * decimal.Decimal(84.745)) / 100
                 tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
                 user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
         else:
@@ -189,6 +193,7 @@ def calculate_commission():
                 commission_for_distributor = dmt_commission_struct.commission_for_distributor + dmt_commission_struct.commission_for_sub_distributor
 
             commission_amt = (customer_fee * commission_for_distributor) / 100
+            commission_amt = (commission_amt * decimal.Decimal(84.745)) / 100
             tds_value = (commission_amt * dmt_commission_struct.tds_value) / 100
             user_gst = (commission_amt * dmt_commission_struct.gst_value) / 100
 
@@ -201,7 +206,7 @@ def calculate_commission():
                 "net_commission": commission_amt + user_gst - tds_value,
                 "bill_payment_comm_structure": bill_pay_comm,
                 "dmt_comm_structure": dmt_commission_struct,
-                "user_commission": (commission_amt * decimal.Decimal(84.745)) / 100
+                "user_commission": commission_amt
             }
         )
 
@@ -218,14 +223,17 @@ def calculate_commission():
                         commission_amt = transaction.amount
 
                     commission_amt = (bill_pay_comm.commission_for_sub_distributor * commission_amt) / 100
+                    commission_amt = (commission_amt * decimal.Decimal(84.745)) / 100
                     tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
                     user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
                 elif bill_pay_comm.commission_type == 'F':
                     commission_amt = bill_pay_comm.commission_for_sub_distributor
+                    commission_amt = (commission_amt * decimal.Decimal(84.745)) / 100
                     tds_value = (commission_amt * bill_pay_comm.tds_value) / 100
                     user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
             else:
                 commission_amt = (customer_fee * dmt_commission_struct.commission_for_sub_distributor) / 100
+                commission_amt = (commission_amt * decimal.Decimal(84.745)) / 100
                 tds_value = (commission_amt * dmt_commission_struct.tds_value) / 100
                 user_gst = (commission_amt * dmt_commission_struct.gst_value) / 100
 
@@ -238,7 +246,7 @@ def calculate_commission():
                     "net_commission": commission_amt + user_gst - tds_value,
                     "bill_payment_comm_structure": bill_pay_comm,
                     "dmt_comm_structure": dmt_commission_struct,
-                    "user_commission": (commission_amt * decimal.Decimal(84.745)) / 100
+                    "user_commission": commission_amt
                 }
             )
 
