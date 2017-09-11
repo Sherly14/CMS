@@ -55,6 +55,7 @@ for index, df in exl.iterrows():
         is_enabled=True,
         is_default=True
     ).last()
+    import ipdb; ipdb.set_trace()
     comm_struct.net_margin = net_margin
     comm_struct.save()
     print(index)
