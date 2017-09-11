@@ -26,36 +26,12 @@ exl = pd.read_excel(
 )
 
 for index, df in exl.iterrows():
-    code = df[2].strip()
-    net_margin = df[4]
-
-    comm_type = 'P'
-    if not isinstance(net_margin, float) and not isinstance(net_margin, int) and 'Rs' in net_margin:
-        comm_type = 'F'
-
-    if comm_type == 'P':
-        net_margin = net_margin * 100
-    elif comm_type == 'F':
-        net_margin = decimal.Decimal(net_margin.lower().replace('rs', '').replace(',', '').strip())
-
-    sp_instance = zt.ServiceProvider.objects.filter(
-        code=code,
-        is_enabled=True
+    cs = comm_models.BillPayCommissionStructure.objects.filter(
+        service_provider__code=df[2],
+        commission_type='P'
     ).last()
-    print(comm_models.BillPayCommissionStructure.objects.filter(
-        distributor=None,
-        service_provider=sp_instance,
-        is_enabled=True,
-        is_default=True
-    ))
-    print(net_margin)
-    comm_struct = comm_models.BillPayCommissionStructure.objects.filter(
-        distributor=None,
-        service_provider=sp_instance,
-        is_enabled=True,
-        is_default=True
-    ).last()
-    comm_struct.net_margin = net_margin
-    comm_struct.save()
-    import pdb; pdb.set_trace()
+    if cs:
+        cs.net_margin = df[4] * 100
+        cs.save()
+
     print(index)
