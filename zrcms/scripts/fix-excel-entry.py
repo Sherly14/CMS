@@ -54,7 +54,7 @@ for index, df in exl.iterrows():
         service_provider=sp_instance,
         is_enabled=True,
         is_default=True
-    ).update(
-        net_margin=net_margin
-    )
+    ).last()
+    comm_struct.net_margin = net_margin
+    comm_struct.save()
     print(index)
