@@ -15,8 +15,8 @@ def add_dmt_comm_structure(apps, schema_editor):
         commission_for_distributor=10,
         commission_for_sub_distributor=10,
         commission_for_merchant=55,
-        tds_value=4.237,
-        gst_value=15.2532,
+        tds_value=5.000,
+        gst_value=18.0000,
         is_enabled=True,
         is_default=True,
         commission_type='P'

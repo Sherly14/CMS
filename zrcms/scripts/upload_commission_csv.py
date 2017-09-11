@@ -90,8 +90,8 @@ for index, df in exl.iterrows():
         commission_for_distributor=10,
         commission_for_sub_distributor=10,
         commission_for_merchant=70,
-        gst_value=decimal.Decimal(15.2532),
-        tds_value=decimal.Decimal(4.237),
+        gst_value=decimal.Decimal(18.0000),
+        tds_value=decimal.Decimal(5.000),
         is_chargable=False,
         is_default=True,
         is_enabled=True
@@ -140,8 +140,8 @@ for row in range(2, sheet.nrows):
         commission_for_distributor=distr_comm,
         commission_for_sub_distributor=sub_distr_comm,
         commission_for_merchant=agent_distr_comm,
-        gst_value=decimal.Decimal(15.2532),
-        tds_value=decimal.Decimal(4.237),
+        gst_value=decimal.Decimal(18.0000),
+        tds_value=decimal.Decimal(5.000),
         is_chargable=True,
         is_default=True
     )

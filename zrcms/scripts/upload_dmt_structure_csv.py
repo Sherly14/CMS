@@ -44,8 +44,8 @@ for index, df in csv.iterrows():
         commission_for_distributor=commission_for_distr,
         commission_for_sub_distributor=commission_for_sub_distr,
         commission_for_merchant=commission_for_merchant,
-        tds_value=decimal.Decimal(4.237),
-        gst_value=decimal.Decimal(15.2532),
+        tds_value=decimal.Decimal(5.000),
+        gst_value=decimal.Decimal(18.0000),
         is_default=True
     )
     print(index)
