@@ -48,6 +48,7 @@ for index, df in exl.iterrows():
         is_enabled=True,
         is_default=True
     ))
+    print(net_margin)
     comm_struct = comm_models.BillPayCommissionStructure.objects.filter(
         distributor=None,
         service_provider=sp_instance,
