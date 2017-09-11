@@ -35,10 +35,6 @@ for index, df in exl.iterrows():
 
     if comm_type == 'P':
         net_margin = net_margin * 100
-        net_margin = round(
-            decimal.Decimal(net_margin),
-            4
-        )
     elif comm_type == 'F':
         net_margin = decimal.Decimal(net_margin.lower().replace('rs', '').replace(',', '').strip())
 
