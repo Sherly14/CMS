@@ -69,9 +69,10 @@ for index, df in exl.iterrows():
         distr_comm = decimal.Decimal(df[8])
         sub_distr_comm = decimal.Decimal(df[14])
         agent_distr_comm = decimal.Decimal(df[20])
+        net_margin = net_margin * 100
         net_margin = round(
             decimal.Decimal(net_margin),
-            3
+            4
         )
     elif comm_type == 'F':
         net_margin = decimal.Decimal(net_margin.lower().replace('rs', '').replace(',', '').strip())
