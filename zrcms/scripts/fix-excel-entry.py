@@ -31,6 +31,9 @@ for index, df in exl.iterrows():
         commission_type='P'
     ).last()
     if cs:
+        if code == 'ACP':
+            import pdb; pdb.set_trace()
+
         cs.net_margin = df[4] * 100
         cs.save()
 
