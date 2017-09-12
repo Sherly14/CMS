@@ -15,11 +15,11 @@ from zrwallet.models import WalletTransactions
 class Command(BaseCommand):
     def handle(self, *args, **options):
 
-        # Exclude all the successful and Refunded Transaction
         transactions = Transaction.objects.exclude(status__in=POLL_EXCLUDED_STATUS)
+        print 'polling transaction status for queryset ', transactions
 
         for transaction in transactions:
-            sleep(5)
+            sleep(2)
             txn_id = transaction.vendor_txn_id
             headers = {'developer_key': EKO_DEVELOPER_KEY, 'cache-control': "no-cache"}
             url = EKO_TRANSACTION_ENQUIRY_URL + txn_id + '?initiator_id=' + EKO_INITIATOR_ID
