@@ -3,21 +3,19 @@ from __future__ import unicode_literals
 from __future__ import unicode_literals
 
 import csv
-import urllib
 import datetime
+import urllib
 
-from django.views.generic import ListView
-from django.http import Http404
-from django.http import HttpResponse
-
-from zrcommission.models import Commission
-from common_utils import transaction_utils
-from django.db.models import Sum
 from django.core.paginator import Paginator
 from django.db.models import F
+from django.db.models import Sum
+from django.http import Http404
+from django.http import HttpResponse
+from django.views.generic import ListView
 
-from common_utils import user_utils
 from common_utils import date_utils
+from common_utils import user_utils
+from zrcommission.models import Commission
 
 
 def get_commission_qs(comm_display):
@@ -81,7 +79,10 @@ class CommissionDisplay(ListView):
             ).aggregate(commission=Sum(
                 F('net_commission') + (F('user_tds') * F('net_commission')) / 100
             ))['commission']
-            context['total_commission'] = '%.2f' % total_commission
+            if total_commission:
+                context['total_commission'] = '%.2f' % total_commission
+            else:
+                context['total_commission'] = '%.2f' % 0
         else:
             req_usr = self.request.user.zr_admin_user
             total_commission = Commission.objects.filter(
@@ -89,7 +90,10 @@ class CommissionDisplay(ListView):
             ).aggregate(commission=Sum(
                 F('net_commission') + (F('user_tds') * F('net_commission')) / 100
             ))['commission']
-            context['total_commission'] = '%.2f' % total_commission
+            if total_commission:
+                context['total_commission'] = '%.2f' % total_commission
+            else:
+                context['total_commission'] = '%.2f' % 0
 
         context['period'] = period
         context['search'] = search
