@@ -84,11 +84,12 @@ class CommissionDisplay(ListView):
             context['total_commission'] = '%.2f' % total_commission
         else:
             req_usr = self.request.user.zr_admin_user
-            context['total_commission'] = '%.2f' % Commission.objects.filter(
+            total_commission = Commission.objects.filter(
                 commission_user=req_usr.zr_user
             ).aggregate(commission=Sum(
                 F('net_commission') + (F('user_tds') * F('net_commission')) / 100
             ))['commission']
+            context['total_commission'] = '%.2f' % total_commission
 
         context['period'] = period
         context['search'] = search
