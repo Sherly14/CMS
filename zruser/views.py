@@ -686,7 +686,7 @@ class DistributorCreateView(CreateView):
 
         merchant_zr_user = merchant_form.save(commit=False)
         merchant_zr_user.role = UserRole.objects.filter(name=DISTRIBUTOR).last()
-        password = '%s%s' % (merchant_zr_user.pan_no.lower().strip(), merchant_zr_user.mobile_no.lower().strip())
+        password = '%s%s' % (merchant_zr_user.pan_no.lower().strip(), str(merchant_zr_user.mobile_no).lower().strip())
         merchant_zr_user.pass_word = password
         merchant_zr_user.save()
 
@@ -794,7 +794,7 @@ class MerchantCreateView(View):
         merchant_zr_user = merchant_form.save(commit=False)
         merchant_zr_user.role = UserRole.objects.filter(name=MERCHANT).last()
         merchant_zr_user.pass_word = '%s%s' % (
-            merchant_zr_user.pan_no.lower().strip(), merchant_zr_user.mobile_no.lower().strip()
+            merchant_zr_user.pan_no.lower().strip(), str(merchant_zr_user.mobile_no).lower().strip()
         )
         merchant_zr_user.save()
         bank_detail = bank_detail_form.save()
@@ -910,7 +910,7 @@ class SubDistributorCreateView(CreateView):
 
         merchant_zr_user = merchant_form.save(commit=False)
         merchant_zr_user.role = UserRole.objects.filter(name=SUBDISTRIBUTOR).last()
-        password = '%s%s' % (merchant_zr_user.pan_no.lower().strip(), merchant_zr_user.mobile_no.lower().strip())
+        password = '%s%s' % (merchant_zr_user.pan_no.lower().strip(), str(merchant_zr_user.mobile_no).lower().strip())
         merchant_zr_user.pass_word = password
         merchant_zr_user.save()
 
