@@ -1,0 +1,13 @@
+.login-submit {
+    background-color: #dd3b2f;
+    border-color: transparent;
+}
+
+.modal-prop{
+    box-shadow: 0 9px 16px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+    border: 0px
+}
+
+.hr-black{
+    background: black;
+}

@@ -75,6 +75,7 @@ TRANSACTION_TYPE_DMT = 'DMT'
 
 @dj_transaction.atomic
 def calculate_commission():
+    print 'running calculate commissions job'
     for transaction in zr_transaction_models.Transaction.objects.filter(
         is_commission_created=False,
         status='S'
