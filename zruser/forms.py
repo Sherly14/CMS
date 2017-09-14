@@ -33,12 +33,23 @@ class MerchantDistributorForm(forms.ModelForm):
     )
     pincode = forms.CharField(widget=forms.TextInput())
 
+    def clean_first_name(self):
+        first_name = self.cleaned_data['first_name']
+        if ' ' in first_name:
+            raise forms.ValidationError('Space not allowed')
+        if re.findall(r'[0-9]+', first_name):
+            raise forms.ValidationError('Numbers not allowed')
+
+        return first_name
+
     def clean_pan_no(self):
         pan_no = self.cleaned_data['pan_no']
         if pan_no:
             return pan_no.upper()
         else:
             raise forms.ValidationError('PAN number is compulsory')
+
+        return pan_no
 
     def clean_mobile_no(self):
         mobile_no = self.cleaned_data['mobile_no']

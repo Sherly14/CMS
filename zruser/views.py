@@ -12,7 +12,13 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView
+from django.db.models import Sum
+from django.db.models import F
 
+from common_utils import transaction_utils
+from zrcommission import models as commission_models
+from zrtransaction import models as transaction_models
+from common_utils import date_utils
 from common_utils.date_utils import last_month, last_week_range
 from common_utils.user_utils import is_user_superuser
 from utils import constants
@@ -30,18 +36,26 @@ CHECKER='CHECKER'
 ADMINSTAFF = 'ADMINSTAFF'
 
 
+def redirect_user(request):
+    user = request.user
+    if user.zr_admin_user.role.name == CHECKER:
+        return redirect('user:kyc-requests')
+    elif is_user_superuser(request):
+        return redirect('user:dashboard')
+    else:
+        return redirect('user:dashboard')
+
+
 def login_view(request):
+    if request.user.is_authenticated():
+        return redirect_user(request)
+
     form = zr_user_form.LoginForm(request.POST or None)
     if request.POST and form.is_valid():
         user = form.login(request)
         if user:
             login(request, user)
-            if user.zr_admin_user.role.name == CHECKER:
-                return redirect('user:kyc-requests')
-            elif user.zr_admin_user.role.name == ADMINSTAFF:
-                return redirect('user:distributor-create')
-            else:
-                return redirect('user:dashboard')
+            return redirect_user(request)
 
     return render(request, 'login.html', {'login_form': form})
 
@@ -123,14 +137,6 @@ def get_merchant_qs(request):
 
 def get_merchant_csv(request):
     merchant_qs = get_merchant_qs(request)
-    pg_no = request.GET.get('page_no', 1)
-
-    p = Paginator(merchant_qs, DistributorListView.paginate_by)
-    try:
-        page = p.page(pg_no)
-    except EmptyPage:
-        raise Http404
-
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="merchants.csv"'
     writer = csv.writer(response)
@@ -143,7 +149,7 @@ def get_merchant_csv(request):
         'Status'
     ])
 
-    for merchant in page.object_list:
+    for merchant in merchant_qs:
         if not is_user_superuser(request):
             merchant = merchant.merchant
 
@@ -342,21 +348,13 @@ def get_sub_distributor_qs(request):
 
 def download_distributor_list_csv(request):
     distributor_qs = get_distributor_qs(request)
-    pg_no = request.GET.get('page_no', 1)
-
-    p = Paginator(distributor_qs, DistributorListView.paginate_by)
-    try:
-        page = p.page(pg_no)
-    except EmptyPage:
-        raise Http404
-
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="distributors.csv"'
     writer = csv.writer(response)
     writer.writerow([
         'Distributor Id', 'Distributor Name', 'DOJ', 'Mobile', 'Email', 'Status'
     ])
-    for distributor in page.object_list:
+    for distributor in distributor_qs:
         writer.writerow([
             distributor.id,
             distributor.first_name,
@@ -452,12 +450,6 @@ class DistributorListView(ListView):
         return get_distributor_qs(self.request)
 
 
-from common_utils import transaction_utils
-from zrcommission import models as commission_models
-from zrtransaction import models as transaction_models
-from common_utils import date_utils
-from django.db.models import Sum
-from django.db.models import F
 class DashBoardView(ListView):
     template_name = 'zruser/user_dashboard.html'
     queryset = ZrUser.objects.filter(role__name=DISTRIBUTOR)
@@ -502,10 +494,11 @@ class DashBoardView(ListView):
                 type__name='DMT',
                 **dt_filter
             ).count()
-            context["total_bill_pay_transactions"] = transaction_models.Transaction.objects.exclude(
-                type__name='DMT'
+            context["total_bill_pay_transactions"] = transaction_models.Transaction.objects.filter(
+                **dt_filter
+            ).exclude(
+                type__name='DMT',
             ).count()
-
             '''
             Total transaction value
             '''

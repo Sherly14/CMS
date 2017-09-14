@@ -68,15 +68,6 @@ def merchant_payment_req_csv_download(request):
         'Ref Id',
     ])
 
-    paginator = Paginator(qs, MerchantPaymentRequestListView.paginate_by)
-    page = request.GET.get('page', 1)
-
-    try:
-        queryset = paginator.page(page)
-    except PageNotAnInteger:
-        queryset = paginator.page(1)
-
-    qs = queryset.object_list
     for payment_req in qs:
         writer.writerow(
             [

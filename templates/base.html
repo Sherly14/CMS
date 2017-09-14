@@ -100,13 +100,13 @@
                 </li>
                 {% endif %}
 
-                {% if request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" or request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF"%}
+                {% if request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
                 <li class="nav-item leftMargin headerText">
                     <a class="nav-link wheatTextColor" href="{% url 'user:merchant-create' %}">Add Merchant</a>
                 </li>
                 {% endif %}
 
-                {% if request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF"%}
+                {% if request.user.zr_admin_user.role.name == "DISTRIBUTOR" %}
                 <li class="nav-item leftMargin headerText">
                     <a class="nav-link wheatTextColor" href="{% url 'user:sub-distributor-create' %}">Add Sub-distributor</a>
                 </li>

@@ -19,6 +19,9 @@ def last_week_range():
 
     start_date = start_date - datetime.timedelta(7)
     end_date = end_date - datetime.timedelta(7)
+
+    start_date = start_date + datetime.timedelta(days=1)
+    end_date = end_date + datetime.timedelta(days=1)
     return (start_date, end_date)
 
 

@@ -129,13 +129,6 @@ class CommissionDisplay(ListView):
 
 def get_comission_csv(request):
     commission_qs = get_commission_display_qs(request)
-    pg_no = request.GET.get('pg-no', 1)
-
-    p = Paginator(commission_qs, CommissionDisplay.paginated_by)
-    try:
-        page = p.page(pg_no)
-    except:
-        raise Http404
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="commissions.csv"'
@@ -147,7 +140,7 @@ def get_comission_csv(request):
         'Name'
     ])
 
-    for commission in page.object_list:
+    for commission in commission_qs:
         name = [commission.transaction.user.first_name]
         if commission.transaction.user.last_name:
             name.append(commission.transaction.user.last_name)
