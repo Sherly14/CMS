@@ -1,0 +1,262 @@
+/*select resized for commissions*/
+select{
+	width:10rem;
+}
+/*different types of text heading and theri alignments made accordingly*/
+
+/*text styles*/
+p {
+	width:100%;
+	color:#434343;
+	margin:0rem;
+}
+
+p.head-right{
+	color: #313131;
+    padding: 20px 0px 30px 0px;
+    width: 100%;
+    text-align: right;
+    font-size: 25px;
+    font-weight: 100;
+    letter-spacing: 0.1rem;
+    padding-right: 50px;
+}
+p.head-left{
+	font-size: 1em;
+    text-align: left;
+    margin: 0.5rem;
+}
+p.inr{
+	font-size: 30px;
+    width: 100%;
+    padding: 25px 2rem 60px 2rem;
+    color: #818181;
+    font-weight: 300;
+    letter-spacing: 5px;
+    color: #313131;
+}
+
+/*headings*/
+p.head-bg{
+	margin:0px;
+	width:40%;
+	color:white;
+	padding: 0.3rem 1rem 0.3rem 1rem;
+	border-radius: 20px;
+	font-size:0.9em;
+	background-color: #2f2f2f;
+    box-shadow: 0 19px 27px 0 rgba(0, 0, 0, 0.09);
+    font-weight: 100;
+    letter-spacing: 0.4px;
+}
+p.head-bg2{
+	width: 100%;
+    box-shadow: 0px 0px 5px 0px #F4F3F3;
+    border-radius: 20px;
+    height: 40px;
+	padding: 0.6rem 1rem 0.3rem 1rem;
+}
+
+.d-flex.resize{
+	width:40%;
+}
+
+/*button styling for this page*/
+.button.right{
+	margin-left: 30%;
+}
+.button.red.resize{
+	font-size: 0.8rem;
+    font-weight: 100;
+    margin: 31px 0.5rem;
+    padding: 0rem 0.5rem;
+    width: 280px;
+    height: 35px;
+    letter-spacing: 0.1rem;
+    border-radius: 3px;
+    background-color: #dc3826;
+    box-shadow: 0 10px 27px 0 rgba(0, 0, 0, 0.13);
+}
+
+/*minute adjustments for margins and positioning*/
+
+.margin-top{
+	margin-top:1em;
+}
+
+.rm-margin-side{
+	padding-left: 0em ;
+}
+.fine{
+	width: 100%;
+    border-radius: 20px 20px 0px 0px;
+    background-color: #F4F3F3;
+    height: 40px;
+}
+
+
+.locate{
+	margin-top:-5rem;
+    right: 38px;
+    position: absolute;
+
+}
+/*search box styling*/
+/*.search{
+	width:100%;
+	border-radius:5px;
+	padding-left: 1rem;
+	box-shadow: 0px 10px 20px 2px rgba(0, 0, 0, 0.4);
+}*/
+
+/*row padding and margin for this page*/
+.row{
+	padding-left:3rem;
+	padding-right:1rem;
+}
+
+
+
+/*aline for table*/
+.line{
+	background-color: #BEBDBD;
+	height:3px;
+}
+
+/*table div and its elements*/
+
+.divTable{
+	margin-left: 4rem;
+	width: 100%;
+}
+.divTableRow {
+	display: table-row;
+}
+
+.divTableCell, .divTableHead {
+	display: table-cell;
+	padding: 3px 10px;
+}
+.divTableBody {
+	display: table-row-group;
+}
+.divTableCell input[type ="button"]{
+	/*padding:3px 15px;*/
+	font-size: 0.7rem;
+	padding:5% 30%;
+}
+
+/*scroll*/
+.scroll{
+	overflow:scroll;
+	background-clip:content-box;
+	background-color: #F4F3F3;
+	height:400px;
+    padding-right: 50px;
+}
+/*scroll bar styling &&stillneedswork*/
+
+/*.scroll::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.scroll::-webkit-scrollbar-button {
+  width: 100px;
+  height: 100px;
+}
+.scroll::-webkit-scrollbar-thumb {
+  background: #5a5a5a;
+  border: 0px ridge #d51010;
+  border-radius: 25px;
+}
+.scroll::-webkit-scrollbar-thumb:hover {
+  background: #5a5a5a;
+}
+.scroll::-webkit-scrollbar-thumb:active {
+  background: #5a5a5a;
+}
+.scroll::-webkit-scrollbar-track {
+  background: #f4f3f3;
+  border: 0px solid #ffffff;
+  border-radius: 0px;
+}
+.scroll::-webkit-scrollbar-track:hover {
+  background: #f4f3f3;
+}
+.scroll::-webkit-scrollbar-track:active {
+  background: #ae3838;
+}
+.scroll::-webkit-scrollbar-corner {
+  background: transparent;
+}
+*/
+
+p i.fa{
+	margin-left:0.5rem;
+}
+
+.periodEntry{
+    font-size: 15px;
+    color: #2f2f2f;
+}
+
+.per-ft-r{
+	display: block;
+    position: relative;
+    right: -160px;
+    top: -18px;
+}
+
+.per-ft-down{
+	display: block;
+    position: relative;
+    right: -190px;
+    top: -34px;
+}
+
+#constrainer {
+   height: 400px;
+   width: 100%;
+}
+
+.scrolltable {
+    overflow-x: scroll;
+    height: 100%;
+}
+
+.scrolltable > .body {
+    width: -webkit-fit-content;
+    overflow-y: scroll;
+}
+
+.scrolltable {
+    display: flex;
+    display: -webkit-flex;
+    flex-direction: column;
+    -webkit-flex-direction: column;
+}
+.scrolltable > .header {
+	width: 100%;
+	margin-top: 5px;
+	border-bottom: 1px solid black
+}
+.scrolltable > .body {
+    flex: 1;
+    -webkit-flex: 1;
+	width: 100%;
+}
+
+td, th {
+    padding-left: 50px;
+    text-align: right;
+	font-size: 12px;
+	padding-top: 15px;
+}
+
+/*th {*/
+    /*!*border-bottom: 1px solid black;*!*/
+    /*padding-left: 60px;*/
+    /*text-align: right;*/
+	/*font-size: 12px;*/
+	/*padding-top: 15px;*/
+/*}*/

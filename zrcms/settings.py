@@ -166,3 +166,37 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static-serve')
 STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 S3_AWS_SEC_KEY_ID = 'AKIAI4Y5NO3K36LXYYVQ'
 S3_AWS_SEC_KEY_SECRET = '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'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format' : "[%(asctime)s] %(levelname)s [%(name)s:%(lineno)s] %(message)s",
+            'datefmt' : "%d/%b/%Y %H:%M:%S"
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'zrcms.log',
+            'formatter': 'verbose'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers':['file'],
+            'propagate': True,
+            'level':'DEBUG',
+        },
+        'MYAPP': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+        },
+    }
+}
+
