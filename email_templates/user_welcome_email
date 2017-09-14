@@ -1,0 +1,11 @@
+Hi there! Thank you for signing up with us and being a part of India's digital transformation.
+
+You can access your dashboard at {{ portal_url }}
+
+Login to {{ portal_url }} using your login credentials stated here:
+
+Your Username: {{ username }}
+Your Password: {{ password }}
+
+Thanks and welcome again!
+Team Zrupee
