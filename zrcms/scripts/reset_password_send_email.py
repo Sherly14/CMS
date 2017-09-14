@@ -13,7 +13,7 @@ import settings  # NOQA
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')  # NOQA
 django.setup()  # NOQA
 
-from django.db.models.fields.related_descriptors import RelatedObjectDoesNotExist:
+from django.db.models.fields.related_descriptors import RelatedObjectDoesNotExist
 
 from common_utils import zrupee_security
 from zruser.utils import constants
