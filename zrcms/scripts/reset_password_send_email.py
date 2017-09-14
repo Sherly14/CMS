@@ -40,4 +40,4 @@ for zruser in zu.ZrUser.objects.filter(
     dj_user.save()
 
     zruser.send_welcome_email(password)
-    print(zruser)
+    print(zruser, zruser.pk)
