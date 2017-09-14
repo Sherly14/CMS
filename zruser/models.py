@@ -9,6 +9,7 @@ from django.db import models
 
 from zruser.utils.constants import KYC_APPROVAL_CHOICES, GENDER_CHOICES, BANK_ACCOUNT_TYPES, BANK_CHANNEL_TYPES
 from zrutils.common.modelutils import RowInfo, get_slugify_value
+from common_utils import email_utils
 
 
 # Create your models here.
@@ -107,6 +108,24 @@ class ZrUser(RowInfo):
 
     def get_full_name(self):
         return '%s - (%s)' % (self.first_name, self.last_name)
+
+    def send_welcome_email(self, password):
+        portal_url = None
+        if self.role.name == 'MERCHANT':
+            portal_url = 'zrupee.com'
+        else:
+            portal_url = 'cms.zrupee.com'
+
+        email_utils.send_email(
+            'Hello and welcome To Zrupee!',
+            self.email,
+            'user_welcome_email',
+            {
+                'username': self.mobile_no,
+                'password': password,
+                'portal_url': portal_url
+            }
+        )
 
     class Meta:
         verbose_name_plural = 'ZrUsers'

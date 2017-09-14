@@ -15,10 +15,11 @@ from django.views.generic import CreateView, DetailView, ListView
 from django.db.models import Sum
 from django.db.models import F
 
-from common_utils import transaction_utils
 from zrcommission import models as commission_models
 from zrtransaction import models as transaction_models
 from common_utils import date_utils
+from common_utils import transaction_utils
+from common_utils import zrupee_security
 from common_utils.date_utils import last_month, last_week_range
 from common_utils.user_utils import is_user_superuser
 from utils import constants
@@ -293,6 +294,17 @@ class KYCRequestsView(ListView):
                 )
                 zruser.is_kyc_verified = True
                 zruser.save(update_fields=['is_kyc_verified'])
+
+                if zruser.is_kyc_verified and status == constants.KYC_APPROVAL_CHOICES[1][0]:
+                    password = zrupee_security.generate_password()
+                    zruser.pass_word = password
+                    zruser.save(update_fields=['pass_word'])
+
+                    dj_user = zruser.zr_user.id
+                    dj_user.set_password(password)
+                    dj_user.save()
+
+                    zruser.send_welcome_email(password)
 
         queryset = ZrUser.objects.filter(
             is_kyc_verified=False
