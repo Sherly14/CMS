@@ -39,10 +39,10 @@ ADMINSTAFF = 'ADMINSTAFF'
 
 def redirect_user(request):
     user = request.user
-    if user.zr_admin_user.role.name == CHECKER:
-        return redirect('user:kyc-requests')
-    elif is_user_superuser(request):
+    if is_user_superuser(request):
         return redirect('user:dashboard')
+    elif user.zr_admin_user.role.name == CHECKER:
+        return redirect('user:kyc-requests')
     else:
         return redirect('user:dashboard')
 
