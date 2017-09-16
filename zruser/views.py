@@ -14,6 +14,7 @@ from django.views import View
 from django.views.generic import CreateView, DetailView, ListView
 from django.db.models import Sum
 from django.db.models import F
+from django.urls import reverse
 
 from zrcommission import models as commission_models
 from zrtransaction import models as transaction_models
@@ -723,8 +724,8 @@ class DistributorCreateView(CreateView):
                 role=merchant_zr_user.role
             )
 
-        #  TODO: Update below url resolution to reverse.
-        return HttpResponseRedirect('/user/distributor_list/')
+        zrwallet_models.Wallet.objects.create(merchant=merchant_zr_user)
+        return HttpResponseRedirect(reverse("user:distributor-list"))
 
 
 class MerchantCreateView(View):
@@ -842,8 +843,7 @@ class MerchantCreateView(View):
             )
 
         zrwallet_models.Wallet.objects.create(merchant=merchant_zr_user)
-        # TODO: Update below url resolution to reverse.
-        return HttpResponseRedirect('/user/merchant_list/')
+        return HttpResponseRedirect(reverse("user:merchant-list"))
 
 
 class SubDistributorCreateView(CreateView):
@@ -967,8 +967,8 @@ class SubDistributorCreateView(CreateView):
                 role=merchant_zr_user.role
             )
 
-        # TODO: Update below url resolution to reverse.
-        return HttpResponseRedirect('/user/distributor_list/')
+        zrwallet_models.Wallet.objects.create(merchant=merchant_zr_user)
+        return HttpResponseRedirect(reverse("user:distributor-list"))
 
 
 class SubDistributorListView(ListView):
