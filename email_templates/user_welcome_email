@@ -1,11 +1,14 @@
 Hi there! Thank you for signing up with us and being a part of India's digital transformation.
+<br /><br />
+<b>Your password has been changed because of few security concerns.</b>
+<br /><br />
 
 You can access your dashboard at {{ portal_url }}
-
+<br /><br />
 Login to {{ portal_url }} using your login credentials stated here:
-
-Your Username: {{ username }}
+<br /><br />
+Your Username: {{ username }}<br />
 Your Password: {{ password }}
-
+<br /><br />
 Thanks and welcome again!
-Team Zrupee
+<br />Team Zrupee

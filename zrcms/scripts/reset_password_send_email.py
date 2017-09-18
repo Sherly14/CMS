@@ -29,14 +29,27 @@ for zruser in zu.ZrUser.objects.filter(
     zruser.pass_word = password
     zruser.save(update_fields=['pass_word'])
 
-    try:
+    if zruser.role.name == 'DISTRIBUTOR':
         dj_user = zruser.zr_user.id
-    except:
+        dj_user.set_password(password)
+        dj_user.save()
         zruser.send_welcome_email(password)
-        continue
+    elif zruser.role.name == 'MERCHANT':
+        zruser.send_welcome_email(password)
+    elif zruser.role.name == 'SUBDISTRIBUTOR':
+        dj_user = zruser.zr_user.id
+        dj_user.set_password(password)
+        dj_user.save()
+        zruser.send_welcome_email(password)
+    elif zruser.role.name == 'CHECKER':
+        dj_user = zruser.zr_user.id
+        dj_user.set_password(password)
+        dj_user.save()
+        zruser.send_welcome_email(password)
+    elif zruser.role.name == 'ADMINSTAFF':
+        dj_user = zruser.zr_user.id
+        dj_user.set_password(password)
+        dj_user.save()
+        zruser.send_welcome_email(password)
 
-    dj_user.set_password(password)
-    dj_user.save()
-
-    zruser.send_welcome_email(password)
     print(zruser, zruser.pk)

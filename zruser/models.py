@@ -116,16 +116,17 @@ class ZrUser(RowInfo):
         else:
             portal_url = 'cms.zrupee.com'
 
-        # email_utils.send_email(
-        #     'Hello and welcome To Zrupee!',
-        #     self.email,
-        #     'user_welcome_email',
-        #     {
-        #         'username': self.mobile_no,
-        #         'password': password,
-        #         'portal_url': portal_url
-        #     }
-        # )
+        email_utils.send_email(
+            'Hello and welcome To Zrupee!',
+            self.email,
+            'user_welcome_email',
+            {
+                'username': self.mobile_no,
+                'password': password,
+                'portal_url': portal_url
+            },
+            is_html=True
+        )
 
     class Meta:
         verbose_name_plural = 'ZrUsers'
