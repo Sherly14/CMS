@@ -497,7 +497,7 @@ class DashBoardView(ListView):
             ))['commission']
 
         total_commission = total_commission if total_commission else 0
-        context['total_commission'] = total_commission
+        context['total_commission'] = "%.2f" % total_commission
 
         if is_user_superuser(self.request):
             '''
