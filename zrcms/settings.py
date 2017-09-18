@@ -171,7 +171,9 @@ FROM_EMAIL = 'noreply@zrupee.com'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'noreply@zrupee.com'
 EMAIL_HOST_PASSWORD = 'm_d@2430'
-EMAIL_USE_TLS = True
+EMAIL_USE_SSL = True
+EMAIL_PORT = 465
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
