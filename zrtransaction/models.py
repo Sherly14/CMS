@@ -176,7 +176,7 @@ class Transaction(RowInfo):
 
     @property
     def dist_net_commission(self):
-        comm_instance = self.commissions.objects.filter(commission_user__role__name=DISTRIBUTOR).last()
+        comm_instance = self.commissions.filter(commission_user__role__name=DISTRIBUTOR).last()
         if comm_instance:
             return comm_instance.net_commission
         return 'NA'
