@@ -1,6 +1,9 @@
 import calendar
 import datetime
 
+import pytz
+IST = pytz.timezone('Asia/Kolkata')
+
 
 def last_week_range():
     date = datetime.date.today()
@@ -40,3 +43,7 @@ def last_month():
     end_date = datetime.date(day=end_date, month=current_month, year=current_year)
 
     return start_date, end_date
+
+
+def utc_to_ist(dt):
+    return dt.astimezone(IST)

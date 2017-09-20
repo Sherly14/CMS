@@ -187,6 +187,9 @@ def get_report_excel(request):
             ('Merchant Name', 'merchant_name'),
             ('Transaction Amount', 'amount'),
             ('Commission Fee', 'commission_fee'),
+            ('Status', 'formatted_status'),
+            ('Created date', 'created_date'),
+            ('Created time', 'created_time'),
 
             ('Merchant Gross Commission', 'merchant_gross_commission'),
             ('Merchant GST', 'merchant_gst'),
@@ -213,6 +216,9 @@ def get_report_excel(request):
             ('Merchant Name', 'merchant_name'),
             ('Transaction Amount', 'amount'),
             ('Commission Fee', 'commission_fee'),
+            ('Status', 'formatted_status'),
+            ('Created date', 'created_date'),
+            ('Created time', 'created_time'),
 
             ('Merchant Gross Commission', 'merchant_gross_commission'),
             ('Merchant GST', 'merchant_gst'),
@@ -232,6 +238,9 @@ def get_report_excel(request):
             ('Merchant Name', 'merchant_name'),
             ('Transaction Amount', 'amount'),
             ('Commission Fee', 'commission_fee'),
+            ('Status', 'formatted_status'),
+            ('Created date', 'created_date'),
+            ('Created time', 'created_time'),
 
             ('Merchant Gross Commission', 'merchant_gross_commission'),
             ('Merchant GST', 'merchant_gst'),

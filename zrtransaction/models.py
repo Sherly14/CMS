@@ -13,6 +13,8 @@ from zruser.mapping import SUBDISTRIBUTOR, DISTRIBUTOR, MERCHANT
 from zruser.models import ZrUser
 from zrutils.common.modelutils import RowInfo, get_slugify_value
 
+from common_utils import date_utils
+
 
 # Create your models here.
 
@@ -99,6 +101,20 @@ class Transaction(RowInfo):
     @property
     def merchant_name(self):
         return self.user.get_full_name()
+    
+    @property
+    def formatted_status(self):
+        for status in TRANSACTION_STATUS:
+            if status[0] == self.status:
+                return status[1]
+
+    @property
+    def created_date(self):
+        return date_utils.utc_to_ist(self.at_created).date().strftime('%d-%m-%Y')
+
+    @property
+    def created_time(self):
+        return date_utils.utc_to_ist(self.at_created).strftime('%H:%M:%S')
 
     @property
     def distributor_name(self):
