@@ -126,54 +126,43 @@ class Transaction(RowInfo):
         return 'NA'
 
     @property
-    def subdistributor_commission(self):
-        commission_fee = 0
-        com_instance = Commission.objects.filter(commission_user__role__name=SUBDISTRIBUTOR).last()
-        if com_instance:
-            if com_instance.bill_payment_comm_structure:
-                commission_fee = com_instance.bill_payment_comm_structure.net_margin
-            elif com_instance.dmt_comm_structure:
-                commission_fee = com_instance.dmt_comm_structure.customer_fee
-        return commission_fee
-
-    @property
     def sub_dist_gross_commission(self):
-        comm_instance = Commission.objects.filter(commission_user__role__name=SUBDISTRIBUTOR).last()
+        comm_instance = self.commissions.filter(commission_user__role__name=SUBDISTRIBUTOR).last()
         if comm_instance:
             return comm_instance.gross_amount()
         return 'NA'
 
     @property
     def sub_dist_gst(self):
-        comm_instance = Commission.objects.filter(commission_user__role__name=SUBDISTRIBUTOR).last()
+        comm_instance = self.commissions.filter(commission_user__role__name=SUBDISTRIBUTOR).last()
         if comm_instance:
             return comm_instance.user_gst
         return 'NA'
 
     @property
     def sub_dist_tds(self):
-        comm_instance = Commission.objects.filter(commission_user__role__name=SUBDISTRIBUTOR).last()
+        comm_instance = self.commissions.filter(commission_user__role__name=SUBDISTRIBUTOR).last()
         if comm_instance:
             return comm_instance.user_tds
         return 'NA'
 
     @property
     def sub_dist_net_commission(self):
-        comm_instance = Commission.objects.filter(commission_user__role__name=SUBDISTRIBUTOR).last()
+        comm_instance = self.commissions.filter(commission_user__role__name=SUBDISTRIBUTOR).last()
         if comm_instance:
             return comm_instance.net_commission
         return 'NA'
 
     @property
     def dist_gross_commission(self):
-        comm_instance = Commission.objects.filter(commission_user__role__name=DISTRIBUTOR).last()
+        comm_instance = self.commissions.filter(commission_user__role__name=DISTRIBUTOR).last()
         if comm_instance:
             return comm_instance.gross_amount()
         return 'NA'
 
     @property
     def dist_gst(self):
-        comm_instance = Commission.objects.filter(commission_user__role__name=DISTRIBUTOR).last()
+        comm_instance = self.commissions.filter(commission_user__role__name=DISTRIBUTOR).last()
         if comm_instance:
             return comm_instance.user_gst
         return 'NA'
@@ -201,28 +190,28 @@ class Transaction(RowInfo):
 
     @property
     def merchant_gst(self):
-        comm_instance = self.commissions.filter(commission_user__role__name=DISTRIBUTOR).last()
+        comm_instance = self.commissions.filter(commission_user__role__name=MERCHANT).last()
         if comm_instance:
             return comm_instance.user_gst
         return 'NA'
 
     @property
     def merchant_tds(self):
-        comm_instance = self.commissions.filter(commission_user__role__name=DISTRIBUTOR).last()
+        comm_instance = self.commissions.filter(commission_user__role__name=MERCHANT).last()
         if comm_instance:
             return comm_instance.user_tds
         return 'NA'
 
     @property
     def merchant_net_commission(self):
-        comm_instance = self.commissions.filter(commission_user__role__name=DISTRIBUTOR).last()
+        comm_instance = self.commissions.filter(commission_user__role__name=MERCHANT).last()
         if comm_instance:
             return comm_instance.net_commission
         return 'NA'
 
     @property
     def admin_net_commission(self):
-        comm_instance = self.commissions.all().last()
+        comm_instance = self.commissions.all().filter(commission_user=None).last()
         if comm_instance:
             return comm_instance.net_commission
         return 'NA'
