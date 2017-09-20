@@ -8,10 +8,13 @@ from urllib import urlencode
 from django.contrib.auth import login, models as dj_auth_models
 from django.core.paginator import EmptyPage, Paginator
 from django.db import transaction
+from django.db.models import F
+from django.db.models import Sum
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView
+
 from django.db.models import Sum
 from django.db.models import F
 from django.urls import reverse
@@ -22,9 +25,14 @@ from common_utils import date_utils
 from common_utils import transaction_utils
 from common_utils import zrupee_security
 from common_utils.date_utils import last_month, last_week_range
+from common_utils.report_util import get_excel_doc
 from common_utils.user_utils import is_user_superuser
+from mapping import *
 from utils import constants
+from zrcommission import models as commission_models
 from zrmapping import models as zrmappings_models
+from zrtransaction import models as transaction_models
+from zrtransaction.views import get_transactions_qs
 from zruser import forms as zr_user_form
 from zruser.models import ZrUser, UserRole, ZrAdminUser, KYCDocumentType, KYCDetail
 from zruser.utils.constants import DEFAULT_DISTRIBUTOR_MOBILE_NUMBER
@@ -166,6 +174,95 @@ def get_merchant_csv(request):
             ]
         )
 
+    return response
+
+
+def get_report_excel(request):
+    # TODO: Commission fee
+    if is_user_superuser(request):
+        DOC_HEADERS = (
+            ('Transaction Type', 'type.name'),
+            ('Transaction ID', 'pk'),
+            ('Distributor Name', 'distributor_name'),
+            ('Merchant Name', 'merchant_name'),
+            ('Transaction Amount', 'amount'),
+            ('Commission Fee', 'distributor_commission'),
+
+            ('Merchant Gross Commission', 'merchant_gross_commission'),
+            ('Merchant GST', 'merchant_gst'),
+            ('Merchant TDS', 'merchant_tds'),
+            ('Merchant Net Commission', 'merchant_net_commission'),
+
+            ('Distributor Gross Commission', 'dist_gross_commission'),
+            ('Distributor GST', 'dist_gst'),
+            ('Distributor TDS', 'dist_tds'),
+            ('Distributor Net Commission', 'dist_net_commission'),
+
+            ('Sub-Distributor Gross Commission', 'sub_dist_gross_commission'),
+            ('Sub-Distributor GST', 'sub_dist_gst'),
+            ('Sub-Distributor  TDS', 'sub_dist_tds'),
+            ('Sub-Distributor  Net Commission', 'sub_dist_net_commission'),
+
+            ('Zrupee Net Commission', 'admin_net_commission'),
+        )
+    elif transaction_utils.is_sub_distributor(request.user.zr_admin_user.zr_user):
+        DOC_HEADERS = (
+            ('Transaction Type', 'type.name'),
+            ('Transaction ID', 'pk'),
+            ('Distributor Name', 'distributor_name'),
+            ('Merchant Name', 'merchant_name'),
+            ('Transaction Amount', 'amount'),
+            ('Commission Fee', 'distributor_commission'),
+
+            ('Merchant Gross Commission', 'merchant_gross_commission'),
+            ('Merchant GST', 'merchant_gst'),
+            ('Merchant TDS', 'merchant_tds'),
+            ('Merchant Net Commission', 'merchant_net_commission'),
+
+            ('Sub-Distributor Gross Commission', 'sub_dist_gross_commission'),
+            ('Sub-Distributor GST', 'sub_dist_gst'),
+            ('Sub-Distributor  TDS', 'sub_dist_tds'),
+            ('Sub-Distributor  Net Commission', 'sub_dist_net_commission'),
+        )
+    elif request.user.zr_admin_user.role.name == DISTRIBUTOR:
+        DOC_HEADERS = (
+            ('Transaction Type', 'type.name'),
+            ('Transaction ID', 'pk'),
+            ('Distributor Name', 'distributor_name'),
+            ('Merchant Name', 'merchant_name'),
+            ('Transaction Amount', 'amount'),
+            ('Commission Fee', 'distributor_commission'),
+
+            ('Merchant Gross Commission', 'merchant_gross_commission'),
+            ('Merchant GST', 'merchant_gst'),
+            ('Merchant TDS', 'merchant_tds'),
+            ('Merchant Net Commission', 'merchant_net_commission'),
+
+            ('Distributor Gross Commission', 'dist_gross_commission'),
+            ('Distributor GST', 'dist_gst'),
+            ('Distributor TDS', 'dist_tds'),
+            ('Distributor Net Commission', 'dist_net_commission'),
+
+            ('Sub-Distributor Gross Commission', 'sub_dist_gross_commission'),
+            ('Sub-Distributor GST', 'sub_dist_gst'),
+            ('Sub-Distributor  TDS', 'sub_dist_tds'),
+            ('Sub-Distributor  Net Commission', 'sub_dist_net_commission'),
+        )
+    else:
+        DOC_HEADERS = (
+            ('Transaction Type', 'type.name'),
+            ('Transaction ID', 'pk'),
+        )
+    # today = datetime.datetime.today()
+    filename = 'report'
+    transactions_qs = get_transactions_qs(request)
+
+    xlsx_data = get_excel_doc(request, transactions_qs, "Transaction Report",
+                              DOC_HEADERS
+                              )
+    response = HttpResponse(content_type='application/vnd.ms-excel')
+    response['Content-Disposition'] = 'attachement; filename={0}.xlsx'.format(filename)
+    response.write(xlsx_data)
     return response
 
 
@@ -322,8 +419,7 @@ class DistributorDetailView(DetailView):
 def get_distributor_qs(request):
     queryset = ZrUser.objects.filter(role__name=DISTRIBUTOR).order_by('-at_created')
     q = request.GET.get('q')
-    filter = request.GET.get('filter')
-
+    filter = request.GET.get('filter', 'All')
     if q:
         queryset = queryset.filter(
             first_name__contains=q,
@@ -479,7 +575,6 @@ class DashBoardView(ListView):
             dt_filter['at_created__range'] = date_utils.last_month()
 
         context = super(DashBoardView, self).get_context_data(*args, **kwargs)
-        total_commission = 0
         if is_user_superuser(self.request):
             total_commission = commission_models.Commission.objects.filter(
                 commission_user=None,
@@ -521,7 +616,8 @@ class DashBoardView(ListView):
             ).aggregate(
                 value=Sum('amount')
             )['value']
-            context["dmt_transaction_value"] = context["dmt_transaction_value"] if context["dmt_transaction_value"] else 0
+            context["dmt_transaction_value"] = context["dmt_transaction_value"] if context[
+                "dmt_transaction_value"] else 0
             context["bill_pay_transaction_value"] = transaction_models.Transaction.objects.filter(
                 **dt_filter
             ).exclude(
@@ -529,7 +625,8 @@ class DashBoardView(ListView):
             ).aggregate(
                 value=Sum('amount')
             )['value']
-            context["bill_pay_transaction_value"] = context["bill_pay_transaction_value"] if context["bill_pay_transaction_value"] else 0
+            context["bill_pay_transaction_value"] = context["bill_pay_transaction_value"] if context[
+                "bill_pay_transaction_value"] else 0
 
             '''
             Total commission value
@@ -550,7 +647,8 @@ class DashBoardView(ListView):
             ).aggregate(
                 value=Sum('user_commission')
             )['value']
-            context["total_bill_pay_commission_value"] = context["total_bill_pay_commission_value"] if context["total_bill_pay_commission_value"] else 0
+            context["total_bill_pay_commission_value"] = context["total_bill_pay_commission_value"] if context[
+                "total_bill_pay_commission_value"] else 0
         else:
             merchants = transaction_utils.get_merchants_from_distributor(
                 self.request.user.zr_admin_user.zr_user
@@ -575,7 +673,8 @@ class DashBoardView(ListView):
             ).aggregate(
                 value=Sum('amount')
             )['value']
-            context["dmt_transaction_value"] = context["dmt_transaction_value"] if context["dmt_transaction_value"] else 0
+            context["dmt_transaction_value"] = context["dmt_transaction_value"] if context[
+                "dmt_transaction_value"] else 0
             context["bill_pay_transaction_value"] = transaction_models.Transaction.objects.filter(
                 user__id__in=merchants,
                 **dt_filter
@@ -585,7 +684,8 @@ class DashBoardView(ListView):
                 value=Sum('amount')
             )['value']
 
-            context["bill_pay_transaction_value"] = context["bill_pay_transaction_value"] if context["bill_pay_transaction_value"] else 0
+            context["bill_pay_transaction_value"] = context["bill_pay_transaction_value"] if context[
+                "bill_pay_transaction_value"] else 0
             context["dmt_commission_value"] = commission_models.Commission.objects.filter(
                 transaction__type__name='DMT',
                 commission_user=self.request.user.zr_admin_user.zr_user
@@ -601,7 +701,8 @@ class DashBoardView(ListView):
             ).aggregate(
                 value=Sum('user_commission')
             )['value']
-            context["total_bill_pay_commission_value"] = context["total_bill_pay_commission_value"] if context["total_bill_pay_commission_value"] else 0
+            context["total_bill_pay_commission_value"] = context["total_bill_pay_commission_value"] if context[
+                "total_bill_pay_commission_value"] else 0
 
         zr_admin_user = self.request.user.zr_admin_user
         if self.request.user.zr_admin_user.role.name == DISTRIBUTOR:

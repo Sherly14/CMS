@@ -13,55 +13,104 @@
         </div>
         <div class="row">
             <div class="d-flex justify-content-between" style="width:90%">
-                <select>
-                    <option>Today</option>
-                    <option>Last Week</option>
-                    <option>Last Month</option>
+                <select id="period">
+                    <option value="All" {% if filter_by == "All" %}selected{% endif %}>All</option>
+                    <option value="Today" {% if filter_by == "Today" %}selected{% endif %}>Today</option>
+                    <option value="Last Week" {% if filter_by == "Last-Week" %}selected{% endif %}>Last Week</option>
+                    <option value="Last Month" {% if filter_by == "Last-Month" %}selected{% endif %}>Last Month</option>
                 </select>
                 <div style="position: relative;">
-                    <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                    <input class="search" id="search-txt" type="search" name="search" value="{{ q }}"
+                           placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
                     <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
                 </div>
-                <input class="button red" type="button" value="DOWNLOAD CSV">
+                <input class="button red" type="button" value="Search" id="search-btn">
+                <a class="nav-link" href="{% url 'transaction:transaction-list' %}">Reset filters</a>
+                <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
+                <input hidden id="is_data_exists" value="{% if queryset %}1{% else %}0{% endif %}">
             </div>
         </div>
         <br>
-            <div class="row" style="padding-right: 50px;">
-                <div class="fine">
-                    <p class="head-bg head-bg2">Transactions</p>
-                </div>
+        <div class="row" style="padding-right: 50px;">
+            <div class="fine">
+                <p class="head-bg head-bg2">Transactions</p>
             </div>
-            <div class="row scroll">
+        </div>
+        <div class="row scroll">
 
-                <div style="width: 100%;">
-                    <table>
+            <div style="width: 100%;">
+                <table>
+                    <tr>
+                        <th>Merchant Id</th>
+                        <th>Vendor Txn Id</th>
+                        <th>status</th>
+                        <th>Amount</th>
+                        <th>Type</th>
+                        <th>Mobile number</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Additional charges</th>
+                        <th>Transaction type</th>
+                        <th>Service provider</th>
+                    </tr>
+                    {% for transaction in queryset %}
                         <tr>
-                            <th>Merchant Id</th>
-                            <th>Vendor Txn Id</th>
-                            <th>status</th>
-                            <th>Amount</th>
-                            <th>Type</th>
-                            <th>Amount</th>
+                            <td>{{ transaction.user.id }}</td>
+                            <td>{{ transaction.vendor_txn_id }}</td>
+                            <td>{{ transaction.get_status_display }}</td>
+                            <td>{{ transaction.amount }}</td>
+                            <td>{{ transaction.type }}</td>
+                            <td>{{ transaction.user.mobile_no }}</td>
+                            <td>{{ transaction.customer }}</td>
+                            <td>{{ transaction.amount }}</td>
+                            <td>{{ transaction.additional_charges }}</td>
+                            <td>{{ transaction.type }}</td>
+                            <td>{{ transaction.service_provider.name }}</td>
                         </tr>
-                        {% for transaction in transaction_list %}
-                            <tr>
-                                <td>{{ transaction.merchant.id }}</td>
-                                <td>{{ transaction.vendor_txn_id }}</td>
-                                <td>{{ transaction.get_status_display }}</td>
-                                <td>{{ transaction.amount }}</td>
-                                <td>{{ transaction.type }}</td>
-                                <td>{{ transaction.amount }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-                </div>
-
+                    {% endfor %}
+                </table>
             </div>
-            <br>
+            {% if has_prev_page %}
+                <a href="{% url 'transaction:transaction-list' %}?{{ prev_page_qs }}">Prev</a>
+            {% endif %}
+
+            {% if has_next_page %}
+                <a href="{% url 'transaction:transaction-list' %}?{{ next_page_qs }}">Next</a>
+            {% endif %}
+
+        </div>
+        <br>
     </div>
 
+    <script>
+        $('#search-btn').click(function () {
+            {% if filter_by %}
+                url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}";
+            {% else %}
+                url = window.location.pathname + "?q=" + $('#search-txt').val();
+            {% endif %}
+            window.location.assign(url)
+        });
 
+        $('#period').change(function () {
+            period_val = $(this).val();
+            url = window.location.pathname + '?filter=' + period_val.replace(' ', '-');
+            {% if q %}
+                url += "&q={{ q }}";
+            {% endif %}
+            window.location.assign(url)
+        });
 
-
+        $('#csv-download').click(function () {
+            if($("#is_data_exists").val() == "1"){
+            url = "{% url 'transaction:transaction-csv' %}" + window.location.search;
+            console.log(url);
+            window.location.assign(url)
+            }
+            else {
+                alert("No data available to download!!");
+            }
+        });
+    </script>
 {% endblock %}
 

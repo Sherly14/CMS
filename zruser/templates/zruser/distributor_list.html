@@ -12,6 +12,7 @@
         <div class="row">
             <div class="d-flex justify-content-between" style="width:90%">
                 <select id="period">
+                    <option value="All" {% if filter_by == "All" %}selected{% endif %}>All</option>
                     <option value="Today" {% if filter_by == "Today" %}selected{% endif %}>Today</option>
                     <option value="Last Week" {% if filter_by == "Last-Week" %}selected{% endif %}>Last Week</option>
                     <option value="Last Month" {% if filter_by == "Last-Month" %}selected{% endif %}>Last Month</option>
@@ -47,13 +48,6 @@
                     </tr>
                     {% for distributor in queryset %}
                         <tr>
-{#                            <td>{{ distributor.id }}</td>#}
-{#                            <td>{{ distributor.first_name }} {{ distributor.last_name |default_if_none:""}}</td>#}
-{#                            <td>{{ distributor.state }}</td>#}
-{#                            <td>{{ distributor.email }}</td>#}
-{#                            <td>{{ distributor.is_active }}</td>#}
-{#                            <td>{{ distributor. }}</td>#}
-
                             <td>{{ distributor.id }}</td>
                             <td>{{ distributor.first_name }} {{ distributor.last_name|default_if_none:""}}</td>
                             <td>{{ distributor.at_created }}</td>
@@ -89,25 +83,25 @@
 <script>
     $('#search-btn').click(function(){
         {% if filter_by %}
-            url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}"
+            url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}";
         {% else %}
-            url = window.location.pathname + "?q=" + $('#search-txt').val()
+            url = window.location.pathname + "?q=" + $('#search-txt').val();
         {% endif %}
         window.location.assign(url)
-    })
+    });
 
     $('#period').change(function() {
-        period_val = $(this).val()
-        url = window.location.pathname + '?filter=' + period_val.replace(' ', '-')
+        period_val = $(this).val();
+        url = window.location.pathname + '?filter=' + period_val.replace(' ', '-');
         {% if q %}
-            url += "&q={{ q }}"
+            url += "&q={{ q }}";
         {% endif %}
         window.location.assign(url)
-    })
+    });
 
     $('#csv-download').click(function(){
-        url = "{% url "user:distributor-csv" %}" + window.location.search
+        url = "{% url "user:distributor-csv" %}" + window.location.search;
         window.location.assign(url)
-    })
+    });
 </script>
 {% endblock %}

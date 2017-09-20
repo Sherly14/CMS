@@ -5,6 +5,8 @@ from django.db import transaction as dj_transaction
 from zrtransaction import models as zr_transaction_models
 from zrmapping import models as zr_mapping_models
 from zrcommission import models as zr_commission_models
+from zrmapping import models as zr_mapping_models
+from zrtransaction import models as zr_transaction_models
 
 
 def get_sub_distributor(distributor):
@@ -15,6 +17,26 @@ def get_sub_distributor(distributor):
         return mapping.sub_distributor
     else:
         return None
+
+
+def get_merchant_id_list_from_distributor(distributor):
+    return list(zr_mapping_models.DistributorMerchant.objects.filter(distributor=distributor).values_list(
+        'merchant_id', flat=True))
+
+
+def get_sub_distributor_id_list_from_distributor(distributor):
+    return list(zr_mapping_models.DistributorSubDistributor.objects.filter(distributor=distributor).values_list(
+        'sub_distributor_id', flat=True))
+
+
+def get_sub_distributor_merchant_id_list_from_distributor(distributor):
+    return list(zr_mapping_models.SubDistributorMerchant.objects.filter(sub_distributor_id__in=get_sub_distributor_id_list_from_distributor(distributor)).values_list(
+        'sub_distributor_id', flat=True))
+
+
+def get_sub_distributor_merchant_id_list_from_sub_distributor(sub_distributor):
+    return list(zr_mapping_models.SubDistributorMerchant.objects.filter(sub_distributor=sub_distributor).values_list(
+        'sub_distributor_id', flat=True))
 
 
 def is_sub_distributor(distributor):
@@ -119,9 +141,6 @@ def calculate_commission():
             customer_fee = (transaction.amount * dmt_commission_struct.customer_fee) / 100
             if customer_fee < dmt_commission_struct.min_charge:
                 customer_fee = dmt_commission_struct.min_charge
-
-        if transaction.pk == 80:
-            import pdb; pdb.set_trace()
 
         # For merchant
         distributor = get_main_distributor_from_merchant(merchant)

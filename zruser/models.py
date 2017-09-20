@@ -107,7 +107,10 @@ class ZrUser(RowInfo):
         return check_password(password, self.pass_word)
 
     def get_full_name(self):
-        return '%s - (%s)' % (self.first_name, self.last_name)
+        if self.last_name:
+            return '%s %s' % (self.first_name, self.last_name)
+        else:
+            return self.first_name
 
     def send_welcome_email(self, password):
         portal_url = None

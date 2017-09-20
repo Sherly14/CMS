@@ -32,7 +32,7 @@
                 </div>
                 <div class="col-xl-9 col-sm-6 mb-3">
                     <div class="mr-5 textAlignRight dashboard">Dashboard</div>
-                    <input type="button" value="DOWNLOAD CSV" style="float: right;" class ="button red downloadcsv mr-5">
+                    <input id="csv-download" type="button" value="DOWNLOAD REPORT" style="float: right;" class ="button red downloadcsv mr-5">
                 </div>
             </div>
 
@@ -189,6 +189,12 @@
 
         $('#last-month').click(function() {
             window.location.assign('{% url "user:dashboard" %}?period=last-month')
+        });
+
+        $('#csv-download').click(function () {
+            url = "{% url 'user:get-report-excel' %}" + window.location.search;
+            console.log(url)
+            window.location.assign(url)
         });
     </script>
 {% endblock %}

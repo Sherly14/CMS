@@ -6,8 +6,10 @@ from decimal import Decimal
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 
-from zrcommission import models as zc
+from zrcommission.models import Commission
+from zrmapping.models import SubDistributorMerchant, DistributorMerchant
 from zrtransaction.utils.constants import TRANSACTION_STATUS
+from zruser.mapping import SUBDISTRIBUTOR, DISTRIBUTOR, MERCHANT
 from zruser.models import ZrUser
 from zrutils.common.modelutils import RowInfo, get_slugify_value
 
@@ -15,7 +17,6 @@ from zrutils.common.modelutils import RowInfo, get_slugify_value
 # Create your models here.
 
 class TransactionType(RowInfo):
-
     name = models.CharField(max_length=128)
 
     def save(self, *args, **kwargs):
@@ -31,7 +32,6 @@ class TransactionType(RowInfo):
 
 
 class Vendor(RowInfo):
-
     name = models.CharField(max_length=128)
 
     def save(self, *args, **kwargs):
@@ -47,7 +47,6 @@ class Vendor(RowInfo):
 
 
 class ServiceProvider(RowInfo):
-
     name = models.CharField(max_length=512)
     code = models.CharField(max_length=256)
     min_amount = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
@@ -97,9 +96,137 @@ class Transaction(RowInfo):
     def __unicode__(self):
         return '%s - %s - %s' % (self.status, self.amount, self.type)
 
+    @property
+    def merchant_name(self):
+        return self.user.get_full_name()
+
+    @property
+    def distributor_name(self):
+        name = ""
+        distributor_instance = SubDistributorMerchant.objects.filter(merchant=self.user).first()
+        if distributor_instance:
+            name = distributor_instance.sub_distributor.get_full_name()
+        else:
+            distributor_instance = DistributorMerchant.objects.filter(merchant=self.user).first()
+            if distributor_instance:
+                name = distributor_instance.distributor.get_full_name()
+        return name
+
+    @property
+    def distributor_commission(self):
+        commission_fee = 0
+        com_instance = Commission.objects.filter(commission_user__role__name=DISTRIBUTOR).last()
+        if com_instance:
+            if com_instance.bill_payment_comm_structure:
+                commission_fee = com_instance.bill_payment_comm_structure.net_margin
+            elif com_instance.dmt_comm_structure:
+                commission_fee = com_instance.dmt_comm_structure.customer_fee
+        return commission_fee
+
+    @property
+    def subdistributor_commission(self):
+        commission_fee = 0
+        com_instance = Commission.objects.filter(commission_user__role__name=SUBDISTRIBUTOR).last()
+        if com_instance:
+            if com_instance.bill_payment_comm_structure:
+                commission_fee = com_instance.bill_payment_comm_structure.net_margin
+            elif com_instance.dmt_comm_structure:
+                commission_fee = com_instance.dmt_comm_structure.customer_fee
+        return commission_fee
+
+    @property
+    def sub_dist_gross_commission(self):
+        comm_instance = Commission.objects.filter(commission_user__role__name=SUBDISTRIBUTOR).last()
+        if comm_instance:
+            return comm_instance.gross_amount()
+        return 0
+
+    @property
+    def sub_dist_gst(self):
+        comm_instance = Commission.objects.filter(commission_user__role__name=SUBDISTRIBUTOR).last()
+        if comm_instance:
+            return comm_instance.user_gst
+        return 0
+
+    @property
+    def sub_dist_tds(self):
+        comm_instance = Commission.objects.filter(commission_user__role__name=SUBDISTRIBUTOR).last()
+        if comm_instance:
+            return comm_instance.user_tds
+        return 0
+
+    @property
+    def sub_dist_net_commission(self):
+        comm_instance = Commission.objects.filter(commission_user__role__name=SUBDISTRIBUTOR).last()
+        if comm_instance:
+            return comm_instance.net_commission
+        return 0
+
+    @property
+    def dist_gross_commission(self):
+        comm_instance = Commission.objects.filter(commission_user__role__name=DISTRIBUTOR).last()
+        if comm_instance:
+            return comm_instance.gross_amount()
+        return 0
+
+    @property
+    def dist_gst(self):
+        comm_instance = Commission.objects.filter(commission_user__role__name=DISTRIBUTOR).last()
+        if comm_instance:
+            return comm_instance.user_gst
+        return 0
+
+    @property
+    def dist_tds(self):
+        comm_instance = Commission.objects.filter(commission_user__role__name=DISTRIBUTOR).last()
+        if comm_instance:
+            return comm_instance.user_tds
+        return 0
+
+    @property
+    def dist_net_commission(self):
+        comm_instance = Commission.objects.filter(commission_user__role__name=DISTRIBUTOR).last()
+        if comm_instance:
+            return comm_instance.net_commission
+        return 0
+
+    @property
+    def merchant_gross_commission(self):
+        comm_instance = Commission.objects.filter(commission_user__role__name=MERCHANT).last()
+        if comm_instance:
+            return comm_instance.gross_amount()
+        return 0
+
+    @property
+    def merchant_gst(self):
+        comm_instance = Commission.objects.filter(commission_user__role__name=DISTRIBUTOR).last()
+        if comm_instance:
+            return comm_instance.user_gst
+        return 0
+
+    @property
+    def merchant_tds(self):
+        comm_instance = Commission.objects.filter(commission_user__role__name=DISTRIBUTOR).last()
+        if comm_instance:
+            return comm_instance.user_tds
+        return 0
+
+    @property
+    def merchant_net_commission(self):
+        comm_instance = Commission.objects.filter(commission_user__role__name=DISTRIBUTOR).last()
+        if comm_instance:
+            return comm_instance.net_commission
+        return 0
+
+    @property
+    def admin_net_commission(self):
+        comm_instance = Commission.objects.all().last()
+        if comm_instance:
+            return comm_instance.net_commission
+        return 0
+
 
 class ServiceCircle(RowInfo):
-
     name = models.CharField(max_length=512)
     code = models.CharField(max_length=256)
     is_enabled = models.BooleanField(default=True)
