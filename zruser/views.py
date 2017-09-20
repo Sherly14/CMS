@@ -186,7 +186,7 @@ def get_report_excel(request):
             ('Distributor Name', 'distributor_name'),
             ('Merchant Name', 'merchant_name'),
             ('Transaction Amount', 'amount'),
-            ('Commission Fee', 'distributor_commission'),
+            ('Commission Fee', 'commission_fee'),
 
             ('Merchant Gross Commission', 'merchant_gross_commission'),
             ('Merchant GST', 'merchant_gst'),
@@ -212,7 +212,7 @@ def get_report_excel(request):
             ('Distributor Name', 'distributor_name'),
             ('Merchant Name', 'merchant_name'),
             ('Transaction Amount', 'amount'),
-            ('Commission Fee', 'distributor_commission'),
+            ('Commission Fee', 'commission_fee'),
 
             ('Merchant Gross Commission', 'merchant_gross_commission'),
             ('Merchant GST', 'merchant_gst'),
@@ -231,7 +231,7 @@ def get_report_excel(request):
             ('Distributor Name', 'distributor_name'),
             ('Merchant Name', 'merchant_name'),
             ('Transaction Amount', 'amount'),
-            ('Commission Fee', 'distributor_commission'),
+            ('Commission Fee', 'commission_fee'),
 
             ('Merchant Gross Commission', 'merchant_gross_commission'),
             ('Merchant GST', 'merchant_gst'),

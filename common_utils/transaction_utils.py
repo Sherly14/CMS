@@ -2,7 +2,6 @@ import decimal
 
 from django.db import transaction as dj_transaction
 
-from zrtransaction import models as zr_transaction_models
 from zrmapping import models as zr_mapping_models
 from zrcommission import models as zr_commission_models
 from zrmapping import models as zr_mapping_models
