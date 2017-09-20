@@ -1,0 +1,8 @@
+Hi ! Some error occurred while polling of EKO transaction status.
+<br /><br />
+
+Request URL: {{ url }}
+
+<br /><br />
+
+Request Payload: {{ response_json }}
