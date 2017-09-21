@@ -109,6 +109,3 @@ def poll_transaction_status_for_refund():
                 else:
                     transaction.transaction_response_json['poll_refunded_response'] = json.dump(response_data)
                 transaction.save()
-
-
-poll_transaction_status_for_refund()
