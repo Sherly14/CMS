@@ -303,3 +303,5 @@ def calculate_commission():
         transaction.is_commission_created = True
         transaction.save(update_fields=['is_commission_created'])
         print(transaction)
+
+

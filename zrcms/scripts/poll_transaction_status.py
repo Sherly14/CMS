@@ -1,8 +1,9 @@
 import json
-from time import sleep
 
 import requests
+from time import sleep
 
+from common_utils import email_utils
 from zrcms.env_vars import EKO_DEVELOPER_KEY, EKO_INITIATOR_ID, EKO_TRANSACTION_ENQUIRY_URL
 from zrtransaction.models import Transaction
 from zrtransaction.utils.constants import POLL_EXCLUDED_STATUS, TX_STATUS_AWAITED, TX_STATUS_FAIL, \
@@ -47,7 +48,17 @@ def poll_transaction_status_for_refund():
                     transaction.transaction_response_json['poll_failure_response'] = json.dump(response_data)
                 transaction.save()
 
-            #     send a mail to the zrupee tech
+                #     send a mail to the zrupee tech
+                email_utils.send_email(
+                    'Error in EKO refund polling!',
+                    'tech@zrupee.com',
+                    'payment_status_error',
+                    {
+                        'url': url,
+                        'response_json': json.dump(response_data)
+                    },
+                    is_html=True
+                )
 
             elif response_data['data']['tx_status'] == TX_STATUS_AWAITED:
                 pass

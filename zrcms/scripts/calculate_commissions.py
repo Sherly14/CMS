@@ -14,3 +14,6 @@ django.setup()  # NOQA
 
 from common_utils import transaction_utils
 transaction_utils.calculate_commission()
+
+from zrcms.scripts import poll_transaction_status
+poll_transaction_status.poll_transaction_status_for_refund()
