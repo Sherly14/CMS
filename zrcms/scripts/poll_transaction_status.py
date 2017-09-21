@@ -19,15 +19,16 @@ def poll_transaction_status_for_refund():
     print 'polling transaction status for queryset ', transactions
 
     for transaction in transactions:
-        sleep(2)
+        sleep(1)
         txn_id = transaction.vendor_txn_id
         headers = {'developer_key': EKO_DEVELOPER_KEY, 'cache-control': "no-cache"}
         url = EKO_TRANSACTION_ENQUIRY_URL + txn_id + '?initiator_id=' + EKO_INITIATOR_ID
         print 'making eko api request ', 'URL: ', url, 'headers: ', headers
         response_data = requests.get(url, headers=headers).json()
+        print response_data, response_data['status']
 
         # refer to eko documentation for tx_status responses http://developers.eko.co.in/docs/index.html
-        if response_data['status'] == "0":
+        if response_data['status'] == 0:
             if response_data['data']['tx_status'] == TX_STATUS_SUCCESS:
                 transaction.status = TRANSACTION_STATUS_SUCCESS
                 transaction.save()
