@@ -1,7 +1,7 @@
 import json
+from time import sleep
 
 import requests
-from time import sleep
 
 from common_utils import email_utils
 from zrcms.env_vars import EKO_DEVELOPER_KEY, EKO_INITIATOR_ID, EKO_TRANSACTION_ENQUIRY_URL
@@ -29,24 +29,25 @@ def poll_transaction_status_for_refund():
 
         # refer to eko documentation for tx_status responses http://developers.eko.co.in/docs/index.html
         if response_data['status'] == 0:
-            if response_data['data']['tx_status'] == TX_STATUS_SUCCESS:
+            if int(response_data['data']['tx_status']) == TX_STATUS_SUCCESS:
+                print ' transaction ', transaction.vendor_txn_id
                 transaction.status = TRANSACTION_STATUS_SUCCESS
                 transaction.save()
 
                 if transaction.transaction_response_json is None:
-                    transaction.transaction_response_json = dict(poll_success_response=json.dump(response_data))
+                    transaction.transaction_response_json = dict(poll_success_response=json.dumps(response_data))
                 else:
-                    transaction.transaction_response_json['poll_success_response'] = json.dump(response_data)
+                    transaction.transaction_response_json['poll_success_response'] = json.dumps(response_data)
                 transaction.save()
 
-            elif response_data['data']['tx_status'] == TX_STATUS_FAIL:
+            elif int(response_data['data']['tx_status']) == TX_STATUS_FAIL:
                 # transaction.status = TRANSACTION_STATUS_FAILURE
                 transaction.save()
 
                 if transaction.transaction_response_json is None:
-                    transaction.transaction_response_json = dict(poll_failure_response=json.dump(response_data))
+                    transaction.transaction_response_json = dict(poll_failure_response=json.dumps(response_data))
                 else:
-                    transaction.transaction_response_json['poll_failure_response'] = json.dump(response_data)
+                    transaction.transaction_response_json['poll_failure_response'] = json.dumps(response_data)
                 transaction.save()
 
                 #     send a mail to the zrupee tech
@@ -56,28 +57,27 @@ def poll_transaction_status_for_refund():
                     'payment_status_error',
                     {
                         'url': url,
-                        'response_json': json.dump(response_data)
+                        'response_json': json.dumps(response_data)
                     },
                     is_html=True
                 )
 
-            elif response_data['data']['tx_status'] == TX_STATUS_AWAITED:
+            elif int(response_data['data']['tx_status']) == TX_STATUS_AWAITED:
                 pass
 
-            elif response_data['data']['tx_status'] == TX_STATUS_REFUND_PENDING:
+            elif int(response_data['data']['tx_status']) == TX_STATUS_REFUND_PENDING:
 
                 if transaction.status != TRANSACTION_STATUS_REFUND_PENDING:
                     if transaction.transaction_response_json is None:
                         transaction.transaction_response_json = dict(
-                            poll_refund_pending_response=json.dump(response_data))
+                            poll_refund_pending_response=json.dumps(response_data))
                     else:
-                        transaction.transaction_response_json['poll_refund_pending_response'] = json.dump(response_data)
-                    transaction.save()
+                        transaction.transaction_response_json['poll_refund_pending_response'] = json.dumps(response_data)
 
                 transaction.status = TRANSACTION_STATUS_REFUND_PENDING
                 transaction.save()
 
-            elif response_data['data']['tx_status'] == TX_STATUS_REFUNDED:
+            elif int(response_data['data']['tx_status']) == TX_STATUS_REFUNDED:
                 merchant_wallet = transaction.user.wallet
                 refund_amount = transaction.amount + transaction.additional_charges
 
@@ -106,7 +106,7 @@ def poll_transaction_status_for_refund():
                 transaction.save()
 
                 if transaction.transaction_response_json is None:
-                    transaction.transaction_response_json = dict(poll_refunded_response=json.dump(response_data))
+                    transaction.transaction_response_json = dict(poll_refunded_response=json.dumps(response_data))
                 else:
-                    transaction.transaction_response_json['poll_refunded_response'] = json.dump(response_data)
+                    transaction.transaction_response_json['poll_refunded_response'] = json.dumps(response_data)
                 transaction.save()
