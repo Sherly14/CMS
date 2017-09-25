@@ -15,12 +15,21 @@ class ZrUserAdmin(admin.ModelAdmin):
     class Meta:
         model = ZrUser
 
-admin.site.register(ZrUser, ZrUserAdmin)
 
 admin.site.register(UserRole)
 admin.site.register(KYCDocumentType)
 admin.site.register(ZrAdminUser)
+admin.site.register(ZrUser, ZrUserAdmin)
 admin.site.register(KYCDetail)
 admin.site.register(BankDetail)
+admin.site.register(BankCode)
+admin.site.register(Sender)
+admin.site.register(Beneficiary)
+admin.site.register(SenderKYCDetail)
 admin.site.register(OTPDetail)
 admin.site.register(MerchantLead)
+
+
+
+
+
