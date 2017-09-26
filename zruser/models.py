@@ -194,6 +194,12 @@ class Bank(RowInfo):
 
     bank_name = models.CharField(max_length=128)
     bank_code = models.CharField(max_length=16)
+    eko_bank_id = models.CharField(max_length=64)
+    account_length = models.IntegerField(default=0)
+    ifsc_code = models.CharField(max_length=16, null=True, blank=True)
+    is_master_ifsc = models.BooleanField(default=False)
+    ifsc_formula = models.IntegerField(default=0)
+    is_enabled = models.BooleanField(default=True)
 
     class Meta:
         verbose_name_plural = 'Banks'
@@ -242,7 +248,7 @@ class Beneficiary(RowInfo):
     address_line_2 = models.CharField(max_length=512, null=True, blank=True)
 
     account_no = models.CharField(max_length=20)
-    bank = models.ForeignKey(to=Bank, related_name='beneficiaries_from_bank', null=True, blank=True)
+    bank = models.ForeignKey(to=Bank, related_name='beneficiaries_from_bank')
     channel = models.IntegerField(choices=BANK_CHANNEL_TYPES, default=BANK_CHANNEL_TYPES[1][0])
     IFSC_code = models.CharField(max_length=20)
     account_name = models.CharField(max_length=128)
