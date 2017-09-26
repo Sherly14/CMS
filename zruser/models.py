@@ -190,13 +190,13 @@ class BankDetail(RowInfo):
         return '%s - (%s)' % (self.account_no, self.IFSC_code)
 
 
-class BankCode(RowInfo):
+class Bank(RowInfo):
 
     bank_name = models.CharField(max_length=128)
     bank_code = models.CharField(max_length=16)
 
     class Meta:
-        verbose_name_plural = 'BankCodes'
+        verbose_name_plural = 'Banks'
 
     def __unicode__(self):
         return '%s - (%s)' % (self.bank_name, self.bank_code)
@@ -242,12 +242,10 @@ class Beneficiary(RowInfo):
     address_line_2 = models.CharField(max_length=512, null=True, blank=True)
 
     account_no = models.CharField(max_length=20)
-    account_type = models.CharField(max_length=2, choices=BANK_ACCOUNT_TYPES)
+    bank = models.ForeignKey(to=Bank, related_name='beneficiaries_from_bank', null=True, blank=True)
     channel = models.IntegerField(choices=BANK_CHANNEL_TYPES, default=BANK_CHANNEL_TYPES[1][0])
     IFSC_code = models.CharField(max_length=20)
     account_name = models.CharField(max_length=128)
-    bank_name = models.CharField(max_length=20, null=True, blank=True)
-    bank_city = models.CharField(max_length=256, null=True, blank=True)
 
     is_bank_account_verified = models.BooleanField(default=False)
     is_user_active = models.BooleanField(default=True)
@@ -255,6 +253,7 @@ class Beneficiary(RowInfo):
 
     class Meta:
         verbose_name_plural = 'Beneficiaries'
+        unique_together = ('account_no', 'bank')
 
     def __unicode__(self):
         return '%s - (%s)' % (self.mobile_no, self.first_name)
