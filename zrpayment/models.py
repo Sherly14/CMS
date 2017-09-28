@@ -56,6 +56,6 @@ class MerchantPaymentRequest(RowInfo):
         verbose_name_plural = 'PaymentRequests'
 
     def __unicode__(self):
-        return '%s - %s - %s' % (self.merchant, self.distributor, self.amount)
+        return '%s - %s - %s' % (self.merchant, self.merchant_payment_mode, self.amount)
 
 

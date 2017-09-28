@@ -278,7 +278,7 @@ class SenderKYCDetail(RowInfo):
         verbose_name_plural = 'SenderKYCDetail'
 
     def __unicode__(self):
-        return '%s - (%s)' % (self.type, self.for_user)
+        return '%s - (%s)' % (self.type, self.for_sender)
 
 
 class OTPDetail(RowInfo):
