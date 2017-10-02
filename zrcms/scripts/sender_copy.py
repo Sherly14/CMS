@@ -18,8 +18,6 @@ from zrcommission import models as comm_models
 
 import pandas as pd
 
-exl = pd.read_excel('/home/hitul/zrcms/zrcms/scripts/Master-Bank-List_v2.xlsx')
-
 for usr in zu.ZrUser.objects.filter(role__name='SENDER'):
     sender, _ = zu.Sender.objects.get_or_create(
         mobile_no=usr.mobile_no,

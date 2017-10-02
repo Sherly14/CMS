@@ -24,10 +24,10 @@ for sbm in zm.SenderBeneficiary.objects.all():
     ).count() and zm.Beneficiary.objects.filter(
         mobile_no=sbm.beneficiary.mobile_no
     )):
-        print("Sender or beneficiary not found")
+        print("Sender or beneficiary not found for"), sbm, sbm.pk
         continue
 
-    mapping = zm.SenderBeneficiaryMapping.objects.create(
+    mapping = zm.SenderBeneficiaryMapping.objects.get_or_create(
         sender=zm.Sender.objects.get(mobile_no=sbm.sender.mobile_no),
         beneficiary=zm.Beneficiary.objects.get(mobile_no=sbm.beneficiary.mobile_no),
         is_active=True,
