@@ -19,19 +19,18 @@ from zrmapping import models as zm
 
 
 for sbm in zm.SenderBeneficiary.objects.all():
-    if not (zm.Sender.objects.filter(
-        mobile_no=sbm.sender.mobile_no
-    ).count() and zm.Beneficiary.objects.filter(
-        mobile_no=sbm.beneficiary.mobile_no
-    )):
+    if not (zm.Sender.objects.filter(mobile_no=sbm.sender.mobile_no).count() or
+                not zm.Beneficiary.objects.filter(mobile_no=sbm.beneficiary.mobile_no)).count():
         print("Sender or beneficiary not found for"), sbm, sbm.pk
-        continue
-
-    mapping = zm.SenderBeneficiaryMapping.objects.get_or_create(
-        sender=zm.Sender.objects.get(mobile_no=sbm.sender.mobile_no),
-        beneficiary=zm.Beneficiary.objects.get(mobile_no=sbm.beneficiary.mobile_no),
-        is_active=True,
-        eko_sender_id=sbm.eko_sender_id,
-        eko_beneficiary_id=sbm.eko_beneficiary_id
-    )
-    print(mapping)
+    else:
+        mapping, created = zm.SenderBeneficiaryMapping.objects.get_or_create(
+            sender=zm.Sender.objects.get(mobile_no=sbm.sender.mobile_no),
+            beneficiary=zm.Beneficiary.objects.get(mobile_no=sbm.beneficiary.mobile_no),
+            is_active=True,
+            eko_sender_id=sbm.eko_sender_id,
+            eko_beneficiary_id=sbm.eko_beneficiary_id
+        )
+        if created:
+            print("SenderBeneficiaryMapping created"), mapping
+        else:
+            print("SenderBeneficiaryMapping already exists"), mapping

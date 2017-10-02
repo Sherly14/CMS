@@ -33,7 +33,7 @@ for usr in zu.ZrUser.objects.filter(role__name='BENEFICIARY'):
         print("Bank not found for ISFC code (%s)" % (bank_detail.IFSC_code))
         continue
 
-    bn, _ = zu.Beneficiary.objects.get_or_create(
+    bn, created = zu.Beneficiary.objects.get_or_create(
         mobile_no=usr.mobile_no,
         defaults={
             "first_name": usr.first_name,
@@ -57,4 +57,7 @@ for usr in zu.ZrUser.objects.filter(role__name='BENEFICIARY'):
         }
     )
 
-    print(bn)
+    if created:
+        print("Beneficiary created"), bn
+    else:
+        print("Beneficiary already exists"), bn
