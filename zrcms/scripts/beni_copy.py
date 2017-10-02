@@ -29,7 +29,6 @@ for usr in zu.ZrUser.objects.filter(role__name='BENEFICIARY'):
     bank_instance = zu.Bank.objects.filter(
         bank_code__istartswith=ifsc
     ).last()
-    print "hello"
     if not bank_instance:
         print("Bank not found for ISFC code (%s)" % (bank_detail.IFSC_code))
         continue
@@ -58,12 +57,9 @@ for usr in zu.ZrUser.objects.filter(role__name='BENEFICIARY'):
                 "is_mobile_verified": usr.is_mobile_verified
             }
         )
+        if created:
+            print("Beneficiary created"), bn
+        else:
+            print("Beneficiary already exists"), bn
     except IntegrityError as e:
         print "IntegrityError ", usr, usr.mobile_no
-
-
-
-    if created:
-        print("Beneficiary created"), bn
-    else:
-        print("Beneficiary already exists"), bn
