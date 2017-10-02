@@ -19,9 +19,10 @@ from zrmapping import models as zm
 
 
 for sbm in zm.SenderBeneficiary.objects.all():
-    if not (zm.Sender.objects.filter(mobile_no=sbm.sender.mobile_no).count() or
-                not zm.Beneficiary.objects.filter(mobile_no=sbm.beneficiary.mobile_no)).count():
+    if not (zm.Sender.objects.filter(mobile_no=sbm.sender.mobile_no).count() and
+                zm.Beneficiary.objects.filter(mobile_no=sbm.beneficiary.mobile_no).count()):
         print("Sender or beneficiary not found for"), sbm, sbm.pk
+        continue
     else:
         mapping, created = zm.SenderBeneficiaryMapping.objects.get_or_create(
             sender=zm.Sender.objects.get(mobile_no=sbm.sender.mobile_no),
