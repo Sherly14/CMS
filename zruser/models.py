@@ -7,9 +7,9 @@ from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
 from django.db import models
 
+from common_utils import email_utils
 from zruser.utils.constants import KYC_APPROVAL_CHOICES, GENDER_CHOICES, BANK_ACCOUNT_TYPES, BANK_CHANNEL_TYPES
 from zrutils.common.modelutils import RowInfo, get_slugify_value
-from common_utils import email_utils
 
 
 # Create your models here.
@@ -188,6 +188,97 @@ class BankDetail(RowInfo):
 
     def __unicode__(self):
         return '%s - (%s)' % (self.account_no, self.IFSC_code)
+
+
+class Bank(RowInfo):
+
+    bank_name = models.CharField(max_length=128)
+    bank_code = models.CharField(max_length=16)
+    eko_bank_id = models.CharField(max_length=64)
+    account_length = models.IntegerField(default=0)
+    ifsc_code = models.CharField(max_length=16, null=True, blank=True)
+    is_master_ifsc = models.BooleanField(default=False)
+    ifsc_formula = models.IntegerField(default=0)
+    is_enabled = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name_plural = 'Banks'
+
+    def __unicode__(self):
+        return '%s - (%s)' % (self.bank_name, self.bank_code)
+
+
+class Sender(RowInfo):
+
+    mobile_no = models.BigIntegerField(unique=True, null=False, blank=False)
+    first_name = models.CharField(max_length=128)
+    last_name = models.CharField(max_length=128, null=True, blank=True)
+    email = models.EmailField(max_length=64, null=True, blank=True)
+    gender = models.CharField(max_length=2, choices=GENDER_CHOICES, null=True, blank=True)
+
+    city = models.CharField(max_length=256, null=True, blank=True)
+    state = models.CharField(max_length=256, null=True, blank=True)
+    pin_code = models.IntegerField(null=True, blank=True)
+    address_line_1 = models.CharField(max_length=512, null=True, blank=True)
+    address_line_2 = models.CharField(max_length=512, null=True, blank=True)
+
+    is_user_active = models.BooleanField(default=True)
+    is_mobile_verified = models.BooleanField(default=False)
+    is_kyc_verified = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name_plural = 'Senders'
+
+    def __unicode__(self):
+        return '%s - (%s)' % (self.mobile_no, self.first_name)
+
+
+class Beneficiary(RowInfo):
+
+    mobile_no = models.BigIntegerField()
+    first_name = models.CharField(max_length=128)
+    last_name = models.CharField(max_length=128, null=True, blank=True)
+    email = models.EmailField(max_length=64, null=True, blank=True)
+    gender = models.CharField(max_length=2, choices=GENDER_CHOICES, null=True, blank=True)
+
+    city = models.CharField(max_length=256, null=True, blank=True)
+    state = models.CharField(max_length=256, null=True, blank=True)
+    pin_code = models.IntegerField(null=True, blank=True)
+    address_line_1 = models.CharField(max_length=512, null=True, blank=True)
+    address_line_2 = models.CharField(max_length=512, null=True, blank=True)
+
+    account_no = models.CharField(max_length=20)
+    bank = models.ForeignKey(to=Bank, related_name='beneficiaries_from_bank')
+    channel = models.IntegerField(choices=BANK_CHANNEL_TYPES, default=BANK_CHANNEL_TYPES[1][0])
+    IFSC_code = models.CharField(max_length=20)
+    account_name = models.CharField(max_length=128)
+
+    is_bank_account_verified = models.BooleanField(default=False)
+    is_user_active = models.BooleanField(default=True)
+    is_mobile_verified = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name_plural = 'Beneficiaries'
+        unique_together = ('account_no', 'bank')
+
+    def __unicode__(self):
+        return '%s - (%s)' % (self.mobile_no, self.first_name)
+
+
+class SenderKYCDetail(RowInfo):
+
+    type = models.ForeignKey(to=KYCDocumentType, related_name='all_sender_kyc_details')
+    document_id = models.CharField(max_length=50, null=True, blank=True)
+    document_link = models.CharField(max_length=512)
+    for_sender = models.ForeignKey(to=Sender, related_name='sender_kyc_details')
+    approval_status = models.CharField(max_length=2, choices=KYC_APPROVAL_CHOICES, default=KYC_APPROVAL_CHOICES[0][0])
+    by_approved = models.ForeignKey(to=ZrAdminUser, related_name='attached_sender_kyc_details', null=True, blank=True)
+
+    class Meta:
+        verbose_name_plural = 'SenderKYCDetail'
+
+    def __unicode__(self):
+        return '%s - (%s)' % (self.type, self.for_sender)
 
 
 class OTPDetail(RowInfo):

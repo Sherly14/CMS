@@ -6,14 +6,13 @@ from decimal import Decimal
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 
+from common_utils import date_utils
 from zrcommission.models import Commission
 from zrmapping.models import SubDistributorMerchant, DistributorMerchant
 from zrtransaction.utils.constants import TRANSACTION_STATUS
 from zruser.mapping import SUBDISTRIBUTOR, DISTRIBUTOR, MERCHANT
-from zruser.models import ZrUser
+from zruser.models import ZrUser, Beneficiary
 from zrutils.common.modelutils import RowInfo, get_slugify_value
-
-from common_utils import date_utils
 
 
 # Create your models here.
@@ -87,6 +86,8 @@ class Transaction(RowInfo):
     additional_charges = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
 
     is_commission_created = models.BooleanField(default=False)
+
+    beneficiary_user = models.ForeignKey(to=Beneficiary, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         self.amount = Decimal(self.amount).quantize(Decimal("0.00"))

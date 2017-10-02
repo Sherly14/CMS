@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 
-from zruser.models import ZrUser
+from zruser.models import ZrUser, Sender, Beneficiary
 from zrutils.common.modelutils import RowInfo
 
 
@@ -43,7 +43,22 @@ class SenderBeneficiary(RowInfo):
     eko_beneficiary_id = models.CharField(max_length=255, null=True, blank=True)
 
     class Meta:
-        verbose_name_plural = 'SenderBeneficiaryMappings'
+        verbose_name_plural = 'SenderBeneficiary'
+
+    def __unicode__(self):
+        return '%s - %s' % (self.sender, self.beneficiary)
+
+
+class SenderBeneficiaryMapping(RowInfo):
+
+    sender = models.ForeignKey(to=Sender, related_name='all_sender_beneficiary_mappings')
+    beneficiary = models.ForeignKey(to=Beneficiary, related_name='all_beneficiary_sender_mappings')
+    is_active = models.BooleanField(default=False)
+    eko_sender_id = models.CharField(max_length=255, null=True, blank=True)
+    eko_beneficiary_id = models.CharField(max_length=255, null=True, blank=True)
+
+    class Meta:
+        verbose_name_plural = 'SenderBeneficiaryMapping'
 
     def __unicode__(self):
         return '%s - %s' % (self.sender, self.beneficiary)
