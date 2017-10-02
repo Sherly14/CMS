@@ -26,8 +26,9 @@ for usr in zu.ZrUser.objects.filter(role__name='BENEFICIARY'):
     bank_instance = None
     ifsc = bank_detail.IFSC_code[:4]
     bank_instance = zu.Bank.objects.filter(
-        ifsc_code__startswith=ifsc.upper()
+        bank_code__istartswith=ifsc
     ).last()
+
     if not bank_instance:
         print("Bank not found for ISFC code (%s)" % (bank_detail.IFSC_code))
         continue
