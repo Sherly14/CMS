@@ -27,7 +27,16 @@ admin.site.register(Sender)
 admin.site.register(Beneficiary)
 admin.site.register(SenderKYCDetail)
 admin.site.register(OTPDetail)
-admin.site.register(MerchantLead)
+
+
+class ZrMerchantLeadAdmin(admin.ModelAdmin):
+    readonly_fields = ('id', )
+    list_display = ('name', 'email', 'mobile_no')
+
+    class Meta:
+        model = MerchantLead
+
+admin.site.register(MerchantLead, ZrMerchantLeadAdmin)
 
 
 
