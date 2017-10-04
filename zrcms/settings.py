@@ -170,7 +170,7 @@ S3_AWS_SEC_KEY_SECRET = 'TF5ADOj5ng1I8HA5Ed5p3htdaPwv9Hi3F4Ci/F/f'
 FROM_EMAIL = 'noreply@zrupee.com'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'noreply@zrupee.com'
-EMAIL_HOST_PASSWORD = 'm_d@2430'
+EMAIL_HOST_PASSWORD = 'Anwesha@2020'
 EMAIL_USE_SSL = True
 EMAIL_PORT = 465
 
