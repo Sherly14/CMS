@@ -10,6 +10,7 @@ from django.db import models
 from common_utils import email_utils
 from zruser.utils.constants import KYC_APPROVAL_CHOICES, GENDER_CHOICES, BANK_ACCOUNT_TYPES, BANK_CHANNEL_TYPES
 from zrutils.common.modelutils import RowInfo, get_slugify_value
+from common_utils import email_utils
 
 
 # Create your models here.

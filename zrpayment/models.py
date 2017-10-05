@@ -5,8 +5,9 @@ from decimal import Decimal
 
 from django.db import models
 
-from zruser.models import ZrUser
+from zruser.models import ZrUser, Bank
 from zrutils.common.modelutils import RowInfo, get_slugify_value
+from zrtransaction import models as zr_transaction_models
 
 PAYMENT_REQUEST_STATUS = (
     (0, 'Submitted'),
@@ -78,10 +79,10 @@ class PaymentRequest(RowInfo):
     dmt_amount = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     non_dmt_amount = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
 
-    to_bank = models.CharField(max_length=50, null=True, blank=True)
+    to_bank = models.ForeignKey(to=Bank, null=True, blank=True, related_name='to_bank')
     to_account_no = models.CharField(max_length=30, null=True, blank=True)
 
-    from_bank = models.CharField(max_length=50, null=True, blank=True)
+    from_bank = models.ForeignKey(to=Bank, null=True, blank=True)
     from_account_no = models.CharField(max_length=30, null=True, blank=True)
 
     payment_mode = models.ForeignKey(to=PaymentMode, related_name='payment_request_mode')
@@ -89,6 +90,7 @@ class PaymentRequest(RowInfo):
     document = models.CharField(max_length=512)
 
     comments = models.TextField(max_length=1024, null=True, blank=True)
+    reject_comments = models.TextField(max_length=1024, null=True, blank=True)
     status = models.PositiveSmallIntegerField(choices=PAYMENT_REQUEST_STATUS, default=0, null=True, blank=True)
 
     @property
@@ -99,9 +101,8 @@ class PaymentRequest(RowInfo):
         return _type
 
     def save(self, *args, **kwargs):
-        self.amount = Decimal(self.amount).quantize(Decimal("0.00"))
-        self.dmt_amount = Decimal(self.amount).quantize(Decimal("0.00"))
-        self.non_dmt_amount = Decimal(self.amount).quantize(Decimal("0.00"))
+        self.dmt_amount = Decimal(self.dmt_amount).quantize(Decimal("0.00"))
+        self.non_dmt_amount = Decimal(self.non_dmt_amount).quantize(Decimal("0.00"))
 
         super(PaymentRequest, self).save(*args, **kwargs)
 
