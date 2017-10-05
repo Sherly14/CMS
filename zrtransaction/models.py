@@ -143,6 +143,31 @@ class Transaction(RowInfo):
         return 'NA'
 
     @property
+    def commission_value(self):
+        if not self.commissions.all():
+            return 'NA'
+
+        commission = self.commissions.all().last()
+        if commission.bill_payment_comm_structure:
+            if commission.bill_payment_comm_structure.is_chargable:
+                return commission.bill_payment_comm_structure.net_margin
+            else:
+                return (
+                    self.amount *
+                    commission.bill_payment_comm_structure.net_margin
+                ) / 100
+        elif commission.dmt_comm_structure:
+            return (
+                self.amount * commission.dmt_comm_structure.customer_fee
+            ) / 100
+
+        return 'NA'
+
+    @property
+    def merchant_mobile(self):
+        return self.user.mobile_no
+
+    @property
     def sub_dist_gross_commission(self):
         comm_instance = self.commissions.filter(commission_user__role__name=SUBDISTRIBUTOR).last()
         if comm_instance:

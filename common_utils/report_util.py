@@ -68,9 +68,9 @@ def get_excel_doc(request, obj, heading, header_dsiplay):
         'border': 1
     })
 
-    worksheet_s.merge_range('J1:M1', 'Merchant', title)
-    worksheet_s.merge_range('N1:Q1', 'Distributor', title)
-    worksheet_s.merge_range('R1:U1', 'Sub-Distributor', title)
+    worksheet_s.merge_range('K1:O1', 'Merchant', title)
+    worksheet_s.merge_range('P1:T1', 'Distributor', title)
+    worksheet_s.merge_range('U1:W1', 'Sub-Distributor', title)
     worksheet_s.write(0, 12, 'Zrupee', cell)
 
     i = incrementClass(val=-1)
