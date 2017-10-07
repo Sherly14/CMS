@@ -40,9 +40,31 @@ class Wallet(RowInfo):
 # Create your models here.
 
 class WalletTransactions(RowInfo):
+    TRANSACTION = 'transaction'
+    BALANCE = 'balance'
+    REFUND_DECR = 'refund_decrement'
+    REFUND_INC = 'refund_increment'
+    LOG_TYPES = (
+        (TRANSACTION, 'Transaction'),
+        (BALANCE, 'Balance'),
+        (REFUND_DECR, 'Refund'),
+        (REFUND_INC, 'Refund increment')
+    )
 
+    log_type = models.CharField(
+        max_length=20,
+        default=TRANSACTION,
+        choices=LOG_TYPES
+    )
     wallet = models.ForeignKey(to=Wallet, related_name='transactions')
-    transaction = models.ForeignKey(to=Transaction, related_name='transaction_logs')
+    transaction = models.ForeignKey(
+        to=Transaction, related_name='transaction_logs',
+        null=True, blank=True
+    )
+    payment_request = models.ForeignKey(
+        to='zrpayment.PaymentRequest',
+        null=True, blank=True
+    )
     dmt_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
 
     non_dmt_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)

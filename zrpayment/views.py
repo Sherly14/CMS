@@ -8,8 +8,10 @@ import json
 from django.core.paginator import Paginator, PageNotAnInteger
 from django.db.models import Q
 from django.http import HttpResponse
+from django.http import HttpResponseRedirect
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
+from django.http import Http404
 from rest_framework import serializers
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -49,19 +51,25 @@ class GeneratePaymentRequestView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        data = dict(request.POST)
-        if data['request_type'] == 'DMT':
-            data['dmt_amount'] = data['amount']
+        data = request.data
+        if data.get('request_type') == 'DMT':
+            data['dmt_amount'] = data.get('amount')
         else:
-            data['non_dmt_amount'] = data['amount']
+            data['non_dmt_amount'] = data.get('amount')
 
         data["from_user"] = request.user.zr_admin_user.zr_user.id
+        main_distributor = None
         if request.user.zr_admin_user.role.name == user_map.DISTRIBUTOR:
             main_distributor = get_main_admin()
-            data["to_user"] = main_distributor.id
         elif request.user.zr_admin_user.role.name == user_map.SUBDISTRIBUTOR:
             main_distributor = get_distributor_from_sub_distributor(request.user.zr_admin_user.zr_user)
-            data["to_user"] = main_distributor.id
+        if not main_distributor:
+            response_data = {
+                "message": "Something went wrong, please contact admin",
+                "success": False
+            }
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+        data["to_user"] = main_distributor.id
         serializer = PaymentRequestSerializer(data=data)
 
         if serializer.is_valid():
@@ -80,10 +88,66 @@ class GeneratePaymentRequestView(APIView):
         return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
 
+class RefundRequestView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        payment_request = request.GET.get('payment_request')
+        payment_request_instance = PaymentRequest.objects.filter(id=payment_request).last()
+        if not payment_request_instance:
+            raise Http404
+
+        from_user_wallet = zrwallet_models.Wallet.objects.get(
+            merchant=payment_request_instance.from_user
+        )
+        to_user_wallet = zrwallet_models.Wallet.objects.get(
+            merchant=payment_request_instance.to_user
+        )
+
+        from_user_wallet.dmt_balance -= payment_request_instance.dmt_amount
+        from_user_wallet.non_dmt_balance -= payment_request_instance.dmt_amount
+
+        to_user_wallet.dmt_balance += payment_request_instance.dmt_amount
+        to_user_wallet.non_dmt_balance += payment_request_instance.non_dmt_amount
+
+        from_user_wallet.save(
+            update_fields=['dmt_balance', 'non_dmt_balance']
+        )
+        to_user_wallet.save(
+            update_fields=['dmt_balance', 'non_dmt_balance']
+        )
+
+        payment_request_instance.status = 3
+        payment_request_instance.save(update_fields=['status'])
+
+        zrwallet_models.WalletTransactions.objects.create(
+            log_type=zrwallet_models.WalletTransactions.REFUND_DECR,
+            wallet=from_user_wallet,
+            transaction=None,
+            payment_request=payment_request_instance,
+            dmt_balance=payment_request_instance.dmt_amount,
+            non_dmt_balance=payment_request_instance.non_dmt_amount,
+            is_success=True
+        )
+
+        zrwallet_models.WalletTransactions.objects.create(
+            log_type=zrwallet_models.WalletTransactions.REFUND_INC,
+            wallet=from_user_wallet,
+            transaction=None,
+            payment_request=payment_request_instance,
+            dmt_balance=payment_request_instance.dmt_amount,
+            non_dmt_balance=payment_request_instance.non_dmt_amount,
+            is_success=True
+        )
+
+        return HttpResponseRedirect('/payment_request/')
+
+
 class AcceptPaymentRequestView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
+        import ipdb; ipdb.set_trace()
         data = dict(json.loads(request.data.keys()[0]))
         request_id = data.get("request_id")
         payment_request = PaymentRequest.objects.filter(id=request_id).last()
@@ -91,11 +155,7 @@ class AcceptPaymentRequestView(APIView):
         if payment_request:
             if payment_request.status == 0:
                 if is_user_superuser(self.request) and payment_request.to_user.role.name == 'ADMINSTAFF':
-                    message = "Wallet updated successfully"
-                    payment_request.status = 1
-                    payment_request.save(update_fields=['status'])
-
-                    zr_wallet, _ = zrwallet_models.Wallet.objects.get(
+                    zr_wallet = zrwallet_models.Wallet.objects.get(
                         merchant=payment_request.from_user
                     )
                     zr_wallet.dmt_balance += payment_request.dmt_amount
@@ -106,11 +166,23 @@ class AcceptPaymentRequestView(APIView):
                             'non_dmt_balance'
                         ]
                     )
+                    zrwallet_models.WalletTransactions.objects.create(
+                        log_type=zrwallet_models.WalletTransactions.BALANCE,
+                        wallet=zr_wallet,
+                        transaction=None,
+                        payment_request=payment_request,
+                        dmt_balance=zr_wallet.dmt_balance,
+                        non_dmt_balance=zr_wallet.non_dmt_balance,
+                        is_success=True
+                    )
+                    message = "Wallet updated successfully"
+                    payment_request.status = 1
+                    payment_request.save(update_fields=['status'])
                 elif self.request.user.zr_admin_user.role.name in ['DISTRIBUTOR', 'SUBDISTRIBUTOR']:
                     supervisor_wallet, _ = zrwallet_models.Wallet.objects.get(
                         merchant=payment_request.to_user
                     )
-                    zr_wallet, _ = zrwallet_models.Wallet.objects.get_or_create(
+                    zr_wallet = zrwallet_models.Wallet.objects.get(
                         merchant=payment_request.from_user
                     )
                     updated = False
@@ -138,6 +210,15 @@ class AcceptPaymentRequestView(APIView):
                                 'dmt_balance',
                                 'non_dmt_balance'
                             ]
+                        )
+                        zrwallet_models.WalletTransactions.objects.create(
+                            log_type=zrwallet_models.WalletTransactions.BALANCE,
+                            wallet=supervisor_wallet,
+                            transaction=None,
+                            payment_request=payment_request,
+                            dmt_balance=zr_wallet.dmt_balance,
+                            non_dmt_balance=zr_wallet.non_dmt_balance,
+                            is_success=True
                         )
                         payment_request.status = 1
                         payment_request.save(update_fields=['status'])
@@ -178,19 +259,30 @@ class RejectPaymentRequestView(APIView):
         return Response({"message": message, 'success': True}, status=status.HTTP_200_OK)
 
 
-def get_payment_request_qs(request):
+def get_payment_request_qs(request, from_user=False, all_user=False, all_req=False):
     filter_by = request.GET.get('filter')
     q = request.GET.get('q')
 
     queryset = []
     if is_user_superuser(request):
-        queryset = PaymentRequest.objects.all()
+        if all_user and all_req:
+            queryset = PaymentRequest.objects.all()
+        elif all_user:
+            queryset = PaymentRequest.objects.all()
+        else:
+            queryset = PaymentRequest.objects.filter(
+                to_user__role__name='ADMINSTAFF',
+            )
     elif request.user.zr_admin_user.role.name in ['DISTRIBUTOR', 'SUBDISTRIBUTOR']:
         # To get own payment request
-        queryset = PaymentRequest.objects.filter(
-            to_user=request.user.zr_admin_user.zr_user
-        ).exclude(from_user=request.user.zr_admin_user.zr_user)
-
+        if from_user:
+            queryset = PaymentRequest.objects.filter(
+                from_user=request.user.zr_admin_user.zr_user
+            )
+        else:
+            queryset = PaymentRequest.objects.filter(
+                to_user=request.user.zr_admin_user.zr_user
+            ).exclude(from_user=request.user.zr_admin_user.zr_user)
     if q:
         query = Q(
             merchant_payment_mode__name__contains=q
@@ -244,6 +336,7 @@ def merchant_payment_req_csv_download(request):
 
 class PaymentRequestListView(ListView):
     context_object_name = 'payment_request_list'
+    template_name = 'payment_request_list.html'
     paginate_by = 10
 
     def get_context_data(self, **kwargs):
@@ -273,7 +366,7 @@ class PaymentRequestListView(ListView):
         wallet = None
         if not is_user_superuser(self.request):
             wallet = zrwallet_models.Wallet.objects.get(
-                merchant=None
+                merchant=self.request.user.zr_admin_user.zr_user
             )
         context['wallet'] = wallet
         context['is_superuser'] = is_user_superuser(self.request)
@@ -281,3 +374,48 @@ class PaymentRequestListView(ListView):
 
     def get_queryset(self):
         return get_payment_request_qs(self.request)
+
+
+class PaymentRequestSentListView(ListView):
+    context_object_name = 'paymentrequestsent_list'
+    template_name = 'zrpayment/paymentrequestsent_list.html'
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        filter_by = self.request.GET.get('filter')
+        q = self.request.GET.get('q')
+
+        context = super(PaymentRequestSentListView, self).get_context_data(**kwargs)
+
+        queryset = self.get_queryset()
+        if not queryset:
+            context['filter_by'] = filter_by
+            context['q'] = q
+            return context
+
+        paginator = Paginator(queryset, self.paginate_by)
+        page = self.request.GET.get('page', 1)
+
+        try:
+            queryset = paginator.page(page)
+        except PageNotAnInteger:
+            queryset = paginator.page(1)
+
+        context['page_obj'] = queryset
+        context['filter_by'] = filter_by
+        context['q'] = q
+
+        wallet = None
+        if not is_user_superuser(self.request):
+            wallet = zrwallet_models.Wallet.objects.get(
+                merchant=self.request.user.zr_admin_user.zr_user
+            )
+        context['wallet'] = wallet
+        context['is_superuser'] = is_user_superuser(self.request)
+        return context
+
+    def get_queryset(self):
+        if is_user_superuser(self.request):
+            return get_payment_request_qs(self.request, all_user=True, all_req=True)
+        else:
+            return get_payment_request_qs(self.request, from_user=True)

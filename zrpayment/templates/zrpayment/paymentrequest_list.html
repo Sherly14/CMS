@@ -20,7 +20,8 @@
                     <input class="search" id="search-txt" type="search" name="search" value="{% if q %}{{ q }}{% endif %}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
                     <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
                 </div>
-                <input type="button" id="search-btn" class="button red" value="Search">
+                <input type="button" id="search-btn" class="button red" value="Search">|
+                <a href='{% url "payment-requests:payment-request-sent-view" %}?view-all=true'>View all sent requests</a>|
                 <a href='{% url "payment-requests:payment-request-list" %}' >Reset filters</a>
                 <input class="button red" type="button" value="DOWNLOAD CSV" id="download-csv" >
                 {% csrf_token %}
@@ -40,6 +41,7 @@
                     <table>
                         <tr>
                             <th>Actions</th>
+                            <th>Refund</th>
                             <th>Status</th>
                             <th>Date</th>
                             <th>Type</th> {# DMT or Non DMT#}
@@ -87,12 +89,19 @@
                                     {% endif %}
                                 </td>
                                 <td>
+                                    {% if payment_request.status == 1 and not payment_request.status == 3 %}
+                                        <input type="button" class="button red payment change_request_id confirm_refund_select" value="Refund" data-toggle="modal" data-target="#confirm_refund" data-slug-id="{{ payment_request.pk }}">
+                                    {% endif %}
+                                </td>
+                                <td>
                                     {% if payment_request.status == 0 %}
                                         Pending
                                     {% elif payment_request.status == 1 %}
                                         Accepted
-                                    {% else %}
+                                    {% elif payment_request.status == 2 %}
                                         Rejected
+                                    {% elif payment_request.status == 3 %}
+                                        Refunded
                                     {% endif %}
                                 </td>
                                 <td>{{ payment_request.at_created }}</td>
@@ -157,11 +166,34 @@
                 </h3>
             </div>
             <div class="modal-body text-dark text-center">
-                Are you sure want to Approve payment request?
+                Are you sure want to Approve payment request ?
             </div>
             <div class="modal-footer btn-block-group" style="align-self: center;">
                 <div class="modal-footer" style="text-align:center">
                     <button type="button" class="btn btn-primary btn-small max-225 approve_payment_confirm">Yes
+                    </button>
+                    <button type="button" class="btn btn-default btn-small max-225" data-dismiss="modal">No</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    </div>
+
+
+    <div id="confirm_refund" class="modal fade" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+        <form class="modal-content">
+            <div class="modal-header text-center">
+                <h3 class="modal-title">
+                    Payment refund
+                </h3>
+            </div>
+            <div class="modal-body text-dark text-center">
+                Are you sure want to refund payment request?
+            </div>
+            <div class="modal-footer btn-block-group" style="align-self: center;">
+                <div class="modal-footer" style="text-align:center">
+                    <button type="button" class="btn btn-primary btn-small max-225 confirm_refund_btn">Yes
                     </button>
                     <button type="button" class="btn btn-default btn-small max-225" data-dismiss="modal">No</button>
                 </div>
@@ -198,6 +230,7 @@
     <!-- /.modal -->
 
 <script>
+    window.current_payment_request = null
     $('#search-btn').click(function(){
         search = $('#search-txt').val();
         {% if filter_by %}
@@ -318,6 +351,16 @@
             }
         );
 
+        $('.confirm_refund_select').click(function(){
+            window.current_payment_request = $(this).attr('data-slug-id')
+            console.log(window.current_payment_request);
+        })
+
+        $('.confirm_refund_btn').click(
+            function(e) {
+                alert('{% url "payment-requests:refund-request-view" %}?payment_request=' + window.current_payment_request)
+                window.location = '{% url "payment-requests:refund-request-view" %}?payment_request=' + window.current_payment_request;
+            }
+        )
     </script>
 {% endblock extrascripts %}
-

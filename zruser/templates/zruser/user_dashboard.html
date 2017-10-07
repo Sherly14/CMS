@@ -380,14 +380,15 @@
             },
             from_bank: {
                 required: true
-            }
+            },
             to_account_no: {
                 required: true
             },
             from_account_no: {
                 required: true
             }
-        }
+        };
+
         challan_request_form.validate({
             rules: rules,
             messages: {
@@ -432,7 +433,6 @@
                     .closest('.input-icon').find('.suc').show();
             },
             submitHandler: function (form) {
-                alert("dfs");
                 console.log("request");
                 <!-- AJAX Call -->
                 data = {
@@ -442,24 +442,23 @@
                     'challan': $('#challan').val(),
                     'payment_mode': $('#payment_mode').val(),
                     'to_bank': $('#to_bank').val(),
-                    'to_account_no: $('#from_account_no').val()
+                    'to_account_no': $('#to_account_no').val(),
                     'from_bank': $('#from_bank').val(),
                     'from_account_no': $('#from_account_no').val()
                 };
                 data = JSON.stringify(data);
                 console.log(data);
+                $('#submit_request').prop('disabled', true)
                 $.ajax({
                     type: "POST",
                     url: '/payment_request/generate_payment_request/',
                     {#                    processData: false,#}
                     dataType: 'json',
                     data: data,
+                    contentType: "application/json",
                     async: false,
                     success: function (data) {
-                        alert(data.message);
-                        setTimeout(function () {
-                            window.location.reload();
-                        }, 1000);
+                        window.location.reload();
                     },
                     error: function (data) {
                         console.log(data.responseJSON.message)
@@ -490,10 +489,9 @@
         });
 
         $("#submit_request").on('click', function(e) {
-            alert("ssdf");
-            e.prevent_default();
             $('#challan_request_form').valid()
-        })
+        });
+
         $("#payment_mode").change(function(){
             var payment_mode = $('#payment_mode option:selected').text();
             if(payment_mode == 'CASH') {

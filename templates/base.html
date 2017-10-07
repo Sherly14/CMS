@@ -17,6 +17,7 @@
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
 
+
     <!-- Bootstrap core CSS -->
 
     {% if user.is_authenticated %}
@@ -27,6 +28,7 @@
     {% else %}
         <link href="{% static 'css/app/login.css' %}" rel="stylesheet">
     {% endif %}
+
 
     <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
 
@@ -79,6 +81,15 @@
                     <a class="nav-link textAlignRight " href="{% url 'commission:display-commission' %}">Commissions</a>
                 </li>
                 {% endif %}
+
+                <li class="nav-item">
+                    <a class="nav-link textAlignRight " href="{% url 'payment-requests:payment-request-sent-view' %}">Payment request sent</a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link textAlignRight " href="{% url 'commission:display-commission' %}">Commissions</a>
+                </li>
+
                 <li class="nav-item">
                     <a class="nav-link textAlignRight"></a>
                 </li>

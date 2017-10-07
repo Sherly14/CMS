@@ -108,7 +108,7 @@ def get_main_admin():
     # Note: On creation of main admin need to assign zr_user details with it
     from zruser import models as zu
     user_instance = zu.ZrUser.objects.filter(
-        role__name='ADMINSTAFF'
+        mobile_no='9999999911'
     ).last()
     return user_instance
 
