@@ -80,11 +80,11 @@ class PaymentRequest(RowInfo):
     dmt_amount = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     non_dmt_amount = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
 
-    to_bank = models.ForeignKey(to=Bank, null=True, blank=True, related_name='to_bank')
-    to_account_no = models.CharField(max_length=30, null=True, blank=True)
+    to_bank = models.ForeignKey(to=Bank, related_name='to_bank')
+    to_account_no = models.CharField(max_length=30)
 
-    from_bank = models.ForeignKey(to=Bank, null=True, blank=True)
-    from_account_no = models.CharField(max_length=30, null=True, blank=True)
+    from_bank = models.ForeignKey(to=Bank)
+    from_account_no = models.CharField(max_length=30)
 
     payment_mode = models.ForeignKey(to=PaymentMode, related_name='payment_request_mode')
     ref_no = models.CharField(max_length=30, null=True, blank=True)
