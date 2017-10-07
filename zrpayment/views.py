@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 import csv
 import datetime
 import json
+import decimal
 
 from django.core.paginator import Paginator, PageNotAnInteger
 from django.db.models import Q
@@ -125,8 +126,8 @@ class RefundRequestView(APIView):
             wallet=from_user_wallet,
             transaction=None,
             payment_request=payment_request_instance,
-            dmt_balance=payment_request_instance.dmt_amount,
-            non_dmt_balance=payment_request_instance.non_dmt_amount,
+            dmt_balance=payment_request_instance.dmt_amount * decimal.Decimal('-1'),
+            non_dmt_balance=payment_request_instance.non_dmt_amount * decimal.Decimal('-1'),
             is_success=True
         )
 
