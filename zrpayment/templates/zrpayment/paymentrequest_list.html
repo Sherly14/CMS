@@ -358,7 +358,6 @@
 
         $('.confirm_refund_btn').click(
             function(e) {
-                alert('{% url "payment-requests:refund-request-view" %}?payment_request=' + window.current_payment_request)
                 window.location = '{% url "payment-requests:refund-request-view" %}?payment_request=' + window.current_payment_request;
             }
         )

@@ -3,11 +3,12 @@ from __future__ import unicode_literals
 
 import csv
 import datetime
-import json
 import decimal
+import json
 
 from django.core.paginator import Paginator, PageNotAnInteger
 from django.db.models import Q
+from django.http import Http404
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.views.generic.detail import DetailView
@@ -22,10 +23,14 @@ from rest_framework.views import APIView
 from common_utils.date_utils import last_month, last_week_range
 from common_utils.transaction_utils import get_distributor_from_sub_distributor, \
     get_main_admin
-from common_utils.user_utils import is_user_superuser
+from common_utils.user_utils import is_user_superuser, file_save_s3
 from zrpayment.models import PaymentRequest
 from zruser import mapping as user_map
 from zrwallet import models as zrwallet_models
+
+SUCCESS_MESSAGE_START = '<div class="alert alert-success" role="alert"><div class="alert-content"><i class="glyphicon glyphicon-ok-circle"></i><strong>'
+ERROR_MESSAGE_START = '<div class="alert alert-danger" role="alert"><div class="alert-content"><i class="glyphicon glyphicon-remove-circle"></i><strong>'
+MESSAGE_END = '</strong></div>'
 
 
 class PaymentRequestDetailView(DetailView):
@@ -37,13 +42,11 @@ class PaymentRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = PaymentRequest
         fields = (
-            'amount', 'dmt_amount',
-            'non_dmt_amount', 'to_user',
-            'from_user', 'payment_mode',
-            'from_account_no',
-            'to_account_no',
-            'from_bank',
-            'to_bank'
+            'amount', 'dmt_amount', 'non_dmt_amount',
+            'to_user', 'from_user',
+            'payment_mode', 'document',
+            'from_account_no', 'to_account_no',
+            'from_bank', 'to_bank'
         )
 
 
@@ -52,41 +55,58 @@ class GeneratePaymentRequestView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        data = request.data
+        data = {}
+        for detail, value in request.data.items():
+            if detail == 'document' and value:
+                # Upload file to S3 and set link
+                data[detail] = file_save_s3(value)
+            else:
+                data[detail] = value if value else ""
         if data.get('request_type') == 'DMT':
             data['dmt_amount'] = data.get('amount')
+            data['non_dmt_amount'] = 0
         else:
+            data['dmt_amount'] = 0
             data['non_dmt_amount'] = data.get('amount')
 
         data["from_user"] = request.user.zr_admin_user.zr_user.id
         main_distributor = None
+        error_message = '{0} {1} {2}'.format(ERROR_MESSAGE_START,
+                                       "Something went wrong, please try again",
+                                       MESSAGE_END)
+
         if request.user.zr_admin_user.role.name == user_map.DISTRIBUTOR:
             main_distributor = get_main_admin()
         elif request.user.zr_admin_user.role.name == user_map.SUBDISTRIBUTOR:
             main_distributor = get_distributor_from_sub_distributor(request.user.zr_admin_user.zr_user)
         if not main_distributor:
             response_data = {
-                "message": "Something went wrong, please contact admin",
+                "message": error_message,
                 "success": False
             }
-            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+            return Response(response_data, status=status.HTTP_200_OK)
         data["to_user"] = main_distributor.id
         serializer = PaymentRequestSerializer(data=data)
 
         if serializer.is_valid():
             serializer.save()
+            success_message = '{0} {1} {2}'.format(SUCCESS_MESSAGE_START,
+                                                 "Payment request sent successfully",
+                                                 MESSAGE_END)
+
             response_data = {
                 "responser": serializer.data,
-                "message": "Payment request sent successfully",
+                "message": success_message,
                 "success": True
             }
             return Response(response_data, status=status.HTTP_201_CREATED)
+
         response_data = {
             "responser": serializer.errors,
-            "message": "Something went wrong, please try again",
+            "message": error_message,
             "success": False
         }
-        return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+        return Response(response_data, status=status.HTTP_200_OK)
 
 
 class RefundRequestView(APIView):
@@ -122,7 +142,6 @@ class RefundRequestView(APIView):
         payment_request_instance.save(update_fields=['status'])
 
         zrwallet_models.WalletTransactions.objects.create(
-            log_type=zrwallet_models.WalletTransactions.REFUND_DECR,
             wallet=from_user_wallet,
             transaction=None,
             payment_request=payment_request_instance,
@@ -132,7 +151,6 @@ class RefundRequestView(APIView):
         )
 
         zrwallet_models.WalletTransactions.objects.create(
-            log_type=zrwallet_models.WalletTransactions.REFUND_INC,
             wallet=from_user_wallet,
             transaction=None,
             payment_request=payment_request_instance,
@@ -148,7 +166,6 @@ class AcceptPaymentRequestView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        import ipdb; ipdb.set_trace()
         data = dict(json.loads(request.data.keys()[0]))
         request_id = data.get("request_id")
         payment_request = PaymentRequest.objects.filter(id=request_id).last()
@@ -168,7 +185,6 @@ class AcceptPaymentRequestView(APIView):
                         ]
                     )
                     zrwallet_models.WalletTransactions.objects.create(
-                        log_type=zrwallet_models.WalletTransactions.BALANCE,
                         wallet=zr_wallet,
                         transaction=None,
                         payment_request=payment_request,
@@ -213,7 +229,6 @@ class AcceptPaymentRequestView(APIView):
                             ]
                         )
                         zrwallet_models.WalletTransactions.objects.create(
-                            log_type=zrwallet_models.WalletTransactions.BALANCE,
                             wallet=supervisor_wallet,
                             transaction=None,
                             payment_request=payment_request,
@@ -366,9 +381,12 @@ class PaymentRequestListView(ListView):
 
         wallet = None
         if not is_user_superuser(self.request):
-            wallet = zrwallet_models.Wallet.objects.get(
-                merchant=self.request.user.zr_admin_user.zr_user
-            )
+            try:
+                wallet = zrwallet_models.Wallet.objects.get(
+                    merchant=self.request.user.zr_admin_user.zr_user
+                )
+            except:
+                pass
         context['wallet'] = wallet
         context['is_superuser'] = is_user_superuser(self.request)
         return context
