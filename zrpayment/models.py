@@ -88,7 +88,7 @@ class PaymentRequest(RowInfo):
 
     payment_mode = models.ForeignKey(to=PaymentMode, related_name='payment_request_mode')
     ref_no = models.CharField(max_length=30, null=True, blank=True)
-    document = models.CharField(max_length=512)
+    document = models.CharField(max_length=512, blank=True)
 
     comments = models.TextField(max_length=1024, null=True, blank=True)
     reject_comments = models.TextField(max_length=1024, null=True, blank=True)
@@ -102,8 +102,9 @@ class PaymentRequest(RowInfo):
         return _type
 
     def save(self, *args, **kwargs):
-        self.dmt_amount = Decimal(self.dmt_amount).quantize(Decimal("0.00"))
-        self.non_dmt_amount = Decimal(self.non_dmt_amount).quantize(Decimal("0.00"))
+        self.amount = Decimal(self.amount).quantize(Decimal("0.00"))
+        self.dmt_amount = Decimal(self.amount).quantize(Decimal("0.00"))
+        self.non_dmt_amount = Decimal(self.amount).quantize(Decimal("0.00"))
 
         super(PaymentRequest, self).save(*args, **kwargs)
 

@@ -245,7 +245,7 @@
                             <div class="form-group col-sm-6">
                                 <label class="control-label">Ref Id (if Online transfer)</label>
                                 <div>
-                                    <input type="number" class="form-control" name="ref_id" id="ref_id">
+                                    <input type="text" class="form-control" name="ref_id" id="ref_id">
                                 </div>
                             </div>
                         </div>
@@ -377,6 +377,9 @@
                 min: 1,
                 max: 100000
             },
+            document: {
+                required: true
+            },
             to_bank: {
                 required: true
             },
@@ -442,17 +445,14 @@
                 // Create an FormData object
                 var data = new FormData($('#challan_request_form')[0]);
                 console.log(data);
-                $('#submit_request').prop('disabled', true)
+                $('#submit_request').prop('disabled', true);
                 $.ajax({
                     type: "POST",
                     enctype: 'multipart/form-data',
                     processData: false,
                     contentType: false,
                     url: '/payment_request/generate_payment_request/',
-                    {#                    processData: false,#}
-                    dataType: 'json',
                     data: data,
-                    async: false,
                     success: function (data) {
                         $('#modal_message').html(data.message);
                         if(data.success) {
@@ -461,15 +461,18 @@
                             }, 1000);
                         }
                         else {
-                            return
+                            setTimeout(function () {
+                                $('#modal_message').html("");
+                            }, 2000);
+                            $('#submit_request').prop('disabled', false);
                         }
                     },
                     error: function (data) {
                         $('#modal_message').html(data.message);
+                        $('#submit_request').prop('disabled', false);
                     }
                 });
                 <!-- AJAX Call -->
-                return false;
             },
             success: function (label) {
                 label
@@ -492,9 +495,9 @@
             }
         });
 
-        $("#submit_request").on('click', function(e) {
-            $('#challan_request_form').valid()
-        });
+{#        $("#submit_request").on('click', function(e) {#}
+{#            $('#challan_request_form').valid()#}
+{#        });#}
 
         $("#payment_mode").change(function(){
             var payment_mode = $('#payment_mode option:selected').text();
