@@ -76,7 +76,7 @@
                                 <td>{{ payment_request.dmt_amount }}</td>
                                 <td>{{ payment_request.non_dmt_amount }}</td>
                                 <td>{{ payment_request.payment_mode }}</td>
-                                <td><td><a href="{{ payment_request.document }}">Download</a></td></td>
+                                <td><a href="{{ payment_request.document }}">Download</a></td>
                                 <td>
                                     {% if payment_request.to_user.role.name == 'ADMINSTAFF' %}
                                         ADMIN
