@@ -63,6 +63,7 @@ class GeneratePaymentRequestView(APIView):
             else:
                 data[detail] = value if value else ""
 
+        import ipdb; ipdb.set_trace()
         data["from_user"] = request.user.zr_admin_user.zr_user.id
         main_distributor = None
         error_message = '{0} {1} {2}'.format(ERROR_MESSAGE_START,

@@ -103,8 +103,8 @@ class PaymentRequest(RowInfo):
 
     def save(self, *args, **kwargs):
         self.amount = Decimal(self.amount).quantize(Decimal("0.00"))
-        self.dmt_amount = Decimal(self.amount).quantize(Decimal("0.00"))
-        self.non_dmt_amount = Decimal(self.amount).quantize(Decimal("0.00"))
+        self.dmt_amount = Decimal(self.dmt_amount).quantize(Decimal("0.00"))
+        self.non_dmt_amount = Decimal(self.non_dmt_amount).quantize(Decimal("0.00"))
 
         super(PaymentRequest, self).save(*args, **kwargs)
 

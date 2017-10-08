@@ -41,11 +41,15 @@
                         <tr>
                             <th>Status</th>
                             <th>Date</th>
-                            <th>Type</th> {# DMT or Non DMT#}
                             <th>Amount</th>
+                            <th>DMT Amount</th>
+                            <th>NON DMT Amount</th>
                             <th>Payment Mode</th>
-                            <th>From User Name</th>
-                            <th>From User Id</th>
+                            <th>To User Name</th>
+                            <th>From Bank Account Number</th>
+                            <th>To Bank Account Number</th>
+                            <th>From bank</th>
+                            <th>To bank</th>
                             <th>Ref Id</th>
                         </tr>
                         {% for payment_request in page_obj %}
@@ -55,18 +59,28 @@
                                         Pending
                                     {% elif payment_request.status == 1 %}
                                         Accepted
+                                    {% elif payment_request.status == 3 %}
+                                        Refund
                                     {% else %}
                                         Rejected
                                     {% endif %}
                                 </td>
                                 <td>{{ payment_request.at_created }}</td>
-                                <td>{{ payment_request.request_type }}</td>
                                 <td>{{ payment_request.amount }}</td>
+                                <td>{{ payment_request.dmt_amount }}</td>
+                                <td>{{ payment_request.non_dmt_amount }}</td>
                                 <td>{{ payment_request.payment_mode }}</td>
                                 <td>
-                                    {{ payment_request.from_user.get_full_name }}
+                                    {% if payment_request.to_user.role.name == 'ADMINSTAFF' %}
+                                        ADMIN
+                                    {% else %}
+                                        {{ payment_request.to_user.get_full_name }}
+                                    {% endif %}
                                 </td>
-                                <td>{{ payment_request.from_user.id }}</td>
+                                <td>{{ payment_request.from_account_no }}</td>
+                                <td>{{ payment_request.to_account_no }}</td>
+                                <td>{{ payment_request.from_bank.bank_name }}</td>
+                                <td>{{ payment_request.to_bank.bank_name }}</td>
                                 <td>{{ payment_request.ref_no|default_if_none:"N/A" }}</td>
                             </tr>
                         {% endfor %}

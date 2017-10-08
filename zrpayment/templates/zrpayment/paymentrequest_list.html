@@ -44,11 +44,15 @@
                             <th>Refund</th>
                             <th>Status</th>
                             <th>Date</th>
-                            <th>Type</th> {# DMT or Non DMT#}
                             <th>Amount</th>
+                            <th>DMT Amount</th>
+                            <th>NON DMT Amount</th>
                             <th>Payment Mode</th>
                             <th>From User Name</th>
-                            <th>From User Id</th>
+                            <th>From Bank Account Number</th>
+                            <th>To Bank Account Number</th>
+                            <th>From bank</th>
+                            <th>To bank</th>
                             <th>Ref Id</th>
                         </tr>
                         {% for payment_request in payment_request_list %}
@@ -57,34 +61,26 @@
                                     {% if is_superuser %}
                                         {% with payment_request.pk as payment_id %}
                                             {% if payment_request.status == 0 %}
-
                                                 <input type="button" class="button green payment change_request_id" value="Approve" data-toggle="modal" data-target="#confirm_approve" data-slug-id="{{ payment_request.pk }}">
                                                 <input type="button" class="button red payment change_request_id" value="Reject" data-toggle="modal" data-target="#confirm_reject" data-slug-id="{{ payment_request.pk }}">
                                             {% endif %}
                                         {% endwith %}
                                     {% elif payment_request.dmt_amount %}
-                                        {% if wallet.dmt_amount >= payment_request.dmt_amount %}
+                                        {% if wallet.dmt_balance >= payment_request.dmt_amount and wallet.non_dmt_balance >= payment_request.non_dmt_amount %}
                                             {% with payment_request.pk as payment_id %}
                                                 {% if payment_request.status == 0 %}
-
                                                     <input type="button" class="button green payment change_request_id" value="Approve" data-toggle="modal" data-target="#confirm_approve" data-slug-id="{{ payment_request.pk }}">
                                                     <input type="button" class="button red payment change_request_id" value="Reject" data-toggle="modal" data-target="#confirm_reject" data-slug-id="{{ payment_request.pk }}">
                                                 {% endif %}
                                             {% endwith %}
                                         {% else %}
-                                            insufficient balance in wallet
-                                        {% endif %}
-                                    {% elif payment_request.non_dmt_amount %}
-                                        {% if wallet.non_dmt_amount >= payment_request.non_dmt_amount %}
-                                            {% with payment_request.pk as payment_id %}
-                                                {% if payment_request.status == 0 %}
-
-                                                    <input type="button" class="button green payment change_request_id" value="Approve" data-toggle="modal" data-target="#confirm_approve" data-slug-id="{{ payment_request.pk }}">
-                                                    <input type="button" class="button red payment change_request_id" value="Reject" data-toggle="modal" data-target="#confirm_reject" data-slug-id="{{ payment_request.pk }}">
-                                                {% endif %}
-                                            {% endwith %}
-                                        {% else %}
-                                            insufficient balance in wallet
+                                            {% if wallet.dmt_balance <= payment_request.dmt_amount and wallet.non_dmt_balance <= payment_request.non_dmt_amount %}
+                                                Insufficient balance in DMT and NON DMT wallets
+                                            {% elif not wallet.dmt_amount >= payment_request.dmt_amount %}
+                                                Insufficient balance in DMT wallet
+                                            {% elif not wallet.non_dmt_balance >= payment_request.non_dmt_amount %}
+                                                Insufficient balance in Non DMT wallet
+                                            {% endif %}
                                         {% endif %}
                                     {% endif %}
                                 </td>
@@ -102,16 +98,29 @@
                                         Rejected
                                     {% elif payment_request.status == 3 %}
                                         Refunded
+                                    {% else %}
                                     {% endif %}
                                 </td>
                                 <td>{{ payment_request.at_created }}</td>
-                                <td>{{ payment_request.request_type }}</td>
                                 <td>{{ payment_request.amount }}</td>
+                                <td>{{ payment_request.dmt_amount }}</td>
+                                <td>{{ payment_request.non_dmt_amount }}</td>
                                 <td>{{ payment_request.payment_mode }}</td>
                                 <td>
                                     {{ payment_request.from_user.get_full_name }}
                                 </td>
-                                <td>{{ payment_request.from_user.id }}</td>
+                                <td>
+                                    {{ payment_request.from_account_no }}
+                                </td>
+                                <td>
+                                    {{ payment_request.to_account_no }}
+                                </td>
+                                <td>
+                                    {{ payment_request.from_bank.bank_name }}
+                                </td>
+                                <td>
+                                    {{ payment_request.to_bank.bank_name }}
+                                </td>
                                 <td>{{ payment_request.ref_no|default_if_none:"N/A" }}</td>
                             </tr>
                         {% endfor %}
