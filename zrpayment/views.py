@@ -62,12 +62,6 @@ class GeneratePaymentRequestView(APIView):
                 data[detail] = file_save_s3(value)
             else:
                 data[detail] = value if value else ""
-        if data.get('request_type') == 'DMT':
-            data['dmt_amount'] = data.get('amount')
-            data['non_dmt_amount'] = 0
-        else:
-            data['dmt_amount'] = 0
-            data['non_dmt_amount'] = data.get('amount')
 
         data["from_user"] = request.user.zr_admin_user.zr_user.id
         main_distributor = None
@@ -203,16 +197,25 @@ class AcceptPaymentRequestView(APIView):
                         merchant=payment_request.from_user
                     )
                     updated = False
-                    if supervisor_wallet.dmt_balance > payment_request.dmt_amount:
+
+                    balance_insufficient = []
+                    if (
+                        supervisor_wallet.dmt_balance >= payment_request.dmt_amount and
+                        supervisor_wallet.non_dmt_balance >= payment_request.non_dmt_amount
+                    ):
                         # For DMT
                         zr_wallet.dmt_balance += payment_request.dmt_amount
                         supervisor_wallet.dmt_balance -= payment_request.dmt_amount
-                        updated = True
-                    elif supervisor_wallet.non_dmt_balance > payment_request.non_dmt_amount:
+
                         # For non dmt
                         zr_wallet.non_dmt_balance += payment_request.non_dmt_amount
                         supervisor_wallet.non_dmt_balance -= payment_request.non_dmt_amount
                         updated = True
+                    else:
+                        if not (supervisor_wallet.dmt_balance >= payment_request.dmt_amount):
+                            balance_insufficient.append('DMT balance')
+                        elif not (supervisor_wallet.non_dmt_balance >= payment_request.non_dmt_amount):
+                            balance_insufficient.append('NON DMT balance')
 
                     if updated:
                         message = "Wallet updated successfully"
@@ -239,7 +242,9 @@ class AcceptPaymentRequestView(APIView):
                         payment_request.status = 1
                         payment_request.save(update_fields=['status'])
                     else:
-                        message = "Insufficient balance, Please recharge you wallet"
+                        message = "Insufficient balance in (%s), Please recharge you wallet" % (
+                            ','.join(balance_insufficient)
+                        )
             else:
                 message = "Payment request already {status}".format(status=payment_request.get_status_display())
 

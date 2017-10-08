@@ -222,16 +222,90 @@
                         {% csrf_token %}
                         <div class="row" style="padding-left: 3rem;padding-top: 25px;">
                             <div class="form-group col-sm-6">
-                                <label class="control-label"><b>Type</b></label>
+                                <label class="control-label"><b>From bank</b></label>
                                 <div>
-                                    <select type="text" class="form-control" name="request_type" id="request_type">
-                                        <option value="DMT">DMT</option>
-                                        <option value="NON_DMT">Non DMT</option>
+                                    <select id="from_bank" name="from_bank">
+                                        {% for b in bank %}
+                                            <option value="{{ b.pk }}">{{ b.bank_name }}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                             </div>
+
+                            <div class="form-group col-sm-6">
+                                <label class="control-label"><b>From Account Number/Branch Name</b></label>
+                                <div>
+                                    <input type="text" class="form-control" name="from_account_no" id="from_account_no" style="box-shadow: 0px 0px;border-style: solid;" required>
+                                </div>
+                            </div>
+                            <!--<div class="form-group col-sm-6">-->
+                                <!--<label class="control-label"><b>Type</b></label>-->
+                                <!--<div>-->
+                                    <!--<select type="text" class="form-control" name="request_type" id="request_type">-->
+                                        <!--<option value="DMT">DMT</option>-->
+                                        <!--<option value="NON_DMT">Non DMT</option>-->
+                                    <!--</select>-->
+                                <!--</div>-->
+                            <!--</div>-->
                         </div>
                         <div class="row" style="padding-left: 3rem;">
+                             <div class="form-group col-sm-6">
+                                <label class="control-label"><b>To bank</b></label>
+                                <div>
+                                    <select id="to_bank" name="to_bank">
+                                        {% for b in bank %}
+                                            <option value="{{ b.pk }}">{{ b.bank_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group col-sm-6">
+                                <label class="control-label"><b>To Account Number/Branch Name</b></label>
+                                <div>
+                                    <input type="text" class="form-control" name="to_account_no" id="to_account_no" style="box-shadow: 0px 0px;border-style: solid;" required>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row" style="padding-left: 3rem;">
+                            <div class="form-group col-sm-6">
+                                <label class="control-label"><b>Enter Amount ₹</b></label>
+                                <div>
+                                    <input type="number" class="form-control" name="amount" id="amount"
+                                           placeholder="INR ">
+                                </div>
+                            </div>
+
+                            <div class="form-group col-sm-6">
+                                <label class="control-label"><b>Enter DMT Amount ₹</b></label>
+                                <div>
+                                    <input type="number" class="form-control" name="dmt_amount" id="dmt_amount"
+                                           placeholder="INR ">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="row" style="padding-left: 3rem;">
+                            <div class="form-group col-sm-6">
+                                <label class="control-label"><b>Non DMT Amount ₹</b></label>
+                                <div>
+                                    <input type="number" class="form-control" name="non_dmt_amount" id="non_dmt_amount"
+                                           placeholder="INR " style="box-shadow: 0px; 0px">
+                                </div>
+                            </div>
+
+                            <div class="form-group col-sm-6">
+                                <label class="control-label"><b>Ref Id (if Online transfer)</b></label>
+                                <div>
+                                    <input type="text" class="form-control" style="box-shadow: 0px 0px;border-style: solid;" name="ref_id" id="ref_id">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" style="padding-left: 3rem;">
+
                             <div class="form-group col-sm-6">
                                 <label class="control-label"><b>Payment Mode</b></label>
                                 <div>
@@ -242,71 +316,23 @@
                                     </select>
                                 </div>
                             </div>
-                            <div class="form-group col-sm-6">
-                                <label class="control-label"><b>Ref Id (if Online transfer)</b></label>
-                                <div>
-                                    <input type="text" class="form-control" name="ref_id" id="ref_id">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row" style="padding-left: 3rem;">
-                            <div class="form-group col-sm-6">
-                                <label class="control-label"><b>Enter Amount ₹</b></label>
-                                <div>
-                                    <input type="number" class="form-control" name="amount" id="amount"
-                                           placeholder="INR ">
-                                </div>
-                            </div>
+
                             <div class="form-group col-sm-6">
                                 <label class="control-label"><b>Upload Challan</b></label>
                                 <div>
                                     <input type="file" class="form-control" name="document" id="document">
                                 </div>
                             </div>
+
                         </div>
 
-                        <div class="row" style="padding-left: 3rem;">
-                            <div class="form-group col-sm-6">
-                                <label class="control-label"><b>From bank</b></label>
-                                <div>
-                                    <select id="from_bank" name="from_bank">
-                                        {% for b in bank %}
-                                            <option value="{{ b.pk }}">{{ b.bank_name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
+                        <div class="row container" style="padding-left: 3rem;">
+                            <div class="form-group col-sm-9"></div>
+                            <div class="form-group col-sm-3" style="    position: relative;left: 13%;">
+                                <button type="submit" id="submit_request" class="pull-right submit_request button red downloadcsv mr-5" style="background-color: red" type="submit">
+                                    Request
+                                </button>
                             </div>
-                            <div class="form-group col-sm-6">
-                                <label class="control-label"><b>To bank</b></label>
-                                <div>
-                                    <select id="to_bank" name="to_bank">
-                                        {% for b in bank %}
-                                            <option value="{{ b.pk }}">{{ b.bank_name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row" style="padding-left: 3rem;">
-                            <div class="form-group col-sm-6">
-                                <label class="control-label"><b>From account number</b></label>
-                                <div>
-                                    <input type="number" class="form-control" name="from_account_no" id="from_account_no" required>
-                                </div>
-                            </div>
-                            <div class="form-group col-sm-6">
-                                <label class="control-label"><b>To account number</b></label>
-                                <div>
-                                    <input type="number" class="form-control" name="to_account_no" id="to_account_no"  required>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row" style="padding-left: 3rem;">
-                            <button type="submit" id="submit_request" class="pull-right submit_request button red downloadcsv mr-5" style="background-color: red" type="submit">
-                                Request
-                            </button>
                         </div>
                     </form>
 
@@ -361,6 +387,24 @@
             }
         });
 
+        jQuery.validator.addMethod("dmt_non_dmt_sum_valid", function(value, element, param) {
+            non_dmt_val = parseInt($('#non_dmt_amount').val())
+            dmt_val = parseInt($('#dmt_amount').val())
+            amount_val = parseInt($('#amount').val())
+
+            if(non_dmt_val + dmt_val == amount_val) {
+                $('#alert_msg').html("")
+                $('#alert_msg').hide()
+                return true
+            } else {
+                $('#alert_msg').html("DMT and NON DMT amount total should be equal to amount")
+                $('#alert_msg').show()
+                return false
+            }
+
+        }, function(data, data2, data3) {
+
+        });
 
         var challan_request_form = $('#challan_request_form');
         var sign_in_error = $('.alert-danger', challan_request_form);
@@ -375,7 +419,8 @@
             amount: {
                 required: true,
                 min: 1,
-                max: 100000
+                max: 100000,
+                dmt_non_dmt_sum_valid: true
             },
             document: {
                 required: true
@@ -391,9 +436,17 @@
             },
             from_account_no: {
                 required: true
+            },
+            dmt_amount: {
+                required: true
+            },
+            non_dmt_amount: {
+                required: false
             }
         };
 
+        $('#alert_msg').hide()
+        $('#alert_msg').html('')
         challan_request_form.validate({
             rules: rules,
             messages: {
@@ -438,7 +491,6 @@
                     .closest('.input-icon').find('.suc').show();
             },
             submitHandler: function (form) {
-                console.log("request");
                 <!-- AJAX Call -->
                 $('#modal_message').html("");
 
@@ -491,7 +543,6 @@
 
             },
             errorPlacement: function (error, element) {
-
             }
         });
 
