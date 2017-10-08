@@ -74,6 +74,7 @@
                                                 {% endif %}
                                             {% endwith %}
                                         {% else %}
+                                            {% if payment_request.status == 0 %}
                                                 {% if wallet.dmt_balance < payment_request.dmt_amount and wallet.non_dmt_balance < payment_request.non_dmt_amount %}
                                                     Insufficient balance in DMT and NON DMT wallets
                                                 {% elif not wallet.dmt_balance >= payment_request.dmt_amount %}
