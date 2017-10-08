@@ -12,9 +12,4 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.AlterField(
-            model_name='wallettransactions',
-            name='log_type',
-            field=models.CharField(choices=[('transaction', 'Transaction'), ('balance', 'Balance'), ('refund_decrement', 'Refund'), ('refund_increment', 'Refund increment')], default='transaction', max_length=20),
-        ),
     ]
