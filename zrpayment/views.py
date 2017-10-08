@@ -145,7 +145,7 @@ class RefundRequestView(APIView):
         )
 
         zrwallet_models.WalletTransactions.objects.create(
-            wallet=from_user_wallet,
+            wallet=to_user_wallet,
             transaction=None,
             payment_request=payment_request_instance,
             dmt_balance=payment_request_instance.dmt_amount,
