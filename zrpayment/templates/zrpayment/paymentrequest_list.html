@@ -58,14 +58,14 @@
                         {% for payment_request in payment_request_list %}
                             <tr>
                                 <td>
-                                    {% if is_superuser %}
+                                    {% is_superuser %}
                                         {% with payment_request.pk as payment_id %}
                                             {% if payment_request.status == 0 %}
                                                 <input type="button" class="button green payment change_request_id" value="Approve" data-toggle="modal" data-target="#confirm_approve" data-slug-id="{{ payment_request.pk }}">
                                                 <input type="button" class="button red payment change_request_id" value="Reject" data-toggle="modal" data-target="#confirm_reject" data-slug-id="{{ payment_request.pk }}">
                                             {% endif %}
                                         {% endwith %}
-                                    {% elif payment_request.dmt_amount %}
+                                    {% else %}
                                         {% if wallet.dmt_balance >= payment_request.dmt_amount and wallet.non_dmt_balance >= payment_request.non_dmt_amount %}
                                             {% with payment_request.pk as payment_id %}
                                                 {% if payment_request.status == 0 %}
@@ -74,7 +74,7 @@
                                                 {% endif %}
                                             {% endwith %}
                                         {% else %}
-                                            {% if wallet.dmt_balance <= payment_request.dmt_amount and wallet.non_dmt_balance <= payment_request.non_dmt_amount %}
+                                            {% if wallet.dmt_balance < payment_request.dmt_amount and wallet.non_dmt_balance < payment_request.non_dmt_amount %}
                                                 Insufficient balance in DMT and NON DMT wallets
                                             {% elif not wallet.dmt_amount >= payment_request.dmt_amount %}
                                                 Insufficient balance in DMT wallet
