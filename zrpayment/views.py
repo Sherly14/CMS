@@ -182,8 +182,8 @@ class AcceptPaymentRequestView(APIView):
                         wallet=zr_wallet,
                         transaction=None,
                         payment_request=payment_request,
-                        dmt_balance=zr_wallet.dmt_balance,
-                        non_dmt_balance=zr_wallet.non_dmt_balance,
+                        dmt_balance=payment_request.dmt_amount,
+                        non_dmt_balance=payment_request.non_dmt_amount,
                         is_success=True
                     )
                     message = "Wallet updated successfully"
@@ -235,8 +235,16 @@ class AcceptPaymentRequestView(APIView):
                             wallet=supervisor_wallet,
                             transaction=None,
                             payment_request=payment_request,
-                            dmt_balance=zr_wallet.dmt_balance,
-                            non_dmt_balance=zr_wallet.non_dmt_balance,
+                            dmt_balance=payment_request.dmt_amount * decimal.Decimal('-1'),
+                            non_dmt_balance=payment_request.non_dmt_amount * decimal.Decimal('-1'),
+                            is_success=True
+                        )
+                        zrwallet_models.WalletTransactions.objects.create(
+                            wallet=zr_wallet,
+                            transaction=None,
+                            payment_request=payment_request,
+                            dmt_balance=payment_request.dmt_amount,
+                            non_dmt_balance=payment_request.non_dmt_amount,
                             is_success=True
                         )
                         payment_request.status = 1
