@@ -58,7 +58,7 @@
                         {% for payment_request in payment_request_list %}
                             <tr>
                                 <td>
-                                    {% is_superuser %}
+                                    {% if is_superuser %}
                                         {% with payment_request.pk as payment_id %}
                                             {% if payment_request.status == 0 %}
                                                 <input type="button" class="button green payment change_request_id" value="Approve" data-toggle="modal" data-target="#confirm_approve" data-slug-id="{{ payment_request.pk }}">
