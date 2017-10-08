@@ -108,6 +108,16 @@ class PaymentRequest(RowInfo):
 
         super(PaymentRequest, self).save(*args, **kwargs)
 
+    def get_status(self):
+        if self.status == 0:
+            return "Pending"
+        elif self.status == 1:
+            return "Accepted"
+        elif self.status == 3:
+            return "Refund"
+        else:
+            return "Rejected"
+
     class Meta:
         verbose_name_plural = 'PaymentRequests'
 

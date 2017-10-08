@@ -338,25 +338,40 @@ def merchant_payment_req_csv_download(request):
     response['Content-Disposition'] = 'attachment; filename="payment-requests.csv"'
     writer = csv.writer(response)
     writer.writerow([
-        'Date',
-        'Type',
-        'Amount',
-        'Payment Mode',
-        'From User Name',
-        'From User Id',
-        'Ref Id',
+        "Status",
+        "Date",
+        "Amount",
+        "DMT Amount",
+        "NON DMT Amount",
+        "Payment Mode",
+        "Challan document",
+        "To User Name",
+        "From User Name",
+        "From Bank Account Number",
+        "To Bank Account Number",
+        "From bank",
+        "To bank",
+        "Ref Id"
     ])
 
     for payment_req in qs:
         writer.writerow(
             [
+                payment_req.get_status(),
                 payment_req.at_created,
-                'DMT' if payment_req.dmt_amount else 'NON_DMD',
                 payment_req.amount,
+                payment_req.dmt_amount,
+                payment_req.non_dmt_amount,
                 payment_req.payment_mode,
-                payment_req.from_user.first_name,
-                payment_req.from_user.id,
-                payment_req.ref_no,
+                payment_req.document,
+                'admin' if payment_req.to_user.role.name == 'ADMINSTAFF' else payment_req.to_user.get_full_name(),
+                'admin' if payment_req.from_user.role.name == 'ADMINSTAFF' else payment_req.from_user.get_full_name(),
+                payment_req.from_account_no,
+                payment_req.from_account_no,
+                payment_req.to_account_no,
+                payment_req.from_bank.bank_name.encode('utf-8', 'ignore'),
+                payment_req.to_bank.bank_name.encode('utf-8', 'ignore'),
+                payment_req.ref_no.encode('utf-8', 'ignore') if payment_req.ref_no else '',
             ]
         )
 
