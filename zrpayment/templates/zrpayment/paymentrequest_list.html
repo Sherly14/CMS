@@ -67,8 +67,8 @@
                                     {% if is_superuser %}
                                         {% with payment_request.pk as payment_id %}
                                             {% if payment_request.status == 0 %}
-                                                <input type="button" class="button green payment change_request_id" value="Approve" data-toggle="modal" data-target="#confirm_approve" data-slug-id="{{ payment_request.pk }}">
-                                                <input type="button" class="button red payment change_request_id" value="Reject" data-toggle="modal" data-target="#confirm_reject" data-slug-id="{{ payment_request.pk }}">
+                                                <input type="button" class="button green payment change_request_id" style="font-size: 80%;" value="Approve" data-toggle="modal" data-target="#confirm_approve" data-slug-id="{{ payment_request.pk }}">
+                                                <input type="button" class="button red payment change_request_id" style="font-size: 80%;" value="Reject" data-toggle="modal" data-target="#confirm_reject" data-slug-id="{{ payment_request.pk }}">
                                             {% endif %}
                                         {% endwith %}
                                     {% else %}
