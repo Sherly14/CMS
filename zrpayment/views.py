@@ -120,7 +120,7 @@ class RefundRequestView(APIView):
         )
 
         from_user_wallet.dmt_balance -= payment_request_instance.dmt_amount
-        from_user_wallet.non_dmt_balance -= payment_request_instance.dmt_amount
+        from_user_wallet.non_dmt_balance -= payment_request_instance.non_dmt_amount
 
         to_user_wallet.dmt_balance += payment_request_instance.dmt_amount
         to_user_wallet.non_dmt_balance += payment_request_instance.non_dmt_amount

@@ -209,7 +209,7 @@
             </div>
             <div class="modal-footer btn-block-group" style="align-self: center;">
                 <div class="modal-footer" style="text-align:center">
-                    <button type="button" class="btn btn-primary btn-small max-225 confirm_refund_btn">Yes
+                    <button type="button" id="confirm_refund_btn" class="btn btn-primary btn-small max-225 confirm_refund_btn" loading-text="Yes">Yes
                     </button>
                     <button type="button" class="btn btn-default btn-small max-225" data-dismiss="modal">No</button>
                 </div>
@@ -374,6 +374,8 @@
 
         $('.confirm_refund_btn').click(
             function(e) {
+                $('#confirm_refund_btn').addClass('disabled')
+                $('#confirm_refund_btn').prop('disabled', true)
                 window.location = '{% url "payment-requests:refund-request-view" %}?payment_request=' + window.current_payment_request;
             }
         )
