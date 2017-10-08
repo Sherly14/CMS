@@ -4,7 +4,7 @@
 
 {% block content %}
 
-            <div class="content-wrapper py-5" style="padding-left: 0.5rem;">
+    <div class="content-wrapper py-5" style="padding-left: 0.5rem;">
 
         <div class="container-fluid" style="position: relative;">
 
@@ -12,95 +12,116 @@
             <div class="row">
                 <div class="col-xl-3 col-sm-6 mb-3">
                     <div class="period">PERIOD</div>
-{#                    <div class="card card-inverse o-hidden h-100" style="height: 45px !important;margin-bottom: 20px;">#}
-{#                        <div class="card-block lightGrayBG blackTextColor">#}
-{#                                <div class="calenderEntry">#}
-{#                                24/1/2017 - 24/2/2017#}
-{#                                <i class="fa fa-calendar dis-ft-r"></i>#}
-{#                                    <i class="fa fa-chevron-down dis-ft-down"></i>#}
-{#                                </div>#}
-{#                        </div>#}
-{#                    </div>#}
-                    <a href="{% url "user:dashboard" %}" >Reset filters</a>
+                    <a href="{% url "user:dashboard" %}">Reset filters</a>
                     <div>
                         <div class="d-flex justify-content-between">
                             <input class="button yellow resize" type="button" value="Today" id="today">
-                            <input class="button yellow resize" type="button" value="Last Week"  id="last-week">
+                            <input class="button yellow resize" type="button" value="Last Week" id="last-week">
                             <input class="button yellow resize" type="button" value="Last Month" id="last-month">
                         </div>
                     </div>
                 </div>
                 <div class="col-xl-9 col-sm-6 mb-3">
                     <div class="mr-5 textAlignRight dashboard">Dashboard</div>
-                    <input id="csv-download" type="button" value="DOWNLOAD REPORT" style="float: right;" class ="button red downloadcsv mr-5">
+                    <input id="csv-download" type="button" value="DOWNLOAD REPORT" style="float: right;"
+                           class="button red downloadcsv mr-5">
                 </div>
             </div>
 
             <!-- Icon Cards -->
             <div class="row" style="margin-bottom: 2.5rem">
-                <div class="col-xl-3 col-sm-6 mb-3">
+                <div class="col-xl-3 col-sm-6 mb-3" style="height: 100%;">
                     <div class="card card-inverse o-hidden h-100">
                         <div class="card-block lightGrayBG blackTextColor">
 
 
-                        <span class="card-head spanAlignment">
+                        <span class="card-head spanAlignment" >
                                 Total Commissions</span>
-                        <span class="card-data textAlignRight spanAlignment">
+                            <span class="card-data textAlignRight spanAlignment">
                                 INR {{ total_commission }}</span>
-                    </div>
+                        </div>
 
                     </div>
                 </div>
                 {% if total_merchants %}
-                <div class="col-xl-3 col-sm-6 mb-3">
-                    <div class="card card-inverse o-hidden h-100">
-                        <div class="card-block lightGrayBG blackTextColor">
+                    <div class="col-xl-3 col-sm-6 mb-3">
+                        <div class="card card-inverse o-hidden h-100">
+                            <div class="card-block lightGrayBG blackTextColor">
 
                         <span class="card-head spanAlignment">
                                 Merchants </span>
-                        <span class="card-data textAlignRight spanAlignment">
+                                <span class="card-data textAlignRight spanAlignment">
                                 Total : {{ total_merchants }}</span>
-                    </div>
+                            </div>
 
+                        </div>
+                    </div>
+                {% endif %}
+                {% if not is_user_superuser %}
+                <div class="col-xl-3 col-sm-6 mb-3">
+                    <div class="card card-inverse o-hidden h-100">
+                        <div class="card-block lightGrayBG blackTextColor" >
+                                <span class="card-head spanAlignment">
+                                    DMT Balance : {{ user_wallet.dmt_balance }}
+                                </span>
+                                <span class="card-head spanAlignment">
+                                    Non-DMT Balance : {{ user_wallet.non_dmt_balance }}
+                                </span>
+                        </div>
+                        <button data-toggle="modal" data-target="#modal" class="title m-b-md button red downloadcsv mr-5">
+                            Request Balance
+                        </button>
                     </div>
                 </div>
                 {% endif %}
-{#                <div class="col-xl-3 col-sm-6 mb-3">#}
-{#                    <div class="card card-inverse o-hidden h-100">#}
-{#                        <div class="card-block lightGrayBG blackTextColor">#}
-{##}
-{##}
-{#                            <span class="card-head spanAlignment">#}
-{#                                Total Remittance</span>#}
-{#                            <span class="card-data textAlignRight spanAlignment">#}
-{#                                INR 48,000</span>#}
-{#                        </div>#}
-{##}
-{#                    </div>#}
-{#                </div>#}
 
             </div>
             <div class="row" style="margin-bottom: 2.5rem">
-                <div class="col-xl-4 col-sm-6 mb-3">
+                <div class="col-xl-4 col-sm-6 mb-3" style="height: 100%;">
                     <div class="card card-inverse o-hidden h-100">
                         <div class="card-block lightGrayBG blackTextColor">
 
                             <div class="mr-5 card-head">
                                 Total Transactions
                             </div>
-
+                            <span class="pull-right"><b>Successful</b></span>
                             <table class="card-data table table-condensed">
                                 <tbody>
-                                    <tr>
-                                        <td>DMT</td>
-                                        <td class="textAlignRight">{{ total_dmt_transactions }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Bills</td>
-                                        <td class="textAlignRight">{{ total_bill_pay_transactions }}</td>
-
-
-                                    </tr>
+                                <tr>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>DMT</td>
+                                    <td class="textAlignRight">{{ successful_dmt_transactions }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Bills</td>
+                                    <td class="textAlignRight">{{ successful_bill_pay_transactions }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Recharges</td>
+                                    <td class="textAlignRight">{{ successful_recharge_transactions }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <span class="pull-right"><b>Pending+Failed</b></span>
+                            <table class="card-data table table-condensed">
+                                <tbody>
+                                <tr>
+                                    <td></td>
+                                </tr>
+                                <tr>
+                                    <td>DMT</td>
+                                    <td class="textAlignRight">{{ pending_failure_dmt_transactions }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Bills</td>
+                                    <td class="textAlignRight">{{ pending_failure_bill_pay_transactions }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Recharges</td>
+                                    <td class="textAlignRight">{{ pending_failure_recharge_transactions }}</td>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -108,8 +129,8 @@
                     </div>
                 </div>
 
-                <div class="col-xl-4 col-sm-6 mb-3">
-                    <div class="card card-inverse o-hidden h-100">
+                <div class="col-xl-4 col-sm-6 mb-3" style="height: 100%;">
+                    <div class="card card-inverse o-hidden h-100" >
                         <div class="card-block lightGrayBG blackTextColor">
 
                             <div class="mr-5 card-head">
@@ -118,15 +139,18 @@
 
                             <table class="card-data table table-condensed">
                                 <tbody>
-                                    <tr>
-                                        <td>DMT</td>
-                                        <td class="textAlignRight">INR {{ dmt_transaction_value }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Bills</td>
-                                        <td class="textAlignRight">INR {{ bill_pay_transaction_value }}</td>
-                                    </tr>
-
+                                <tr>
+                                    <td>DMT</td>
+                                    <td class="textAlignRight">INR {{ dmt_transaction_value }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Bills</td>
+                                    <td class="textAlignRight">INR {{ bill_pay_transaction_value }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Recharges</td>
+                                    <td class="textAlignRight">INR {{ recharge_transaction_value }}</td>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -134,7 +158,7 @@
                     </div>
                 </div>
 
-                <div class="col-xl-4 col-sm-6 mb-3">
+                <div class="col-xl-4 col-sm-6 mb-3" style="height: 100%;">
                     <div class="card card-inverse o-hidden h-100">
                         <div class="card-block lightGrayBG blackTextColor">
 
@@ -144,14 +168,18 @@
 
                             <table class="card-data table table-condensed">
                                 <tbody>
-                                    <tr>
-                                        <td>DMT</td>
-                                        <td class="textAlignRight">INR {{ dmt_commission_value }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Bills</td>
-                                        <td class="textAlignRight">INR {{ total_bill_pay_commission_value }}</td>
-                                    </tr>
+                                <tr>
+                                    <td>DMT</td>
+                                    <td class="textAlignRight">INR {{ dmt_commission_value }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Bills</td>
+                                    <td class="textAlignRight">INR {{ total_bill_pay_commission_value }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Recharges</td>
+                                    <td class="textAlignRight">INR {{ total_recharge_commission_value }}</td>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -163,14 +191,14 @@
             <div class="row" style="margin-bottom: 2.5rem">
                 <div class="col-xl-3 col-sm-6 mb-3">
                     {% if total_payment_request %}
-                    <div class="card card-block lightGrayBG blackTextColor">
+                        <div class="card card-block lightGrayBG blackTextColor">
 
 
                         <span class="card-head spanAlignment">
                                 Payment Requests</span>
-                        <span class="card-data textAlignRight spanAlignment">
+                            <span class="card-data textAlignRight spanAlignment">
                                 {{ total_payment_request }}</span>
-                    </div>
+                        </div>
                     {% endif %}
 
 
@@ -178,16 +206,155 @@
             </div>
         </div>
 
+    </div>
+
+    <!-- Modal HTML Markup -->
+    <div id="modal" class="modal fade">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content" style="width: 700px;">
+                <div class="modal-header" style="    background-color: #e2e2e2;">
+                    <h1 class="modal-title" style="font-size: 1.5rem; font-size: 1.5rem;font-weight: bold;line-height: 2rem;padding-left: 12px;">Request Balance</h1>
+                </div>
+                <div class="modal-body">
+
+                    <div id="modal_message" tabindex='1'></div>
+                    <form class="form-horizontal" method="POST" id="challan_request_form" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row" style="padding-left: 3rem;padding-top: 25px;">
+                            <div class="form-group col-sm-6">
+                                <label class="control-label"><b>From bank</b></label>
+                                <div>
+                                    <select id="from_bank" name="from_bank">
+                                        {% for b in bank %}
+                                            <option value="{{ b.pk }}">{{ b.bank_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group col-sm-6">
+                                <label class="control-label"><b>From Account Number/Branch Name</b></label>
+                                <div>
+                                    <input type="text" class="form-control" name="from_account_no" id="from_account_no" style="box-shadow: 0px 0px;border-style: solid;" required>
+                                </div>
+                            </div>
+                            <!--<div class="form-group col-sm-6">-->
+                                <!--<label class="control-label"><b>Type</b></label>-->
+                                <!--<div>-->
+                                    <!--<select type="text" class="form-control" name="request_type" id="request_type">-->
+                                        <!--<option value="DMT">DMT</option>-->
+                                        <!--<option value="NON_DMT">Non DMT</option>-->
+                                    <!--</select>-->
+                                <!--</div>-->
+                            <!--</div>-->
+                        </div>
+                        <div class="row" style="padding-left: 3rem;">
+                             <div class="form-group col-sm-6">
+                                <label class="control-label"><b>To bank</b></label>
+                                <div>
+                                    <select id="to_bank" name="to_bank">
+                                        {% for b in bank %}
+                                            <option value="{{ b.pk }}">{{ b.bank_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group col-sm-6">
+                                <label class="control-label"><b>To Account Number</b></label>
+                                <div>
+                                    <input type="number" class="form-control" name="to_account_no" id="to_account_no" style="box-shadow: 0px 0px;border-style: solid;" required>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row" style="padding-left: 3rem;">
+                            <div class="form-group col-sm-6">
+                                <label class="control-label"><b>Enter Amount ₹</b></label>
+                                <div>
+                                    <input type="number" class="form-control" name="amount" id="amount"
+                                           placeholder="INR ">
+                                </div>
+                            </div>
+
+                            <div class="form-group col-sm-6">
+                                <label class="control-label"><b>Enter DMT Amount ₹</b></label>
+                                <div>
+                                    <input type="number" class="form-control" name="dmt_amount" id="dmt_amount"
+                                           placeholder="INR ">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="row" style="padding-left: 3rem;">
+                            <div class="form-group col-sm-6">
+                                <label class="control-label"><b>Non DMT Amount ₹</b></label>
+                                <div>
+                                    <input type="number" class="form-control" name="non_dmt_amount" id="non_dmt_amount"
+                                           placeholder="INR " style="box-shadow: 0px; 0px">
+                                </div>
+                            </div>
+
+                            <div class="form-group col-sm-6">
+                                <label class="control-label"><b>Ref Id (if Online transfer)</b></label>
+                                <div>
+                                    <input type="text" class="form-control" style="box-shadow: 0px 0px;border-style: solid;" name="ref_id" id="ref_id">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" style="padding-left: 3rem;">
+
+                            <div class="form-group col-sm-6">
+                                <label class="control-label"><b>Payment Mode</b></label>
+                                <div>
+                                    <select type="text" class="form-control" name="payment_mode" id="payment_mode" style="box-shadow: 0px 0px;font-size:80%">
+                                        {% for mod in payment_mods %}
+                                        <option value="{{ mod.id }}">{{ mod.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group col-sm-6">
+                                <label class="control-label"><b>Upload Challan</b></label>
+                                <div>
+                                    <input type="file" class="form-control" name="document" id="document">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="row container" style="padding-left: 3rem;">
+                            <div class="form-group col-sm-9"></div>
+                            <div class="form-group col-sm-3" style="    position: relative;left: 13%;">
+                                <button type="submit" id="submit_request" class="pull-right submit_request button red downloadcsv mr-5" style="background-color: red" type="submit">
+                                    Request
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="alert alert-danger" id="alert_msg" style="display:none;">
+                    </div>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+
+
+
     <script>
-        $('#today').click(function() {
+        $('#today').click(function () {
             window.location.assign('{% url "user:dashboard" %}?period=today')
         });
 
-        $('#last-week').click(function() {
+        $('#last-week').click(function () {
             window.location.assign('{% url "user:dashboard" %}?period=last-week')
         });
 
-        $('#last-month').click(function() {
+        $('#last-month').click(function () {
             window.location.assign('{% url "user:dashboard" %}?period=last-month')
         });
 
@@ -198,3 +365,201 @@
         });
     </script>
 {% endblock %}
+
+
+{% block extrascripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
+    <script>
+        // using jQuery
+        var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+        jQuery.validator.addMethod("dmt_non_dmt_sum_valid", function(value, element, param) {
+            non_dmt_val = parseInt($('#non_dmt_amount').val())
+            dmt_val = parseInt($('#dmt_amount').val())
+            amount_val = parseInt($('#amount').val())
+
+            if(non_dmt_val + dmt_val == amount_val) {
+                $('#alert_msg').html("")
+                $('#alert_msg').hide()
+                return true
+            } else {
+                $('#alert_msg').html("DMT and NON DMT amount total should be equal to amount")
+                $('#alert_msg').show()
+                return false
+            }
+
+        }, function(data, data2, data3) {
+
+        });
+
+        var challan_request_form = $('#challan_request_form');
+        var sign_in_error = $('.alert-danger', challan_request_form);
+        var sign_in_success = $('.alert-success', challan_request_form);
+        rules = {
+            type: {
+                required: true
+            },
+            payment_mode: {
+                required: true
+            },
+            amount: {
+                required: true,
+                min: 1,
+                max: 100000,
+                dmt_non_dmt_sum_valid: true
+            },
+            document: {
+                required: true
+            },
+            to_bank: {
+                required: true
+            },
+            from_bank: {
+                required: true
+            },
+            to_account_no: {
+                required: true
+            },
+            from_account_no: {
+                required: true
+            },
+            dmt_amount: {
+                required: true
+            },
+            non_dmt_amount: {
+                required: false
+            }
+        };
+
+        $('#alert_msg').hide()
+        $('#alert_msg').html('')
+        challan_request_form.validate({
+            rules: rules,
+            messages: {
+                "email": {
+                    // required: "Email is required",
+                }
+            },
+            invalidHandler: function (event, validator) { //display error alert on form submit
+                sign_in_success.hide();
+                sign_in_error.show();
+            },
+            highlight: function (element) { // hightlight error inputs
+                $(element)
+                    .closest('.form-group').addClass('has-error'); // set error class to the control group
+                $(element)
+                    .closest('.help-block').removeClass('ok'); // display OK icon
+                $(element)
+                    .closest('.control-group').removeClass('success').addClass('error'); // set error class to the control group
+                $(element)
+                    .closest('.form-group').removeClass('has-success').addClass('has-error');
+                $(element)
+                    .closest('.col-md-4').find('.suc').hide();
+                $(element)
+                    .closest('.col-md-4').find('.err').show();
+                $(element)
+                    .closest('.input-icon').find('.err').show();
+                $(element)
+                    .closest('.input-icon').find('.suc').hide();
+            },
+            unhighlight: function (element) { // revert the change dony by hightlight
+                $(element)
+                    .closest('.control-group').removeClass('has-error'); // set error class to the control group
+                $(element)
+                    .closest('.form-group').removeClass('has-error').addClass('has-success'); // set error class to the control group
+                $(element)
+                    .closest('.col-md-4').find('.err').hide();
+                $(element)
+                    .closest('.col-md-4').find('.suc').show();
+                $(element)
+                    .closest('.input-icon').find('.err').hide();
+                $(element)
+                    .closest('.input-icon').find('.suc').show();
+            },
+            submitHandler: function (form) {
+                <!-- AJAX Call -->
+                $('#modal_message').html("");
+
+                // Create an FormData object
+                var data = new FormData($('#challan_request_form')[0]);
+                console.log(data);
+                $('#submit_request').prop('disabled', true);
+                $('#submit_request').addClass('disabled');
+                $.ajax({
+                    type: "POST",
+                    enctype: 'multipart/form-data',
+                    processData: false,
+                    contentType: false,
+                    url: '/payment_request/generate_payment_request/',
+                    data: data,
+                    success: function (data) {
+                        $('#modal_message').html(data.message);
+                        if(data.success) {
+                            setTimeout(function () {
+                                window.location.reload();
+                            }, 1000);
+                        }
+                        else {
+                            setTimeout(function () {
+                                $('#modal_message').html("");
+                            }, 2000);
+                            $('#submit_request').prop('disabled', false);
+                            $('#submit_request').removeClass('disabled');
+                        }
+                    },
+                    error: function (data) {
+                        $('#modal_message').html(data.message);
+                        $('#submit_request').prop('disabled', false);
+                    }
+                });
+                <!-- AJAX Call -->
+            },
+            success: function (label) {
+                label
+                    .addClass('valid').addClass('help-block ok') // mark the current input as valid and display OK icon
+                    .closest('.control-group').removeClass('error').addClass('success'); // set success class to the control group
+                label
+                    .closest('.form-group').removeClass('has-error').addClass('has-success');
+                $(this)
+                    .closest('.col-md-4').find('.err').hide();
+                $(this)
+                    .closest('.col-md-4').find('.suc').show();
+                label
+                    .closest('.form-group').removeClass('has-error'); // set success class to the control group
+                label
+                    .closest('.form-group').removeClass('has-error'); // set success class to the control group
+
+            },
+            errorPlacement: function (error, element) {
+            }
+        });
+o
+{#        $("#submit_request").on('click', function(e) {#}
+{#            $('#challan_request_form').valid()#}
+{#        });#}
+
+        $("#payment_mode").change(function(){
+            var payment_mode = $('#payment_mode option:selected').text();
+            if(payment_mode == 'CASH') {
+                $("#ref_id").prop('required',false);
+            } else {
+                $("#ref_id").prop('required',true);
+            }
+        })
+
+    </script>
+{% endblock extrascripts %}

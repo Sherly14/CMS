@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block title %} Payment Requests Details {% endblock %}
+
+{% block content %}
+    <div class="content-wrapper">
+        <p class="head-right">Payment Request Detail</p>
+        {% if payment_request %}
+            <div class="row" style="padding-right: 50px;">
+                <div class="fine">
+                    <p class="head-bg head-bg2">From: {{ payment_request.from_user.get_full_name }}</p>
+                </div>
+            </div>
+
+            <div class="row scroll">
+
+                <div style="width: 100%;">
+                    <table>
+                        <tbody>
+                        <tr>
+                            <th width="60%">Requester:</th>
+                            <td><b>{{ payment_request.from_user }}</b></td>
+                        </tr>
+                        <tr>
+                            <th>Request type:</th>
+                            <td><b>{{ payment_request.request_type }}</b></td>
+                        </tr>
+                        {% if payment_request.dmt_amount %}
+                            <tr>
+                                <th>DMT Amount:</th>
+                                <td><b>{{ payment_request.dmt_amount }}</b></td>
+                            </tr>
+                        {% endif %}
+                        {% if payment_request.non_dmt_amount %}
+                            <tr>
+                                <th>Non DMT Amount:</th>
+                                <td><b>{{ payment_request.non_dmt_amount }}</b></td>
+                            </tr>
+                        {% endif %}
+                        <tr>
+                            <th>Payment Mode:</th>
+                            <td><b>{{ payment_request.payment_mode|default_if_none:"N/A" }}</b></td>
+                        </tr>
+                        <tr>
+                            <th>Reference Number:</th>
+                            <td><b>{{ payment_request.ref_no|default_if_none:"N/A" }}</b></td>
+                        </tr>
+                        <tr>
+                            <th>To Bank:</th>
+                            <td><b>{{ payment_request.to_bank|default_if_none:"N/A" }}</b></td>
+                        </tr>
+                        <tr>
+                            <th>To Account Number:</th>
+                            <td><b>{{ payment_request.to_account_no|default_if_none:"N/A" }}</b></td>
+                        </tr>
+                        <tr>
+                            <th>From Bank:</th>
+                            <td><b>{{ payment_request.from_bank|default_if_none:"N/A" }}</b></td>
+                        </tr>
+                        <tr>
+                            <th>Document:</th>
+                            <td><b>{{ payment_request.document|default_if_none:"N/A" }}</b></td>
+                        </tr>
+                        <tr>
+                            <th>Comment:</th>
+                            <td><b>{{ payment_request.comments|default_if_none:"N/A" }}</b></td>
+                        </tr>
+                        <tr>
+                            <th>Status:</th>
+                            <td><b>{{ payment_request.get_status_display|default_if_none:"N/A" }}</b></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}

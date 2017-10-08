@@ -1,5 +1,6 @@
 import decimal
 
+from django.contrib.auth import get_user_model
 from django.db import transaction as dj_transaction
 
 from zrmapping import models as zr_mapping_models
@@ -29,7 +30,8 @@ def get_sub_distributor_id_list_from_distributor(distributor):
 
 
 def get_sub_distributor_merchant_id_list_from_distributor(distributor):
-    return list(zr_mapping_models.SubDistributorMerchant.objects.filter(sub_distributor_id__in=get_sub_distributor_id_list_from_distributor(distributor)).values_list(
+    return list(zr_mapping_models.SubDistributorMerchant.objects.filter(
+        sub_distributor_id__in=get_sub_distributor_id_list_from_distributor(distributor)).values_list(
         'sub_distributor_id', flat=True))
 
 
@@ -89,6 +91,26 @@ def get_merchants_from_distributor(distributor):
         distributor=distributor
     )
     return mapping.values_list('merchant', flat=True)
+
+
+def get_distributor_from_sub_distributor(sub_distributor):
+    mapping = zr_mapping_models.DistributorSubDistributor.objects.filter(
+        sub_distributor=sub_distributor
+    ).last()
+    if mapping:
+        return mapping.distributor
+    else:
+        return None
+
+
+def get_main_admin():
+    # This is to get main admin means zrupee admin user object
+    # Note: On creation of main admin need to assign zr_user details with it
+    from zruser import models as zu
+    user_instance = zu.ZrUser.objects.filter(
+        mobile_no='9999999911'
+    ).last()
+    return user_instance
 
 
 TRANSACTION_TYPE_DMT = 'DMT'
