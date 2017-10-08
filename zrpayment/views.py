@@ -190,7 +190,7 @@ class AcceptPaymentRequestView(APIView):
                     payment_request.status = 1
                     payment_request.save(update_fields=['status'])
                 elif self.request.user.zr_admin_user.role.name in ['DISTRIBUTOR', 'SUBDISTRIBUTOR']:
-                    supervisor_wallet, _ = zrwallet_models.Wallet.objects.get(
+                    supervisor_wallet = zrwallet_models.Wallet.objects.get(
                         merchant=payment_request.to_user
                     )
                     zr_wallet = zrwallet_models.Wallet.objects.get(
