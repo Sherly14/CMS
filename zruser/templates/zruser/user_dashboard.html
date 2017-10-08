@@ -498,6 +498,7 @@
                 var data = new FormData($('#challan_request_form')[0]);
                 console.log(data);
                 $('#submit_request').prop('disabled', true);
+                $('#submit_request').addClass('disabled');
                 $.ajax({
                     type: "POST",
                     enctype: 'multipart/form-data',
@@ -517,6 +518,7 @@
                                 $('#modal_message').html("");
                             }, 2000);
                             $('#submit_request').prop('disabled', false);
+                            $('#submit_request').removeClass('disabled');
                         }
                     },
                     error: function (data) {
