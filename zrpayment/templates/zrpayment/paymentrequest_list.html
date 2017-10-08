@@ -291,6 +291,8 @@
              })
 
             .on('click','.approve_payment_confirm',function() {
+                $('.approve_payment_confirm').addClass('disabled')
+                $('.approve_payment_confirm').prop('disabled', true)
                  var request_id = $('#request_id').val();
                 console.log(request_id);
                 <!-- AJAX Call -->
