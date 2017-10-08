@@ -74,14 +74,14 @@
                                                 {% endif %}
                                             {% endwith %}
                                         {% else %}
-                                            {% if wallet.dmt_balance < payment_request.dmt_amount and wallet.non_dmt_balance < payment_request.non_dmt_amount %}
-                                                Insufficient balance in DMT and NON DMT wallets
-                                            {% elif not wallet.dmt_amount >= payment_request.dmt_amount %}
-                                                Insufficient balance in DMT wallet
-                                            {% elif not wallet.non_dmt_balance >= payment_request.non_dmt_amount %}
-                                                Insufficient balance in Non DMT wallet
+                                                {% if wallet.dmt_balance < payment_request.dmt_amount and wallet.non_dmt_balance < payment_request.non_dmt_amount %}
+                                                    Insufficient balance in DMT and NON DMT wallets
+                                                {% elif not wallet.dmt_amount >= payment_request.dmt_amount %}
+                                                    Insufficient balance in DMT wallet
+                                                {% elif not wallet.non_dmt_balance >= payment_request.non_dmt_amount %}
+                                                    Insufficient balance in Non DMT wallet
+                                                {% endif %}
                                             {% endif %}
-                                        {% endif %}
                                     {% endif %}
                                 </td>
                                 <td>
