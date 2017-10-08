@@ -11,7 +11,8 @@ def payment_req_cnt(request):
     pr_cnt = 0
     if is_user_superuser(request):
         pr_cnt = PaymentRequest.objects.filter(
-            status=0
+            status=0,
+            to_user__role__name='ADMINSTAFF',
         ).count()
     elif request.user.zr_admin_user.role.name in ['DISTRIBUTOR', 'SUBDISTRIBUTOR']:
         pr_cnt = PaymentRequest.objects.filter(
