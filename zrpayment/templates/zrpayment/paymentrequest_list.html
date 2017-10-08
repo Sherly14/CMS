@@ -67,16 +67,16 @@
                                     {% if is_superuser %}
                                         {% with payment_request.pk as payment_id %}
                                             {% if payment_request.status == 0 %}
-                                                <input type="button" class="button green payment change_request_id" style="font-size: 80%;" value="Approve" data-toggle="modal" data-target="#confirm_approve" data-slug-id="{{ payment_request.pk }}">
-                                                <input type="button" class="button red payment change_request_id" style="font-size: 80%;" value="Reject" data-toggle="modal" data-target="#confirm_reject" data-slug-id="{{ payment_request.pk }}">
+                                                <input type="button" class="button green payment change_request_id" style="font-size: 80%; margin-top: 5px;" value="Approve" data-toggle="modal" data-target="#confirm_approve" data-slug-id="{{ payment_request.pk }}">
+                                                <input type="button" class="button red payment change_request_id" style="font-size: 80%; margin-top: 5px;" value="Reject" data-toggle="modal" data-target="#confirm_reject" data-slug-id="{{ payment_request.pk }}">
                                             {% endif %}
                                         {% endwith %}
                                     {% else %}
                                         {% if wallet.dmt_balance >= payment_request.dmt_amount and wallet.non_dmt_balance >= payment_request.non_dmt_amount %}
                                             {% with payment_request.pk as payment_id %}
                                                 {% if payment_request.status == 0 %}
-                                                    <input type="button" class="button green payment change_request_id" style="font-size: 80%;" value="Approve" data-toggle="modal" data-target="#confirm_approve" data-slug-id="{{ payment_request.pk }}">
-                                                    <input type="button" class="button red payment change_request_id" style="font-size: 80%;" value="Reject" data-toggle="modal" data-target="#confirm_reject" data-slug-id="{{ payment_request.pk }}">
+                                                    <input type="button" class="button green payment change_request_id" style="font-size: 80%; margin-top: 5px;;" value="Approve" data-toggle="modal" data-target="#confirm_approve" data-slug-id="{{ payment_request.pk }}">
+                                                    <input type="button" class="button red payment change_request_id" style="font-size: 80%; margin-top: 5px;" value="Reject" data-toggle="modal" data-target="#confirm_reject" data-slug-id="{{ payment_request.pk }}">
                                                 {% endif %}
                                             {% endwith %}
                                         {% else %}
