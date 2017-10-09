@@ -274,12 +274,12 @@ class RejectPaymentRequestView(APIView):
                     message = "Payment request rejected successfully"
                     payment_request.status = 2
                     payment_request.reject_comments = rejection_reason
-                    payment_request.save(update_fields=['status', 'comments'])
-                elif is_user_superuser(request) and payment_request.to_user.role == 'ADMINSTAFF':
+                    payment_request.save(update_fields=['status', 'reject_comments'])
+                elif is_user_superuser(request) and payment_request.to_user.role.name == 'ADMINSTAFF':
                     message = "Payment request rejected successfully"
                     payment_request.status = 2
                     payment_request.reject_comments = rejection_reason
-                    payment_request.save(update_fields=['status', 'comments'])
+                    payment_request.save(update_fields=['status', 'reject_comments'])
                 else:
                     message = "Not allowed to accept payment request"
             else:
