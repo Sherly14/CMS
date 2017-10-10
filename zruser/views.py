@@ -470,13 +470,12 @@ def get_distributor_qs(request):
 
 
 def get_sub_distributor_qs(request):
+    queryset = zrmappings_models.DistributorSubDistributor.objects.none()
     if request.user.zr_admin_user:
         try:
             queryset = request.user.zr_admin_user.zr_user.sub_dist_dist_mappings.order_by('-at_created')
         except:
             pass
-    else:
-        queryset = zrmappings_models.DistributorSubDistributor.objects.none()
 
     q = request.GET.get('q')
     filter = request.GET.get('filter')
