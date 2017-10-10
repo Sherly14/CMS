@@ -618,7 +618,7 @@ class DashBoardView(ListView):
 
             context["dmt_commission_value"] = commission_models.Commission.objects.filter(
                 transaction__type__name='DMT',
-                commission_user=self.request.user.zr_admin_user.zr_user
+                commission_user=None
             ).aggregate(
                 value=Sum('user_commission')
             )['value'] or 0
