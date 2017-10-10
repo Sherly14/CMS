@@ -471,7 +471,10 @@ def get_distributor_qs(request):
 
 def get_sub_distributor_qs(request):
     if request.user.zr_admin_user:
-        queryset = request.user.zr_admin_user.zr_user.sub_dist_dist_mappings.order_by('-at_created')
+        try:
+            queryset = request.user.zr_admin_user.zr_user.sub_dist_dist_mappings.order_by('-at_created')
+        except:
+            pass
     else:
         queryset = zrmappings_models.DistributorSubDistributor.objects.none()
 
