@@ -615,7 +615,6 @@ class DashBoardView(ListView):
             '''
             Total commission value
             '''
-
             context["dmt_commission_value"] = commission_models.Commission.objects.filter(
                 transaction__type__name='DMT',
                 commission_user=None
@@ -624,7 +623,7 @@ class DashBoardView(ListView):
             )['value'] or 0
 
             context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
-                transaction__type__name=RECHARGES_TYPE,
+                transaction__type__name=BILLS_TYPE,
                 commission_user=None,
                 **dt_filter
             ).aggregate(
@@ -643,42 +642,6 @@ class DashBoardView(ListView):
             merchants = transaction_utils.get_merchants_from_distributor(
                 self.request.user.zr_admin_user.zr_user
             )
-
-            '''
-            context["total_dmt_transactions"] = transaction_models.Transaction.objects.filter(
-                user__id__in=merchants,
-                type__name='DMT',
-                **dt_filter
-            ).count()
-            context["total_bill_pay_transactions"] = transaction_models.Transaction.objects.filter(
-                **dt_filter
-            ).exclude(
-                user__id__in=merchants,
-                type__name='DMT'
-            ).count()
-
-            context["dmt_transaction_value"] = transaction_models.Transaction.objects.filter(
-                user__id__in=merchants,
-                type__name='DMT',
-                **dt_filter
-            ).aggregate(
-                value=Sum('amount')
-            )['value']
-            context["dmt_transaction_value"] = context["dmt_transaction_value"] if context[
-                "dmt_transaction_value"] else 0
-            context["bill_pay_transaction_value"] = transaction_models.Transaction.objects.filter(
-                user__id__in=merchants,
-                **dt_filter
-            ).exclude(
-                type__name='DMT'
-            ).aggregate(
-                value=Sum('amount')
-            )['value']
-
-            context["bill_pay_transaction_value"] = context["bill_pay_transaction_value"] if context[
-                "bill_pay_transaction_value"] else 0
-            '''
-
             context["dmt_commission_value"] = commission_models.Commission.objects.filter(
                 transaction__type__name='DMT',
                 commission_user=self.request.user.zr_admin_user.zr_user
@@ -687,7 +650,7 @@ class DashBoardView(ListView):
             )['value'] or 0
 
             context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
-                transaction__type__name=RECHARGES_TYPE,
+                transaction__type__name=BILLS_TYPE,
                 commission_user=self.request.user.zr_admin_user.zr_user,
                 **dt_filter
             ).aggregate(
