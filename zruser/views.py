@@ -36,7 +36,7 @@ from zrmapping import models as zrmappings_models
 from zrpayment.models import PaymentMode
 from zrtransaction import models as transaction_models
 from zrtransaction.utils.constants import RECHARGES_TYPE, TRANSACTION_STATUS_SUCCESS, \
-    TRANSACTION_STATUS_FAILURE, BILLS_TYPE
+    TRANSACTION_STATUS_FAILURE, BILLS_TYPE, TRANSACTION_STATUS_PENDING
 from zrtransaction.views import get_transactions_qs
 from zruser import forms as zr_user_form
 from zruser.models import ZrUser, UserRole, ZrAdminUser, KYCDocumentType, KYCDetail, Bank
@@ -718,17 +718,17 @@ class DashBoardView(ListView):
 
         context["pending_failure_dmt_transactions"] = transaction_models.Transaction.objects.filter(
             type__name='DMT',
-            status__in=[TRANSACTION_STATUS_SUCCESS, TRANSACTION_STATUS_FAILURE],
+            status__in=[TRANSACTION_STATUS_PENDING, TRANSACTION_STATUS_FAILURE],
             **dt_filter
         ).count()
         context["pending_failure_bill_pay_transactions"] = transaction_models.Transaction.objects.filter(
             type__name__in=BILLS_TYPE,
-            status__in=[TRANSACTION_STATUS_SUCCESS, TRANSACTION_STATUS_FAILURE],
+            status__in=[TRANSACTION_STATUS_PENDING, TRANSACTION_STATUS_FAILURE],
             **dt_filter
         ).count()
         context["pending_failure_recharge_transactions"] = transaction_models.Transaction.objects.filter(
             type__name__in=RECHARGES_TYPE,
-            status__in=[TRANSACTION_STATUS_SUCCESS, TRANSACTION_STATUS_FAILURE],
+            status__in=[TRANSACTION_STATUS_PENDING, TRANSACTION_STATUS_FAILURE],
             **dt_filter
         ).count()
 
