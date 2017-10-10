@@ -12,6 +12,7 @@ from django.db.models import Sum
 from django.http import Http404
 from django.http import HttpResponse
 from django.views.generic import ListView
+from django.db.models import Q
 
 from common_utils import date_utils
 from common_utils import user_utils
@@ -35,16 +36,23 @@ def get_commission_display_qs(request):
 
     req_usr = request.user.zr_admin_user
     queryset = Commission.objects.filter(commission_user=None).order_by('-at_created')
+    query_filter = Q(
+        commission_user__mobile_no__contains=search
+    ) | Q(
+        commission_user__first_name__contains=search
+    ) | Q(
+        commission_user__last_name__contains=search
+    )
     if user_utils.is_user_superuser(request):
         if search:
             queryset = queryset.filter(
-                commission_user__mobile_no__contains=search
+                query_filter
             ).order_by('-at_created')
     else:
         if search:
             queryset = Commission.objects.filter(
-                commission_user=req_usr.zr_user,
-                commission_user__mobile_no__contains=search
+                query_filter,
+                commission_user=req_usr.zr_user
             )
         else:
             queryset = Commission.objects.filter(

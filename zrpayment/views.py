@@ -313,13 +313,22 @@ def get_payment_request_qs(request, from_user=False, all_user=False, all_req=Fal
                 to_user=request.user.zr_admin_user.zr_user
             ).exclude(from_user=request.user.zr_admin_user.zr_user)
     if q:
-        query = Q(
-            merchant_payment_mode__name__contains=q
-        ) | Q(
-            supervisor__first_name__contains=q
-        ) | Q(
-            merchant__first_name__contains=q
-        )
+        if from_user:
+            query = Q(
+                to_user__first_name__contains=q
+            ) | Q(
+                to_user__last_name__contains=q
+            ) | Q(
+                to_user__mobile_no__contains=q
+            )
+        else:
+            query = Q(
+                from_user__first_name__contains=q
+            ) | Q(
+                from_user__last_name__contains=q
+            ) | Q(
+                from_user__mobile_no__contains=q
+            )
         queryset = queryset.filter(query)
 
     if filter_by == 'last_week':

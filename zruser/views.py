@@ -470,12 +470,18 @@ def get_distributor_qs(request):
 
 
 def get_sub_distributor_qs(request):
-    queryset = request.user.zr_admin_user.zr_user.merchant_sub_mappings.order_by('-at_created')
+    queryset = request.user.zr_admin_user.zr_user.sub_dist_dist_mappings.order_by('-at_created')
     q = request.GET.get('q')
     filter = request.GET.get('filter')
 
     if q:
-        query_filter = Q(first_name__contains=q) | Q(last_name__contains=q) | Q(mobile_no__contains=q)
+        query_filter = Q(
+            sub_distributor__first_name__contains=q
+        ) | Q(
+            sub_distributor__last_name__contains=q
+        ) | Q(
+            sub_distributor__mobile_no__contains=q
+        )
         queryset = queryset.filter(
             query_filter
         )

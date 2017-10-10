@@ -31,53 +31,55 @@
             </div>
         </div>
         <br>
-        <div class="row" style="padding-right: 50px;">
-            <div class="fine">
-                <p class="head-bg head-bg2">Transactions</p>
+        <div>
+            <div class="row" style="padding-right: 50px;">
+                <div class="fine">
+                    <p class="head-bg head-bg2">Transactions</p>
+                </div>
             </div>
-        </div>
-        <div class="row scroll">
+            <div class="row scroll">
 
-            <div style="width: 100%;">
-                <table>
-                    <tr>
-                        <th>Merchant Id</th>
-                        <th>Vendor Txn Id</th>
-                        <th>status</th>
-                        <th>Amount</th>
-                        <th>Type</th>
-                        <th>Mobile number</th>
-                        <th>Customer</th>
-                        <th>Amount</th>
-                        <th>Additional charges</th>
-                        <th>Transaction type</th>
-                        <th>Service provider</th>
-                    </tr>
-                    {% for transaction in queryset %}
+                <div style="width: 100%;     overflow: scroll;">
+                    <table>
                         <tr>
-                            <td>{{ transaction.user.id }}</td>
-                            <td>{{ transaction.vendor_txn_id }}</td>
-                            <td>{{ transaction.get_status_display }}</td>
-                            <td>{{ transaction.amount }}</td>
-                            <td>{{ transaction.type }}</td>
-                            <td>{{ transaction.user.mobile_no }}</td>
-                            <td>{{ transaction.customer }}</td>
-                            <td>{{ transaction.amount }}</td>
-                            <td>{{ transaction.additional_charges }}</td>
-                            <td>{{ transaction.type }}</td>
-                            <td>{{ transaction.service_provider.name }}</td>
+                            <th>Merchant Id</th>
+                            <th>Vendor Txn Id</th>
+                            <th>status</th>
+                            <th>Amount</th>
+                            <th>Type</th>
+                            <th>Mobile number</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Additional charges</th>
+                            <th>Transaction type</th>
+                            <th>Service provider</th>
                         </tr>
-                    {% endfor %}
-                </table>
+                        {% for transaction in queryset %}
+                            <tr>
+                                <td>{{ transaction.user.id }}</td>
+                                <td>{{ transaction.vendor_txn_id }}</td>
+                                <td>{{ transaction.get_status_display }}</td>
+                                <td>{{ transaction.amount }}</td>
+                                <td>{{ transaction.type }}</td>
+                                <td>{{ transaction.user.mobile_no }}</td>
+                                <td>{{ transaction.customer }}</td>
+                                <td>{{ transaction.amount }}</td>
+                                <td>{{ transaction.additional_charges }}</td>
+                                <td>{{ transaction.type }}</td>
+                                <td>{{ transaction.service_provider.name }}</td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+                {% if has_prev_page %}
+                    <a href="{% url 'transaction:transaction-list' %}?{{ prev_page_qs }}">Prev</a>
+                {% endif %}
+
+                {% if has_next_page %}
+                    <a href="{% url 'transaction:transaction-list' %}?{{ next_page_qs }}">Next</a>
+                {% endif %}
+
             </div>
-            {% if has_prev_page %}
-                <a href="{% url 'transaction:transaction-list' %}?{{ prev_page_qs }}">Prev</a>
-            {% endif %}
-
-            {% if has_next_page %}
-                <a href="{% url 'transaction:transaction-list' %}?{{ next_page_qs }}">Next</a>
-            {% endif %}
-
         </div>
         <br>
     </div>

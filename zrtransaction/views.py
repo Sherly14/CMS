@@ -26,11 +26,14 @@ class TransactionsDetailView(DetailView):
 
 
 def get_transactions_qs(request):
-    q_obj = Q()
     q = request.GET.get('q', "")
-    if str(q).isdigit():
-        # Search using mobile number
-        q_obj = q_obj.add(Q(user__mobile_no=q), q_obj.connector)
+    q_obj = Q(
+        user__first_name__contains=q
+    ) | Q(
+        user__last_name__contains=q
+    ) | Q(
+        user__mobile_no__contains=q
+    )
 
     p_filter = request.GET.get('filter', 'All')
     if p_filter == 'All':
