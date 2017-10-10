@@ -623,7 +623,7 @@ class DashBoardView(ListView):
             )['value'] or 0
 
             context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
-                transaction__type__name=BILLS_TYPE,
+                transaction__type__name__in=BILLS_TYPE,
                 commission_user=None,
                 **dt_filter
             ).aggregate(
@@ -631,7 +631,7 @@ class DashBoardView(ListView):
             )['value'] or 0
 
             context["total_recharge_commission_value"] = commission_models.Commission.objects.filter(
-                transaction__type__name=RECHARGES_TYPE,
+                transaction__type__name__in=RECHARGES_TYPE,
                 commission_user=None,
                 **dt_filter
             ).aggregate(
@@ -650,7 +650,7 @@ class DashBoardView(ListView):
             )['value'] or 0
 
             context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
-                transaction__type__name=BILLS_TYPE,
+                transaction__type__name__in=BILLS_TYPE,
                 commission_user=self.request.user.zr_admin_user.zr_user,
                 **dt_filter
             ).aggregate(
@@ -658,7 +658,7 @@ class DashBoardView(ListView):
             )['value'] or 0
 
             context["total_recharge_commission_value"] = commission_models.Commission.objects.filter(
-                transaction__type__name=RECHARGES_TYPE,
+                transaction__type__name__in=RECHARGES_TYPE,
                 commission_user=self.request.user.zr_admin_user.zr_user,
                 **dt_filter
             ).aggregate(
