@@ -15,6 +15,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView
+from django.db.models import Q
 
 from django.db.models import Sum
 from django.db.models import F
@@ -87,8 +88,9 @@ def get_merchant_qs(request):
 
     if is_user_superuser(request):
         if q:
+            query_filter = Q(first_name__contains=q) | Q(last_name__contains=q) | Q(mobile_no__contains=q)
             queryset = queryset.filter(
-                first_name__contains=q,
+                query_filter
             )
 
         if filter == 'Today':
@@ -104,8 +106,15 @@ def get_merchant_qs(request):
             is_active=True
         ).order_by('-at_created')
         if q:
+            query_filter = Q(
+                merchant__first_name__contains=q
+            ) | Q(
+                merchant__last_name__contains=q
+            ) | Q(
+                merchant__mobile_no__contains=q
+            )
             queryset = queryset.filter(
-                merchant__first_name__contains=q,
+                query_filter
             )
         else:
             queryset = queryset
@@ -127,8 +136,15 @@ def get_merchant_qs(request):
             is_active=True
         ).order_by('-at_created')
         if q:
+            query_filter = Q(
+                merchant__first_name__contains=q
+            ) | Q(
+                merchant__last_name__contains=q
+            ) | Q(
+                merchant__mobile_no__contains=q
+            )
             queryset = queryset.filter(
-                merchant__first_name__contains=q,
+                query_filter
             )
         else:
             queryset = queryset
@@ -438,8 +454,9 @@ def get_distributor_qs(request):
     q = request.GET.get('q')
     filter = request.GET.get('filter', 'All')
     if q:
+        query_filter = Q(first_name__contains=q) | Q(last_name__contains=q) | Q(mobile_no__contains=q)
         queryset = queryset.filter(
-            first_name__contains=q,
+            query_filter
         )
 
     if filter == 'Today':
@@ -458,8 +475,9 @@ def get_sub_distributor_qs(request):
     filter = request.GET.get('filter')
 
     if q:
+        query_filter = Q(first_name__contains=q) | Q(last_name__contains=q) | Q(mobile_no__contains=q)
         queryset = queryset.filter(
-            first_name__contains=q,
+            query_filter
         )
 
     if filter == 'Today':
