@@ -270,7 +270,7 @@ class RejectPaymentRequestView(APIView):
         message = "Something went wrong, Please try again!!"
         if payment_request:
             if payment_request.status == 0:
-                if payment_request.to_user.pk == request.user.zr_admin_user.zr_user.pk:
+                if request.user.zr_admin_user.zr_user and payment_request.to_user.pk == request.user.zr_admin_user.zr_user.pk:
                     message = "Payment request rejected successfully"
                     payment_request.status = 2
                     payment_request.reject_comments = rejection_reason
