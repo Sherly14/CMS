@@ -17,6 +17,7 @@ from django.conf.urls import url, include
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
+from zrcms.utils.healthutil import health_check
 from zruser.views import login_view
 
 urlpatterns = [
@@ -27,4 +28,5 @@ urlpatterns = [
     url(r'^transactions/', include('zrtransaction.urls', namespace='transaction')),
     url(r'^payment_request/', include('zrpayment.urls', namespace='payment-requests')),
     url(r'^commission/', include('zrcommission.urls', namespace='commission')),
+    url(r'^health_check/', health_check),
 ]
