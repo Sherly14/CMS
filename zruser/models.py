@@ -10,13 +10,11 @@ from django.db import models
 from common_utils import email_utils
 from zruser.utils.constants import KYC_APPROVAL_CHOICES, GENDER_CHOICES, BANK_ACCOUNT_TYPES, BANK_CHANNEL_TYPES
 from zrutils.common.modelutils import RowInfo, get_slugify_value
-from common_utils import email_utils
 
 
 # Create your models here.
 
 class UserRole(RowInfo):
-
     name = models.CharField(max_length=128, unique=True)
 
     def save(self, *args, **kwargs):
@@ -32,7 +30,6 @@ class UserRole(RowInfo):
 
 
 class KYCDocumentType(RowInfo):
-
     name = models.CharField(max_length=128)
 
     @staticmethod
@@ -72,7 +69,6 @@ class ZrAdminUser(RowInfo):
 
 
 class ZrUser(RowInfo):
-
     mobile_no = models.BigIntegerField(
         unique=True, null=False, blank=False,
     )
@@ -113,6 +109,10 @@ class ZrUser(RowInfo):
         else:
             return self.first_name
 
+    @property
+    def full_name(self):
+        return self.get_full_name()
+
     def send_welcome_email(self, password):
         portal_url = None
         if self.role.name == 'MERCHANT':
@@ -140,7 +140,6 @@ class ZrUser(RowInfo):
 
 
 class KYCDetail(RowInfo):
-
     type = models.ForeignKey(to=KYCDocumentType, related_name='all_kyc_details')
     document_id = models.CharField(max_length=50, null=True, blank=True)
     document_link = models.CharField(max_length=512)
@@ -173,7 +172,6 @@ class KYCDetail(RowInfo):
 
 
 class BankDetail(RowInfo):
-
     account_no = models.CharField(max_length=20)
     account_type = models.CharField(max_length=2, choices=BANK_ACCOUNT_TYPES)
     channel = models.IntegerField(choices=BANK_CHANNEL_TYPES, default=BANK_CHANNEL_TYPES[1][0])
@@ -192,7 +190,6 @@ class BankDetail(RowInfo):
 
 
 class Bank(RowInfo):
-
     bank_name = models.CharField(max_length=128)
     bank_code = models.CharField(max_length=16)
     eko_bank_id = models.CharField(max_length=64)
@@ -210,7 +207,6 @@ class Bank(RowInfo):
 
 
 class Sender(RowInfo):
-
     mobile_no = models.BigIntegerField(unique=True, null=False, blank=False)
     first_name = models.CharField(max_length=128)
     last_name = models.CharField(max_length=128, null=True, blank=True)
@@ -235,7 +231,6 @@ class Sender(RowInfo):
 
 
 class Beneficiary(RowInfo):
-
     mobile_no = models.BigIntegerField()
     first_name = models.CharField(max_length=128)
     last_name = models.CharField(max_length=128, null=True, blank=True)
@@ -267,7 +262,6 @@ class Beneficiary(RowInfo):
 
 
 class SenderKYCDetail(RowInfo):
-
     type = models.ForeignKey(to=KYCDocumentType, related_name='all_sender_kyc_details')
     document_id = models.CharField(max_length=50, null=True, blank=True)
     document_link = models.CharField(max_length=512)
@@ -283,7 +277,6 @@ class SenderKYCDetail(RowInfo):
 
 
 class OTPDetail(RowInfo):
-
     challengeId = models.CharField(max_length=64)
     user = models.ForeignKey(to=ZrUser, related_name='all_otps')
     mobile_no = models.BigIntegerField()
@@ -298,7 +291,6 @@ class OTPDetail(RowInfo):
 
 
 class MerchantLead(RowInfo):
-
     name = models.CharField(max_length=128)
     email = models.EmailField(max_length=64)
     mobile_no = models.BigIntegerField(unique=True)

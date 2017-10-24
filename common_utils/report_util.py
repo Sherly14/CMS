@@ -28,7 +28,7 @@ class incrementClass():
         return self.val
 
 
-def get_excel_doc(request, obj, heading, header_dsiplay):
+def get_excel_doc(request, obj, header_dsiplay, has_next=False):
     output = BytesIO()
     workbook = xlsxwriter.Workbook(output)
     worksheet_s = workbook.add_worksheet("Summary")
@@ -78,29 +78,92 @@ def get_excel_doc(request, obj, heading, header_dsiplay):
         worksheet_s.write(1, i.get_inc_val(), ugettext(key), header)
 
     inc_cls = incrementClass(val=-1)
+    row = 2
     for idx, data in enumerate(obj):
         inc_cls = incrementClass(val=-1)
         row = 2 + idx
         for key, value in header_dsiplay:
-            if str(value).endswith("()"):
-                temp = data.__getattribute__(value.split("(")[0])() or "N/A"
-            # elif str(value).startswith("self."):
-            #     temp = self.__getattribute__(value.split("self.")[1])(data) or "N/A"
-            else:
-                value = value.split('.')
-                temp = data
-                for val in value:
-                    temp = temp.__getattribute__(val)
-            if type(temp) == datetime.datetime:
-                temp = temp.replace(tzinfo=None)
-                worksheet_s.write(row, inc_cls.get_inc_val(), temp.date(), date_format)
-            elif type(temp) in [int, float, Decimal]:
-                worksheet_s.write(row, inc_cls.get_inc_val(), temp, number_cell)
-            else:
-                worksheet_s.write(row, inc_cls.get_inc_val(), temp, cell)
+            try:
+                if str(value).endswith("()"):
+                    temp = data.__getattribute__(value.split("(")[0])() or "N/A"
+                # elif str(value).startswith("self."):
+                #     temp = self.__getattribute__(value.split("self.")[1])(data) or "N/A"
+                else:
+                    value = value.split('.')
+                    temp = data
+                    for val in value:
+                        temp = temp.__getattribute__(val)
+                if type(temp) == datetime.datetime:
+                    temp = temp.replace(tzinfo=None)
+                    worksheet_s.write(row, inc_cls.get_inc_val(), temp.date(), date_format)
+                elif type(temp) in [int, float, Decimal]:
+                    worksheet_s.write(row, inc_cls.get_inc_val(), temp, number_cell)
+                else:
+                    worksheet_s.write(row, inc_cls.get_inc_val(), temp, cell)
+            except:
+                worksheet_s.write(row, inc_cls.get_inc_val(), "N/A", cell)
 
+    # To set size of all columns to 20
     for index in range(inc_cls.get_inc_val()):
         worksheet_s.set_column("{0}:{0}".format(string.uppercase[index]), 20)
 
+    if has_next:
+        return workbook, worksheet_s, row+1, output
     workbook.close()
-    return output.getvalue()
+    return workbook, worksheet_s, row+1, output
+
+
+def update_excel_doc(request, obj, header_dsiplay, workbook, worksheet_s, last_row, output, has_next=False):
+    # excel styles
+    cell = workbook.add_format({
+        'align': 'center',
+        'valign': 'top',
+        'text_wrap': True,
+        'border': 1
+    })
+    number_cell = workbook.add_format({
+        'align': 'right',
+        'valign': 'top',
+        'text_wrap': True,
+        'border': 1
+    })
+    date_format = workbook.add_format({
+        'num_format': 'dd/mm/yyyy',
+        'align': 'center',
+        'valign': 'top',
+        'border': 1
+    })
+
+    inc_cls = incrementClass(val=-1)
+    for idx, data in enumerate(obj):
+        inc_cls = incrementClass(val=-1)
+        row = last_row + idx
+        for key, value in header_dsiplay:
+            try:
+                if str(value).endswith("()"):
+                    temp = data.__getattribute__(value.split("(")[0])() or "N/A"
+                # elif str(value).startswith("self."):
+                #     temp = self.__getattribute__(value.split("self.")[1])(data) or "N/A"
+                else:
+                    value = value.split('.')
+                    temp = data
+                    for val in value:
+                        temp = temp.__getattribute__(val)
+                if type(temp) == datetime.datetime:
+                    temp = temp.replace(tzinfo=None)
+                    worksheet_s.write(row, inc_cls.get_inc_val(), temp.date(), date_format)
+                elif type(temp) in [int, float, Decimal]:
+                    worksheet_s.write(row, inc_cls.get_inc_val(), temp, number_cell)
+                else:
+                    worksheet_s.write(row, inc_cls.get_inc_val(), temp, cell)
+            except:
+                worksheet_s.write(row, inc_cls.get_inc_val(), "N/A", cell)
+
+    # To set size of all columns to 20
+    for index in range(inc_cls.get_inc_val()):
+        worksheet_s.set_column("{0}:{0}".format(string.uppercase[index]), 20)
+
+    if has_next:
+        return workbook, worksheet_s, row+1, output
+    workbook.close()
+    return workbook, worksheet_s, row+1, output

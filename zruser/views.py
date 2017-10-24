@@ -9,25 +9,19 @@ from django.contrib.auth import login, models as dj_auth_models
 from django.core.paginator import EmptyPage, Paginator
 from django.db import transaction
 from django.db.models import F
+from django.db.models import Q
 from django.db.models import Sum
 from django.http import Http404, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView
-from django.db.models import Q
 
-from django.db.models import Sum
-from django.db.models import F
-from django.urls import reverse
-
-from zrcommission import models as commission_models
-from zrtransaction import models as transaction_models
 from common_utils import date_utils
 from common_utils import transaction_utils
 from common_utils import zrupee_security
 from common_utils.date_utils import last_month, last_week_range
-from common_utils.report_util import get_excel_doc
+from common_utils.report_util import get_excel_doc, update_excel_doc
 from common_utils.user_utils import is_user_superuser
 from mapping import *
 from utils import constants
@@ -198,104 +192,77 @@ def get_merchant_csv(request):
 
 
 def get_report_excel(request):
-    # TODO: Commission fee
+    DOC_HEADERS = (
+        ('Transaction Type', 'type.name'),
+        ('Transaction ID', 'pk'),
+        ('Distributor Name', 'distributor_name'),
+        # ('Merchant Name', 'merchant_name'),
+
+        ('Agent Email ID', 'user.email'),
+        ('Agent Name', 'user.full_name'),
+        ('Agent City', 'user.city'),
+        ('Agent Pin code', 'user.pincode'),
+
+        ('Beneficiary bank name', 'beneficiary_user.bank.bank_name'),
+        ('Beneficiary bank code', 'beneficiary_user.bank.bank_code'),
+        ('Beneficiary account number', 'beneficiary_user.bank.eko_bank_id'),
+
+        ('Transaction Amount', 'amount'),
+        ('Commission Fee', 'commission_fee'),
+        ('Commission Value', 'commission_value'),
+        ('Status', 'formatted_status'),
+        ('Created date', 'created_date'),
+        ('Created time', 'created_time'),
+    )
+    merchant_headers = (
+        ('Merchant Mobile', 'merchant_mobile'),
+        ('Merchant Gross Commission', 'merchant_gross_commission'),
+        ('Merchant GST', 'merchant_gst'),
+        ('Merchant TDS', 'merchant_tds'),
+        ('Merchant Net Commission', 'merchant_net_commission'),
+    )
+    distributor_headers = (
+        ('Distributor Gross Commission', 'dist_gross_commission'),
+        ('Distributor GST', 'dist_gst'),
+        ('Distributor TDS', 'dist_tds'),
+        ('Distributor Net Commission', 'dist_net_commission'),
+    )
+    sub_distributor_headers = (
+        ('Sub-Distributor Gross Commission', 'sub_dist_gross_commission'),
+        ('Sub-Distributor GST', 'sub_dist_gst'),
+        ('Sub-Distributor  TDS', 'sub_dist_tds'),
+        ('Sub-Distributor  Net Commission', 'sub_dist_net_commission'),
+    )
+    DOC_HEADERS += merchant_headers
     if is_user_superuser(request):
-        DOC_HEADERS = (
-            ('Transaction Type', 'type.name'),
-            ('Transaction ID', 'pk'),
-            ('Distributor Name', 'distributor_name'),
-            ('Merchant Name', 'merchant_name'),
-            ('Transaction Amount', 'amount'),
-            ('Commission Fee', 'commission_fee'),
-            ('Commission Value', 'commission_value'),
-            ('Status', 'formatted_status'),
-            ('Created date', 'created_date'),
-            ('Created time', 'created_time'),
-
-            ('Merchant Mobile', 'merchant_mobile'),
-            ('Merchant Gross Commission', 'merchant_gross_commission'),
-            ('Merchant GST', 'merchant_gst'),
-            ('Merchant TDS', 'merchant_tds'),
-            ('Merchant Net Commission', 'merchant_net_commission'),
-
-            ('Distributor Gross Commission', 'dist_gross_commission'),
-            ('Distributor GST', 'dist_gst'),
-            ('Distributor TDS', 'dist_tds'),
-            ('Distributor Net Commission', 'dist_net_commission'),
-
-            ('Sub-Distributor Gross Commission', 'sub_dist_gross_commission'),
-            ('Sub-Distributor GST', 'sub_dist_gst'),
-            ('Sub-Distributor  TDS', 'sub_dist_tds'),
-            ('Sub-Distributor  Net Commission', 'sub_dist_net_commission'),
-
-            ('Zrupee Net Commission', 'admin_net_commission'),
-        )
+        DOC_HEADERS += distributor_headers
+        DOC_HEADERS += sub_distributor_headers
+        DOC_HEADERS += (('Zrupee Net Commission', 'admin_net_commission'),)
     elif transaction_utils.is_sub_distributor(request.user.zr_admin_user.zr_user):
-        DOC_HEADERS = (
-            ('Transaction Type', 'type.name'),
-            ('Transaction ID', 'pk'),
-            ('Distributor Name', 'distributor_name'),
-            ('Merchant Name', 'merchant_name'),
-            ('Transaction Amount', 'amount'),
-            ('Commission Fee', 'commission_fee'),
-            ('Commission Value', 'commission_value'),
-            ('Status', 'formatted_status'),
-            ('Created date', 'created_date'),
-            ('Created time', 'created_time'),
-
-            ('Merchant Gross Commission', 'merchant_gross_commission'),
-            ('Merchant GST', 'merchant_gst'),
-            ('Merchant TDS', 'merchant_tds'),
-            ('Merchant Net Commission', 'merchant_net_commission'),
-
-            ('Sub-Distributor Gross Commission', 'sub_dist_gross_commission'),
-            ('Sub-Distributor GST', 'sub_dist_gst'),
-            ('Sub-Distributor  TDS', 'sub_dist_tds'),
-            ('Sub-Distributor  Net Commission', 'sub_dist_net_commission'),
-        )
+        DOC_HEADERS += sub_distributor_headers
     elif request.user.zr_admin_user.role.name == DISTRIBUTOR:
-        DOC_HEADERS = (
-            ('Transaction Type', 'type.name'),
-            ('Transaction ID', 'pk'),
-            ('Distributor Name', 'distributor_name'),
-            ('Merchant Name', 'merchant_name'),
-            ('Transaction Amount', 'amount'),
-            ('Commission Fee', 'commission_fee'),
-            ('Commission Value', 'commission_value'),
-            ('Status', 'formatted_status'),
-            ('Created date', 'created_date'),
-            ('Created time', 'created_time'),
+        DOC_HEADERS += distributor_headers
+        DOC_HEADERS += sub_distributor_headers
 
-            ('Merchant Gross Commission', 'merchant_gross_commission'),
-            ('Merchant GST', 'merchant_gst'),
-            ('Merchant TDS', 'merchant_tds'),
-            ('Merchant Net Commission', 'merchant_net_commission'),
-
-            ('Distributor Gross Commission', 'dist_gross_commission'),
-            ('Distributor GST', 'dist_gst'),
-            ('Distributor TDS', 'dist_tds'),
-            ('Distributor Net Commission', 'dist_net_commission'),
-
-            ('Sub-Distributor Gross Commission', 'sub_dist_gross_commission'),
-            ('Sub-Distributor GST', 'sub_dist_gst'),
-            ('Sub-Distributor  TDS', 'sub_dist_tds'),
-            ('Sub-Distributor  Net Commission', 'sub_dist_net_commission'),
-        )
-    else:
-        DOC_HEADERS = (
-            ('Transaction Type', 'type.name'),
-            ('Transaction ID', 'pk'),
-        )
     # today = datetime.datetime.today()
     filename = 'report'
     transactions_qs = get_transactions_qs(request)
+    paginator = Paginator(transactions_qs, 1)
 
-    xlsx_data = get_excel_doc(request, transactions_qs, "Transaction Report",
-                              DOC_HEADERS
-                              )
+    for x in paginator.page_range:
+        page_data = paginator.page(x)
+        if x == 1:
+            workbook, worksheet_s, last_row, output = get_excel_doc(
+                request, page_data.object_list, DOC_HEADERS, page_data.has_next()
+            )
+        else:
+            workbook, worksheet_s, last_row, output = update_excel_doc(
+                request, page_data.object_list, DOC_HEADERS, workbook, worksheet_s, last_row,
+                output, page_data.has_next())
+
     response = HttpResponse(content_type='application/vnd.ms-excel')
     response['Content-Disposition'] = 'attachement; filename={0}.xlsx'.format(filename)
-    response.write(xlsx_data)
+    response.write(output.getvalue())
     return response
 
 
