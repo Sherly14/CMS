@@ -207,6 +207,7 @@ LOGGING = {
     }
 }
 
+CELERY_BROKER_URL = 'amqp://localhost'
 
 try:
     from local_settings import *

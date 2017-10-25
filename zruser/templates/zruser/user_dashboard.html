@@ -23,8 +23,9 @@
                 </div>
                 <div class="col-xl-9 col-sm-6 mb-3">
                     <div class="mr-5 textAlignRight dashboard">Dashboard</div>
-                    <input id="csv-download" type="button" value="DOWNLOAD REPORT" style="float: right;"
-                           class="button red downloadcsv mr-5">
+                    <button data-toggle="modal" data-target="#get_email_modal" style="float: right;" class="button red downloadcsv mr-5">
+                        DOWNLOAD REPORT
+                    </button>
                 </div>
             </div>
 
@@ -238,15 +239,6 @@
                                     <input type="text" class="form-control" name="from_account_no" id="from_account_no" style="box-shadow: 0px 0px;border-style: solid;" required>
                                 </div>
                             </div>
-                            <!--<div class="form-group col-sm-6">-->
-                                <!--<label class="control-label"><b>Type</b></label>-->
-                                <!--<div>-->
-                                    <!--<select type="text" class="form-control" name="request_type" id="request_type">-->
-                                        <!--<option value="DMT">DMT</option>-->
-                                        <!--<option value="NON_DMT">Non DMT</option>-->
-                                    <!--</select>-->
-                                <!--</div>-->
-                            <!--</div>-->
                         </div>
                         <div class="row" style="padding-left: 3rem;">
                              <div class="form-group col-sm-6">
@@ -341,7 +333,46 @@
                 </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
-    </div><!-- /.modal -->
+    </div>
+    <!-- /.modal -->
+
+    <!-- Modal to get Email -->
+    <div id="get_email_modal" class="modal fade">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content" style="width: 700px;">
+                <div class="modal-header" style="    background-color: #e2e2e2;">
+                    <h1 class="modal-title" style="font-size: 1.5rem; font-size: 1.5rem;font-weight: bold;line-height: 2rem;padding-left: 12px;">Send report as mail</h1>
+                </div>
+                <div class="modal-body">
+
+                    <div id="modal_message" tabindex='1'></div>
+                    <form class="form-horizontal" method="POST" id="report_mail_form" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row" style="padding-left: 3rem;padding-top: 25px;">
+                            <div class="form-group col-sm-6">
+                                <label class="control-label"><b>Email list</b></label>
+                                <div>
+                                    <input type="text" class="form-control" placeholder="Comma separated email list" name="email" id="email_field" style="box-shadow: 0px 0px;border-style: solid;" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row container" style="padding-left: 3rem;">
+                            <div class="form-group col-sm-9"></div>
+                            <div class="form-group col-sm-3" style=" position: relative;left: 13%;">
+                                <button type="submit" id="submit_request" class="pull-right submit_request button red downloadcsv mr-5" style="background-color: red" type="submit">
+                                    Mail a report
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="alert alert-danger" id="alert_msg" style="display:none;">
+                    </div>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
 
 
 
@@ -496,7 +527,7 @@
 
                 // Create an FormData object
                 var data = new FormData($('#challan_request_form')[0]);
-                console.log(data);
+                {# console.log(data);#}
                 $('#submit_request').prop('disabled', true);
                 $('#submit_request').addClass('disabled');
                 $.ajax({
@@ -547,10 +578,106 @@
             errorPlacement: function (error, element) {
             }
         });
-o
-{#        $("#submit_request").on('click', function(e) {#}
-{#            $('#challan_request_form').valid()#}
-{#        });#}
+
+
+        var report_mail_form = $('#report_mail_form');
+        var report_mail_error = $('.alert-danger', report_mail_form);
+        var report_mail_success = $('.alert-success', report_mail_form);
+        rules = {
+            email: {
+                required: true
+            }
+        };
+
+        $('#alert_msg')
+            .hide()
+            .html('');
+        challan_request_form.validate({
+            rules: rules,
+            messages: {
+                "email": {
+                    // required: "Email is required",
+                }
+            },
+            invalidHandler: function (event, validator) { //display error alert on form submit
+                sign_in_success.hide();
+                sign_in_error.show();
+            },
+            highlight: function (element) { // hightlight error inputs
+                $(element)
+                    .closest('.form-group').addClass('has-error'); // set error class to the control group
+                $(element)
+                    .closest('.help-block').removeClass('ok'); // display OK icon
+                $(element)
+                    .closest('.control-group').removeClass('success').addClass('error'); // set error class to the control group
+                $(element)
+                    .closest('.form-group').removeClass('has-success').addClass('has-error');
+            },
+            unhighlight: function (element) { // revert the change dony by hightlight
+                $(element)
+                    .closest('.control-group').removeClass('has-error'); // set error class to the control group
+                $(element)
+                    .closest('.form-group').removeClass('has-error').addClass('has-success'); // set error class to the control group
+            },
+            submitHandler: function (form) {
+                <!-- AJAX Call -->
+                $('#modal_message').html("");
+
+                // Create an FormData object
+                var data = new FormData($('#challan_request_form')[0]);
+                {# console.log(data);#}
+                $('#submit_request')
+                    .prop('disabled', true)
+                    .addClass('disabled');
+                $.ajax({
+                    type: "POST",
+                    enctype: 'multipart/form-data',
+                    processData: false,
+                    contentType: false,
+                    url: '/payment_request/generate_payment_request/',
+                    data: data,
+                    success: function (data) {
+                        $('#modal_message').html(data.message);
+                        if(data.success) {
+                            setTimeout(function () {
+                                window.location.reload();
+                            }, 1000);
+                        }
+                        else {
+                            setTimeout(function () {
+                                $('#modal_message').html("");
+                            }, 2000);
+                            $('#submit_request').prop('disabled', false);
+                            $('#submit_request').removeClass('disabled');
+                        }
+                    },
+                    error: function (data) {
+                        $('#modal_message').html(data.message);
+                        $('#submit_request').prop('disabled', false);
+                    }
+                });
+                <!-- AJAX Call -->
+            },
+            success: function (label) {
+                label
+                    .addClass('valid').addClass('help-block ok') // mark the current input as valid and display OK icon
+                    .closest('.control-group').removeClass('error').addClass('success'); // set success class to the control group
+                label
+                    .closest('.form-group').removeClass('has-error').addClass('has-success');
+                $(this)
+                    .closest('.col-md-4').find('.err').hide();
+                $(this)
+                    .closest('.col-md-4').find('.suc').show();
+                label
+                    .closest('.form-group').removeClass('has-error'); // set success class to the control group
+                label
+                    .closest('.form-group').removeClass('has-error'); // set success class to the control group
+
+            },
+            errorPlacement: function (error, element) {
+            }
+        });
+
 
         $("#payment_mode").change(function(){
             var payment_mode = $('#payment_mode option:selected').text();

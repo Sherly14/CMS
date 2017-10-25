@@ -42,3 +42,4 @@ urllib3==1.22
 numpy==1.13.1
 pandas==0.20.3
 idna==2.6
+celery==4.1.0
