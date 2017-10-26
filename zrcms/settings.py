@@ -167,11 +167,14 @@ STATICFILES_STORAGE = 'whitenoise.django.GzipManifestStaticFilesStorage'
 S3_AWS_SEC_KEY_ID = 'AKIAI4Y5NO3K36LXYYVQ'
 S3_AWS_SEC_KEY_SECRET = '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'
 
+
+# BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
 FROM_EMAIL = 'noreply@zrupee.com'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'noreply@zrupee.com'
 EMAIL_HOST_PASSWORD = 'Anwesha@2020'
-EMAIL_USE_SSL = True
+# EMAIL_USE_SSL = True
 EMAIL_PORT = 465
 
 LOGGING = {

@@ -348,6 +348,7 @@
                     <div id="modal_message" tabindex='1'></div>
                     <form class="form-horizontal" method="POST" id="report_mail_form" enctype="multipart/form-data">
                         {% csrf_token %}
+                        <input hidden name="period" value="{{ request.GET.period }}">
                         <div class="row" style="padding-left: 3rem;padding-top: 25px;">
                             <div class="form-group col-sm-6">
                                 <label class="control-label"><b>Email list</b></label>
@@ -389,11 +390,11 @@
             window.location.assign('{% url "user:dashboard" %}?period=last-month')
         });
 
-        $('#csv-download').click(function () {
-            url = "{% url 'user:get-report-excel' %}" + window.location.search;
-            console.log(url)
-            window.location.assign(url)
-        });
+{#        $('#csv-download').click(function () {#}
+{#            url = "{% url 'user:get-report-excel' %}" + window.location.search;#}
+{#            console.log(url)#}
+{#            window.location.assign(url)#}
+{#        });#}
     </script>
 {% endblock %}
 

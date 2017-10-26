@@ -42,4 +42,5 @@ urllib3==1.22
 numpy==1.13.1
 pandas==0.20.3
 idna==2.6
-celery==4.1.0
+celery==3.1.25
+django-celery-email==2.0.0

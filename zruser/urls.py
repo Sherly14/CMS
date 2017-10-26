@@ -27,7 +27,7 @@ urlpatterns += [
     url(r'^merchant_details/(?P<pk>\d+)/$', MerchantDetailView.as_view(), name='merchant-details'),
     url(r'^merchant_create/$', MerchantCreateView.as_view(), name='merchant-create'),
     url(r'^merchant_csv/$', zr_user_views.get_merchant_csv, name='merchant-csv'),
-    url(r'^get_report_excel/$', zr_user_views.get_report_excel, name='get-report-excel'),
+    # url(r'^get_report_excel/$', zr_user_views.get_report_excel, name='get-report-excel'),
 
     url(r'^dashboard/$', DashBoardView.as_view(), name='dashboard'),
     url(r'^mail_report/$', zr_user_views.mail_report, name='user_mail_report'),
