@@ -352,14 +352,14 @@
                             <div class="form-group col-sm-6">
                                 <label class="control-label"><b>Email list</b></label>
                                 <div>
-                                    <input type="text" class="form-control" placeholder="Comma separated email list" name="email" id="email_field" style="box-shadow: 0px 0px;border-style: solid;" required>
+                                    <input type="text" class="form-control" placeholder="Comma separated email list" name="email" id="email_list" style="box-shadow: 0px 0px;border-style: solid;" required>
                                 </div>
                             </div>
                         </div>
                         <div class="row container" style="padding-left: 3rem;">
                             <div class="form-group col-sm-9"></div>
                             <div class="form-group col-sm-3" style=" position: relative;left: 13%;">
-                                <button type="submit" id="submit_request" class="pull-right submit_request button red downloadcsv mr-5" style="background-color: red" type="submit">
+                                <button type="submit" id="mail_report" class="pull-right submit_request button red downloadcsv mr-5" style="background-color: red">
                                     Mail a report
                                 </button>
                             </div>
@@ -579,29 +579,44 @@
             }
         });
 
+        jQuery.validator.addMethod("separated_emails", function(value, element) {
+            if (this.optional(element)) {
+                return true;
+            }
+
+            var mails = value.split(/,|;/);
+            for(var i = 0; i < mails.length; i++) {
+                // taken from the jquery validation internals
+                if (!/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(mails[i])) {
+                    return false;
+                }
+            }
+            return true;
+        }, "Please specify a email address or a comma separated list of addresses");
 
         var report_mail_form = $('#report_mail_form');
         var report_mail_error = $('.alert-danger', report_mail_form);
         var report_mail_success = $('.alert-success', report_mail_form);
         rules = {
             email: {
-                required: true
+                required: true,
+                separated_emails:true
             }
         };
 
         $('#alert_msg')
             .hide()
             .html('');
-        challan_request_form.validate({
+        report_mail_form.validate({
             rules: rules,
             messages: {
                 "email": {
-                    // required: "Email is required",
+                    required: "Email is required to send report"
                 }
             },
             invalidHandler: function (event, validator) { //display error alert on form submit
-                sign_in_success.hide();
-                sign_in_error.show();
+                report_mail_success.hide();
+                report_mail_error.show();
             },
             highlight: function (element) { // hightlight error inputs
                 $(element)
@@ -624,7 +639,7 @@
                 $('#modal_message').html("");
 
                 // Create an FormData object
-                var data = new FormData($('#challan_request_form')[0]);
+                var data = new FormData($('#report_mail_form')[0]);
                 {# console.log(data);#}
                 $('#submit_request')
                     .prop('disabled', true)
@@ -634,7 +649,7 @@
                     enctype: 'multipart/form-data',
                     processData: false,
                     contentType: false,
-                    url: '/payment_request/generate_payment_request/',
+                    url: '/user/mail_report/',
                     data: data,
                     success: function (data) {
                         $('#modal_message').html(data.message);

@@ -11,7 +11,7 @@ from django.db import transaction
 from django.db.models import F
 from django.db.models import Q
 from django.db.models import Sum
-from django.http import Http404, HttpResponse, HttpResponseRedirect
+from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views import View
@@ -264,6 +264,13 @@ def get_report_excel(request):
     response['Content-Disposition'] = 'attachement; filename={0}.xlsx'.format(filename)
     response.write(output.getvalue())
     return response
+
+
+def mail_report(request):
+    print(request.POST)
+    email_list = request.POST.get('email', '').split(",")
+    print(email_list)
+    return JsonResponse({"success": True})
 
 
 class MerchantListView(ListView):
