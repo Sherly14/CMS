@@ -5,6 +5,7 @@ import csv
 import datetime
 from urllib import urlencode
 
+from django.conf import settings
 from django.contrib.auth import login, models as dj_auth_models
 from django.core.paginator import EmptyPage, Paginator
 from django.db import transaction
@@ -22,7 +23,7 @@ from common_utils import transaction_utils
 from common_utils import zrupee_security
 from common_utils.date_utils import last_month, last_week_range
 from common_utils.report_util import get_excel_doc, update_excel_doc
-from common_utils.user_utils import is_user_superuser, file_save_s3
+from common_utils.user_utils import is_user_superuser, get_unique_id, push_file_to_s3
 from mapping import *
 from utils import constants
 from zrcommission import models as commission_models
@@ -244,34 +245,29 @@ def get_report_excel(request):
         DOC_HEADERS += distributor_headers
         DOC_HEADERS += sub_distributor_headers
 
-    # today = datetime.datetime.today()
-    filename = 'report'
     transactions_qs = get_transactions_qs(request)
     paginator = Paginator(transactions_qs, 1)
-
+    report_file_path = settings.REPORTS_PATH + "/" + str(get_unique_id()) + ".xlsx"
     for x in paginator.page_range:
         page_data = paginator.page(x)
         if x == 1:
-            workbook, worksheet_s, last_row, output = get_excel_doc(
-                request, page_data.object_list, DOC_HEADERS, page_data.has_next()
+            workbook, worksheet_s, last_row = get_excel_doc(
+                page_data.object_list, DOC_HEADERS, report_file_path, page_data.has_next()
             )
         else:
-            workbook, worksheet_s, last_row, output = update_excel_doc(
-                request, page_data.object_list, DOC_HEADERS, workbook, worksheet_s, last_row,
-                output, page_data.has_next())
-
-    response = HttpResponse(content_type='application/vnd.ms-excel')
-    response['Content-Disposition'] = 'attachement; filename={0}.xlsx'.format(filename)
-    response.write(output.getvalue())
-    return response
+            workbook, worksheet_s, last_row = update_excel_doc(
+                page_data.object_list, DOC_HEADERS, workbook, worksheet_s, last_row,
+                page_data.has_next())
+    return report_file_path
 
 
 def mail_report(request):
     email_list = request.POST.get('email', '').split(",")
-    # TODO: make get_report_excel o/p as file obj or save in media to save it on S3
-    report_link = file_save_s3(get_report_excel(request))
+    report_file_path = get_report_excel(request)
+    file_name = report_file_path.split('/')[-1]
+    report_link = push_file_to_s3(report_file_path, file_name, "zrupee-reports")
     print(report_link)
-    email_utils.send_email(
+    email_utils.send_email_multiple(
         'Your dashboard Report is ready',
         email_list,
         'report_email',

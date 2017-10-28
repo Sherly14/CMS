@@ -1,7 +1,7 @@
 import os
 
 from django.conf import settings as dj_settings
-from django.core.mail import send_mail, EmailMessage
+from django.core.mail import send_mail
 from django.template import Context, Template
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
@@ -39,12 +39,11 @@ def send_email(
     )
 
 
-def send_email_miltiple(subject, to_email_list, template_name, context, is_html=False):
+def send_email_multiple(subject, to_email_list, template_name, context, is_html=False):
     tmpl_path = os.path.join(email_templates, template_name)
     if not os.path.isfile(tmpl_path):
         raise Exception("Invalid email template (%s)" % template_name)
 
-    rendered_context = None
     text_content = ''
     html_content = ''
     with open(tmpl_path) as f:

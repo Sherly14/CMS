@@ -174,7 +174,7 @@ FROM_EMAIL = 'noreply@zrupee.com'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'noreply@zrupee.com'
 EMAIL_HOST_PASSWORD = 'Anwesha@2020'
-# EMAIL_USE_SSL = True
+EMAIL_USE_SSL = True
 EMAIL_PORT = 465
 
 LOGGING = {
@@ -211,6 +211,10 @@ LOGGING = {
 }
 
 CELERY_BROKER_URL = 'amqp://localhost'
+
+REPORTS_PATH = BASE_DIR + '/media/report'
+if not os.path.exists(REPORTS_PATH):
+    os.makedirs(REPORTS_PATH)
 
 try:
     from local_settings import *

@@ -28,9 +28,9 @@ class incrementClass():
         return self.val
 
 
-def get_excel_doc(request, obj, header_dsiplay, has_next=False):
-    output = BytesIO()
-    workbook = xlsxwriter.Workbook(output)
+def get_excel_doc(obj, header_dsiplay,report_file_path, has_next=False):
+    # output = BytesIO()
+    workbook = xlsxwriter.Workbook(report_file_path)
     worksheet_s = workbook.add_worksheet("Summary")
 
     # excel styles
@@ -108,12 +108,12 @@ def get_excel_doc(request, obj, header_dsiplay, has_next=False):
         worksheet_s.set_column("{0}:{0}".format(string.uppercase[index]), 20)
 
     if has_next:
-        return workbook, worksheet_s, row+1, output
+        return workbook, worksheet_s, row+1
     workbook.close()
-    return workbook, worksheet_s, row+1, output
+    return workbook, worksheet_s, row+1
 
 
-def update_excel_doc(request, obj, header_dsiplay, workbook, worksheet_s, last_row, output, has_next=False):
+def update_excel_doc(obj, header_dsiplay, workbook, worksheet_s, last_row, has_next=False):
     # excel styles
     cell = workbook.add_format({
         'align': 'center',
@@ -164,6 +164,6 @@ def update_excel_doc(request, obj, header_dsiplay, workbook, worksheet_s, last_r
         worksheet_s.set_column("{0}:{0}".format(string.uppercase[index]), 20)
 
     if has_next:
-        return workbook, worksheet_s, row+1, output
+        return workbook, worksheet_s, row+1
     workbook.close()
-    return workbook, worksheet_s, row+1, output
+    return workbook, worksheet_s, row+1
