@@ -54,6 +54,8 @@ EXTERNAL_APPS = [
     'rest_framework',
     'corsheaders',
     'widget_tweaks',
+    'djcelery',
+    # 'djcelery_email',
 ]
 
 INSTALLED_APPS = INTERNAL_APPS + PROJECT_APPS + EXTERNAL_APPS
@@ -169,7 +171,7 @@ S3_AWS_SEC_KEY_SECRET = 'TF5ADOj5ng1I8HA5Ed5p3htdaPwv9Hi3F4Ci/F/f'
 
 
 # BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
+# EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
 FROM_EMAIL = 'noreply@zrupee.com'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'noreply@zrupee.com'
@@ -210,7 +212,10 @@ LOGGING = {
     }
 }
 
-CELERY_BROKER_URL = 'amqp://localhost'
+# CELERY_BROKER_URL = 'amqp://localhost'
+BROKER_URL = os.environ.get("CLOUDAMQP_URL", "django://")
+# BROKER_TRANSPORT = 'redis'
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 
 REPORTS_PATH = BASE_DIR + '/media/report'
 if not os.path.exists(REPORTS_PATH):

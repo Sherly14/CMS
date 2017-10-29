@@ -104,8 +104,8 @@ def get_excel_doc(obj, header_dsiplay,report_file_path, has_next=False):
                 worksheet_s.write(row, inc_cls.get_inc_val(), "N/A", cell)
 
     # To set size of all columns to 20
-    for index in range(inc_cls.get_inc_val()):
-        worksheet_s.set_column("{0}:{0}".format(string.uppercase[index]), 20)
+    # for index in range(inc_cls.get_inc_val()):
+    #     worksheet_s.set_column("{0}:{0}".format(string.uppercase[index]), 20)
 
     if has_next:
         return workbook, worksheet_s, row+1

@@ -26,6 +26,7 @@ from common_utils.report_util import get_excel_doc, update_excel_doc
 from common_utils.user_utils import is_user_superuser, get_unique_id, push_file_to_s3
 from mapping import *
 from utils import constants
+from zrcms.celery_app import app
 from zrcommission import models as commission_models
 from zrmapping import models as zrmappings_models
 from zrpayment.models import PaymentMode
@@ -261,12 +262,11 @@ def get_report_excel(request):
     return report_file_path
 
 
-def mail_report(request):
-    email_list = request.POST.get('email', '').split(",")
+@app.task
+def send_dashboard_report(request, email_list):
     report_file_path = get_report_excel(request)
     file_name = report_file_path.split('/')[-1]
     report_link = push_file_to_s3(report_file_path, file_name, "zrupee-reports")
-    print(report_link)
     email_utils.send_email_multiple(
         'Your dashboard Report is ready',
         email_list,
@@ -277,6 +277,10 @@ def mail_report(request):
         is_html=True
     )
 
+
+def mail_report(request):
+    email_list = request.POST.get('email', '').split(",")
+    send_dashboard_report(request, email_list)
     return JsonResponse({"success": True})
 
 
