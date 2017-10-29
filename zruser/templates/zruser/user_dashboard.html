@@ -22,7 +22,9 @@
                     </div>
                 </div>
                 <div class="col-xl-9 col-sm-6 mb-3">
-                    <div class="mr-5 textAlignRight dashboard">Dashboard</div>
+                    <div class="mr-5 text-right dashboard">
+                        Dashboard
+                    </div>
                     <button data-toggle="modal" data-target="#get_email_modal" style="float: right;" class="button red downloadcsv mr-5">
                         DOWNLOAD REPORT
                     </button>
@@ -38,7 +40,7 @@
 
                         <span class="card-head spanAlignment" >
                                 Total Commissions</span>
-                            <span class="card-data textAlignRight spanAlignment">
+                            <span class="card-data text-right spanAlignment">
                                 INR {{ total_commission }}</span>
                         </div>
 
@@ -51,7 +53,7 @@
 
                         <span class="card-head spanAlignment">
                                 Merchants </span>
-                                <span class="card-data textAlignRight spanAlignment">
+                                <span class="card-data text-right spanAlignment">
                                 Total : {{ total_merchants }}</span>
                             </div>
 
@@ -93,15 +95,15 @@
                                 </tr>
                                 <tr>
                                     <td>DMT</td>
-                                    <td class="textAlignRight">{{ successful_dmt_transactions }}</td>
+                                    <td class="text-right">{{ successful_dmt_transactions }}</td>
                                 </tr>
                                 <tr>
                                     <td>Bills</td>
-                                    <td class="textAlignRight">{{ successful_bill_pay_transactions }}</td>
+                                    <td class="text-right">{{ successful_bill_pay_transactions }}</td>
                                 </tr>
                                 <tr>
                                     <td>Recharges</td>
-                                    <td class="textAlignRight">{{ successful_recharge_transactions }}</td>
+                                    <td class="text-right">{{ successful_recharge_transactions }}</td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -113,15 +115,15 @@
                                 </tr>
                                 <tr>
                                     <td>DMT</td>
-                                    <td class="textAlignRight">{{ pending_failure_dmt_transactions }}</td>
+                                    <td class="text-right">{{ pending_failure_dmt_transactions }}</td>
                                 </tr>
                                 <tr>
                                     <td>Bills</td>
-                                    <td class="textAlignRight">{{ pending_failure_bill_pay_transactions }}</td>
+                                    <td class="text-right">{{ pending_failure_bill_pay_transactions }}</td>
                                 </tr>
                                 <tr>
                                     <td>Recharges</td>
-                                    <td class="textAlignRight">{{ pending_failure_recharge_transactions }}</td>
+                                    <td class="text-right">{{ pending_failure_recharge_transactions }}</td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -142,15 +144,15 @@
                                 <tbody>
                                 <tr>
                                     <td>DMT</td>
-                                    <td class="textAlignRight">INR {{ dmt_transaction_value }}</td>
+                                    <td class="text-right">INR {{ dmt_transaction_value }}</td>
                                 </tr>
                                 <tr>
                                     <td>Bills</td>
-                                    <td class="textAlignRight">INR {{ bill_pay_transaction_value }}</td>
+                                    <td class="text-right">INR {{ bill_pay_transaction_value }}</td>
                                 </tr>
                                 <tr>
                                     <td>Recharges</td>
-                                    <td class="textAlignRight">INR {{ recharge_transaction_value }}</td>
+                                    <td class="text-right">INR {{ recharge_transaction_value }}</td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -171,15 +173,15 @@
                                 <tbody>
                                 <tr>
                                     <td>DMT</td>
-                                    <td class="textAlignRight">INR {{ dmt_commission_value }}</td>
+                                    <td class="text-right">INR {{ dmt_commission_value }}</td>
                                 </tr>
                                 <tr>
                                     <td>Bills</td>
-                                    <td class="textAlignRight">INR {{ total_bill_pay_commission_value }}</td>
+                                    <td class="text-right">INR {{ total_bill_pay_commission_value }}</td>
                                 </tr>
                                 <tr>
                                     <td>Recharges</td>
-                                    <td class="textAlignRight">INR {{ total_recharge_commission_value }}</td>
+                                    <td class="text-right">INR {{ total_recharge_commission_value }}</td>
                                 </tr>
                                 </tbody>
                             </table>
@@ -197,7 +199,7 @@
 
                         <span class="card-head spanAlignment">
                                 Payment Requests</span>
-                            <span class="card-data textAlignRight spanAlignment">
+                            <span class="card-data text-right spanAlignment">
                                 {{ total_payment_request }}</span>
                         </div>
                     {% endif %}

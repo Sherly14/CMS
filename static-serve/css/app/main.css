@@ -72,13 +72,6 @@ select{
     box-shadow: 2px 3px 10px #E5E5E5;
 }
 
-.textAlignRight {
-    text-align: right;
-}
-
-.textAlignLeft {
-    text-align: left;
-}
 /*table styling*/
 .table td {
     border : 0px;
