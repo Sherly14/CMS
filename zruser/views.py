@@ -462,6 +462,9 @@ def get_sub_distributor_qs(request):
         except:
             pass
 
+    if is_user_superuser(request):
+        queryset = zrmappings_models.DistributorSubDistributor.objects.order_by('-at_created')
+
     q = request.GET.get('q')
     filter = request.GET.get('filter')
 
