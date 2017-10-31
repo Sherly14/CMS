@@ -212,16 +212,24 @@ LOGGING = {
 
 INSTALLED_APPS += ("djcelery", )
 
-import djcelery
-djcelery.setup_loader()
-
 SETUP = os.environ.get('SETUP', '')
 if SETUP == 'heroku':
-    CELERY_BROKER_URL = 'amqp://cwolziqk:_DmFPc9QiXp_gF8AfrBBu_PlDmkyxtzn@impala.rmq.cloudamqp.com/cwolziqk'
+    BROKER_HOST = 'impala.rmq.cloudamqp.com'
+    BROKER_PORT = 5672
+    BROKER_USER = 'cwolziqk'
+    BROKER_PASSWORD = '_DmFPc9QiXp_gF8AfrBBu_PlDmkyxtzn'
+    BROKER_VHOST = 'cwolziqk'
 elif SETUP == 'prod':
     CELERY_BROKER_URL = 'amqp://172.17.0.1'
+    BROKER_HOST = '172.17.0.1'
+    BROKER_PORT = 5672
 else:
-    CELERY_BROKER_URL = 'amqp://localhost'
+    # CELERY_BROKER_URL = 'amqp://localhost'
+    BROKER_HOST = 'localhost'
+    BROKER_PORT = 5672
+
+import djcelery
+djcelery.setup_loader()
 
 REPORTS_PATH = BASE_DIR + '/media/report'
 if not os.path.exists(REPORTS_PATH):
