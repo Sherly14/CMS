@@ -220,9 +220,16 @@ if SETUP == 'heroku':
     BROKER_PASSWORD = '_DmFPc9QiXp_gF8AfrBBu_PlDmkyxtzn'
     BROKER_VHOST = 'cwolziqk'
 elif SETUP == 'prod':
-    CELERY_BROKER_URL = 'amqp://localhost'
-    BROKER_HOST = 'localhost'
-    BROKER_PORT = 5672
+    BROKER_HOST = "172.17.0.1"
+    BROKER_BACKEND="redis"
+    REDIS_PORT = 6379
+    REDIS_HOST = "172.17.0.1"
+    BROKER_USER = ""
+    BROKER_PASSWORD = ""
+    BROKER_VHOST = "0"
+    REDIS_DB = 0
+    REDIS_CONNECT_RETRY = True
+    CELERY_SEND_EVENTS = True
 else:
     # CELERY_BROKER_URL = 'amqp://localhost'
     BROKER_HOST = 'localhost'
