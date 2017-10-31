@@ -46,7 +46,7 @@ def get_transactions_qs_with_dict(report_params):
         q_obj = q_obj.add(Q(at_created__range=last_week_range()), q_obj.connector)
     elif p_filter in ['Last-Month' or 'last-month']:
         q_obj = q_obj.add(Q(at_created__range=last_month()), q_obj.connector)
-    user = get_user_model().object.filter(pk=report_params.get('user_id'))
+    user = get_user_model().objects.filter(pk=report_params.get('user_id'))
     if report_params.get('user_type') == "SU":
         pass
         # If user is main admin then need to show all listing
