@@ -54,7 +54,7 @@
                 </li>
                 {% endif %}
 
-                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "DISTRIBUTOR" %}
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "DISTRIBUTOR" %}
                 <li class="nav-item ">
                     <a class="nav-link textAlignRight" href="{% url 'user:sub-distributor-list' %}">Sub-Distributors</a>
                 </li>

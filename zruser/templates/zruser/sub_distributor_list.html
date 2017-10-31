@@ -43,7 +43,7 @@
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
-                    {% for subdistributor in queryset %}
+                    {% for subdist_mapping in queryset %}
                         <tr>
 {#                            <td>{{ distributor.id }}</td>#}
 {#                            <td>{{ distributor.first_name }} {{ distributor.last_name |default_if_none:""}}</td>#}
@@ -52,17 +52,17 @@
 {#                            <td>{{ distributor.is_active }}</td>#}
 {#                            <td>{{ distributor. }}</td>#}
 
-                            <td>{{ subdistributor.id }}</td>
-                            <td>{{ subdistributor.first_name }} {{ subdistributor.last_name|default_if_none:""}}</td>
-                            <td>{{ subdistributor.at_created }}</td>
-                            <td>{{ subdistributor.mobile_no }}</td>
-                            <td>{{ subdistributor.email }}</td>
-                            <td>{% if subdistributor.is_active %}Active{% else %}Inactive{% endif %}</td>
+                            <td>{{ subdist_mapping.sub_distributor.id }}</td>
+                            <td>{{ subdist_mapping.sub_distributor.first_name }} {{ subdist_mapping.subdistributor.last_name|default_if_none:""}}</td>
+                            <td>{{ subdist_mapping.at_created }}</td>
+                            <td>{{ subdist_mapping.sub_distributor.mobile_no }}</td>
+                            <td>{{ subdist_mapping.sub_distributor.email }}</td>
+                            <td>{% if subdist_mapping.is_active %}Active{% else %}Inactive{% endif %}</td>
                             <td>
-                                {% if subdistributor.is_active %}
-                                    <a href='{% url "user:sub-distributor-list" %}?disable={{ subdistributor.id }}'>Disable</a>
+                                {% if subdist_mapping.is_active %}
+                                    <a href='{% url "user:sub-distributor-list" %}?disable={{ subdist_mapping.id }}'>Disable</a>
                                 {% else %}
-                                    <a href='{% url "user:sub-distributor-list" %}?activate={{ subdistributor.id }}'>Activate</a>
+                                    <a href='{% url "user:sub-distributor-list" %}?activate={{ subdist_mapping.id }}'>Activate</a>
                                 {% endif %}
                             </td>
                         </tr>
@@ -104,7 +104,7 @@
     })
 
     $('#csv-download').click(function(){
-        url = "{% url "user:distributor-csv" %}" + window.location.search
+        url = "{% url "user:sub-distributor-csv" %}" + window.location.search
         window.location.assign(url)
     })
 </script>
