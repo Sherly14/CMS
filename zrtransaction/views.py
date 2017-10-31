@@ -5,6 +5,7 @@ import csv
 import datetime
 from urllib import urlencode
 
+from django.contrib.auth import get_user_model
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import Q
 from django.http.response import Http404, HttpResponse
@@ -13,16 +14,65 @@ from django.views.generic.list import ListView
 
 from common_utils import user_utils, transaction_utils
 from common_utils.date_utils import last_month, last_week_range
-from common_utils.transaction_utils import get_sub_distributor_id_list_from_distributor, \
-    get_sub_distributor_merchant_id_list_from_distributor, get_merchant_id_list_from_distributor, \
+from common_utils.transaction_utils import get_sub_distributor_merchant_id_list_from_distributor, \
+    get_merchant_id_list_from_distributor, \
     get_sub_distributor_merchant_id_list_from_sub_distributor
 from zrtransaction.models import Transaction
-from zruser.mapping import DISTRIBUTOR
+from zruser.mapping import DISTRIBUTOR, SUBDISTRIBUTOR
 
 
 class TransactionsDetailView(DetailView):
     queryset = Transaction.objects.all()
     context_object_name = 'transaction'
+
+
+def get_transactions_qs_with_dict(report_params):
+    q = report_params.get('q', "")
+    q_obj = Q(
+        user__first_name__contains=q
+    ) | Q(
+        user__last_name__contains=q
+    ) | Q(
+        user__mobile_no__contains=q
+    )
+
+    p_filter = report_params.get('filter', 'All')
+    if p_filter == 'All':
+        p_filter = report_params.get('period', "All")
+
+    if p_filter in ['Today', 'today']:
+        q_obj = q_obj.add(Q(at_created__gte=datetime.datetime.now().date()), q_obj.connector)
+    elif p_filter in ['Last-Week' or 'last-week']:
+        q_obj = q_obj.add(Q(at_created__range=last_week_range()), q_obj.connector)
+    elif p_filter in ['Last-Month' or 'last-month']:
+        q_obj = q_obj.add(Q(at_created__range=last_month()), q_obj.connector)
+    user = get_user_model().object.filter(pk=report_params.get('user_id'))
+    if report_params.get('user_type') == "SU":
+        pass
+        # If user is main admin then need to show all listing
+    elif report_params.get('user_type') == SUBDISTRIBUTOR:
+        # SUB DISTRIBUTOR
+        # Get merchants for sub-distributor
+        q_obj = q_obj.add(
+            (Q(user_id__in=
+               # [request.user.zr_admin_user.zr_user_id] +
+               get_sub_distributor_merchant_id_list_from_sub_distributor(user.zr_admin_user.zr_user))),
+            q_obj.connector
+        )
+    elif report_params.get('user_type') == DISTRIBUTOR:
+        # DISTRIBUTOR
+        # Get merchants for distrubutor and sub-distributor
+        q_obj = q_obj.add(
+            (Q(user_id__in=
+               # [request.user.zr_admin_user.zr_user_id] +
+               get_merchant_id_list_from_distributor(user.zr_admin_user.zr_user) +
+               # get_sub_distributor_id_list_from_distributor(request.user.zr_admin_user.zr_user) +
+               get_sub_distributor_merchant_id_list_from_distributor(user.zr_admin_user.zr_user))),
+            q_obj.connector
+        )
+
+    queryset = Transaction.objects.filter(q_obj).order_by('-at_created')
+    return queryset
 
 
 def get_transactions_qs(request):
@@ -39,7 +89,7 @@ def get_transactions_qs(request):
     if p_filter == 'All':
         p_filter = request.GET.get('period', "All")
 
-    if p_filter in ['Today','today']:
+    if p_filter in ['Today', 'today']:
         q_obj = q_obj.add(Q(at_created__gte=datetime.datetime.now().date()), q_obj.connector)
     elif p_filter in ['Last-Week' or 'last-week']:
         q_obj = q_obj.add(Q(at_created__range=last_week_range()), q_obj.connector)
@@ -56,8 +106,8 @@ def get_transactions_qs(request):
             (Q(user_id__in=
                # [request.user.zr_admin_user.zr_user_id] +
                get_sub_distributor_merchant_id_list_from_sub_distributor(request.user.zr_admin_user.zr_user))),
-             q_obj.connector
-             )
+            q_obj.connector
+        )
     elif request.user.zr_admin_user.role.name == DISTRIBUTOR:
         # DISTRIBUTOR
         # Get merchants for distrubutor and sub-distributor

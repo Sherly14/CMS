@@ -5,6 +5,7 @@ import csv
 import datetime
 from urllib import urlencode
 
+from celery import shared_task
 from django.conf import settings
 from django.contrib.auth import login, models as dj_auth_models
 from django.core.paginator import EmptyPage, Paginator
@@ -32,7 +33,7 @@ from zrpayment.models import PaymentMode
 from zrtransaction import models as transaction_models
 from zrtransaction.utils.constants import RECHARGES_TYPE, TRANSACTION_STATUS_SUCCESS, \
     TRANSACTION_STATUS_FAILURE, BILLS_TYPE, TRANSACTION_STATUS_PENDING
-from zrtransaction.views import get_transactions_qs
+from zrtransaction.views import get_transactions_qs_with_dict
 from zruser import forms as zr_user_form
 from zruser.models import ZrUser, UserRole, ZrAdminUser, KYCDocumentType, KYCDetail, Bank
 from zruser.utils.constants import DEFAULT_DISTRIBUTOR_MOBILE_NUMBER
@@ -192,7 +193,7 @@ def get_merchant_csv(request):
     return response
 
 
-def get_report_excel(request):
+def get_report_excel(report_params):
     DOC_HEADERS = (
         ('Transaction Type', 'type.name'),
         ('Transaction ID', 'pk'),
@@ -235,17 +236,17 @@ def get_report_excel(request):
         ('Sub-Distributor  Net Commission', 'sub_dist_net_commission'),
     )
     DOC_HEADERS += merchant_headers
-    if is_user_superuser(request):
+    if report_params.get('user_type') == "SU":
         DOC_HEADERS += distributor_headers
         DOC_HEADERS += sub_distributor_headers
         DOC_HEADERS += (('Zrupee Net Commission', 'admin_net_commission'),)
-    elif transaction_utils.is_sub_distributor(request.user.zr_admin_user.zr_user):
+    elif report_params.get('user_type') == SUBDISTRIBUTOR:
         DOC_HEADERS += sub_distributor_headers
-    elif request.user.zr_admin_user.role.name == DISTRIBUTOR:
+    elif report_params.get('user_type') == DISTRIBUTOR:
         DOC_HEADERS += distributor_headers
         DOC_HEADERS += sub_distributor_headers
 
-    transactions_qs = get_transactions_qs(request)
+    transactions_qs = get_transactions_qs_with_dict(report_params)
     paginator = Paginator(transactions_qs, 1)
     report_file_path = settings.REPORTS_PATH + "/" + str(get_unique_id()) + ".xlsx"
     for x in paginator.page_range:
@@ -261,15 +262,15 @@ def get_report_excel(request):
     return report_file_path
 
 
-def mail_report(request):
-    email_list = request.POST.get('email', '').split(",")
-    report_file_path = get_report_excel(request)
+@shared_task
+def send_dashboard_report(report_params):
+    report_file_path = get_report_excel(report_params)
     file_name = report_file_path.split('/')[-1]
     report_link = push_file_to_s3(report_file_path, file_name, "zrupee-reports")
-    print(report_link)
+
     email_utils.send_email_multiple(
         'Your dashboard Report is ready',
-        email_list,
+        report_params.get('email_list'),
         'report_email',
         {
             'report_link': report_link
@@ -277,6 +278,24 @@ def mail_report(request):
         is_html=True
     )
 
+
+def mail_report(request):
+    email_list = request.POST.get('email', '').split(",")
+    if is_user_superuser(request):
+        user_type = "SU"
+    elif transaction_utils.is_sub_distributor(request.user.zr_admin_user.zr_user):
+        user_type = SUBDISTRIBUTOR
+    else:
+        user_type = request.user.zr_admin_user.role.name
+    report_params = {
+        "email_list": email_list,
+        "user_type": user_type,
+        "q": request.GET.get('q', ""),
+        "filter": request.GET.get('filter', ""),
+        "period": request.GET.get('period', ""),
+        "user_id": request.user.id,
+    }
+    send_dashboard_report.delay(report_params)
     return JsonResponse({"success": True})
 
 

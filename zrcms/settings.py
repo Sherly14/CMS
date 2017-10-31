@@ -169,7 +169,7 @@ S3_AWS_SEC_KEY_SECRET = 'TF5ADOj5ng1I8HA5Ed5p3htdaPwv9Hi3F4Ci/F/f'
 
 
 # BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
+# EMAIL_BACKEND = 'djcelery_email.backends.CeleryEmailBackend'
 FROM_EMAIL = 'noreply@zrupee.com'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'noreply@zrupee.com'
@@ -209,6 +209,11 @@ LOGGING = {
         },
     }
 }
+
+INSTALLED_APPS += ("djcelery", )
+
+import djcelery
+djcelery.setup_loader()
 
 CELERY_BROKER_URL = 'amqp://localhost'
 
