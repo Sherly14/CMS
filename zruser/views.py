@@ -511,6 +511,27 @@ def download_distributor_list_csv(request):
     return response
 
 
+def download_sub_distributor_list_csv(request):
+    sub_distributor_mapping_qs = get_sub_distributor_qs(request)  # get_distributor_qs(request)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="subdistributors.csv"'
+    writer = csv.writer(response)
+    writer.writerow([
+        'Sub Distributor Id', 'Sub Distributor Name', 'DOJ', 'Mobile', 'Email', 'Status'
+    ])
+    for sub_distributor_map_item in sub_distributor_mapping_qs:
+        writer.writerow([
+            sub_distributor_map_item.sub_distributor.id,
+            sub_distributor_map_item.sub_distributor.first_name,
+            sub_distributor_map_item.at_created,
+            sub_distributor_map_item.sub_distributor.mobile_no,
+            sub_distributor_map_item.sub_distributor.email,
+            'Active' if sub_distributor_map_item.is_active else 'Inactive'
+        ])
+
+    return response
+
+
 class DistributorListView(ListView):
     template_name = 'zruser/distributor_list.html'
     queryset = ZrUser.objects.filter(role__name=DISTRIBUTOR)

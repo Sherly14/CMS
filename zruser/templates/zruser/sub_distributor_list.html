@@ -104,7 +104,7 @@
     })
 
     $('#csv-download').click(function(){
-        url = "{% url "user:distributor-csv" %}" + window.location.search
+        url = "{% url "user:sub-distributor-csv" %}" + window.location.search
         window.location.assign(url)
     })
 </script>

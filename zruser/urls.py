@@ -18,6 +18,7 @@ urlpatterns += [
     url(r'^distributor_details/(?P<pk>\d+)/$', DistributorDetailView.as_view(), name='distributor-details'),
     url(r'^distributor_create/$', DistributorCreateView.as_view(), name='distributor-create'),
     url(r'^distributor_csv/$', zr_user_views.download_distributor_list_csv, name="distributor-csv"),
+    url(r'^sub_distributor_csv/$', zr_user_views.download_sub_distributor_list_csv, name="sub-distributor-csv"),
 
     url(r'^sub_distributor_create/$', SubDistributorCreateView.as_view(), name='sub-distributor-create'),
 
