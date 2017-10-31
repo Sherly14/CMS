@@ -350,7 +350,7 @@
                         {% csrf_token %}
                         <input hidden name="period" value="{{ request.GET.period }}">
                         <div class="row" style="padding-left: 3rem;padding-top: 25px;">
-                            <div class="form-group col-sm-6">
+                            <div class="form-group col-sm-12">
                                 <label class="control-label"><b>Email list</b></label>
                                 <div>
                                     <input type="text" class="form-control" placeholder="Comma separated email list" name="email" id="email_list" style="box-shadow: 0px 0px;border-style: solid;" required>
@@ -358,11 +358,14 @@
                             </div>
                         </div>
                         <div class="row container" style="padding-left: 3rem;">
-                            <div class="form-group col-sm-9"></div>
-                            <div class="form-group col-sm-3" style=" position: relative;left: 13%;">
+                            <div class="form-group col-sm-3">
+                            </div>
+                            <div class="form-group col-sm-6">
                                 <button type="submit" id="mail_report" class="pull-right submit_request button red downloadcsv mr-5" style="background-color: red">
                                     Mail a report
                                 </button>
+                            </div>
+                            <div class="form-group col-sm-3" style=" position: relative;left: 13%;">
                             </div>
                         </div>
                     </form>

@@ -36,6 +36,12 @@ def file_save_s3(file_obj, directory="default", user_id=""):
 def push_file_to_s3(file_path, file_name, bucket_name):
     with open(file_path, 'rb') as data:
         s3.upload_fileobj(data, bucket_name, file_name, ExtraArgs={'ACL': 'public-read'})
-    s3_url = "{}/{}/{}".format('https://s3.ap-south-1.amazonaws.com', bucket_name, file_name)
+    # s3_url = "{}/{}/{}".format('https://s3.ap-south-1.amazonaws.com', bucket_name, file_name)
+    s3_url = s3.generate_presigned_url(
+        'get_object',
+        Params={
+            'Bucket': bucket_name,
+            'Key': file_name, },
+        ExpiresIn=600, )
     os.remove(file_path)
     return s3_url

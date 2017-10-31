@@ -68,9 +68,9 @@ def get_excel_doc(obj, header_dsiplay,report_file_path, has_next=False):
         'border': 1
     })
 
-    worksheet_s.merge_range('K1:O1', 'Merchant', title)
-    worksheet_s.merge_range('P1:T1', 'Distributor', title)
-    worksheet_s.merge_range('U1:W1', 'Sub-Distributor', title)
+    worksheet_s.merge_range('Q1:U1', 'Merchant', title)
+    worksheet_s.merge_range('V1:Y1', 'Distributor', title)
+    worksheet_s.merge_range('Z1:AC1', 'Sub-Distributor', title)
     worksheet_s.write(0, 12, 'Zrupee', cell)
 
     i = incrementClass(val=-1)
@@ -160,8 +160,8 @@ def update_excel_doc(obj, header_dsiplay, workbook, worksheet_s, last_row, has_n
                 worksheet_s.write(row, inc_cls.get_inc_val(), "N/A", cell)
 
     # To set size of all columns to 20
-    for index in range(inc_cls.get_inc_val()):
-        worksheet_s.set_column("{0}:{0}".format(string.uppercase[index]), 20)
+    # for index in range(inc_cls.get_inc_val()):
+    #     worksheet_s.set_column("{0}:{0}".format(string.uppercase[index]), 20)
 
     if has_next:
         return workbook, worksheet_s, row+1

@@ -54,8 +54,6 @@ EXTERNAL_APPS = [
     'rest_framework',
     'corsheaders',
     'widget_tweaks',
-    'djcelery',
-    # 'djcelery_email',
 ]
 
 INSTALLED_APPS = INTERNAL_APPS + PROJECT_APPS + EXTERNAL_APPS
@@ -212,10 +210,26 @@ LOGGING = {
     }
 }
 
-# CELERY_BROKER_URL = 'amqp://localhost'
-BROKER_URL = os.environ.get("CLOUDAMQP_URL", "django://")
-# BROKER_TRANSPORT = 'redis'
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+INSTALLED_APPS += ("djcelery", )
+
+SETUP = os.environ.get('SETUP', '')
+if SETUP == 'heroku':
+    BROKER_HOST = 'impala.rmq.cloudamqp.com'
+    BROKER_PORT = 5672
+    BROKER_USER = 'cwolziqk'
+    BROKER_PASSWORD = '_DmFPc9QiXp_gF8AfrBBu_PlDmkyxtzn'
+    BROKER_VHOST = 'cwolziqk'
+elif SETUP == 'prod':
+    CELERY_BROKER_URL = 'amqp://172.17.0.1'
+    BROKER_HOST = '172.17.0.1'
+    BROKER_PORT = 5672
+else:
+    # CELERY_BROKER_URL = 'amqp://localhost'
+    BROKER_HOST = 'localhost'
+    BROKER_PORT = 5672
+
+import djcelery
+djcelery.setup_loader()
 
 REPORTS_PATH = BASE_DIR + '/media/report'
 if not os.path.exists(REPORTS_PATH):

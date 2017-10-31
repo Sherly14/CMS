@@ -5,6 +5,7 @@ import csv
 import datetime
 from urllib import urlencode
 
+from celery import shared_task, task
 from django.conf import settings
 from django.contrib.auth import login, models as dj_auth_models
 from django.core.paginator import EmptyPage, Paginator
@@ -18,22 +19,21 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView
 
-from common_utils import date_utils, email_utils
+from common_utils import date_utils
 from common_utils import transaction_utils
 from common_utils import zrupee_security
 from common_utils.date_utils import last_month, last_week_range
 from common_utils.report_util import get_excel_doc, update_excel_doc
-from common_utils.user_utils import is_user_superuser, get_unique_id, push_file_to_s3
+from common_utils.user_utils import is_user_superuser
 from mapping import *
 from utils import constants
-from zrcms.celery_app import app
 from zrcommission import models as commission_models
 from zrmapping import models as zrmappings_models
 from zrpayment.models import PaymentMode
 from zrtransaction import models as transaction_models
 from zrtransaction.utils.constants import RECHARGES_TYPE, TRANSACTION_STATUS_SUCCESS, \
     TRANSACTION_STATUS_FAILURE, BILLS_TYPE, TRANSACTION_STATUS_PENDING
-from zrtransaction.views import get_transactions_qs
+from zrtransaction.views import get_transactions_qs_with_dict
 from zruser import forms as zr_user_form
 from zruser.models import ZrUser, UserRole, ZrAdminUser, KYCDocumentType, KYCDetail, Bank
 from zruser.utils.constants import DEFAULT_DISTRIBUTOR_MOBILE_NUMBER
@@ -193,7 +193,7 @@ def get_merchant_csv(request):
     return response
 
 
-def get_report_excel(request):
+def get_report_excel(report_params):
     DOC_HEADERS = (
         ('Transaction Type', 'type.name'),
         ('Transaction ID', 'pk'),
@@ -236,19 +236,22 @@ def get_report_excel(request):
         ('Sub-Distributor  Net Commission', 'sub_dist_net_commission'),
     )
     DOC_HEADERS += merchant_headers
-    if is_user_superuser(request):
+    if report_params.get('user_type') == "SU":
         DOC_HEADERS += distributor_headers
         DOC_HEADERS += sub_distributor_headers
         DOC_HEADERS += (('Zrupee Net Commission', 'admin_net_commission'),)
-    elif transaction_utils.is_sub_distributor(request.user.zr_admin_user.zr_user):
+    elif report_params.get('user_type') == SUBDISTRIBUTOR:
         DOC_HEADERS += sub_distributor_headers
-    elif request.user.zr_admin_user.role.name == DISTRIBUTOR:
+    elif report_params.get('user_type') == DISTRIBUTOR:
         DOC_HEADERS += distributor_headers
         DOC_HEADERS += sub_distributor_headers
 
-    transactions_qs = get_transactions_qs(request)
+    transactions_qs = get_transactions_qs_with_dict(report_params)
     paginator = Paginator(transactions_qs, 1)
-    report_file_path = settings.REPORTS_PATH + "/" + str(get_unique_id()) + ".xlsx"
+    import string, random
+    unique_name = datetime.datetime.now().strftime("%d-%m-%YT%H:%M:%S-") + ''.join(
+        random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
+    report_file_path = settings.REPORTS_PATH + "/" + unique_name + ".xlsx"
     for x in paginator.page_range:
         page_data = paginator.page(x)
         if x == 1:
@@ -262,25 +265,25 @@ def get_report_excel(request):
     return report_file_path
 
 
-@app.task
-def send_dashboard_report(request, email_list):
-    report_file_path = get_report_excel(request)
-    file_name = report_file_path.split('/')[-1]
-    report_link = push_file_to_s3(report_file_path, file_name, "zrupee-reports")
-    email_utils.send_email_multiple(
-        'Your dashboard Report is ready',
-        email_list,
-        'report_email',
-        {
-            'report_link': report_link
-        },
-        is_html=True
-    )
-
 
 def mail_report(request):
     email_list = request.POST.get('email', '').split(",")
-    send_dashboard_report(request, email_list)
+    if is_user_superuser(request):
+        user_type = "SU"
+    elif transaction_utils.is_sub_distributor(request.user.zr_admin_user.zr_user):
+        user_type = SUBDISTRIBUTOR
+    else:
+        user_type = request.user.zr_admin_user.role.name
+    report_params = {
+        "email_list": email_list,
+        "user_type": user_type,
+        "q": request.GET.get('q', ""),
+        "filter": request.GET.get('filter', ""),
+        "period": request.GET.get('period', ""),
+        "user_id": request.user.id,
+    }
+    from zruser import tasks as zu_celery_tasks
+    zu_celery_tasks.send_dashboard_report.apply_async(args=[report_params])
     return JsonResponse({"success": True})
 
 
@@ -462,9 +465,6 @@ def get_sub_distributor_qs(request):
         except:
             pass
 
-    if is_user_superuser(request):
-        queryset = zrmappings_models.DistributorSubDistributor.objects.order_by('-at_created')
-
     q = request.GET.get('q')
     filter = request.GET.get('filter')
 
@@ -506,27 +506,6 @@ def download_distributor_list_csv(request):
             distributor.mobile_no,
             distributor.email,
             'Active' if distributor.is_active else 'Inactive'
-        ])
-
-    return response
-
-
-def download_sub_distributor_list_csv(request):
-    sub_distributor_mapping_qs = get_sub_distributor_qs(request)  # get_distributor_qs(request)
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="subdistributors.csv"'
-    writer = csv.writer(response)
-    writer.writerow([
-        'Sub Distributor Id', 'Sub Distributor Name', 'DOJ', 'Mobile', 'Email', 'Status'
-    ])
-    for sub_distributor_map_item in sub_distributor_mapping_qs:
-        writer.writerow([
-            sub_distributor_map_item.sub_distributor.id,
-            sub_distributor_map_item.sub_distributor.first_name,
-            sub_distributor_map_item.at_created,
-            sub_distributor_map_item.sub_distributor.mobile_no,
-            sub_distributor_map_item.sub_distributor.email,
-            'Active' if sub_distributor_map_item.is_active else 'Inactive'
         ])
 
     return response
