@@ -220,8 +220,8 @@ if SETUP == 'heroku':
     BROKER_PASSWORD = '_DmFPc9QiXp_gF8AfrBBu_PlDmkyxtzn'
     BROKER_VHOST = 'cwolziqk'
 elif SETUP == 'prod':
-    CELERY_BROKER_URL = 'amqp://172.17.0.1'
-    BROKER_HOST = '172.17.0.1'
+    CELERY_BROKER_URL = 'amqp://13.126.134.234'
+    BROKER_HOST = '13.126.134.234'
     BROKER_PORT = 5672
 else:
     # CELERY_BROKER_URL = 'amqp://localhost'
