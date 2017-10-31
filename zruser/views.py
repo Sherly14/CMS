@@ -5,7 +5,7 @@ import csv
 import datetime
 from urllib import urlencode
 
-from celery import shared_task
+from celery import shared_task, task
 from django.conf import settings
 from django.contrib.auth import login, models as dj_auth_models
 from django.core.paginator import EmptyPage, Paginator
@@ -19,12 +19,12 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView
 
-from common_utils import date_utils, email_utils
+from common_utils import date_utils
 from common_utils import transaction_utils
 from common_utils import zrupee_security
 from common_utils.date_utils import last_month, last_week_range
 from common_utils.report_util import get_excel_doc, update_excel_doc
-from common_utils.user_utils import is_user_superuser, get_unique_id, push_file_to_s3
+from common_utils.user_utils import is_user_superuser
 from mapping import *
 from utils import constants
 from zrcommission import models as commission_models
@@ -265,22 +265,6 @@ def get_report_excel(report_params):
     return report_file_path
 
 
-@shared_task
-def send_dashboard_report(report_params):
-    report_file_path = get_report_excel(report_params)
-    file_name = report_file_path.split('/')[-1]
-    report_link = push_file_to_s3(report_file_path, file_name, "zrupee-reports")
-
-    email_utils.send_email_multiple(
-        'Your dashboard Report is ready',
-        report_params.get('email_list'),
-        'report_email',
-        {
-            'report_link': report_link
-        },
-        is_html=True
-    )
-
 
 def mail_report(request):
     email_list = request.POST.get('email', '').split(",")
@@ -298,7 +282,8 @@ def mail_report(request):
         "period": request.GET.get('period', ""),
         "user_id": request.user.id,
     }
-    send_dashboard_report.delay(report_params)
+    from zruser import tasks as zu_celery_tasks
+    zu_celery_tasks.send_dashboard_report.apply_async(args=[report_params])
     return JsonResponse({"success": True})
 
 
