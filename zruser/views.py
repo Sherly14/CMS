@@ -5,7 +5,6 @@ import csv
 import datetime
 from urllib import urlencode
 
-from celery import shared_task, task
 from django.conf import settings
 from django.contrib.auth import login, models as dj_auth_models
 from django.core.paginator import EmptyPage, Paginator
@@ -997,6 +996,27 @@ class MerchantCreateView(View):
 
         zrwallet_models.Wallet.objects.create(merchant=merchant_zr_user)
         return HttpResponseRedirect(reverse("user:merchant-list"))
+
+
+def download_sub_distributor_list_csv(request):
+    sub_distributor_mapping_qs = get_sub_distributor_qs(request)  # get_distributor_qs(request)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="subdistributors.csv"'
+    writer = csv.writer(response)
+    writer.writerow([
+        'Sub Distributor Id', 'Sub Distributor Name', 'DOJ', 'Mobile', 'Email', 'Status'
+    ])
+    for sub_distributor_map_item in sub_distributor_mapping_qs:
+        writer.writerow([
+            sub_distributor_map_item.sub_distributor.id,
+            sub_distributor_map_item.sub_distributor.first_name,
+            sub_distributor_map_item.at_created,
+            sub_distributor_map_item.sub_distributor.mobile_no,
+            sub_distributor_map_item.sub_distributor.email,
+            'Active' if sub_distributor_map_item.is_active else 'Inactive'
+        ])
+
+    return response
 
 
 class SubDistributorCreateView(CreateView):
