@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 from decimal import Decimal
 
 from django.db import models
+from django.contrib.postgres.fields import JSONField
 
 from zruser.models import ZrUser, Bank
 from zrutils.common.modelutils import RowInfo, get_slugify_value
@@ -123,3 +124,31 @@ class PaymentRequest(RowInfo):
 
     def __unicode__(self):
         return '%s - %s - %s' % (self.from_user, self.to_user, self.amount)
+
+
+class Payments(RowInfo):
+    PENDING = 'Pending'
+    SUCCESS = 'Success'
+    FAILURE = 'Failure'
+    REFUND_PENDING = 'Refund Pending'
+    REFUNDED = 'Refunded'
+    EXPIRED = 'Expired'
+
+    status = (
+        ('P', PENDING),
+        ('S', SUCCESS),
+        ('F', FAILURE),
+        ('RP', REFUND_PENDING),
+        ('R', REFUNDED),
+        ('E', EXPIRED)
+    )
+    mode = models.ForeignKey(PaymentMode)
+    amount = models.DecimalField(decimal_places=3, default=0.00, max_digits=10)
+    txn_id = models.CharField(max_length=128)
+    vendor_txn_id = models.CharField(max_length=128)
+    customer = models.CharField(max_length=256)
+    user = models.ForeignKey(ZrUser)
+    transaction_request_json = JSONField(default={})
+    transaction_response_json = JSONField(default={})
+    additional_charges = models.DecimalField(decimal_places=3, default=0.00, max_digits=10)
+    is_settled = models.BooleanField(default=False)
