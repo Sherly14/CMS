@@ -166,6 +166,16 @@ p.head-bg{
 	font-size: 10px;
 }
 
+.pagination-prev{
+    margin-right: 40%;
+    margin-left:5%;
+}
+
+.pagination-next{
+    margin-left: 40%;
+    margin-right:5%;
+}
+
 
 /*scroll bar styling &&stillneedswork*/
 

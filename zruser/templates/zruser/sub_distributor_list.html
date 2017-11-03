@@ -71,15 +71,17 @@
                     {% endfor %}
                 </table>
             </div>
+            <div class="pagination-prev">
+                {% if has_prev_page %}
+                    <a href="{% url "user:sub-distributor-list" %}?{{prev_page_qs}}" >Prev</a>
+                {% endif %}
+            </div>
 
-            {% if has_prev_page %}
-                <a href="{% url "user:sub-distributor-list" %}?{{prev_page_qs}}" >Prev</a>
-            {% endif %}
-
-            {% if has_next_page %}
-                <a href="{% url "user:sub-distributor-list" %}?{{next_page_qs}}" >Next</a>
-            {% endif %}
-
+            <div class="pagination-next">
+                {% if has_next_page %}
+                    <a href="{% url "user:sub-distributor-list" %}?{{next_page_qs}}" >Next</a>
+                {% endif %}
+            </div>
         </div>
         <br>
     </div>
