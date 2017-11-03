@@ -50,51 +50,51 @@
             <ul class="sidebar-nav navbar-nav">
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF"%}
                 <li class="nav-item ">
-                    <a class="nav-link textAlignRight" href="{% url 'user:distributor-list' %}">Distributors</a>
+                    <a class="nav-link text-right" href="{% url 'user:distributor-list' %}">Distributors</a>
                 </li>
                 {% endif %}
 
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "DISTRIBUTOR" %}
                 <li class="nav-item ">
-                    <a class="nav-link textAlignRight" href="{% url 'user:sub-distributor-list' %}">Sub-Distributors</a>
+                    <a class="nav-link text-right" href="{% url 'user:sub-distributor-list' %}">Sub-Distributors</a>
                 </li>
                 {% endif %}
 
                 {% if request.user.zr_admin_user.role.name == "CHECKER" or request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
                 <li class="nav-item ">
-                    <a class="nav-link textAlignRight" href="{% url 'user:kyc-requests' %}">KYC Requests</a>
+                    <a class="nav-link text-right" href="{% url 'user:kyc-requests' %}">KYC Requests</a>
                 </li>
                 {% endif %}
 
                 <li class="nav-item ">
-                    <a class="nav-link textAlignRight" href="{% url 'user:merchant-list' %}">Merchants</a>
+                    <a class="nav-link text-right" href="{% url 'user:merchant-list' %}">Merchants</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link textAlignRight" href="{% url 'transaction:transaction-list' %}">Transactions</a>
+                    <a class="nav-link text-right" href="{% url 'transaction:transaction-list' %}">Transactions</a>
                 </li>
                 <li class="nav-item" style="position: relative;">
-                    <a class="nav-link textAlignRight" href="{% url 'payment-requests:payment-request-list' %}">Payment Requests</a>
+                    <a class="nav-link text-right" href="{% url 'payment-requests:payment-request-list' %}">Payment Requests</a>
                     <span class="badge badge-pill badge-outline">{{ request|payment_req_cnt }}</span></a>
                 </li>
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
                 <li class="nav-item">
-                    <a class="nav-link textAlignRight " href="{% url 'commission:display-commission' %}">Commissions</a>
+                    <a class="nav-link text-right " href="{% url 'commission:display-commission' %}">Commissions</a>
                 </li>
                 {% endif %}
 
                 <li class="nav-item">
-                    <a class="nav-link textAlignRight " href="{% url 'payment-requests:payment-request-sent-view' %}">Payment request sent</a>
+                    <a class="nav-link text-right " href="{% url 'payment-requests:payment-request-sent-view' %}">Payment request sent</a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link textAlignRight " href="{% url 'commission:display-commission' %}">Commissions</a>
+                    <a class="nav-link text-right " href="{% url 'commission:display-commission' %}">Commissions</a>
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link textAlignRight"></a>
+                    <a class="nav-link text-right"></a>
                 </li>
 {#                <li class="nav-item">#}
-{#                    <a class="nav-link textAlignRight" href="#">Settings</a>#}
+{#                    <a class="nav-link text-right" href="#">Settings</a>#}
 {#                </li>#}
 
             </ul>

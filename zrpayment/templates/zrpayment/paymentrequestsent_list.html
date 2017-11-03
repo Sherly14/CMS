@@ -11,124 +11,126 @@
     </style>
     <div class="content-wrapper">
         <p class="head-right">Payment Request Sent</p>
-        <div class="row rm-margin-side">
-            <p class="head-left">Date</p>
-        </div>
-        <div class="row">
-            <div class="d-flex justify-content-between" style="width:90%">
-                <select id="timespan-filter" >
-                    <option value="today" {% if filter_by == "today" %} selected {% endif %}>Today</option>
-                    <option value="last_week" {% if filter_by == "last_week" %} selected {% endif %}>Last Week</option>
-                    <option value="last_month" {% if filter_by == "last_month" %} selected {% endif %}>Last Month</option>
-                </select>
-                <div style="position: relative;">
-                    <input class="search" id="search-txt" type="search" name="search" value="{% if q %}{{ q }}{% endif %}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                    <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
-                </div>
-                <input type="button" id="search-btn" class="button red" value="Search">
-                <a href='{% url "payment-requests:payment-request-sent-view" %}' >Reset filters</a>
-                <input class="button red" type="button" value="DOWNLOAD CSV" id="download-csv" >
-                {% csrf_token %}
-                <input type="hidden" id="request_id" value="">
+        <div class="col-12" >
+            <div class="row rm-margin-side">
+                <p class="head-left">Date</p>
             </div>
-        </div>
-        <br>
-        <div style="">
-            <div class="row" style="padding-right: 50">
-                <div class="fine">
-                    <p class="head-bg head-bg2">New Requests</p>
+            <div class="row">
+                <div class="d-flex justify-content-between" style="width:90%">
+                    <select id="timespan-filter" >
+                        <option value="today" {% if filter_by == "today" %} selected {% endif %}>Today</option>
+                        <option value="last_week" {% if filter_by == "last_week" %} selected {% endif %}>Last Week</option>
+                        <option value="last_month" {% if filter_by == "last_month" %} selected {% endif %}>Last Month</option>
+                    </select>
+                    <div style="position: relative;">
+                        <input class="search" id="search-txt" type="search" name="search" value="{% if q %}{{ q }}{% endif %}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                        <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                    </div>
+                    <input type="button" id="search-btn" class="button red" value="Search">
+                    <a href='{% url "payment-requests:payment-request-sent-view" %}' >Reset filters</a>
+                    <input class="button red" type="button" value="DOWNLOAD CSV" id="download-csv" >
+                    {% csrf_token %}
+                    <input type="hidden" id="request_id" value="">
                 </div>
-            </div>
-            <div class="row scroll">
-
-                <div style="width: 100%; overflow: scroll;">
-                    <table>
-                        <tr style="border-bottom-style: solid;">
-                            <th>Status</th>
-                            <th>Date</th>
-                            <th>Amount</th>
-                            <th>DMT Amount</th>
-                            <th>NON DMT Amount</th>
-                            <th>Payment Mode</th>
-                            <th>Challan document</th>
-                            <th>To User Name</th>
-                            <th>From Bank Account Number</th>
-                            <th>To Bank Account Number</th>
-                            <th>From bank</th>
-                            <th>To bank</th>
-                            <th>Ref Id</th>
-                        </tr>
-                        {% for payment_request in page_obj %}
-                            <tr>
-                                <td>
-                                    {% if payment_request.status == 0 %}
-                                        Pending
-                                    {% elif payment_request.status == 1 %}
-                                        Accepted
-                                    {% elif payment_request.status == 3 %}
-                                        Refund
-                                    {% else %}
-                                        Rejected
-                                    {% endif %}
-                                </td>
-                                <td>{{ payment_request.at_created }}</td>
-                                <td>{{ payment_request.amount }}</td>
-                                <td>{{ payment_request.dmt_amount }}</td>
-                                <td>{{ payment_request.non_dmt_amount }}</td>
-                                <td>{{ payment_request.payment_mode }}</td>
-                                <td><a href="{{ payment_request.document }}">Download</a></td>
-                                <td>
-                                    {% if payment_request.to_user.role.name == 'ADMINSTAFF' %}
-                                        ADMIN
-                                    {% else %}
-                                        {{ payment_request.to_user.get_full_name }}
-                                    {% endif %}
-                                </td>
-                                <td>{{ payment_request.from_account_no }}</td>
-                                <td>{{ payment_request.to_account_no }}</td>
-                                <td>{{ payment_request.from_bank.bank_name }}</td>
-                                <td>{{ payment_request.to_bank.bank_name }}</td>
-                                <td>{{ payment_request.ref_no|default_if_none:"N/A" }}</td>
-                            </tr>
-                        {% endfor %}
-                    </table>
-
-                    <br />
-                    {% if is_paginated %}
-                        <div class="pagination">
-                            <span class="page-links">
-                                <span class="page-current">
-                                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-                                </span>
-                                {% if page_obj.has_previous %}
-                                    {% if filter_by and q %}
-                                        <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}">previous</a>
-                                    {% elif q %}
-                                        <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}&q={{ q }}">previous</a>
-                                    {% elif filter_by %}
-                                        <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}">previous</a>
-                                    {% else %}
-                                        <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}">previous</a>
-                                    {% endif %}
-                                {% endif %}
-                                {% if page_obj.has_next %}
-                                    {% if filter_by and q %}
-                                        <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}">next</a>
-                                    {% elif q %}
-                                        <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}&q={{ q }}">next</a>
-                                    {% elif filter_by %}
-                                        <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}&filter={{ filter_by }}">next</a>
-                                    {% else %}
-                                        <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}">next</a>
-                                    {% endif %}
-                                {% endif %}
-                            </span>
-                        </div>
-                    {% endif %}
-                </div>
-
             </div>
             <br>
+            <div style="">
+                <div class="row" style="padding-right: 50">
+                    <div class="fine">
+                        <p class="head-bg">New Requests</p>
+                    </div>
+                </div>
+                <div class="row scroll">
+
+                    <div style="width: 100%; overflow: scroll;">
+                        <table>
+                            <tr style="border-bottom-style: solid;">
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>DMT Amount</th>
+                                <th>NON DMT Amount</th>
+                                <th>Payment Mode</th>
+                                <th>Challan document</th>
+                                <th>To User Name</th>
+                                <th>From Bank Account Number</th>
+                                <th>To Bank Account Number</th>
+                                <th>From bank</th>
+                                <th>To bank</th>
+                                <th>Ref Id</th>
+                            </tr>
+                            {% for payment_request in page_obj %}
+                                <tr>
+                                    <td>
+                                        {% if payment_request.status == 0 %}
+                                            Pending
+                                        {% elif payment_request.status == 1 %}
+                                            Accepted
+                                        {% elif payment_request.status == 3 %}
+                                            Refund
+                                        {% else %}
+                                            Rejected
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ payment_request.at_created }}</td>
+                                    <td>{{ payment_request.amount }}</td>
+                                    <td>{{ payment_request.dmt_amount }}</td>
+                                    <td>{{ payment_request.non_dmt_amount }}</td>
+                                    <td>{{ payment_request.payment_mode }}</td>
+                                    <td><a href="{{ payment_request.document }}">Download</a></td>
+                                    <td>
+                                        {% if payment_request.to_user.role.name == 'ADMINSTAFF' %}
+                                            ADMIN
+                                        {% else %}
+                                            {{ payment_request.to_user.get_full_name }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ payment_request.from_account_no }}</td>
+                                    <td>{{ payment_request.to_account_no }}</td>
+                                    <td>{{ payment_request.from_bank.bank_name }}</td>
+                                    <td>{{ payment_request.to_bank.bank_name }}</td>
+                                    <td>{{ payment_request.ref_no|default_if_none:"N/A" }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+
+                        <br />
+                        {% if is_paginated %}
+                            <div class="pagination">
+                                <span class="page-links">
+                                    <span class="page-current">
+                                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                                    </span>
+                                    {% if page_obj.has_previous %}
+                                        {% if filter_by and q %}
+                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}">previous</a>
+                                        {% elif q %}
+                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}&q={{ q }}">previous</a>
+                                        {% elif filter_by %}
+                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}">previous</a>
+                                        {% else %}
+                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}">previous</a>
+                                        {% endif %}
+                                    {% endif %}
+                                    {% if page_obj.has_next %}
+                                        {% if filter_by and q %}
+                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}">next</a>
+                                        {% elif q %}
+                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}&q={{ q }}">next</a>
+                                        {% elif filter_by %}
+                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}&filter={{ filter_by }}">next</a>
+                                        {% else %}
+                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}">next</a>
+                                        {% endif %}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                </div>
+                <br>
+            </div>
         </div>
     </div>
 

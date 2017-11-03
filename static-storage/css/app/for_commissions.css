@@ -39,22 +39,16 @@ p.inr{
 /*headings*/
 p.head-bg{
 	margin:0px;
-	width:40%;
+	width: 100%;
 	color:white;
-	padding: 0.3rem 1rem 0.3rem 1rem;
+	padding: 0.6rem 1rem 0.3rem 1rem;
 	border-radius: 20px;
-	font-size:0.9em;
+	font-size:12px;
 	background-color: #2f2f2f;
-    box-shadow: 0 19px 27px 0 rgba(0, 0, 0, 0.09);
+    box-shadow: 0px 0px 5px 0px #F4F3F3;
     font-weight: 100;
     letter-spacing: 0.4px;
-}
-p.head-bg2{
-	width: 100%;
-    box-shadow: 0px 0px 5px 0px #F4F3F3;
-    border-radius: 20px;
     height: 40px;
-	padding: 0.6rem 1rem 0.3rem 1rem;
 }
 
 .d-flex.resize{
@@ -154,6 +148,35 @@ p.head-bg2{
 	height:400px;
     padding-right: 50px;
 }
+
+.scroll table{
+    margin: 0 auto;
+    width: 95%;
+}
+
+.scroll td {
+    padding: 5px;
+	font-size: 10px;
+    text-align: center;
+}
+.scroll th {
+    text-align: center;
+    border-bottom: 1px solid black;
+    padding: 10px;
+	font-size: 10px;
+}
+
+.pagination-prev{
+    margin-right: 40%;
+    margin-left:5%;
+}
+
+.pagination-next{
+    margin-left: 40%;
+    margin-right:5%;
+}
+
+
 /*scroll bar styling &&stillneedswork*/
 
 /*.scroll::-webkit-scrollbar {
@@ -244,13 +267,6 @@ p i.fa{
     flex: 1;
     -webkit-flex: 1;
 	width: 100%;
-}
-
-td, th {
-    padding-left: 50px;
-    text-align: right;
-	font-size: 12px;
-	padding-top: 15px;
 }
 
 /*th {*/
