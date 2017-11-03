@@ -167,13 +167,11 @@ p.head-bg{
 }
 
 .pagination-prev{
-    margin-right: 40%;
-    margin-left:5%;
+    margin: 0 auto;
 }
 
 .pagination-next{
-    margin-left: 40%;
-    margin-right:5%;
+    margin: 0 auto;
 }
 
 
