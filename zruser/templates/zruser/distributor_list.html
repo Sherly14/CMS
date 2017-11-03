@@ -69,13 +69,13 @@
                 </div>
                 <div class="pagination-prev">
                 {% if has_prev_page %}
-                    <a href="{% url "user:distributor-list" %}?{{prev_page_qs}}" >Prev</a>
+                    <a href="{% url "user:distributor-list" %}?{{prev_page_qs}}" class="button red" >Prev</a>
                 {% endif %}
                 </div>
 
                 <div class="pagination-next">
                     {% if has_next_page %}
-                        <a href="{% url "user:distributor-list" %}?{{next_page_qs}}" >Next</a>
+                        <a href="{% url "user:distributor-list" %}?{{next_page_qs}}" class="button red" >Next</a>
                     {% endif %}
                 </div>
             </div>

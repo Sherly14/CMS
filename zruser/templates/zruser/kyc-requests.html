@@ -84,41 +84,36 @@
                     </tr>
                     {% endfor %}
                 </table>
-                {% if is_paginated %}
-                  <nav>
-                    <ul class="pagination">
-                      {% if page_obj.has_previous %}
-                        <li>
-                          <a href="?page={{ page_obj.previous_page_number }}">
-                            <span>Previous</span>
-                          </a>
-                        </li>
-                      {% else %}
-                        <li class="disabled">
-                          <a href="#">
-                            <span>Previous</span>
-                          </a>
-                        </li>
-                      {% endif %}
-
-                      {% if page_obj.has_next %}
-                        <li>
-                          <a href="?page={{ page_obj.next_page_number }}">
-                            <span>Next</span>
-                          </a>
-                        </li>
-                      {% else %}
-                        <li {% if not page_obj.has_next %}class="disabled"{% endif %}>
-                          <a href="#">
-                            <span>Next</span>
-                          </a>
-                        </li>
-                      {% endif %}
-                    </ul>
-                  </nav>
-                {% endif %}
             </div>
+                {% if is_paginated %}
 
+                    <div class="pagination-prev">
+                      {% if page_obj.has_previous %}
+                          <a href="?page={{ page_obj.previous_page_number }}" class="button red">
+                            <span>Previous</span>
+                          </a>
+                      {% else %}
+{#                        <li class="disabled">#}
+                          <a href="#" class="disabled">
+                            <span>Previous</span>
+                          </a>
+{#                        </li>#}
+                      {% endif %}
+                    </div>
+
+                    <div class="pagination-next">
+                      {% if page_obj.has_next %}
+                          <a href="?page={{ page_obj.next_page_number }}" class="button red">
+                            <span>Next</span>
+                          </a>
+                      {% else %}
+                          <a href="#" {% if not page_obj.has_next %}class="disabled"{% endif %}>
+                            <span>Next</span>
+                          </a>
+                      {% endif %}
+                    </div>
+
+                {% endif %}
         </div>
         <br>
     </div>
