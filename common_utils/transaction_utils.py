@@ -73,18 +73,12 @@ def get_main_distributor_from_merchant(merchant):
 
 
 def get_sub_distributor_from_merchant(merchant):
-    mapping = zr_mapping_models.DistributorMerchant.objects.filter(
+    mappings = zr_mapping_models.DistributorSubDistributor.objects.filter(
         merchant=merchant
     ).last()
-    if not mapping:
-        raise Exception("Invalid merchant (%s)" % (merchant.pk))
-
     sub_distr = None
-    if is_sub_distributor(mapping.distributor):
-        dist_sub_dist_map = zr_mapping_models.DistributorSubDistributor.objects.filter(
-            sub_distributor=mapping.distributor
-        ).last()
-        sub_distr = dist_sub_dist_map.distributor
+    if mappings:
+        sub_distr = mappings.distributor
 
     return sub_distr
 
@@ -333,5 +327,3 @@ def calculate_commission():
         transaction.is_commission_created = True
         transaction.save(update_fields=['is_commission_created'])
         print(transaction)
-
-
