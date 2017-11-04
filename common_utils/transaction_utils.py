@@ -131,7 +131,8 @@ def calculate_commission():
             bill_pay_comm = zr_commission_models.BillPayCommissionStructure.objects.filter(
                 distributor=distributor,
                 service_provider=sp,
-                is_enabled=True
+                is_enabled=True,
+                is_default=False
             ).last()
             if not bill_pay_comm:
                 bill_pay_comm = zr_commission_models.BillPayCommissionStructure.objects.filter(
@@ -143,7 +144,9 @@ def calculate_commission():
                 raise Exception("CommissionStructure not found for transaction (%s)" % transaction.pk)
         else:
             dmt_commission_struct = zr_commission_models.DMTCommissionStructure.objects.filter(
-                is_enabled=True, is_default=True, distributor=distributor,
+                is_enabled=True,
+                is_default=False,
+                distributor=distributor,
                 minimum_amount__lte=transaction.amount,
                 maximum_amount__gte=transaction.amount
             ).last()
@@ -152,7 +155,8 @@ def calculate_commission():
                 dmt_commission_struct = zr_commission_models.DMTCommissionStructure.objects.filter(
                     minimum_amount__lte=transaction.amount,
                     maximum_amount__gte=transaction.amount,
-                    is_enabled=True, is_default=True
+                    is_enabled=True,
+                    is_default=True
                 ).last()
             if not dmt_commission_struct:
                 raise Exception("DMT structure not found for transaction(%s)")
