@@ -54,34 +54,31 @@ def get_main_distributor_from_merchant(merchant):
     mapping = zr_mapping_models.DistributorMerchant.objects.filter(
         merchant=merchant
     ).last()
-    if not mapping:
-        raise Exception("Invalid merchant (%s)" % (merchant.pk))
 
     main_distr = None
-    if is_sub_distributor(mapping.distributor):
-        dist_sub_dist_map = zr_mapping_models.DistributorSubDistributor.objects.filter(
-            sub_distributor=mapping.distributor
-        ).last()
-        main_distr = dist_sub_dist_map.distributor
-    else:
+    if mapping:
         main_distr = mapping.distributor
+    else:
+        dist_sub_dist_map = zr_mapping_models.SubDistributorMerchant.objects.filter(
+            merchant=merchant
+        ).last()
+        if dist_sub_dist_map:
+            distr_sub_distr = zr_mapping_models.DistributorSubDistributor.objects.filter(
+                sub_distributor=dist_sub_dist_map.sub_distributor
+            ).last()
+            if distr_sub_distr:
+                main_distr = distr_sub_distr.distributor
 
     return main_distr
 
 
 def get_sub_distributor_from_merchant(merchant):
-    mapping = zr_mapping_models.DistributorMerchant.objects.filter(
+    mappings = zr_mapping_models.SubDistributorMerchant.objects.filter(
         merchant=merchant
     ).last()
-    if not mapping:
-        raise Exception("Invalid merchant (%s)" % (merchant.pk))
-
     sub_distr = None
-    if is_sub_distributor(mapping.distributor):
-        dist_sub_dist_map = zr_mapping_models.DistributorSubDistributor.objects.filter(
-            sub_distributor=mapping.distributor
-        ).last()
-        sub_distr = dist_sub_dist_map.distributor
+    if mappings:
+        sub_distr = mappings.sub_distributor
 
     return sub_distr
 
@@ -128,12 +125,16 @@ def calculate_commission():
         dmt_commission_struct = None
         distributor = get_main_distributor_from_merchant(merchant)
 
+        if not distributor:
+            continue
+
         if not transaction.type.name == TRANSACTION_TYPE_DMT:
             sp = transaction.service_provider
             bill_pay_comm = zr_commission_models.BillPayCommissionStructure.objects.filter(
                 distributor=distributor,
                 service_provider=sp,
-                is_enabled=True
+                is_enabled=True,
+                is_default=False
             ).last()
             if not bill_pay_comm:
                 bill_pay_comm = zr_commission_models.BillPayCommissionStructure.objects.filter(
@@ -145,16 +146,21 @@ def calculate_commission():
                 raise Exception("CommissionStructure not found for transaction (%s)" % transaction.pk)
         else:
             dmt_commission_struct = zr_commission_models.DMTCommissionStructure.objects.filter(
-                is_enabled=True, is_default=True, distributor=distributor,
+                transaction_vendor=transaction.vendor,
+                is_enabled=True,
+                is_default=False,
+                distributor=distributor,
                 minimum_amount__lte=transaction.amount,
                 maximum_amount__gte=transaction.amount
             ).last()
 
             if not dmt_commission_struct:
                 dmt_commission_struct = zr_commission_models.DMTCommissionStructure.objects.filter(
+                    transaction_vendor=transaction.vendor,
                     minimum_amount__lte=transaction.amount,
                     maximum_amount__gte=transaction.amount,
-                    is_enabled=True, is_default=True
+                    is_enabled=True,
+                    is_default=True
                 ).last()
             if not dmt_commission_struct:
                 raise Exception("DMT structure not found for transaction(%s)")
@@ -164,7 +170,6 @@ def calculate_commission():
                 customer_fee = dmt_commission_struct.min_charge
 
         # For merchant
-        distributor = get_main_distributor_from_merchant(merchant)
         if not transaction.type.name == TRANSACTION_TYPE_DMT:
             commission_amt = 0
             tds_value = 0
@@ -325,5 +330,3 @@ def calculate_commission():
         transaction.is_commission_created = True
         transaction.save(update_fields=['is_commission_created'])
         print(transaction)
-
-
