@@ -54,17 +54,15 @@ def get_main_distributor_from_merchant(merchant):
     mapping = zr_mapping_models.DistributorMerchant.objects.filter(
         merchant=merchant
     ).last()
-    if not mapping:
-        raise Exception("Invalid merchant (%s)" % (merchant.pk))
-
     main_distr = None
-    if is_sub_distributor(mapping.distributor):
+    if mapping:
+        main_distr = mapping.distributor
+    else:
         dist_sub_dist_map = zr_mapping_models.DistributorSubDistributor.objects.filter(
             sub_distributor=mapping.distributor
         ).last()
-        main_distr = dist_sub_dist_map.distributor
-    else:
-        main_distr = mapping.distributor
+        if dist_sub_dist_map:
+            main_distr = dist_sub_dist_map.distributor
 
     return main_distr
 
@@ -164,7 +162,6 @@ def calculate_commission():
                 customer_fee = dmt_commission_struct.min_charge
 
         # For merchant
-        distributor = get_main_distributor_from_merchant(merchant)
         if not transaction.type.name == TRANSACTION_TYPE_DMT:
             commission_amt = 0
             tds_value = 0
