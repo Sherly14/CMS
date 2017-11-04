@@ -73,12 +73,12 @@ def get_main_distributor_from_merchant(merchant):
 
 
 def get_sub_distributor_from_merchant(merchant):
-    mappings = zr_mapping_models.DistributorSubDistributor.objects.filter(
+    mappings = zr_mapping_models.SubDistributorMerchant.objects.filter(
         merchant=merchant
     ).last()
     sub_distr = None
     if mappings:
-        sub_distr = mappings.distributor
+        sub_distr = mappings.sub_distributor
 
     return sub_distr
 
