@@ -418,9 +418,10 @@ class KYCRequestsView(ListView):
                     zruser.pass_word = password
                     zruser.save(update_fields=['pass_word'])
 
-                    dj_user = zruser.zr_user.id
-                    dj_user.set_password(password)
-                    dj_user.save()
+                    if zruser.role.name != MERCHANT:
+                        dj_user = zruser.zr_user.id
+                        dj_user.set_password(password)
+                        dj_user.save()
 
                     zruser.send_welcome_email(password)
 
