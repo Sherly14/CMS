@@ -54,15 +54,20 @@ def get_main_distributor_from_merchant(merchant):
     mapping = zr_mapping_models.DistributorMerchant.objects.filter(
         merchant=merchant
     ).last()
+
     main_distr = None
     if mapping:
         main_distr = mapping.distributor
     else:
-        dist_sub_dist_map = zr_mapping_models.DistributorSubDistributor.objects.filter(
-            sub_distributor=mapping.distributor
+        dist_sub_dist_map = zr_mapping_models.SubDistributorMerchant.objects.filter(
+            merchant=merchant
         ).last()
         if dist_sub_dist_map:
-            main_distr = dist_sub_dist_map.distributor
+            distr_sub_distr = zr_mapping_models.DistributorSubDistributor.objects.filter(
+                sub_distributor=dist_sub_dist_map.sub_distributor
+            ).last()
+            if distr_sub_distr:
+                main_distr = distr_sub_distr.distributor
 
     return main_distr
 
