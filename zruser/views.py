@@ -235,12 +235,14 @@ def get_report_excel(report_params):
         ('Sub-Distributor  Net Commission', 'sub_dist_net_commission'),
     )
     DOC_HEADERS += merchant_headers
+    is_sub_dist = False
     if report_params.get('user_type') == "SU":
         DOC_HEADERS += distributor_headers
         DOC_HEADERS += sub_distributor_headers
         DOC_HEADERS += (('Zrupee Net Commission', 'admin_net_commission'),)
     elif report_params.get('user_type') == SUBDISTRIBUTOR:
         DOC_HEADERS += sub_distributor_headers
+        is_sub_dist = True
     elif report_params.get('user_type') == DISTRIBUTOR:
         DOC_HEADERS += distributor_headers
         DOC_HEADERS += sub_distributor_headers
@@ -255,7 +257,7 @@ def get_report_excel(report_params):
         page_data = paginator.page(x)
         if x == 1:
             workbook, worksheet_s, last_row = get_excel_doc(
-                page_data.object_list, DOC_HEADERS, report_file_path, page_data.has_next()
+                page_data.object_list, DOC_HEADERS, report_file_path, is_sub_dist, page_data.has_next()
             )
         else:
             workbook, worksheet_s, last_row = update_excel_doc(
