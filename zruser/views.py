@@ -7,7 +7,7 @@ from urllib import urlencode
 
 from django.conf import settings
 from django.contrib.auth import login, models as dj_auth_models
-from django.core.paginator import EmptyPage, Paginator
+from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
 from django.db import transaction
 from django.db.models import F
 from django.db.models import Q
@@ -264,7 +264,6 @@ def get_report_excel(report_params):
     return report_file_path
 
 
-
 def mail_report(request):
     email_list = request.POST.get('email', '').split(",")
     if is_user_superuser(request):
@@ -392,9 +391,35 @@ class KYCRequestsView(ListView):
     context_object_name = 'kyc_requests'
     paginate_by = 10
 
+    def get_context_data(self, **kwargs):
+        filter_by = self.request.GET.get('filter', 'All')
+        q = self.request.GET.get('q', "")
+
+        context = super(KYCRequestsView, self).get_context_data(**kwargs)
+
+        queryset = self.get_queryset()
+        context['filter_by'] = filter_by
+        context['q'] = q
+        if not queryset:
+            return context
+
+        paginator = Paginator(queryset, self.paginate_by)
+        page = self.request.GET.get('page', 1)
+
+        try:
+            queryset = paginator.page(page)
+        except PageNotAnInteger:
+            queryset = paginator.page(1)
+
+        context['page_obj'] = queryset
+
+        return context
+
     def get_queryset(self):
         approve = self.request.GET.get('approve')
         reject = self.request.GET.get('approve')
+        filter_by = self.request.GET.get('filter', 'All')
+        q = self.request.GET.get('q')
 
         if approve or reject:
             if not ZrUser.objects.filter(id=approve or reject).last():
@@ -428,6 +453,20 @@ class KYCRequestsView(ListView):
         queryset = ZrUser.objects.filter(
             is_kyc_verified=False
         ).order_by('-at_created')
+        if filter_by == "Last-Week":
+            queryset = queryset.filter(at_created__range=last_week_range())
+        elif filter_by == "Last-Month":
+            queryset = queryset.filter(at_created__range=last_month())
+        elif filter_by == "Today":
+            queryset = queryset.filter(at_created__date__gte=datetime.date.today())
+
+        if q:
+            # added search from mobile number of user
+            query = Q(
+                mobile_no__contains=q
+            )
+            queryset = queryset.filter(query)
+
         return queryset
 
 
