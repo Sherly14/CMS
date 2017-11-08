@@ -142,6 +142,8 @@ class Payments(RowInfo):
         ('R', REFUNDED),
         ('E', EXPIRED)
     )
+    status = models.CharField(choices=status, max_length=3, default=status[0][0])
+    vendor = models.ForeignKey(to='zrtransaction.Vendor', null=True, blank=True)
     mode = models.ForeignKey(PaymentMode)
     amount = models.DecimalField(decimal_places=3, default=0.00, max_digits=10)
     txn_id = models.CharField(max_length=128)
