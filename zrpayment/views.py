@@ -13,7 +13,6 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
-from django.http import Http404
 from rest_framework import serializers
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -24,7 +23,7 @@ from common_utils.date_utils import last_month, last_week_range
 from common_utils.transaction_utils import get_distributor_from_sub_distributor, \
     get_main_admin
 from common_utils.user_utils import is_user_superuser, file_save_s3
-from zrpayment.models import PaymentRequest
+from zrpayment.models import PaymentRequest, Payments
 from zruser import mapping as user_map
 from zrwallet import models as zrwallet_models
 
@@ -66,8 +65,8 @@ class GeneratePaymentRequestView(APIView):
         data["from_user"] = request.user.zr_admin_user.zr_user.id
         main_distributor = None
         error_message = '{0} {1} {2}'.format(ERROR_MESSAGE_START,
-                                       "Something went wrong, please try again",
-                                       MESSAGE_END)
+                                             "Something went wrong, please try again",
+                                             MESSAGE_END)
 
         if request.user.zr_admin_user.role.name == user_map.DISTRIBUTOR:
             main_distributor = get_main_admin()
@@ -85,8 +84,8 @@ class GeneratePaymentRequestView(APIView):
         if serializer.is_valid():
             serializer.save()
             success_message = '{0} {1} {2}'.format(SUCCESS_MESSAGE_START,
-                                                 "Payment request sent successfully",
-                                                 MESSAGE_END)
+                                                   "Payment request sent successfully",
+                                                   MESSAGE_END)
 
             response_data = {
                 "responser": serializer.data,
@@ -200,8 +199,8 @@ class AcceptPaymentRequestView(APIView):
 
                     balance_insufficient = []
                     if (
-                        supervisor_wallet.dmt_balance >= payment_request.dmt_amount and
-                        supervisor_wallet.non_dmt_balance >= payment_request.non_dmt_amount
+                                    supervisor_wallet.dmt_balance >= payment_request.dmt_amount and
+                                    supervisor_wallet.non_dmt_balance >= payment_request.non_dmt_amount
                     ):
                         # For DMT
                         zr_wallet.dmt_balance += payment_request.dmt_amount
@@ -387,6 +386,39 @@ def merchant_payment_req_csv_download(request):
     return response
 
 
+def payments_csv_download(request):
+    qs = get_payment_qs(request)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="payments.csv"'
+    writer = csv.writer(response)
+    writer.writerow([
+        "Mode",
+        "Amount",
+        "Transaction Id",
+        "Vendor Transaction Id",
+        "Customer",
+        "User",
+        "Additional Charges",
+        "Settled",
+    ])
+
+    for payment_req in qs:
+        writer.writerow(
+            [
+                payment_req.mode,
+                payment_req.amount,
+                payment_req.txn_id,
+                payment_req.vendor_txn_id,
+                payment_req.customer,
+                payment_req.user,
+                payment_req.additional_charges,
+                payment_req.settled,
+            ]
+        )
+
+    return response
+
+
 class PaymentRequestListView(ListView):
     context_object_name = 'payment_request_list'
     template_name = 'payment_request_list.html'
@@ -430,6 +462,74 @@ class PaymentRequestListView(ListView):
 
     def get_queryset(self):
         return get_payment_request_qs(self.request)
+
+
+def get_payment_qs(request):
+    filter_by = request.GET.get('filter')
+    q = request.GET.get('q')
+
+    queryset = []
+    if is_user_superuser(request):
+        queryset = Payments.objects.all()
+    elif request.user.zr_admin_user.role.name in ['DISTRIBUTOR', 'SUBDISTRIBUTOR']:
+        queryset = Payments.objects.filter(user=request.user.zr_admin_user.zr_user)
+    if q:
+        query = Q(
+            txn_id__contains=q
+        ) | Q(
+            vendor_txn_id__contains=q
+        ) | Q(
+            customer__contains=q
+        ) | Q(
+            user__mobile_no__contains=q
+        )
+        queryset = queryset.filter(query)
+
+    if filter_by == 'last_week':
+        queryset = queryset.filter(at_created__range=last_week_range())
+    elif filter_by == 'last_month':
+        queryset = queryset.filter(at_created__range=last_month())
+    elif filter_by == 'today':
+        queryset = queryset.filter(at_created__date__gte=datetime.date.today())
+
+    return queryset.order_by('-at_created')
+
+
+class PaymentListView(ListView):
+    context_object_name = 'payment_list'
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        filter_by = self.request.GET.get('filter', 'all')
+        q = self.request.GET.get('q')
+
+        context = super(PaymentListView, self).get_context_data(**kwargs)
+
+        queryset = self.get_queryset()
+        if not queryset:
+            context['filter_by'] = filter_by
+            context['q'] = q
+            return context
+
+        paginator = Paginator(queryset, self.paginate_by)
+        page = self.request.GET.get('page', 1)
+
+        try:
+            queryset = paginator.page(page)
+        except PageNotAnInteger:
+            queryset = paginator.page(1)
+        from django.core.urlresolvers import reverse
+
+        context['main_url'] = reverse('payment-requests:payment-list')
+        context['page_obj'] = queryset
+        context['filter_by'] = filter_by
+        context['q'] = q
+
+        context['is_superuser'] = is_user_superuser(self.request)
+        return context
+
+    def get_queryset(self):
+        return get_payment_qs(self.request)
 
 
 class PaymentRequestSentListView(ListView):

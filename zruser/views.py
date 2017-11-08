@@ -7,7 +7,7 @@ from urllib import urlencode
 
 from django.conf import settings
 from django.contrib.auth import login, models as dj_auth_models
-from django.core.paginator import EmptyPage, Paginator
+from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
 from django.db import transaction
 from django.db.models import F
 from django.db.models import Q
@@ -235,12 +235,14 @@ def get_report_excel(report_params):
         ('Sub-Distributor  Net Commission', 'sub_dist_net_commission'),
     )
     DOC_HEADERS += merchant_headers
+    is_sub_dist = False
     if report_params.get('user_type') == "SU":
         DOC_HEADERS += distributor_headers
         DOC_HEADERS += sub_distributor_headers
         DOC_HEADERS += (('Zrupee Net Commission', 'admin_net_commission'),)
     elif report_params.get('user_type') == SUBDISTRIBUTOR:
         DOC_HEADERS += sub_distributor_headers
+        is_sub_dist = True
     elif report_params.get('user_type') == DISTRIBUTOR:
         DOC_HEADERS += distributor_headers
         DOC_HEADERS += sub_distributor_headers
@@ -263,7 +265,6 @@ def get_report_excel(report_params):
                 page_data.object_list, DOC_HEADERS, workbook, worksheet_s, last_row,
                 page_data.has_next())
     return report_file_path
-
 
 
 def mail_report(request):
@@ -423,6 +424,8 @@ class KYCRequestsView(ListView):
 
         approve = self.request.GET.get('approve')
         reject = self.request.GET.get('approve')
+        filter_by = self.request.GET.get('filter', 'All')
+        q = self.request.GET.get('q')
 
         if approve or reject:
             if not ZrUser.objects.filter(id=approve or reject).last():
