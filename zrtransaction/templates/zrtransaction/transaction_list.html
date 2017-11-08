@@ -8,6 +8,7 @@
 
     <div class="content-wrapper">
         <p class="head-right">Transactions Table</p>
+    <div class="col-12" >
         <div class="row rm-margin-side">
             <p class="head-left">PERIOD</p>
         </div>
@@ -34,7 +35,7 @@
         <div>
             <div class="row" style="padding-right: 50px;">
                 <div class="fine">
-                    <p class="head-bg head-bg2">Transactions</p>
+                    <p class="head-bg">Transactions</p>
                 </div>
             </div>
             <div class="row scroll">
@@ -71,17 +72,23 @@
                         {% endfor %}
                     </table>
                 </div>
-                {% if has_prev_page %}
-                    <a href="{% url 'transaction:transaction-list' %}?{{ prev_page_qs }}">Prev</a>
-                {% endif %}
+                <div class="pagination-prev">
+                    {% if has_prev_page %}
+                        <a href="{% url 'transaction:transaction-list' %}?{{ prev_page_qs }}" class="button red">Prev</a>
+                    {% endif %}
+                </div>
 
-                {% if has_next_page %}
-                    <a href="{% url 'transaction:transaction-list' %}?{{ next_page_qs }}">Next</a>
-                {% endif %}
+                <div class="pagination-next">
+                    {% if has_next_page %}
+                        <a href="{% url 'transaction:transaction-list' %}?{{ next_page_qs }} " class="button red">Next</a>
+                    {% endif %}
+                </div>
+
 
             </div>
         </div>
         <br>
+    </div>
     </div>
 
     <script>

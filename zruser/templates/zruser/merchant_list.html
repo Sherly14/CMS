@@ -6,6 +6,7 @@
 
     <div class="content-wrapper">
         <p class="head-right">Merchant Table</p>
+    <div class="col-12" >
         <div class="row rm-margin-side">
             <p class="head-left">PERIOD</p>
         </div>
@@ -28,7 +29,7 @@
         <br>
         <div class="row" style="padding-right: 50px;">
             <div class="fine">
-                <p class="head-bg head-bg2">Merchants</p>
+                <p class="head-bg">Merchants</p>
             </div>
         </div>
         <div class="row scroll">
@@ -77,17 +78,20 @@
                 </table>
             </div>
 
-            {% if has_prev_page %}
-                <a href="{% url "user:merchant-list" %}?{{prev_page_qs}}" >Prev</a>
-            {% endif %}
+            <div class="pagination-prev">
+                {% if has_prev_page %}
+                    <a href="{% url "user:merchant-list" %}?{{prev_page_qs}}" class="button red">Prev</a>
+                {% endif %}
+            </div>
 
-            {% if has_next_page %}
-                <a href="{% url "user:merchant-list" %}?{{next_page_qs}}" >Next</a>
-            {% endif %}
-
+            <div class="pagination-next">
+                {% if has_next_page %}
+                    <a href="{% url "user:merchant-list" %}?{{next_page_qs}}" class="button red">Next</a>
+                {% endif %}
+            </div>
         </div>
         <br>
-
+    </div>
     </div>
 
 <script>

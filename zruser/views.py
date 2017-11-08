@@ -5,10 +5,9 @@ import csv
 import datetime
 from urllib import urlencode
 
-from celery import shared_task, task
 from django.conf import settings
 from django.contrib.auth import login, models as dj_auth_models
-from django.core.paginator import EmptyPage, Paginator
+from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
 from django.db import transaction
 from django.db.models import F
 from django.db.models import Q
@@ -236,12 +235,14 @@ def get_report_excel(report_params):
         ('Sub-Distributor  Net Commission', 'sub_dist_net_commission'),
     )
     DOC_HEADERS += merchant_headers
+    is_sub_dist = False
     if report_params.get('user_type') == "SU":
         DOC_HEADERS += distributor_headers
         DOC_HEADERS += sub_distributor_headers
         DOC_HEADERS += (('Zrupee Net Commission', 'admin_net_commission'),)
     elif report_params.get('user_type') == SUBDISTRIBUTOR:
         DOC_HEADERS += sub_distributor_headers
+        is_sub_dist = True
     elif report_params.get('user_type') == DISTRIBUTOR:
         DOC_HEADERS += distributor_headers
         DOC_HEADERS += sub_distributor_headers
@@ -256,14 +257,13 @@ def get_report_excel(report_params):
         page_data = paginator.page(x)
         if x == 1:
             workbook, worksheet_s, last_row = get_excel_doc(
-                page_data.object_list, DOC_HEADERS, report_file_path, page_data.has_next()
+                page_data.object_list, DOC_HEADERS, report_file_path, is_sub_dist, page_data.has_next()
             )
         else:
             workbook, worksheet_s, last_row = update_excel_doc(
                 page_data.object_list, DOC_HEADERS, workbook, worksheet_s, last_row,
                 page_data.has_next())
     return report_file_path
-
 
 
 def mail_report(request):
@@ -393,9 +393,35 @@ class KYCRequestsView(ListView):
     context_object_name = 'kyc_requests'
     paginate_by = 10
 
+    def get_context_data(self, **kwargs):
+        filter_by = self.request.GET.get('filter', 'All')
+        q = self.request.GET.get('q', "")
+
+        context = super(KYCRequestsView, self).get_context_data(**kwargs)
+
+        queryset = self.get_queryset()
+        context['filter_by'] = filter_by
+        context['q'] = q
+        if not queryset:
+            return context
+
+        paginator = Paginator(queryset, self.paginate_by)
+        page = self.request.GET.get('page', 1)
+
+        try:
+            queryset = paginator.page(page)
+        except PageNotAnInteger:
+            queryset = paginator.page(1)
+
+        context['page_obj'] = queryset
+
+        return context
+
     def get_queryset(self):
         approve = self.request.GET.get('approve')
         reject = self.request.GET.get('approve')
+        filter_by = self.request.GET.get('filter', 'All')
+        q = self.request.GET.get('q')
 
         if approve or reject:
             if not ZrUser.objects.filter(id=approve or reject).last():
@@ -419,15 +445,30 @@ class KYCRequestsView(ListView):
                     zruser.pass_word = password
                     zruser.save(update_fields=['pass_word'])
 
-                    dj_user = zruser.zr_user.id
-                    dj_user.set_password(password)
-                    dj_user.save()
+                    if zruser.role.name != MERCHANT:
+                        dj_user = zruser.zr_user.id
+                        dj_user.set_password(password)
+                        dj_user.save()
 
                     zruser.send_welcome_email(password)
 
         queryset = ZrUser.objects.filter(
             is_kyc_verified=False
         ).order_by('-at_created')
+        if filter_by == "Last-Week":
+            queryset = queryset.filter(at_created__range=last_week_range())
+        elif filter_by == "Last-Month":
+            queryset = queryset.filter(at_created__range=last_month())
+        elif filter_by == "Today":
+            queryset = queryset.filter(at_created__date__gte=datetime.date.today())
+
+        if q:
+            # added search from mobile number of user
+            query = Q(
+                mobile_no__contains=q
+            )
+            queryset = queryset.filter(query)
+
         return queryset
 
 
@@ -464,6 +505,9 @@ def get_sub_distributor_qs(request):
             queryset = request.user.zr_admin_user.zr_user.sub_dist_dist_mappings.order_by('-at_created')
         except:
             pass
+
+    if is_user_superuser(request):
+        queryset = zrmappings_models.DistributorSubDistributor.objects.order_by('-at_created')
 
     q = request.GET.get('q')
     filter = request.GET.get('filter')
@@ -997,6 +1041,27 @@ class MerchantCreateView(View):
 
         zrwallet_models.Wallet.objects.create(merchant=merchant_zr_user)
         return HttpResponseRedirect(reverse("user:merchant-list"))
+
+
+def download_sub_distributor_list_csv(request):
+    sub_distributor_mapping_qs = get_sub_distributor_qs(request)  # get_distributor_qs(request)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="subdistributors.csv"'
+    writer = csv.writer(response)
+    writer.writerow([
+        'Sub Distributor Id', 'Sub Distributor Name', 'DOJ', 'Mobile', 'Email', 'Status'
+    ])
+    for sub_distributor_map_item in sub_distributor_mapping_qs:
+        writer.writerow([
+            sub_distributor_map_item.sub_distributor.id,
+            sub_distributor_map_item.sub_distributor.first_name,
+            sub_distributor_map_item.at_created,
+            sub_distributor_map_item.sub_distributor.mobile_no,
+            sub_distributor_map_item.sub_distributor.email,
+            'Active' if sub_distributor_map_item.is_active else 'Inactive'
+        ])
+
+    return response
 
 
 class SubDistributorCreateView(CreateView):

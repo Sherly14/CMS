@@ -9,8 +9,9 @@
             padding-left: 25px;
         }
     </style>
+
     <div class="content-wrapper">
-        <p class="head-right">Payment Request Sent</p>
+        <p class="head-right">Payments Table</p>
         <div class="col-12" >
             <div class="row rm-margin-side">
                 <p class="head-left">Date</p>
@@ -27,69 +28,47 @@
                         <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
                     </div>
                     <input type="button" id="search-btn" class="button red" value="Search">
-                    <a href='{% url "payment-requests:payment-request-sent-view" %}' >Reset filters</a>
+                    <a href='{% url 'payment-requests:payment-list' %}' >Reset filters</a>
                     <input class="button red" type="button" value="DOWNLOAD CSV" id="download-csv" >
                     {% csrf_token %}
                     <input type="hidden" id="request_id" value="">
                 </div>
             </div>
             <br>
-            <div style="">
-                <div class="row" style="padding-right: 50">
+            <div>
+                <div class="row" style="padding-right: 50px;">
                     <div class="fine">
                         <p class="head-bg">New Requests</p>
                     </div>
                 </div>
                 <div class="row scroll">
 
-                    <div style="width: 100%; overflow: scroll;">
+                    <div style="width: 100%;     overflow: scroll;">
                         <table>
                             <tr style="border-bottom-style: solid;">
-                                <th>Status</th>
-                                <th>Date</th>
+                                <th>Mode</th>
                                 <th>Amount</th>
-                                <th>DMT Amount</th>
-                                <th>NON DMT Amount</th>
-                                <th>Payment Mode</th>
-                                <th>Challan document</th>
-                                <th>To User Name</th>
-                                <th>From Bank Account Number</th>
-                                <th>To Bank Account Number</th>
-                                <th>From bank</th>
-                                <th>To bank</th>
-                                <th>Ref Id</th>
+                                <th>txn_id</th>
+                                <th>vendor_txn_id</th>
+                                <th>customer</th>
+                                <th>user</th>
+                                <th>transaction_request_json</th>
+                                <th>transaction_response_json</th>
+                                <th>additional_charges</th>
+                                <th>is_settled</th>
                             </tr>
-                            {% for payment_request in page_obj %}
+                            {% for payment in payment_list %}
                                 <tr>
-                                    <td>
-                                        {% if payment_request.status == 0 %}
-                                            Pending
-                                        {% elif payment_request.status == 1 %}
-                                            Accepted
-                                        {% elif payment_request.status == 3 %}
-                                            Refund
-                                        {% else %}
-                                            Rejected
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ payment_request.at_created }}</td>
-                                    <td>{{ payment_request.amount }}</td>
-                                    <td>{{ payment_request.dmt_amount }}</td>
-                                    <td>{{ payment_request.non_dmt_amount }}</td>
-                                    <td>{{ payment_request.payment_mode }}</td>
-                                    <td><a href="{{ payment_request.document }}">Download</a></td>
-                                    <td>
-                                        {% if payment_request.to_user.role.name == 'ADMINSTAFF' %}
-                                            ADMIN
-                                        {% else %}
-                                            {{ payment_request.to_user.get_full_name }}
-                                        {% endif %}
-                                    </td>
-                                    <td>{{ payment_request.from_account_no }}</td>
-                                    <td>{{ payment_request.to_account_no }}</td>
-                                    <td>{{ payment_request.from_bank.bank_name }}</td>
-                                    <td>{{ payment_request.to_bank.bank_name }}</td>
-                                    <td>{{ payment_request.ref_no|default_if_none:"N/A" }}</td>
+                                    <td>{{ payment.mode }}</td>
+                                    <td>{{ payment.amount }}</td>
+                                    <td>{{ payment.txn_id }}</td>
+                                    <td>{{ payment.vendor_txn_id }}</td>
+                                    <td>{{ payment.customer }}</td>
+                                    <td>{{ payment.user }}</td>
+                                    <td>{{ payment.transaction_request_json }}</td>
+                                    <td>{{ payment.transaction_response_json }}</td>
+                                    <td>{{ payment.additional_charges }}</td>
+                                    <td>{{ payment.is_settled }}</td>
                                 </tr>
                             {% endfor %}
                         </table>
@@ -103,24 +82,24 @@
                                     </span>
                                     {% if page_obj.has_previous %}
                                         {% if filter_by and q %}
-                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}">previous</a>
+                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}">previous</a>
                                         {% elif q %}
-                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}&q={{ q }}">previous</a>
+                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.previous_page_number }}&q={{ q }}">previous</a>
                                         {% elif filter_by %}
-                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}">previous</a>
+                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}">previous</a>
                                         {% else %}
-                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}">previous</a>
+                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.previous_page_number }}">previous</a>
                                         {% endif %}
                                     {% endif %}
                                     {% if page_obj.has_next %}
                                         {% if filter_by and q %}
-                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}">next</a>
+                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}">next</a>
                                         {% elif q %}
-                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}&q={{ q }}">next</a>
+                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.next_page_number }}&q={{ q }}">next</a>
                                         {% elif filter_by %}
-                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}&filter={{ filter_by }}">next</a>
+                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}">next</a>
                                         {% else %}
-                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}">next</a>
+                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.next_page_number }}">next</a>
                                         {% endif %}
                                     {% endif %}
                                 </span>
@@ -144,7 +123,7 @@
                 </h3>
             </div>
             <div class="modal-body text-dark text-center">
-                Are you sure want to Approve payment request?
+                Are you sure want to Approve payment request ?
             </div>
             <div class="modal-footer btn-block-group" style="align-self: center;">
                 <div class="modal-footer" style="text-align:center">
@@ -156,10 +135,35 @@
         </form>
     </div>
     </div>
+
+
+    <div id="confirm_refund" class="modal fade" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+        <form class="modal-content">
+            <div class="modal-header text-center">
+                <h3 class="modal-title">
+                    Payment Revoke
+                </h3>
+            </div>
+            <div class="modal-body text-dark text-center">
+                Are you sure want to Revoke payment request?
+            </div>
+            <div class="modal-footer btn-block-group" style="align-self: center;">
+                <div class="modal-footer" style="text-align:center">
+                    <button type="button" id="confirm_refund_btn" class="btn btn-primary btn-small max-225 confirm_refund_btn" loading-text="Yes">Yes
+                    </button>
+                    <button type="button" class="btn btn-default btn-small max-225" data-dismiss="modal">No</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    </div>
     <!-- /.modal -->
 
     <!-- Modal HTML Markup -->
-    <div id="confirm_reject" class="modal fade" data-backdrop="static">
+    <div id="confirm_reject" class="modal fade" data-backdrop="static" style="margin: 0 20px;
+    padding: 5px;
+    line-height: 20px;">
         <div class="modal-dialog" role="document">
         <form class="modal-content">
             <div class="modal-header text-center">
@@ -185,6 +189,7 @@
     <!-- /.modal -->
 
 <script>
+    window.current_payment_request = null
     $('#search-btn').click(function(){
         search = $('#search-txt').val();
         {% if filter_by %}
@@ -207,5 +212,32 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
-{% endblock extrascripts %}
+    <script>
+     // using jQuery
+        var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
 
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+        $("#timespan-filter").change(
+            function() {
+                var input = document.getElementById("timespan-filter");
+                url = "{{ request.path }}?filter=" + input.value;
+                {% if q %}
+                    url += "&q={{ q }}";
+                {% endif %}
+                window.location = url
+            }
+        );
+
+    </script>
+{% endblock extrascripts %}

@@ -6,77 +6,81 @@
 
     <div class="content-wrapper">
         <p class="head-right">Distributor Table</p>
-        <div class="row rm-margin-side">
-            <p class="head-left">PERIOD</p>
-        </div>
-        <div class="row">
-            <div class="d-flex justify-content-between" style="width:90%">
-                <select id="period">
-                    <option value="All" {% if filter_by == "All" %}selected{% endif %}>All</option>
-                    <option value="Today" {% if filter_by == "Today" %}selected{% endif %}>Today</option>
-                    <option value="Last Week" {% if filter_by == "Last-Week" %}selected{% endif %}>Last Week</option>
-                    <option value="Last Month" {% if filter_by == "Last-Month" %}selected{% endif %}>Last Month</option>
-                </select>
+        <div class="col-12" >
+            <div class="row rm-margin-side">
+                <p class="head-left">PERIOD</p>
+            </div>
+            <div class="row">
+                <div class="d-flex justify-content-between" style="width:90%">
+                    <select id="period">
+                        <option value="All" {% if filter_by == "All" %}selected{% endif %}>All</option>
+                        <option value="Today" {% if filter_by == "Today" %}selected{% endif %}>Today</option>
+                        <option value="Last Week" {% if filter_by == "Last-Week" %}selected{% endif %}>Last Week</option>
+                        <option value="Last Month" {% if filter_by == "Last-Month" %}selected{% endif %}>Last Month</option>
+                    </select>
 
-                <div style="position: relative;">
-                    <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                    <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                    <div style="position: relative;">
+                        <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                        <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                    </div>
+                    <input class="button red" type="button" value="Search" id="search-btn">
+                    <a class="nav-link" href="{% url 'user:distributor-list' %}">Reset filters</a>
+                    <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
                 </div>
-                <input class="button red" type="button" value="Search" id="search-btn">
-                <a class="nav-link" href="{% url 'user:distributor-list' %}">Reset filters</a>
-                <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
             </div>
-        </div>
-        <br>
-        <div class="row" style="padding-right: 50px;">
-            <div class="fine">
-                <p class="head-bg head-bg2">List of Distributors</p>
+            <br>
+            <div class="row" style="padding-right: 50px;">
+                <div class="fine">
+                    <p class="head-bg">List of Distributors</p>
+                </div>
             </div>
-        </div>
-        <div class="row scroll">
+            <div class="row scroll">
 
-            <div style="width: 100%;">
-                <table>
-                    <tr>
-                        <th>Distributor Id</th>
-                        <th>Distributor Name</th>
-                        <th>DOJ</th>
-                        <th>Mobile No</th>
-                        <th>Email</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                    {% for distributor in queryset %}
+                <div style="width: 100%;">
+                    <table>
                         <tr>
-                            <td>{{ distributor.id }}</td>
-                            <td>{{ distributor.first_name }} {{ distributor.last_name|default_if_none:""}}</td>
-                            <td>{{ distributor.at_created }}</td>
-                            <td>{{ distributor.mobile_no }}</td>
-                            <td>{{ distributor.email }}</td>
-                            <td>{% if distributor.is_active %}Active{% else %}Inactive{% endif %}</td>
-                            <td>
-                                {% if distributor.is_active %}
-                                    <a href='{% url "user:distributor-list" %}?disable={{ distributor.id }}'>Disable</a>
-                                {% else %}
-                                    <a href='{% url "user:distributor-list" %}?activate={{ distributor.id }}'>Activate</a>
-                                {% endif %}
-                            </td>
+                            <th>Distributor Id</th>
+                            <th>Distributor Name</th>
+                            <th>DOJ</th>
+                            <th>Mobile No</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Actions</th>
                         </tr>
+                        {% for distributor in queryset %}
+                            <tr>
+                                <td>{{ distributor.id }}</td>
+                                <td>{{ distributor.first_name }} {{ distributor.last_name|default_if_none:""}}</td>
+                                <td>{{ distributor.at_created }}</td>
+                                <td>{{ distributor.mobile_no }}</td>
+                                <td>{{ distributor.email }}</td>
+                                <td>{% if distributor.is_active %}Active{% else %}Inactive{% endif %}</td>
+                                <td>
+                                    {% if distributor.is_active %}
+                                        <a href='{% url "user:distributor-list" %}?disable={{ distributor.id }}'>Disable</a>
+                                    {% else %}
+                                        <a href='{% url "user:distributor-list" %}?activate={{ distributor.id }}'>Activate</a>
+                                    {% endif %}
+                                </td>
+                            </tr>
 
-                    {% endfor %}
-                </table>
+                        {% endfor %}
+                    </table>
+                </div>
+                <div class="pagination-prev">
+                {% if has_prev_page %}
+                    <a href="{% url "user:distributor-list" %}?{{prev_page_qs}}" class="button red" >Prev</a>
+                {% endif %}
+                </div>
+
+                <div class="pagination-next">
+                    {% if has_next_page %}
+                        <a href="{% url "user:distributor-list" %}?{{next_page_qs}}" class="button red" >Next</a>
+                    {% endif %}
+                </div>
             </div>
-
-            {% if has_prev_page %}
-                <a href="{% url "user:distributor-list" %}?{{prev_page_qs}}" >Prev</a>
-            {% endif %}
-
-            {% if has_next_page %}
-                <a href="{% url "user:distributor-list" %}?{{next_page_qs}}" >Next</a>
-            {% endif %}
-
+            <br>
         </div>
-        <br>
 
     </div>
 
