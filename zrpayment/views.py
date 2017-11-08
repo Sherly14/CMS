@@ -497,7 +497,7 @@ def get_payment_qs(request):
 
 class PaymentListView(ListView):
     context_object_name = 'payment_list'
-    paginate_by = 1
+    paginate_by = 10
 
     def get_context_data(self, **kwargs):
         filter_by = self.request.GET.get('filter', 'all')
