@@ -386,6 +386,39 @@ def merchant_payment_req_csv_download(request):
     return response
 
 
+def payments_csv_download(request):
+    qs = get_payment_qs(request)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="payments.csv"'
+    writer = csv.writer(response)
+    writer.writerow([
+        "Mode",
+        "Amount",
+        "Transaction Id",
+        "Vendor Transaction Id",
+        "Customer",
+        "User",
+        "Additional Charges",
+        "Settled",
+    ])
+
+    for payment_req in qs:
+        writer.writerow(
+            [
+                payment_req.mode,
+                payment_req.amount,
+                payment_req.txn_id,
+                payment_req.vendor_txn_id,
+                payment_req.customer,
+                payment_req.user,
+                payment_req.additional_charges,
+                payment_req.settled,
+            ]
+        )
+
+    return response
+
+
 class PaymentRequestListView(ListView):
     context_object_name = 'payment_request_list'
     template_name = 'payment_request_list.html'
@@ -442,9 +475,9 @@ def get_payment_qs(request):
         queryset = Payments.objects.filter(user=request.user.zr_admin_user.zr_user)
     if q:
         query = Q(
-            txn_id=q
+            txn_id__contains=q
         ) | Q(
-            vendor_txn_id=q
+            vendor_txn_id__contains=q
         ) | Q(
             customer__contains=q
         ) | Q(
@@ -467,7 +500,7 @@ class PaymentListView(ListView):
     paginate_by = 1
 
     def get_context_data(self, **kwargs):
-        filter_by = self.request.GET.get('filter')
+        filter_by = self.request.GET.get('filter', 'all')
         q = self.request.GET.get('q')
 
         context = super(PaymentListView, self).get_context_data(**kwargs)

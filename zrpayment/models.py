@@ -152,3 +152,9 @@ class Payments(RowInfo):
     transaction_response_json = JSONField(default={})
     additional_charges = models.DecimalField(decimal_places=3, default=0.00, max_digits=10)
     is_settled = models.BooleanField(default=False)
+
+    @property
+    def settled(self):
+        if self.is_settled:
+            return "Yes"
+        return "No"
