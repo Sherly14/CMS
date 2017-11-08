@@ -5,7 +5,6 @@ from zrpayment.models import Payments
 def poll_transaction_status_for_refund():
     payments = Payments.objects.all()
     # TODO: define status field in Payments model
-    # payments = Payments.objects.filter(status='P')
     print 'polling payments status for queryset ', payments
 
     for payment_obj in payments:
@@ -13,6 +12,7 @@ def poll_transaction_status_for_refund():
         if response:
             try:
                 payment_obj.status = response['status']
+                payment_obj.transaction_response_json = response
                 payment_obj.save()
             except:
                 pass
