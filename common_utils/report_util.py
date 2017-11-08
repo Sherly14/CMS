@@ -28,7 +28,7 @@ class incrementClass():
         return self.val
 
 
-def get_excel_doc(obj, header_dsiplay,report_file_path, has_next=False):
+def get_excel_doc(obj, header_dsiplay,report_file_path, has_next=False, user_type=None):
     # output = BytesIO()
     workbook = xlsxwriter.Workbook(report_file_path)
     worksheet_s = workbook.add_worksheet("Summary")
@@ -71,7 +71,8 @@ def get_excel_doc(obj, header_dsiplay,report_file_path, has_next=False):
     worksheet_s.merge_range('Q1:U1', 'Merchant', title)
     worksheet_s.merge_range('V1:Y1', 'Distributor', title)
     worksheet_s.merge_range('Z1:AC1', 'Sub-Distributor', title)
-    worksheet_s.write(0, 12, 'Zrupee', cell)
+    if user_type == 'SU':
+        worksheet_s.merge_range('AD1:AE1', 'Zrupee', cell)
 
     i = incrementClass(val=-1)
     for key, value in header_dsiplay:

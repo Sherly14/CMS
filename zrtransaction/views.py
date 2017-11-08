@@ -28,13 +28,15 @@ class TransactionsDetailView(DetailView):
 
 def get_transactions_qs_with_dict(report_params):
     q = report_params.get('q', "")
-    q_obj = Q(
-        user__first_name__contains=q
-    ) | Q(
-        user__last_name__contains=q
-    ) | Q(
-        user__mobile_no__contains=q
-    )
+    q_obj = Q()
+    if q:
+        q_obj = Q(
+            user__first_name__contains=q
+        ) | Q(
+            user__last_name__contains=q
+        ) | Q(
+            user__mobile_no__contains=q
+        )
 
     p_filter = report_params.get('filter', 'All')
     if p_filter == 'All':

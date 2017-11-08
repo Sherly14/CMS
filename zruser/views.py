@@ -255,7 +255,8 @@ def get_report_excel(report_params):
         page_data = paginator.page(x)
         if x == 1:
             workbook, worksheet_s, last_row = get_excel_doc(
-                page_data.object_list, DOC_HEADERS, report_file_path, page_data.has_next()
+                page_data.object_list, DOC_HEADERS, report_file_path, page_data.has_next(),
+                user_type=report_params.get('user_type')
             )
         else:
             workbook, worksheet_s, last_row = update_excel_doc(
@@ -392,7 +393,34 @@ class KYCRequestsView(ListView):
     context_object_name = 'kyc_requests'
     paginate_by = 10
 
+    def get_context_data(self, **kwargs):
+        filter_by = self.request.GET.get('filter', 'All')
+        q = self.request.GET.get('q', "")
+
+        context = super(KYCRequestsView, self).get_context_data(**kwargs)
+
+        queryset = self.get_queryset()
+        context['filter_by'] = filter_by
+        context['q'] = q
+        if not queryset:
+            return context
+
+        paginator = Paginator(queryset, self.paginate_by)
+        page = self.request.GET.get('page', 1)
+
+        try:
+            queryset = paginator.page(page)
+        except PageNotAnInteger:
+            queryset = paginator.page(1)
+
+        context['page_obj'] = queryset
+
+        return context
+
     def get_queryset(self):
+        filter_by = self.request.GET.get('filter', 'All')
+        q = self.request.GET.get('q')
+
         approve = self.request.GET.get('approve')
         reject = self.request.GET.get('approve')
 
@@ -428,6 +456,20 @@ class KYCRequestsView(ListView):
         queryset = ZrUser.objects.filter(
             is_kyc_verified=False
         ).order_by('-at_created')
+        if filter_by == "Last-Week":
+            queryset = queryset.filter(at_created__range=last_week_range())
+        elif filter_by == "Last-Month":
+            queryset = queryset.filter(at_created__range=last_month())
+        elif filter_by == "Today":
+            queryset = queryset.filter(at_created__date__gte=datetime.date.today())
+
+        if q:
+            # added search from mobile number of user
+            query = Q(
+                mobile_no__contains=q
+            )
+            queryset = queryset.filter(query)
+
         return queryset
 
 
