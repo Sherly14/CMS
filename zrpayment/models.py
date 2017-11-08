@@ -133,6 +133,7 @@ class Payments(RowInfo):
     REFUND_PENDING = 'Refund Pending'
     REFUNDED = 'Refunded'
     EXPIRED = 'Expired'
+    SPAM = 'Spam'
 
     status = (
         ('P', PENDING),
@@ -140,7 +141,8 @@ class Payments(RowInfo):
         ('F', FAILURE),
         ('RP', REFUND_PENDING),
         ('R', REFUNDED),
-        ('E', EXPIRED)
+        ('E', EXPIRED),
+        ('SP', SPAM),
     )
     status = models.CharField(choices=status, max_length=3, default=status[0][0])
     vendor = models.ForeignKey(to='zrtransaction.Vendor', null=True, blank=True)
