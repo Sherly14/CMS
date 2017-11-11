@@ -7,7 +7,7 @@ from urllib import urlencode
 
 from django.conf import settings
 from django.contrib.auth import login, models as dj_auth_models
-from django.core.paginator import EmptyPage, Paginator
+from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
 from django.db import transaction
 from django.db.models import F
 from django.db.models import Q
@@ -265,7 +265,6 @@ def get_report_excel(report_params):
     return report_file_path
 
 
-
 def mail_report(request):
     email_list = request.POST.get('email', '').split(",")
     if is_user_superuser(request):
@@ -466,6 +465,10 @@ class KYCRequestsView(ListView):
         if q:
             # added search from mobile number of user
             query = Q(
+                first_name__icontains=q
+            ) | Q(
+                last_name__icontains=q
+            ) | Q(
                 mobile_no__contains=q
             )
             queryset = queryset.filter(query)

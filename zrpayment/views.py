@@ -13,7 +13,6 @@ from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
-from django.http import Http404
 from rest_framework import serializers
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -66,8 +65,8 @@ class GeneratePaymentRequestView(APIView):
         data["from_user"] = request.user.zr_admin_user.zr_user.id
         main_distributor = None
         error_message = '{0} {1} {2}'.format(ERROR_MESSAGE_START,
-                                       "Something went wrong, please try again",
-                                       MESSAGE_END)
+                                             "Something went wrong, please try again",
+                                             MESSAGE_END)
 
         if request.user.zr_admin_user.role.name == user_map.DISTRIBUTOR:
             main_distributor = get_main_admin()
@@ -85,8 +84,8 @@ class GeneratePaymentRequestView(APIView):
         if serializer.is_valid():
             serializer.save()
             success_message = '{0} {1} {2}'.format(SUCCESS_MESSAGE_START,
-                                                 "Payment request sent successfully",
-                                                 MESSAGE_END)
+                                                   "Payment request sent successfully",
+                                                   MESSAGE_END)
 
             response_data = {
                 "responser": serializer.data,
@@ -200,8 +199,8 @@ class AcceptPaymentRequestView(APIView):
 
                     balance_insufficient = []
                     if (
-                        supervisor_wallet.dmt_balance >= payment_request.dmt_amount and
-                        supervisor_wallet.non_dmt_balance >= payment_request.non_dmt_amount
+                                    supervisor_wallet.dmt_balance >= payment_request.dmt_amount and
+                                    supervisor_wallet.non_dmt_balance >= payment_request.non_dmt_amount
                     ):
                         # For DMT
                         zr_wallet.dmt_balance += payment_request.dmt_amount
@@ -288,7 +287,7 @@ class RejectPaymentRequestView(APIView):
         return Response({"message": message, 'success': True}, status=status.HTTP_200_OK)
 
 
-def get_payment_request_qs(request, from_user=False, all_user=False, all_req=False):
+def get_payment_request_qs(request, from_user=False, to_user=False, all_user=False, all_req=False):
     filter_by = request.GET.get('filter')
     q = request.GET.get('q')
 
@@ -315,19 +314,19 @@ def get_payment_request_qs(request, from_user=False, all_user=False, all_req=Fal
     if q:
         if from_user:
             query = Q(
-                to_user__first_name__contains=q
+                to_user__first_name__icontains=q
             ) | Q(
-                to_user__last_name__contains=q
+                to_user__last_name__icontains=q
             ) | Q(
                 to_user__mobile_no__contains=q
             )
-        else:
+        elif to_user:
             query = Q(
-                from_user__first_name__contains=q
+                to_user__first_name__icontains=q
             ) | Q(
-                from_user__last_name__contains=q
+                to_user__last_name__icontains=q
             ) | Q(
-                from_user__mobile_no__contains=q
+                to_user__mobile_no__contains=q
             )
         queryset = queryset.filter(query)
 
@@ -429,7 +428,7 @@ class PaymentRequestListView(ListView):
         return context
 
     def get_queryset(self):
-        return get_payment_request_qs(self.request)
+        return get_payment_request_qs(self.request, from_user=True, to_user=True)
 
 
 class PaymentRequestSentListView(ListView):
