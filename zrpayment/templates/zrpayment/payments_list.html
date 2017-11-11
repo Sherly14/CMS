@@ -29,7 +29,7 @@
                         <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
                     </div>
                     <input type="button" id="search-btn" class="button red" value="Search">
-                    <a href='{% url 'payment-requests:payment-list' %}' >Reset filters</a>
+                    <a href="{% url 'payment-requests:payment-list' %}" >Reset filters</a>
                     <input class="button red" type="button" value="DOWNLOAD CSV" id="download-csv">
                     {% csrf_token %}
                     <input type="hidden" id="request_id" value="">
@@ -47,7 +47,9 @@
                     <div style="width: 100%;     overflow: scroll;">
                         <table>
                             <tr style="border-bottom-style: solid;">
+                                <th>Merchant it</th>
                                 <th>Mode</th>
+                                <th>Vendor</th>
                                 <th>Amount</th>
                                 <th>Transaction Id</th>
                                 <th>Vendor Transaction Id</th>
@@ -58,7 +60,9 @@
                             </tr>
                             {% for payment in payment_list %}
                                 <tr>
+                                    <td>{{ payment.merchant.id|default:"N/A" }}</td>
                                     <td>{{ payment.mode }}</td>
+                                    <td>{{ payment.vendor.name|default:"N/A" }}</td>
                                     <td>{{ payment.amount }}</td>
                                     <td>{{ payment.txn_id }}</td>
                                     <td>{{ payment.vendor_txn_id }}</td>

@@ -392,6 +392,7 @@ def payments_csv_download(request):
     response['Content-Disposition'] = 'attachment; filename="payments.csv"'
     writer = csv.writer(response)
     writer.writerow([
+        "Vendor Id",
         "Mode",
         "Amount",
         "Transaction Id",
@@ -405,6 +406,7 @@ def payments_csv_download(request):
     for payment_req in qs:
         writer.writerow(
             [
+                payment_req.vendor.id if payment_req.vendor else 'N/A',
                 payment_req.mode,
                 payment_req.amount,
                 payment_req.txn_id,
@@ -479,9 +481,17 @@ def get_payment_qs(request):
         ) | Q(
             vendor_txn_id__contains=q
         ) | Q(
+            vendor__id__contains=q
+        ) | Q(
             customer__contains=q
         ) | Q(
+            vendor__name__icontains=q
+        ) | Q(
             user__mobile_no__contains=q
+        ) | Q(
+            user__first_name__icontains=q
+        ) | Q(
+            user__last_name__icontains=q
         )
         queryset = queryset.filter(query)
 
