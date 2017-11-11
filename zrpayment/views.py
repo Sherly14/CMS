@@ -341,7 +341,7 @@ def get_payment_request_qs(request, from_user=False, to_user=False, all_user=Fal
 
 
 def merchant_payment_req_csv_download(request):
-    qs = get_payment_request_qs(request)
+    qs = get_payment_request_qs(request, all_user=True)
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="payment-requests.csv"'
     writer = csv.writer(response)
