@@ -419,9 +419,6 @@ class KYCRequestsView(ListView):
         return context
 
     def get_queryset(self):
-        filter_by = self.request.GET.get('filter', 'All')
-        q = self.request.GET.get('q')
-
         approve = self.request.GET.get('approve')
         reject = self.request.GET.get('approve')
         filter_by = self.request.GET.get('filter', 'All')
