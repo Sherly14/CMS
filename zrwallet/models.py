@@ -71,6 +71,7 @@ class Passbook(RowInfo):
     dmt_wallet_debit = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     dmt_closing_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     dmt_closing_wallet_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+
     non_dmt_opening_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     non_dmt_opening_wallet_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     non_dmt_wallet_credit = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
