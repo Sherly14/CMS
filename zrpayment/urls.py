@@ -4,6 +4,8 @@ from zrpayment import views as zr_payment_views
 
 urlpatterns = [
     url(r'^$', zr_payment_views.PaymentRequestListView.as_view(), name='payment-request-list'),
+    url(r'^payments/$', zr_payment_views.PaymentListView.as_view(), name='payment-list'),
+    url(r'^payments-csv/$', zr_payment_views.payments_csv_download, name='payments-csv'),
     url(r'^merchant-payment-req-csv/$', zr_payment_views.merchant_payment_req_csv_download, name='payment-request-csv'),
     url(r'^payment-request-sent/$', zr_payment_views.PaymentRequestSentListView.as_view(), name='payment-request-sent-view'),
     url(r'^refund-request/$', zr_payment_views.RefundRequestView.as_view(), name='refund-request-view'),

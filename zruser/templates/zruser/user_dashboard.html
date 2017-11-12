@@ -12,7 +12,7 @@
             <div class="row">
                 <div class="col-xl-3 col-sm-6 mb-3">
                     <div class="period">PERIOD</div>
-                    <a href="{% url "user:dashboard" %}">Reset filters</a>
+                    <a href="{% url 'user:dashboard' %}">Reset filters</a>
                     <div>
                         <div class="d-flex justify-content-between">
                             <input class="button yellow resize" type="button" value="Today" id="today">
@@ -347,7 +347,6 @@
                 </div>
                 <div class="modal-body">
 
-                    <div id="modal_message" tabindex='1'></div>
                     <form class="form-horizontal" method="POST" id="report_mail_form" enctype="multipart/form-data">
                         {% csrf_token %}
                         <input hidden name="period" value="{{ request.GET.period }}">

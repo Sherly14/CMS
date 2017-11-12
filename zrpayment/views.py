@@ -5,15 +5,17 @@ import csv
 import datetime
 import decimal
 import json
+import random
+import string
 
+from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger
 from django.db.models import Q
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
-from django.http import Http404
 from rest_framework import serializers
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -24,7 +26,7 @@ from common_utils.date_utils import last_month, last_week_range
 from common_utils.transaction_utils import get_distributor_from_sub_distributor, \
     get_main_admin
 from common_utils.user_utils import is_user_superuser, file_save_s3
-from zrpayment.models import PaymentRequest
+from zrpayment.models import PaymentRequest, Payments
 from zruser import mapping as user_map
 from zrwallet import models as zrwallet_models
 
@@ -66,8 +68,8 @@ class GeneratePaymentRequestView(APIView):
         data["from_user"] = request.user.zr_admin_user.zr_user.id
         main_distributor = None
         error_message = '{0} {1} {2}'.format(ERROR_MESSAGE_START,
-                                       "Something went wrong, please try again",
-                                       MESSAGE_END)
+                                             "Something went wrong, please try again",
+                                             MESSAGE_END)
 
         if request.user.zr_admin_user.role.name == user_map.DISTRIBUTOR:
             main_distributor = get_main_admin()
@@ -85,8 +87,8 @@ class GeneratePaymentRequestView(APIView):
         if serializer.is_valid():
             serializer.save()
             success_message = '{0} {1} {2}'.format(SUCCESS_MESSAGE_START,
-                                                 "Payment request sent successfully",
-                                                 MESSAGE_END)
+                                                   "Payment request sent successfully",
+                                                   MESSAGE_END)
 
             response_data = {
                 "responser": serializer.data,
@@ -200,8 +202,8 @@ class AcceptPaymentRequestView(APIView):
 
                     balance_insufficient = []
                     if (
-                        supervisor_wallet.dmt_balance >= payment_request.dmt_amount and
-                        supervisor_wallet.non_dmt_balance >= payment_request.non_dmt_amount
+                                    supervisor_wallet.dmt_balance >= payment_request.dmt_amount and
+                                    supervisor_wallet.non_dmt_balance >= payment_request.non_dmt_amount
                     ):
                         # For DMT
                         zr_wallet.dmt_balance += payment_request.dmt_amount
@@ -288,7 +290,7 @@ class RejectPaymentRequestView(APIView):
         return Response({"message": message, 'success': True}, status=status.HTTP_200_OK)
 
 
-def get_payment_request_qs(request, from_user=False, all_user=False, all_req=False):
+def get_payment_request_qs(request, from_user=False, to_user=False, all_user=False, all_req=False):
     filter_by = request.GET.get('filter')
     q = request.GET.get('q')
 
@@ -313,22 +315,19 @@ def get_payment_request_qs(request, from_user=False, all_user=False, all_req=Fal
                 to_user=request.user.zr_admin_user.zr_user
             ).exclude(from_user=request.user.zr_admin_user.zr_user)
     if q:
-        if from_user:
-            query = Q(
-                to_user__first_name__contains=q
-            ) | Q(
-                to_user__last_name__contains=q
-            ) | Q(
-                to_user__mobile_no__contains=q
-            )
-        else:
-            query = Q(
-                from_user__first_name__contains=q
-            ) | Q(
-                from_user__last_name__contains=q
-            ) | Q(
-                from_user__mobile_no__contains=q
-            )
+        query = Q(
+            to_user__first_name__icontains=q
+        ) | Q(
+            to_user__last_name__icontains=q
+        ) | Q(
+            to_user__mobile_no__contains=q
+        ) | Q(
+            to_user__first_name__icontains=q
+        ) | Q(
+            to_user__last_name__icontains=q
+        ) | Q(
+            to_user__mobile_no__contains=q
+        )
         queryset = queryset.filter(query)
 
     if filter_by == 'last_week':
@@ -342,7 +341,7 @@ def get_payment_request_qs(request, from_user=False, all_user=False, all_req=Fal
 
 
 def merchant_payment_req_csv_download(request):
-    qs = get_payment_request_qs(request)
+    qs = get_payment_request_qs(request, all_user=True)
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="payment-requests.csv"'
     writer = csv.writer(response)
@@ -387,6 +386,66 @@ def merchant_payment_req_csv_download(request):
     return response
 
 
+def get_report_csv(params):
+    qs = get_payment_qs_dict(params)
+    response = HttpResponse(content_type='text/csv')
+    unique_name = datetime.datetime.now().strftime("%d-%m-%YT%H:%M:%S-") + ''.join(
+        random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
+    report_file_path = settings.REPORTS_PATH + "/" + unique_name + ".csv"
+    response['Content-Disposition'] = 'attachment; filename="{}"'.format(report_file_path)
+
+    with open(report_file_path, 'w') as csvfile:
+        writer = csv.writer(csvfile)
+
+        writer.writerow([
+            "Vendor Id",
+            "Mode",
+            "Amount",
+            "Transaction Id",
+            "Vendor Transaction Id",
+            "Customer",
+            "User",
+            "Merchant Id",
+            "Additional Charges",
+            "Settled",
+        ])
+        paginator = Paginator(qs, 1)
+        for x in paginator.page_range:
+            page_data = paginator.page(x)
+            for payment_req in page_data:
+                writer.writerow(
+                    [
+                        payment_req.vendor.id if payment_req.vendor else 'N/A',
+                        payment_req.mode,
+                        payment_req.amount,
+                        payment_req.txn_id,
+                        payment_req.vendor_txn_id,
+                        payment_req.customer,
+                        payment_req.user.get_full_name(),
+                        payment_req.merchant.pk if payment_req.merchant else '',
+                        payment_req.additional_charges,
+                        payment_req.settled,
+                    ]
+                )
+    return report_file_path
+
+
+def payments_csv_download(request):
+    if not (request.user.zr_admin_user.role.name == 'ADMINSTAFF' or is_user_superuser(request)):
+        return JsonResponse({"success": False})
+    email_list = request.POST.get('email', '').split(",")
+    report_params = {
+        "email_list": email_list,
+        "q": request.POST.get('q', ""),
+        "filter": request.POST.get('filter', ""),
+        "period": request.POST.get('period', ""),
+        "user_id": request.user.id,
+    }
+    from zrpayment import tasks as payment_celery_tasks
+    payment_celery_tasks.send_payment_report.apply_async(args=[report_params])
+    return JsonResponse({"success": True})
+
+
 class PaymentRequestListView(ListView):
     context_object_name = 'payment_request_list'
     template_name = 'payment_request_list.html'
@@ -429,7 +488,108 @@ class PaymentRequestListView(ListView):
         return context
 
     def get_queryset(self):
-        return get_payment_request_qs(self.request)
+        return get_payment_request_qs(self.request, from_user=True, to_user=True)
+
+
+def get_payment_qs(request):
+    filter_by = request.GET.get('filter')
+    q = request.GET.get('q')
+    queryset = Payments.objects.all()
+
+    if q:
+        query = Q(
+            txn_id__contains=q
+        ) | Q(
+            vendor_txn_id__contains=q
+        ) | Q(
+            vendor__id__contains=q
+        ) | Q(
+            customer__contains=q
+        ) | Q(
+            vendor__name__icontains=q
+        ) | Q(
+            user__mobile_no__contains=q
+        ) | Q(
+            user__first_name__icontains=q
+        ) | Q(
+            user__last_name__icontains=q
+        )
+        queryset = queryset.filter(query)
+
+    if filter_by == 'last_week':
+        queryset = queryset.filter(at_created__range=last_week_range())
+    elif filter_by == 'last_month':
+        queryset = queryset.filter(at_created__range=last_month())
+    elif filter_by == 'today':
+        queryset = queryset.filter(at_created__date__gte=datetime.date.today())
+
+    return queryset.order_by('-at_created')
+
+
+def get_payment_qs_dict(report_params):
+    filter_by = report_params.get('filter', "")
+    q = report_params.get('q', "")
+
+    queryset = Payments.objects.all()
+    if q:
+        query = Q(
+            customer__icontains=q
+        ) | Q(
+            txn_id__icontains=q
+        ) | Q(
+            merchant__id=q
+        ) | Q(
+            merchant__first_name__icontains=q
+        ) | Q(
+            merchant__last_name__icontains=q
+        )
+        queryset = queryset.filter(query)
+
+    if filter_by == 'last_week':
+        queryset = queryset.filter(at_created__range=last_week_range())
+    elif filter_by == 'last_month':
+        queryset = queryset.filter(at_created__range=last_month())
+    elif filter_by == 'today':
+        queryset = queryset.filter(at_created__date__gte=datetime.date.today())
+
+    return queryset.order_by('-at_created')
+
+
+class PaymentListView(ListView):
+    context_object_name = 'payment_list'
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+        filter_by = self.request.GET.get('filter', 'all')
+        q = self.request.GET.get('q')
+
+        context = super(PaymentListView, self).get_context_data(**kwargs)
+
+        queryset = self.get_queryset()
+        if not queryset:
+            context['filter_by'] = filter_by
+            context['q'] = q
+            return context
+
+        paginator = Paginator(queryset, self.paginate_by)
+        page = self.request.GET.get('page', 1)
+
+        try:
+            queryset = paginator.page(page)
+        except PageNotAnInteger:
+            queryset = paginator.page(1)
+        from django.core.urlresolvers import reverse
+
+        context['main_url'] = reverse('payment-requests:payment-list')
+        context['page_obj'] = queryset
+        context['filter_by'] = filter_by
+        context['q'] = q
+
+        context['is_superuser'] = is_user_superuser(self.request)
+        return context
+
+    def get_queryset(self):
+        return get_payment_qs(self.request)
 
 
 class PaymentRequestSentListView(ListView):
