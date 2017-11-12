@@ -147,6 +147,6 @@ def payments_csv_download(request):
         "user_id": request.user.id,
     }
     from zrwallet import tasks as passbook_celery_tasks
-    passbook_celery_tasks.send_passbook_report(report_params)
-    # passbook_celery_tasks.send_passbook_report.apply_async(args=[report_params])
+    # passbook_celery_tasks.send_passbook_report(report_params)
+    passbook_celery_tasks.send_passbook_report.apply_async(args=[report_params])
     return JsonResponse({"success": True})
