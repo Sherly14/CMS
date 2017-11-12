@@ -1,0 +1,331 @@
+{% extends 'base.html' %}
+
+{% block title %} Payment Requests List {% endblock %}
+
+{% block content %}
+    <style>
+        td {
+            min-width : 100px;
+            padding-left: 25px;
+        }
+    </style>
+
+    <div class="content-wrapper">
+        <p class="head-right">Passbook Table</p>
+        <div class="col-12" >
+            <div class="row rm-margin-side">
+                <p class="head-left">Date</p>
+            </div>
+            <div class="row">
+                <div class="d-flex justify-content-between" style="width:90%">
+                    <select id="timespan-filter" >
+                        <option value="all" {% if filter_by == "all" %} selected {% endif %}>All</option>
+                        <option value="today" {% if filter_by == "today" %} selected {% endif %}>Today</option>
+                        <option value="last_week" {% if filter_by == "last_week" %} selected {% endif %}>Last Week</option>
+                        <option value="last_month" {% if filter_by == "last_month" %} selected {% endif %}>Last Month</option>
+                    </select>
+                    <div style="position: relative;">
+                        <input class="search" id="search-txt" type="search" name="search" value="{% if q %}{{ q }}{% endif %}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                        <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                    </div>
+                    <input type="button" id="search-btn" class="button red" value="Search">
+                    <a href="{{ main_url }}" >Reset filters</a>
+                    <button data-toggle="modal" data-target="#get_email_modal" class="button red">
+                        DOWNLOAD CSV
+                    </button>
+                    {% csrf_token %}
+                    <input type="hidden" id="request_id" value="">
+                </div>
+            </div>
+            <br>
+            <div>
+                <div class="row" style="padding-right: 50px;">
+                    <div class="fine">
+                        <p class="head-bg">New Requests</p>
+                    </div>
+                </div>
+                <div class="row scroll">
+
+                    <div style="width: 100%;     overflow: scroll;">
+                        <table>
+                            <tr style="border-bottom-style: solid;">
+                                <th>User name</th>
+                                <th>Mobile No</th>
+                                <th>DMT opening_balance</th>
+                                <th>DMT opening_wallet_balance</th>
+                                <th>DMT wallet_credit</th>
+                                <th>DMT wallet_debit</th>
+                                <th>DMT closing_balance</th>
+                                <th>DMT closing_wallet_balance</th>
+                                <th>Non DMT opening_balance</th>
+                                <th>Non DMT opening_wallet_balance</th>
+                                <th>Non DMT wallet_credit</th>
+                                <th>Non DMT wallet_debit</th>
+                                <th>Non DMT closing_balance</th>
+                                <th>Non DMT closing_wallet_balance</th>
+                            </tr>
+                            {% for passbook in passbook_list %}
+                                <tr>
+                                    <td>{{ passbook.user.full_name }}</td>
+                                    <td>{{ passbook.user.mobile_no }}</td>
+                                    <td>{{ passbook.dmt_opening_balance }}</td>
+                                    <td>{{ passbook.dmt_opening_wallet_balance }}</td>
+                                    <td>{{ passbook.dmt_wallet_credit }}</td>
+                                    <td>{{ passbook.dmt_wallet_debit }}</td>
+                                    <td>{{ passbook.dmt_closing_balance }}</td>
+                                    <td>{{ passbook.dmt_closing_wallet_balance }}</td>
+                                    <td>{{ passbook.non_dmt_opening_balance }}</td>
+                                    <td>{{ passbook.non_dmt_opening_wallet_balance }}</td>
+                                    <td>{{ passbook.non_dmt_wallet_credit }}</td>
+                                    <td>{{ passbook.non_dmt_wallet_debit }}</td>
+                                    <td>{{ passbook.non_dmt_closing_balance }}</td>
+                                    <td>{{ passbook.non_dmt_closing_wallet_balance }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+
+                        <br />
+                        {% if is_paginated %}
+                            <div class="pagination">
+                                <span class="page-links">
+                                    <span class="page-current">
+                                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                                    </span>
+                                    {% if page_obj.has_previous %}
+                                        {% if filter_by and q %}
+                                            <a href="{{ main_url }}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}">previous</a>
+                                        {% elif q %}
+                                            <a href="{{ main_url }}?page={{ page_obj.previous_page_number }}&q={{ q }}">previous</a>
+                                        {% elif filter_by %}
+                                            <a href="{{ main_url }}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}">previous</a>
+                                        {% else %}
+                                            <a href="{{ main_url }}?page={{ page_obj.previous_page_number }}">previous</a>
+                                        {% endif %}
+                                    {% endif %}
+                                    {% if page_obj.has_next %}
+                                        {% if filter_by and q %}
+                                            <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}">next</a>
+                                        {% elif q %}
+                                            <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&q={{ q }}">next</a>
+                                        {% elif filter_by %}
+                                            <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}">next</a>
+                                        {% else %}
+                                            <a href="{{ main_url }}?page={{ page_obj.next_page_number }}">next</a>
+                                        {% endif %}
+                                    {% endif %}
+                                </span>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                </div>
+                <br>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal to get Email -->
+    <div id="get_email_modal" class="modal fade">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content" style="width: 700px;">
+                <div class="modal-header" style="    background-color: #e2e2e2;">
+                    <h1 class="modal-title" style="font-size: 1.5rem; font-size: 1.5rem;font-weight: bold;line-height: 2rem;padding-left: 12px;">Send report as mail</h1>
+                </div>
+                <div class="modal-body">
+
+                    <form class="form-horizontal" method="POST" id="report_mail_form" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input hidden name="period" value="{{ request.GET.period }}">
+                        <div class="row" style="padding-left: 3rem;padding-top: 25px;">
+                            <div class="form-group col-sm-12">
+                                <label class="control-label"><b>Email list</b></label>
+                                <div>
+                                    <input type="text" class="form-control" placeholder="Comma separated email list" name="email" id="email_list" style="box-shadow: 0px 0px;border-style: solid;" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row container" style="padding-left: 3rem;">
+                            <div class="form-group col-sm-3">
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <button type="submit" id="mail_report" class="pull-right submit_request button red downloadcsv mr-5" style="background-color: red">
+                                    Mail a report
+                                </button>
+                            </div>
+                            <div class="form-group col-sm-3" style=" position: relative;left: 13%;">
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="alert alert-danger" id="alert_msg" style="display:none;">
+                    </div>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+
+<script>
+    window.current_payment_request = null
+    $('#search-btn').click(function(){
+        search = $('#search-txt').val();
+        {% if filter_by %}
+            url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}"
+        {% else %}
+            url = window.location.pathname + "?q=" + $('#search-txt').val()
+        {% endif %}
+        window.location.assign(url)
+    });
+
+</script>
+{% endblock %}
+
+
+{% block extrascripts %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
+    <script>
+     // using jQuery
+        var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+        $("#timespan-filter").change(
+            function() {
+                var input = document.getElementById("timespan-filter");
+                url = "{{ request.path }}?filter=" + input.value;
+                {% if q %}
+                    url += "&q={{ q }}";
+                {% endif %}
+                window.location = url
+            }
+        );
+
+
+    jQuery.validator.addMethod("separated_emails", function(value, element) {
+        if (this.optional(element)) {
+            return true;
+        }
+
+        var mails = value.split(/,|;/);
+        for(var i = 0; i < mails.length; i++) {
+            // taken from the jquery validation internals
+            if (!/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(mails[i])) {
+                return false;
+            }
+        }
+        return true;
+    }, "Please specify a email address or a comma separated list of addresses");
+
+    var report_mail_form = $('#report_mail_form');
+        var report_mail_error = $('.alert-danger', report_mail_form);
+        var report_mail_success = $('.alert-success', report_mail_form);
+        rules = {
+            email: {
+                required: true,
+                separated_emails:true
+            }
+        };
+
+        $('#alert_msg')
+            .hide()
+            .html('');
+        report_mail_form.validate({
+            rules: rules,
+            messages: {
+                "email": {
+                    required: "Email is required to send report"
+                }
+            },
+            invalidHandler: function (event, validator) { //display error alert on form submit
+                report_mail_success.hide();
+                report_mail_error.show();
+            },
+            highlight: function (element) { // hightlight error inputs
+                $(element)
+                    .closest('.form-group').addClass('has-error'); // set error class to the control group
+                $(element)
+                    .closest('.help-block').removeClass('ok'); // display OK icon
+                $(element)
+                    .closest('.control-group').removeClass('success').addClass('error'); // set error class to the control group
+                $(element)
+                    .closest('.form-group').removeClass('has-success').addClass('has-error');
+            },
+            unhighlight: function (element) { // revert the change dony by hightlight
+                $(element)
+                    .closest('.control-group').removeClass('has-error'); // set error class to the control group
+                $(element)
+                    .closest('.form-group').removeClass('has-error').addClass('has-success'); // set error class to the control group
+            },
+            submitHandler: function (form) {
+                <!-- AJAX Call -->
+                $('#modal_message').html("");
+
+                // Create an FormData object
+                var data = new FormData($('#report_mail_form')[0]);
+                $('#submit_request')
+                    .prop('disabled', true)
+                    .addClass('disabled');
+                url = '{% url "payment-requests:payments-csv" %}';
+
+                $.ajax({
+                    type: "POST",
+                    enctype: 'multipart/form-data',
+                    processData: false,
+                    contentType: false,
+                    url: url,
+                    data: data,
+                    success: function (data) {
+                        $('#modal_message').html(data.message);
+                        if(data.success) {
+                            setTimeout(function () {
+                                window.location.reload();
+                            }, 1000);
+                        }
+                        else {
+                            setTimeout(function () {
+                                $('#modal_message').html("");
+                            }, 2000);
+                            $('#submit_request').prop('disabled', false);
+                            $('#submit_request').removeClass('disabled');
+                        }
+                    },
+                    error: function (data) {
+                        $('#modal_message').html(data.message);
+                        $('#submit_request').prop('disabled', false);
+                    }
+                });
+                <!-- AJAX Call -->
+            },
+            success: function (label) {
+                label
+                    .addClass('valid').addClass('help-block ok') // mark the current input as valid and display OK icon
+                    .closest('.control-group').removeClass('error').addClass('success'); // set success class to the control group
+                label
+                    .closest('.form-group').removeClass('has-error').addClass('has-success');
+                $(this)
+                    .closest('.col-md-4').find('.err').hide();
+                $(this)
+                    .closest('.col-md-4').find('.suc').show();
+                label
+                    .closest('.form-group').removeClass('has-error'); // set success class to the control group
+                label
+                    .closest('.form-group').removeClass('has-error'); // set success class to the control group
+
+            },
+            errorPlacement: function (error, element) {
+            }
+        });
+    </script>
+{% endblock extrascripts %}

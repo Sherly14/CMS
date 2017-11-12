@@ -11,10 +11,7 @@ from zruser.models import ZrUser
 from zrutils.common.modelutils import RowInfo
 
 
-# Create your models here.
-
 class Wallet(RowInfo):
-
     # Merchant field is invalid name. It should be user because it can be for all
     # distributors, merchants and sub distributors
     merchant = models.OneToOneField(to=ZrUser, related_name='wallet', primary_key=True)
@@ -36,8 +33,6 @@ class Wallet(RowInfo):
 
         super(Wallet, self).save(*args, **kwargs)
 
-
-# Create your models here.
 
 class WalletTransactions(RowInfo):
     wallet = models.ForeignKey(to=Wallet, related_name='transactions')
@@ -65,3 +60,23 @@ class WalletTransactions(RowInfo):
         self.non_dmt_balance = Decimal(self.non_dmt_balance).quantize(Decimal("0.00"))
 
         super(WalletTransactions, self).save(*args, **kwargs)
+
+
+class Passbook(RowInfo):
+    user = models.ForeignKey(ZrUser)
+
+    dmt_opening_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+    dmt_opening_wallet_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+    dmt_wallet_credit = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+    dmt_wallet_debit = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+    dmt_closing_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+    dmt_closing_wallet_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+    non_dmt_opening_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+    non_dmt_opening_wallet_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+    non_dmt_wallet_credit = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+    non_dmt_wallet_debit = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+    non_dmt_closing_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+    non_dmt_closing_wallet_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+
+    def __unicode__(self):
+        return '%s Passbook' % (self.user.full_name)
