@@ -5,10 +5,13 @@ import csv
 import datetime
 import decimal
 import json
+import random
+import string
 
+from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger
 from django.db.models import Q
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.http import HttpResponse
 from django.http import HttpResponseRedirect
 from django.views.generic.detail import DetailView
@@ -386,37 +389,62 @@ def merchant_payment_req_csv_download(request):
     return response
 
 
-def payments_csv_download(request):
-    qs = get_payment_qs(request)
+def get_report_csv(params):
+    qs = get_payment_qs_dict(params)
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="payments.csv"'
-    writer = csv.writer(response)
-    writer.writerow([
-        "Mode",
-        "Amount",
-        "Transaction Id",
-        "Vendor Transaction Id",
-        "Customer",
-        "User",
-        "Additional Charges",
-        "Settled",
-    ])
+    unique_name = datetime.datetime.now().strftime("%d-%m-%YT%H:%M:%S-") + ''.join(
+        random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
+    report_file_path = settings.REPORTS_PATH + "/" + unique_name + ".csv"
+    response['Content-Disposition'] = 'attachment; filename="{}"'.format(report_file_path)
 
-    for payment_req in qs:
-        writer.writerow(
-            [
-                payment_req.mode,
-                payment_req.amount,
-                payment_req.txn_id,
-                payment_req.vendor_txn_id,
-                payment_req.customer,
-                payment_req.user,
-                payment_req.additional_charges,
-                payment_req.settled,
-            ]
-        )
+    with open(report_file_path, 'w') as csvfile:
+        writer = csv.writer(csvfile)
 
-    return response
+        writer.writerow([
+            "Vendor Id",
+            "Mode",
+            "Amount",
+            "Transaction Id",
+            "Vendor Transaction Id",
+            "Customer",
+            "User",
+            "Additional Charges",
+            "Settled",
+        ])
+        paginator = Paginator(qs, 1)
+        for x in paginator.page_range:
+            page_data = paginator.page(x)
+            for payment_req in page_data:
+                writer.writerow(
+                    [
+                        payment_req.vendor.id if payment_req.vendor else 'N/A',
+                        payment_req.mode,
+                        payment_req.amount,
+                        payment_req.txn_id,
+                        payment_req.vendor_txn_id,
+                        payment_req.customer,
+                        payment_req.user,
+                        payment_req.additional_charges,
+                        payment_req.settled,
+                    ]
+                )
+    return report_file_path
+
+
+def payments_csv_download(request):
+    if not (request.user.zr_admin_user.role.name == 'ADMINSTAFF' or is_user_superuser(request)):
+        return JsonResponse({"success": False})
+    email_list = request.POST.get('email', '').split(",")
+    report_params = {
+        "email_list": email_list,
+        "q": request.POST.get('q', ""),
+        "filter": request.POST.get('filter', ""),
+        "period": request.POST.get('period', ""),
+        "user_id": request.user.id,
+    }
+    from zrpayment import tasks as payment_celery_tasks
+    payment_celery_tasks.send_payment_report.apply_async(args=[report_params])
+    return JsonResponse({"success": True})
 
 
 class PaymentRequestListView(ListView):
@@ -479,9 +507,52 @@ def get_payment_qs(request):
         ) | Q(
             vendor_txn_id__contains=q
         ) | Q(
+            vendor__id__contains=q
+        ) | Q(
             customer__contains=q
         ) | Q(
+            vendor__name__icontains=q
+        ) | Q(
             user__mobile_no__contains=q
+        ) | Q(
+            user__first_name__icontains=q
+        ) | Q(
+            user__last_name__icontains=q
+        )
+        queryset = queryset.filter(query)
+
+    if filter_by == 'last_week':
+        queryset = queryset.filter(at_created__range=last_week_range())
+    elif filter_by == 'last_month':
+        queryset = queryset.filter(at_created__range=last_month())
+    elif filter_by == 'today':
+        queryset = queryset.filter(at_created__date__gte=datetime.date.today())
+
+    return queryset.order_by('-at_created')
+
+
+def get_payment_qs_dict(report_params):
+    filter_by = report_params.get('filter', "")
+    q = report_params.get('q', "")
+
+    queryset = Payments.objects.all()
+    if q:
+        query = Q(
+            txn_id__contains=q
+        ) | Q(
+            vendor_txn_id__contains=q
+        ) | Q(
+            vendor__id__contains=q
+        ) | Q(
+            customer__contains=q
+        ) | Q(
+            vendor__name__icontains=q
+        ) | Q(
+            user__mobile_no__contains=q
+        ) | Q(
+            user__first_name__icontains=q
+        ) | Q(
+            user__last_name__icontains=q
         )
         queryset = queryset.filter(query)
 

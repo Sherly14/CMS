@@ -29,8 +29,10 @@
                         <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
                     </div>
                     <input type="button" id="search-btn" class="button red" value="Search">
-                    <a href='{% url 'payment-requests:payment-list' %}' >Reset filters</a>
-                    <input class="button red" type="button" value="DOWNLOAD CSV" id="download-csv">
+                    <a href="{% url 'payment-requests:payment-list' %}" >Reset filters</a>
+                    <button data-toggle="modal" data-target="#get_email_modal" class="button red">
+                        DOWNLOAD CSV
+                    </button>
                     {% csrf_token %}
                     <input type="hidden" id="request_id" value="">
                 </div>
@@ -47,7 +49,9 @@
                     <div style="width: 100%;     overflow: scroll;">
                         <table>
                             <tr style="border-bottom-style: solid;">
+                                <th>Merchant it</th>
                                 <th>Mode</th>
+                                <th>Vendor</th>
                                 <th>Amount</th>
                                 <th>Transaction Id</th>
                                 <th>Vendor Transaction Id</th>
@@ -58,7 +62,9 @@
                             </tr>
                             {% for payment in payment_list %}
                                 <tr>
+                                    <td>{{ payment.merchant.id|default:"N/A" }}</td>
                                     <td>{{ payment.mode }}</td>
+                                    <td>{{ payment.vendor.name|default:"N/A" }}</td>
                                     <td>{{ payment.amount }}</td>
                                     <td>{{ payment.txn_id }}</td>
                                     <td>{{ payment.vendor_txn_id }}</td>
@@ -110,78 +116,44 @@
         </div>
     </div>
 
-        <!-- Modal HTML Markup -->
-    <div id="confirm_approve" class="modal fade" data-backdrop="static">
+    <!-- Modal to get Email -->
+    <div id="get_email_modal" class="modal fade">
         <div class="modal-dialog" role="document">
-        <form class="modal-content">
-            <div class="modal-header text-center">
-                <h3 class="modal-title">
-                    Payment Request
-                </h3>
-            </div>
-            <div class="modal-body text-dark text-center">
-                Are you sure want to Approve payment request ?
-            </div>
-            <div class="modal-footer btn-block-group" style="align-self: center;">
-                <div class="modal-footer" style="text-align:center">
-                    <button type="button" class="btn btn-primary btn-small max-225 approve_payment_confirm">Yes
-                    </button>
-                    <button type="button" class="btn btn-default btn-small max-225" data-dismiss="modal">No</button>
+            <div class="modal-content" style="width: 700px;">
+                <div class="modal-header" style="    background-color: #e2e2e2;">
+                    <h1 class="modal-title" style="font-size: 1.5rem; font-size: 1.5rem;font-weight: bold;line-height: 2rem;padding-left: 12px;">Send report as mail</h1>
                 </div>
-            </div>
-        </form>
-    </div>
-    </div>
+                <div class="modal-body">
 
+                    <form class="form-horizontal" method="POST" id="report_mail_form" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input hidden name="period" value="{{ request.GET.period }}">
+                        <div class="row" style="padding-left: 3rem;padding-top: 25px;">
+                            <div class="form-group col-sm-12">
+                                <label class="control-label"><b>Email list</b></label>
+                                <div>
+                                    <input type="text" class="form-control" placeholder="Comma separated email list" name="email" id="email_list" style="box-shadow: 0px 0px;border-style: solid;" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row container" style="padding-left: 3rem;">
+                            <div class="form-group col-sm-3">
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <button type="submit" id="mail_report" class="pull-right submit_request button red downloadcsv mr-5" style="background-color: red">
+                                    Mail a report
+                                </button>
+                            </div>
+                            <div class="form-group col-sm-3" style=" position: relative;left: 13%;">
+                            </div>
+                        </div>
+                    </form>
 
-    <div id="confirm_refund" class="modal fade" data-backdrop="static">
-        <div class="modal-dialog" role="document">
-        <form class="modal-content">
-            <div class="modal-header text-center">
-                <h3 class="modal-title">
-                    Payment Revoke
-                </h3>
-            </div>
-            <div class="modal-body text-dark text-center">
-                Are you sure want to Revoke payment request?
-            </div>
-            <div class="modal-footer btn-block-group" style="align-self: center;">
-                <div class="modal-footer" style="text-align:center">
-                    <button type="button" id="confirm_refund_btn" class="btn btn-primary btn-small max-225 confirm_refund_btn" loading-text="Yes">Yes
-                    </button>
-                    <button type="button" class="btn btn-default btn-small max-225" data-dismiss="modal">No</button>
+                    <div class="alert alert-danger" id="alert_msg" style="display:none;">
+                    </div>
                 </div>
-            </div>
-        </form>
-    </div>
-    </div>
-    <!-- /.modal -->
-
-    <!-- Modal HTML Markup -->
-    <div id="confirm_reject" class="modal fade" data-backdrop="static" style="margin: 0 20px;
-    padding: 5px;
-    line-height: 20px;">
-        <div class="modal-dialog" role="document">
-        <form class="modal-content">
-            <div class="modal-header text-center">
-                <h3 class="modal-title">
-                    Payment Request
-                </h3>
-            </div>
-            <div class="modal-body text-dark text-center">
-                Are you sure want to Reject payment request?
-            </div>
-            <textarea rows="4" cols="40" id="rejection_reason" placeholder="Reason for reject"></textarea>
-            <div class="modal-footer btn-block-group" style="align-self: center;">
-                <div class="modal-footer" style="text-align:center">
-
-                    <button type="button" class="btn btn-primary btn-small max-225 reject_payment_confirm">Yes
-                    </button>
-                    <button type="button" class="btn btn-default btn-small max-225" data-dismiss="modal">No</button>
-                </div>
-            </div>
-        </form>
-    </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
     </div>
     <!-- /.modal -->
 
@@ -197,10 +169,6 @@
         window.location.assign(url)
     });
 
-    $('#download-csv').click(function(){
-        url = '{% url "payment-requests:payments-csv" %}' + window.location.search;
-        window.location.assign(url)
-    })
 </script>
 {% endblock %}
 
@@ -236,5 +204,120 @@
             }
         );
 
+
+    jQuery.validator.addMethod("separated_emails", function(value, element) {
+        if (this.optional(element)) {
+            return true;
+        }
+
+        var mails = value.split(/,|;/);
+        for(var i = 0; i < mails.length; i++) {
+            // taken from the jquery validation internals
+            if (!/^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(mails[i])) {
+                return false;
+            }
+        }
+        return true;
+    }, "Please specify a email address or a comma separated list of addresses");
+
+    var report_mail_form = $('#report_mail_form');
+        var report_mail_error = $('.alert-danger', report_mail_form);
+        var report_mail_success = $('.alert-success', report_mail_form);
+        rules = {
+            email: {
+                required: true,
+                separated_emails:true
+            }
+        };
+
+        $('#alert_msg')
+            .hide()
+            .html('');
+        report_mail_form.validate({
+            rules: rules,
+            messages: {
+                "email": {
+                    required: "Email is required to send report"
+                }
+            },
+            invalidHandler: function (event, validator) { //display error alert on form submit
+                report_mail_success.hide();
+                report_mail_error.show();
+            },
+            highlight: function (element) { // hightlight error inputs
+                $(element)
+                    .closest('.form-group').addClass('has-error'); // set error class to the control group
+                $(element)
+                    .closest('.help-block').removeClass('ok'); // display OK icon
+                $(element)
+                    .closest('.control-group').removeClass('success').addClass('error'); // set error class to the control group
+                $(element)
+                    .closest('.form-group').removeClass('has-success').addClass('has-error');
+            },
+            unhighlight: function (element) { // revert the change dony by hightlight
+                $(element)
+                    .closest('.control-group').removeClass('has-error'); // set error class to the control group
+                $(element)
+                    .closest('.form-group').removeClass('has-error').addClass('has-success'); // set error class to the control group
+            },
+            submitHandler: function (form) {
+                <!-- AJAX Call -->
+                $('#modal_message').html("");
+
+                // Create an FormData object
+                var data = new FormData($('#report_mail_form')[0]);
+                $('#submit_request')
+                    .prop('disabled', true)
+                    .addClass('disabled');
+                url = '{% url "payment-requests:payments-csv" %}';
+
+                $.ajax({
+                    type: "POST",
+                    enctype: 'multipart/form-data',
+                    processData: false,
+                    contentType: false,
+                    url: url,
+                    data: data,
+                    success: function (data) {
+                        $('#modal_message').html(data.message);
+                        if(data.success) {
+                            setTimeout(function () {
+                                window.location.reload();
+                            }, 1000);
+                        }
+                        else {
+                            setTimeout(function () {
+                                $('#modal_message').html("");
+                            }, 2000);
+                            $('#submit_request').prop('disabled', false);
+                            $('#submit_request').removeClass('disabled');
+                        }
+                    },
+                    error: function (data) {
+                        $('#modal_message').html(data.message);
+                        $('#submit_request').prop('disabled', false);
+                    }
+                });
+                <!-- AJAX Call -->
+            },
+            success: function (label) {
+                label
+                    .addClass('valid').addClass('help-block ok') // mark the current input as valid and display OK icon
+                    .closest('.control-group').removeClass('error').addClass('success'); // set success class to the control group
+                label
+                    .closest('.form-group').removeClass('has-error').addClass('has-success');
+                $(this)
+                    .closest('.col-md-4').find('.err').hide();
+                $(this)
+                    .closest('.col-md-4').find('.suc').show();
+                label
+                    .closest('.form-group').removeClass('has-error'); // set success class to the control group
+                label
+                    .closest('.form-group').removeClass('has-error'); // set success class to the control group
+
+            },
+            errorPlacement: function (error, element) {
+            }
+        });
     </script>
 {% endblock extrascripts %}
