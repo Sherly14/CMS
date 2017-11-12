@@ -466,6 +466,10 @@ class KYCRequestsView(ListView):
         if q:
             # added search from mobile number of user
             query = Q(
+                first_name__icontains=q
+            ) | Q(
+                last_name__icontains=q
+            ) | Q(
                 mobile_no__contains=q
             )
             queryset = queryset.filter(query)

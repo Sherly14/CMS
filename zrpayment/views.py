@@ -290,7 +290,7 @@ class RejectPaymentRequestView(APIView):
         return Response({"message": message, 'success': True}, status=status.HTTP_200_OK)
 
 
-def get_payment_request_qs(request, from_user=False, all_user=False, all_req=False):
+def get_payment_request_qs(request, from_user=False, to_user=False, all_user=False, all_req=False):
     filter_by = request.GET.get('filter')
     q = request.GET.get('q')
 
@@ -317,19 +317,19 @@ def get_payment_request_qs(request, from_user=False, all_user=False, all_req=Fal
     if q:
         if from_user:
             query = Q(
-                to_user__first_name__contains=q
+                to_user__first_name__icontains=q
             ) | Q(
-                to_user__last_name__contains=q
+                to_user__last_name__icontains=q
             ) | Q(
                 to_user__mobile_no__contains=q
             )
-        else:
+        elif to_user:
             query = Q(
-                from_user__first_name__contains=q
+                to_user__first_name__icontains=q
             ) | Q(
-                from_user__last_name__contains=q
+                to_user__last_name__icontains=q
             ) | Q(
-                from_user__mobile_no__contains=q
+                to_user__mobile_no__contains=q
             )
         queryset = queryset.filter(query)
 
@@ -344,7 +344,7 @@ def get_payment_request_qs(request, from_user=False, all_user=False, all_req=Fal
 
 
 def merchant_payment_req_csv_download(request):
-    qs = get_payment_request_qs(request)
+    qs = get_payment_request_qs(request, all_user=True)
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="payment-requests.csv"'
     writer = csv.writer(response)
@@ -489,7 +489,7 @@ class PaymentRequestListView(ListView):
         return context
 
     def get_queryset(self):
-        return get_payment_request_qs(self.request)
+        return get_payment_request_qs(self.request, from_user=True, to_user=True)
 
 
 def get_payment_qs(request):
