@@ -74,6 +74,7 @@ class PaymentRequest(RowInfo):
     For payment request from merchant or distributor
     """
 
+
     from_user = models.ForeignKey(to=ZrUser, related_name='payment_requester',
                                   help_text="Who generates request of payment")
     to_user = models.ForeignKey(to=ZrUser, related_name='payment_request_supervisor')
@@ -151,6 +152,7 @@ class Payments(RowInfo):
     txn_id = models.CharField(max_length=128)
     vendor_txn_id = models.CharField(max_length=128)
     customer = models.CharField(max_length=256)
+    merchant = models.ForeignKey(ZrUser, null=True, blank=True, related_name="merchant_payments")
     user = models.ForeignKey(ZrUser)
     transaction_request_json = JSONField(default={})
     transaction_response_json = JSONField(default={})

@@ -315,22 +315,19 @@ def get_payment_request_qs(request, from_user=False, to_user=False, all_user=Fal
                 to_user=request.user.zr_admin_user.zr_user
             ).exclude(from_user=request.user.zr_admin_user.zr_user)
     if q:
-        if from_user:
-            query = Q(
-                to_user__first_name__icontains=q
-            ) | Q(
-                to_user__last_name__icontains=q
-            ) | Q(
-                to_user__mobile_no__contains=q
-            )
-        elif to_user:
-            query = Q(
-                to_user__first_name__icontains=q
-            ) | Q(
-                to_user__last_name__icontains=q
-            ) | Q(
-                to_user__mobile_no__contains=q
-            )
+        query = Q(
+            to_user__first_name__icontains=q
+        ) | Q(
+            to_user__last_name__icontains=q
+        ) | Q(
+            to_user__mobile_no__contains=q
+        ) | Q(
+            to_user__first_name__icontains=q
+        ) | Q(
+            to_user__last_name__icontains=q
+        ) | Q(
+            to_user__mobile_no__contains=q
+        )
         queryset = queryset.filter(query)
 
     if filter_by == 'last_week':
@@ -408,6 +405,7 @@ def get_report_csv(params):
             "Vendor Transaction Id",
             "Customer",
             "User",
+            "Merchant Id",
             "Additional Charges",
             "Settled",
         ])
@@ -423,7 +421,8 @@ def get_report_csv(params):
                         payment_req.txn_id,
                         payment_req.vendor_txn_id,
                         payment_req.customer,
-                        payment_req.user,
+                        payment_req.user.get_full_name(),
+                        payment_req.merchant.pk if payment_req.merchant else '',
                         payment_req.additional_charges,
                         payment_req.settled,
                     ]
@@ -495,12 +494,8 @@ class PaymentRequestListView(ListView):
 def get_payment_qs(request):
     filter_by = request.GET.get('filter')
     q = request.GET.get('q')
+    queryset = Payments.objects.all()
 
-    queryset = []
-    if is_user_superuser(request):
-        queryset = Payments.objects.all()
-    elif request.user.zr_admin_user.role.name in ['DISTRIBUTOR', 'SUBDISTRIBUTOR']:
-        queryset = Payments.objects.filter(user=request.user.zr_admin_user.zr_user)
     if q:
         query = Q(
             txn_id__contains=q
@@ -538,21 +533,15 @@ def get_payment_qs_dict(report_params):
     queryset = Payments.objects.all()
     if q:
         query = Q(
-            txn_id__contains=q
+            customer__icontains=q
         ) | Q(
-            vendor_txn_id__contains=q
+            txn_id__icontains=q
         ) | Q(
-            vendor__id__contains=q
+            merchant__id=q
         ) | Q(
-            customer__contains=q
+            merchant__first_name__icontains=q
         ) | Q(
-            vendor__name__icontains=q
-        ) | Q(
-            user__mobile_no__contains=q
-        ) | Q(
-            user__first_name__icontains=q
-        ) | Q(
-            user__last_name__icontains=q
+            merchant__last_name__icontains=q
         )
         queryset = queryset.filter(query)
 
