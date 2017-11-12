@@ -1,9 +1,7 @@
 from __future__ import print_function
 
 import datetime
-import string
 from decimal import Decimal
-from io import BytesIO
 
 import xlsxwriter
 from django.utils.translation import ugettext
@@ -78,7 +76,6 @@ def get_excel_doc(obj, header_dsiplay,report_file_path, has_next=False, user_typ
     for key, value in header_dsiplay:
         worksheet_s.write(1, i.get_inc_val(), ugettext(key), header)
 
-    inc_cls = incrementClass(val=-1)
     row = 2
     for idx, data in enumerate(obj):
         inc_cls = incrementClass(val=-1)
@@ -109,9 +106,9 @@ def get_excel_doc(obj, header_dsiplay,report_file_path, has_next=False, user_typ
     #     worksheet_s.set_column("{0}:{0}".format(string.uppercase[index]), 20)
 
     if has_next:
-        return workbook, worksheet_s, row+1
+        return workbook, worksheet_s, row + 1
     workbook.close()
-    return workbook, worksheet_s, row+1
+    return workbook, worksheet_s, row + 1
 
 
 def update_excel_doc(obj, header_dsiplay, workbook, worksheet_s, last_row, has_next=False):
@@ -135,7 +132,6 @@ def update_excel_doc(obj, header_dsiplay, workbook, worksheet_s, last_row, has_n
         'border': 1
     })
 
-    inc_cls = incrementClass(val=-1)
     for idx, data in enumerate(obj):
         inc_cls = incrementClass(val=-1)
         row = last_row + idx
@@ -165,6 +161,6 @@ def update_excel_doc(obj, header_dsiplay, workbook, worksheet_s, last_row, has_n
     #     worksheet_s.set_column("{0}:{0}".format(string.uppercase[index]), 20)
 
     if has_next:
-        return workbook, worksheet_s, row+1
+        return workbook, worksheet_s, row + 1
     workbook.close()
-    return workbook, worksheet_s, row+1
+    return workbook, worksheet_s, row + 1

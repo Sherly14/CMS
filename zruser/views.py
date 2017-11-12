@@ -235,12 +235,14 @@ def get_report_excel(report_params):
         ('Sub-Distributor  Net Commission', 'sub_dist_net_commission'),
     )
     DOC_HEADERS += merchant_headers
+    is_sub_dist = False
     if report_params.get('user_type') == "SU":
         DOC_HEADERS += distributor_headers
         DOC_HEADERS += sub_distributor_headers
         DOC_HEADERS += (('Zrupee Net Commission', 'admin_net_commission'),)
     elif report_params.get('user_type') == SUBDISTRIBUTOR:
         DOC_HEADERS += sub_distributor_headers
+        is_sub_dist = True
     elif report_params.get('user_type') == DISTRIBUTOR:
         DOC_HEADERS += distributor_headers
         DOC_HEADERS += sub_distributor_headers
@@ -417,11 +419,10 @@ class KYCRequestsView(ListView):
         return context
 
     def get_queryset(self):
-        filter_by = self.request.GET.get('filter', 'All')
-        q = self.request.GET.get('q')
-
         approve = self.request.GET.get('approve')
         reject = self.request.GET.get('approve')
+        filter_by = self.request.GET.get('filter', 'All')
+        q = self.request.GET.get('q')
 
         if approve or reject:
             if not ZrUser.objects.filter(id=approve or reject).last():
