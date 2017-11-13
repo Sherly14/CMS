@@ -341,7 +341,15 @@ def get_payment_request_qs(request, from_user=False, to_user=False, all_user=Fal
 
 
 def merchant_payment_req_csv_download(request):
-    qs = get_payment_request_qs(request, all_user=True)
+    sent_request = request.GET.get('sent')
+    if sent_request == 'true':
+        qs = get_payment_request_qs(request, from_user=True)
+    else:
+        qs = get_payment_request_qs(request, to_user=True)
+
+    if request.user.zr_admin_user.zr_user.role.name == 'ADMINSTAFF':
+        qs = get_payment_request_qs(request, all_user=True)
+
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="payment-requests.csv"'
     writer = csv.writer(response)
@@ -488,7 +496,7 @@ class PaymentRequestListView(ListView):
         return context
 
     def get_queryset(self):
-        return get_payment_request_qs(self.request, from_user=True, to_user=True)
+        return get_payment_request_qs(self.request, from_user=False, to_user=True)
 
 
 def get_payment_qs(request):

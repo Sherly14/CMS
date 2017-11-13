@@ -91,8 +91,8 @@
 
                     <div class="pagination-prev">
                       {% if page_obj.has_previous %}
-                          <a href="?page={{ page_obj.previous_page_number }}" class="button red">
-                            <span>Previous</span>
+                          <a href="?page={{ page_obj.previous_page_number }}" >
+                           <span>Previous</span>
                           </a>
                       {% else %}
 {#                        <li class="disabled">#}
@@ -105,7 +105,7 @@
 
                     <div class="pagination-next">
                       {% if page_obj.has_next %}
-                          <a href="?page={{ page_obj.next_page_number }}" class="button red">
+                          <a href="?page={{ page_obj.next_page_number }}" >
                             <span>Next</span>
                           </a>
                       {% else %}
