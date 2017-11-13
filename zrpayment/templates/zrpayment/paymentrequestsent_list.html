@@ -196,7 +196,11 @@
     })
 
     $('#download-csv').click(function(){
-        url = '{% url "payment-requests:payment-request-csv" %}' + window.location.search
+        if(window.location.search) {
+            url = '{% url "payment-requests:payment-request-csv" %}' + window.location.search + "&sent=true"
+        } else {
+            url = '{% url "payment-requests:payment-request-csv" %}' + "?sent=true"
+        }
         window.location.assign(url)
     })
 </script>
