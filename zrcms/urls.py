@@ -28,5 +28,6 @@ urlpatterns = [
     url(r'^transactions/', include('zrtransaction.urls', namespace='transaction')),
     url(r'^payment_request/', include('zrpayment.urls', namespace='payment-requests')),
     url(r'^commission/', include('zrcommission.urls', namespace='commission')),
+    url(r'^wallet/', include('zrwallet.urls', namespace='wallet')),
     url(r'^health_check/', health_check),
 ]

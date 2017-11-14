@@ -2,7 +2,7 @@ from common_utils.upi_status_check import get_payment_status
 from zrpayment.models import Payments
 
 
-def poll_transaction_status_for_refund():
+def poll_payments_for_lastest_status():
     payments = Payments.objects.all()
     # TODO: define status field in Payments model
     print 'polling payments status for queryset ', payments

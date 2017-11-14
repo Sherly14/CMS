@@ -11,7 +11,7 @@
     </style>
 
     <div class="content-wrapper">
-        <p class="head-right">Payments Table</p>
+        <p class="head-right">Passbook Table</p>
         <div class="col-12" >
             <div class="row rm-margin-side">
                 <p class="head-left">Date</p>
@@ -29,7 +29,7 @@
                         <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
                     </div>
                     <input type="button" id="search-btn" class="button red" value="Search">
-                    <a href="{% url 'payment-requests:payment-list' %}" >Reset filters</a>
+                    <a href="{{ main_url }}" >Reset filters</a>
                     <button data-toggle="modal" data-target="#get_email_modal" class="button red">
                         DOWNLOAD CSV
                     </button>
@@ -49,29 +49,37 @@
                     <div style="width: 100%;     overflow: scroll;">
                         <table>
                             <tr style="border-bottom-style: solid;">
-                                <th>Merchant id</th>
-                                <th>Mode</th>
-                                <th>Vendor</th>
-                                <th>Amount</th>
-                                <th>Transaction Id</th>
-                                <th>Vendor Transaction Id</th>
-                                <th>Customer</th>
-                                <th>User</th>
-                                <th>Additional Charges</th>
-                                <th>Settled</th>
+                                <th>User name</th>
+                                <th>Mobile No</th>
+                                <th>DMT opening_balance</th>
+                                <th>DMT opening_wallet_balance</th>
+                                <th>DMT wallet_credit</th>
+                                <th>DMT wallet_debit</th>
+                                <th>DMT closing_balance</th>
+                                <th>DMT closing_wallet_balance</th>
+                                <th>Non DMT opening_balance</th>
+                                <th>Non DMT opening_wallet_balance</th>
+                                <th>Non DMT wallet_credit</th>
+                                <th>Non DMT wallet_debit</th>
+                                <th>Non DMT closing_balance</th>
+                                <th>Non DMT closing_wallet_balance</th>
                             </tr>
-                            {% for payment in payment_list %}
+                            {% for passbook in passbook_list %}
                                 <tr>
-                                    <td>{{ payment.merchant.id|default:"N/A" }}</td>
-                                    <td>{{ payment.mode }}</td>
-                                    <td>{{ payment.vendor.name|default:"N/A" }}</td>
-                                    <td>{{ payment.amount }}</td>
-                                    <td>{{ payment.txn_id }}</td>
-                                    <td>{{ payment.vendor_txn_id }}</td>
-                                    <td>{{ payment.customer }}</td>
-                                    <td>{{ payment.user }}</td>
-                                    <td>{{ payment.additional_charges }}</td>
-                                    <td>{{ payment.settled }}</td>
+                                    <td>{{ passbook.user.full_name }}</td>
+                                    <td>{{ passbook.user.mobile_no }}</td>
+                                    <td>{{ passbook.dmt_opening_balance }}</td>
+                                    <td>{{ passbook.dmt_opening_wallet_balance }}</td>
+                                    <td>{{ passbook.dmt_wallet_credit }}</td>
+                                    <td>{{ passbook.dmt_wallet_debit }}</td>
+                                    <td>{{ passbook.dmt_closing_balance }}</td>
+                                    <td>{{ passbook.dmt_closing_wallet_balance }}</td>
+                                    <td>{{ passbook.non_dmt_opening_balance }}</td>
+                                    <td>{{ passbook.non_dmt_opening_wallet_balance }}</td>
+                                    <td>{{ passbook.non_dmt_wallet_credit }}</td>
+                                    <td>{{ passbook.non_dmt_wallet_debit }}</td>
+                                    <td>{{ passbook.non_dmt_closing_balance }}</td>
+                                    <td>{{ passbook.non_dmt_closing_wallet_balance }}</td>
                                 </tr>
                             {% endfor %}
                         </table>
@@ -85,24 +93,24 @@
                                     </span>
                                     {% if page_obj.has_previous %}
                                         {% if filter_by and q %}
-                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}">previous</a>
+                                            <a href="{{ main_url }}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}">previous</a>
                                         {% elif q %}
-                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.previous_page_number }}&q={{ q }}">previous</a>
+                                            <a href="{{ main_url }}?page={{ page_obj.previous_page_number }}&q={{ q }}">previous</a>
                                         {% elif filter_by %}
-                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}">previous</a>
+                                            <a href="{{ main_url }}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}">previous</a>
                                         {% else %}
-                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.previous_page_number }}">previous</a>
+                                            <a href="{{ main_url }}?page={{ page_obj.previous_page_number }}">previous</a>
                                         {% endif %}
                                     {% endif %}
                                     {% if page_obj.has_next %}
                                         {% if filter_by and q %}
-                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}">next</a>
+                                            <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}">next</a>
                                         {% elif q %}
-                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.next_page_number }}&q={{ q }}">next</a>
+                                            <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&q={{ q }}">next</a>
                                         {% elif filter_by %}
-                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}">next</a>
+                                            <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}">next</a>
                                         {% else %}
-                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.next_page_number }}">next</a>
+                                            <a href="{{ main_url }}?page={{ page_obj.next_page_number }}">next</a>
                                         {% endif %}
                                     {% endif %}
                                 </span>
@@ -170,6 +178,7 @@
         {% endif %}
         window.location.assign(url)
     });
+
 
 </script>
 {% endblock %}
@@ -271,8 +280,7 @@
                 $('#submit_request')
                     .prop('disabled', true)
                     .addClass('disabled');
-                url = '{% url "payment-requests:payments-csv" %}';
-
+                url = '{% url "wallet:passbook-csv" %}';
                 $.ajax({
                     type: "POST",
                     enctype: 'multipart/form-data',
