@@ -18,9 +18,9 @@ def passbook_open_script():
     This script is to create first passbook entry for all users
     :return: 
     """
-    user_objs = ZrUser.objects.all()
-
-    for user in user_objs:
+#    user_objs = ZrUser.objects.all()
+    for wallet in zw_models.Wallet.objects.filter():
+        user = wallet.merchant
         is_exist_passbook_entry = Passbook.objects.filter(user=user).exists()
         if is_exist_passbook_entry:
             continue
@@ -46,18 +46,8 @@ def passbook_open_script():
 
 
 def daily_passbook_script():
-    user_objs = ZrUser.objects.all()
-
-    for user in user_objs:
-
-        try:
-            wallet = Wallet.objects.get(merchant=user)
-        except ObjectDoesNotExist:
-            logger.warning(
-                "Wallet not found for user(%s)" % user.pk
-            )
-            continue
-
+    for wallet in zw_models.Wallet.objects.all():
+        user = wallet.merchant
         passbook_last_entry = Passbook.objects.filter(user=user).last()
         if passbook_last_entry:
             # On next day this entry will be updated
