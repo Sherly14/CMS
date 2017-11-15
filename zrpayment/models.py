@@ -73,8 +73,6 @@ class PaymentRequest(RowInfo):
     """
     For payment request from merchant or distributor
     """
-
-
     from_user = models.ForeignKey(to=ZrUser, related_name='payment_requester',
                                   help_text="Who generates request of payment")
     to_user = models.ForeignKey(to=ZrUser, related_name='payment_request_supervisor')

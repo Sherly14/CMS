@@ -101,14 +101,14 @@ def get_passbook_report_csv(params):
             "DMT opening_wallet_balance",
             "DMT wallet_credit",
             "DMT wallet_debit",
-            "DMT closing_balance",
-            "DMT closing_wallet_balance",
-            "Non DMT opening_balance",
-            "Non DMT opening_wallet_balance",
-            "Non DMT wallet_credit",
-            "Non DMT wallet_debit",
-            "Non DMT closing_balance",
-            "Non DMT closing_wallet_balance",
+            "DMT closing balance",
+            "DMT closing wallet balance",
+            "Non DMT opening balance",
+            "Non DMT opening wallet balance",
+            "Non DMT wallet credit",
+            "Non DMT wallet debit",
+            "Non DMT closing balance",
+            "Non DMT closing wallet balance",
         ])
         paginator = Paginator(qs, 1)
         for x in paginator.page_range:

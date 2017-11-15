@@ -1,10 +1,16 @@
+import logging
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Sum
 from django.utils import timezone
 
-from zrpayment.models import PaymentRequest
+from zrpayment.models import PaymentRequest, PAYMENT_REQUEST_STATUS
 from zruser.models import ZrUser
 from zrwallet.models import Passbook, Wallet
+from zrtransaction.utils import constants
+from zrwallet import models as zw_models
+
+logger = logging.getLogger(__name__)
 
 
 def passbook_open_script():
@@ -22,15 +28,21 @@ def passbook_open_script():
         try:
             wallet = Wallet.objects.get(merchant=user)
         except ObjectDoesNotExist:
+            logger.warning(
+                "Wallet not found for user(%s)" % user.pk
+            )
             continue
 
-        Passbook.objects.create(
+        passbook = Passbook.objects.create(
             user=user,
             non_dmt_opening_balance=wallet.non_dmt_balance,
             dmt_opening_balance=wallet.dmt_balance,
             non_dmt_opening_wallet_balance=wallet.non_dmt_balance,
             dmt_opening_wallet_balance=wallet.dmt_balance,
         )
+        logger.info("PassbookInitialize: Passport(%s) created for user_id(%s)" % (
+            passbook.pk, user.pk
+        ))
 
 
 def daily_passbook_script():
@@ -41,6 +53,9 @@ def daily_passbook_script():
         try:
             wallet = Wallet.objects.get(merchant=user)
         except ObjectDoesNotExist:
+            logger.warning(
+                "Wallet not found for user(%s)" % user.pk
+            )
             continue
 
         passbook_last_entry = Passbook.objects.filter(user=user).last()
@@ -54,13 +69,57 @@ def daily_passbook_script():
             # datetime.datetime(2017, 11, 12, 23, 59, 59, 999999)
             max_day = timezone.datetime.combine(nw - timezone.timedelta(1), timezone.datetime.max.time())
 
-            # TODO: here needs approve date instead of modified for precise information
-            dmt_wallet_credit = PaymentRequest.objects.filter(from_user=user, at_modified__range=(min_day, max_day)).aggregate(Sum('dmt_amount')).get('dmt_amount__sum')
-            non_dmt_wallet_credit = PaymentRequest.objects.filter(from_user=user, at_modified__range=(min_day, max_day)).aggregate(Sum('non_dmt_amount')).get('non_dmt_amount__sum')
+            # dmt_wallet_credit
+            dmt_wallet_credit = zw_models.WalletTransactions.objects.filter(
+                payment_request__from_user=user,
+                payment_request__status__in=[
+                    PAYMENT_REQUEST_STATUS[1][0], PAYMENT_REQUEST_STATUS[3][0]
+                ],
+                payment_request_at_modified__range=(min_day, max_day)
+            ).aggregate(
+                Sum('dmt_balance')
+            ).get('dmt_balance__sum')
 
-            # TODO: Need to update
-            dmt_wallet_debit = 0
-            non_dmt_wallet_debit = 0
+            # non_dmt_wallet_credit
+            non_dmt_wallet_credit = zw_models.WalletTransactions.objects.filter(
+                payment_request__from_user=user,
+                payment_request__status__in=[
+                    PAYMENT_REQUEST_STATUS[1][0], PAYMENT_REQUEST_STATUS[3][0]
+                ],
+                payment_request_at_modified__range=(min_day, max_day)
+            ).aggregate(
+                Sum('non_dmt_balance')
+            ).get('non_dmt_balance__sum')
+
+            # dmt_wallet_debit
+            dmt_wallet_debit = zw_models.WalletTransactions.objects.filter(
+                transaction__status__in=[
+                    constants.TRANSACTION_STATUS_SUCCESS,
+                    constants.TRANSACTION_STATUS_PENDING,
+                    constants.TRANSACTION_STATUS_REFUNDED
+                ],
+                transaction__user=user,
+                transaction__at_modified__range=(min_day, max_day)
+            ).aggregate(
+                Sum('dmt_balance')
+            ).get('dmt_balance__sum')
+            if not dmt_wallet_debit:
+                dmt_wallet_debit = 0
+
+            # non_dmt_wallet_debit
+            non_dmt_wallet_debit = zw_models.WalletTransactions.objects.filter(
+                transaction__status__in=[
+                    constants.TRANSACTION_STATUS_SUCCESS,
+                    constants.TRANSACTION_STATUS_PENDING,
+                    constants.TRANSACTION_STATUS_REFUNDED
+                ],
+                transaction__user=user,
+                transaction__at_modified__range=(min_day, max_day)
+            ).aggregate(
+                Sum('non_dmt_balance')
+            ).get('non_dmt_balance__sum')
+            if not non_dmt_wallet_debit:
+                non_dmt_wallet_debit = 0
 
             passbook_last_entry.dmt_wallet_credit = dmt_wallet_credit
             passbook_last_entry.non_dmt_wallet_credit = non_dmt_wallet_credit
@@ -78,25 +137,13 @@ def daily_passbook_script():
             # Every day balance status in passbook
             # create a new entry for this day with
             # opening_balance = closing_balance & opening_wallet_balance = current wallet balance.
-            Passbook.objects.create(
+            passbook = Passbook.objects.create(
                 user=user,
                 non_dmt_opening_balance=passbook_last_entry.non_dmt_closing_balance,
                 dmt_opening_balance=passbook_last_entry.dmt_closing_balance,
                 non_dmt_opening_wallet_balance=wallet.non_dmt_balance,
                 dmt_opening_wallet_balance=wallet.dmt_balance,
             )
-
-
-'''
-wallet_credit =(sum of all credit requests approved for the user on previous day
-                + sum of all refunds on previous day)
-i.e. sum of positive credit in wallet log on previous day
-
-wallet_debit = (sum of amount of all successful transactions done on previous day 
-                    + sum of all pending/refund pending transactions done on previous day)
-i.e. sum of negative credit in wallet log on previous day
-
-closing_balance = opening_balance + wallet_credit - wallet_debit
-
-# closing_wallet_balance = current wallet balance
-'''
+            logger.info("Dailycron: Passport(%s) created for user_id(%s)" % (
+                passbook.pk, user.pk
+            ))
