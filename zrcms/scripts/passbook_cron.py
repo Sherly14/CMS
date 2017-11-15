@@ -75,10 +75,12 @@ def daily_passbook_script():
                 payment_request__status__in=[
                     PAYMENT_REQUEST_STATUS[1][0], PAYMENT_REQUEST_STATUS[3][0]
                 ],
-                payment_request_at_modified__range=(min_day, max_day)
+                payment_request__at_modified__range=(min_day, max_day)
             ).aggregate(
                 Sum('dmt_balance')
             ).get('dmt_balance__sum')
+            if not dmt_wallet_credit:
+                dmt_wallet_credit = 0
 
             # non_dmt_wallet_credit
             non_dmt_wallet_credit = zw_models.WalletTransactions.objects.filter(
@@ -86,10 +88,12 @@ def daily_passbook_script():
                 payment_request__status__in=[
                     PAYMENT_REQUEST_STATUS[1][0], PAYMENT_REQUEST_STATUS[3][0]
                 ],
-                payment_request_at_modified__range=(min_day, max_day)
+                payment_request__at_modified__range=(min_day, max_day)
             ).aggregate(
                 Sum('non_dmt_balance')
             ).get('non_dmt_balance__sum')
+            if not non_dmt_wallet_credit:
+                non_dmt_wallet_credit = 0
 
             # dmt_wallet_debit
             dmt_wallet_debit = zw_models.WalletTransactions.objects.filter(
