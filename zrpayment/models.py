@@ -150,7 +150,6 @@ class Payments(RowInfo):
     txn_id = models.CharField(max_length=128)
     vendor_txn_id = models.CharField(max_length=128)
     customer = models.CharField(max_length=256)
-    merchant = models.ForeignKey(ZrUser, null=True, blank=True, related_name="merchant_payments")
     user = models.ForeignKey(ZrUser)
     transaction_request_json = JSONField(default={})
     transaction_response_json = JSONField(default={})
@@ -162,3 +161,10 @@ class Payments(RowInfo):
         if self.is_settled:
             return "Yes"
         return "No"
+
+    def __unicode__(self):
+        return 'status=%s / amount=%s / pk=%s' % (
+            self.status,
+            self.amount,
+            self.pk
+        )
