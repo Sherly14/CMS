@@ -11,15 +11,6 @@ params = {
 
 
 def get_payment_status(tran_id):
-    '''
-    {
-    " status ": "CONFIRMED ",
-    " message ": "Transaction Successful",
-    " transId ":”78790”,
-    “checksum”: "BwYx7tYV6uLQNImyQ45MoMgi50+QKitDwBojBWv9E9I+wRCtAGmeTeiNbJ4fk1gJFmgcRvEqXryzi\/u\/tihyyxhaEyNm9281Elb+Da+JyvS8UqU9PEabg2”
-    }
-
-    '''
     req_param = copy.copy(params)
     req_param['transactionId'] = tran_id
     checksum = ''.join(params.values())
