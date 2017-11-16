@@ -15,8 +15,13 @@ def get_payment_status(tran_id):
     req_param = copy.copy(params)
     req_param['transactionId'] = tran_id
     req_param['PayProMID'] = '1263'
-    checksum = ''.join(params.values())
-    params['checksum'] = hashlib.sha512(checksum).hexdigest()
+    checksum = '%s%s%s%s' % (
+        params['apiPassword'],
+        params['PayProMID'],
+        params['transactionId'],
+        "D22qbAyeMaY1MW6FX2+23Q=="
+    )
+    params['checksum'] = checksum
     try:
         response = requests.post(
             '{}/PayProUPI/live/upi/statusCall?partnerId={}&request=JSON_String'.format(
