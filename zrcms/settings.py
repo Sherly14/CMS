@@ -242,6 +242,12 @@ REPORTS_PATH = BASE_DIR + '/media/report'
 if not os.path.exists(REPORTS_PATH):
     os.makedirs(REPORTS_PATH)
 
+UPI_URL = 'http://114.143.22.139/'
+UPI_API_PASSWORD = "EE560B75E235E2180107D0160"
+UPI_PAY_PRO_MID = "1263"
+UPI_SECRET = "D22qbAyeMaY1MW6FX2+23Q=="
+UPI_PARTNER_ID = "P1263"
+
 try:
     from local_settings import *
 except ImportError:

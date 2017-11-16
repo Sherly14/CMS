@@ -1,34 +1,37 @@
 import copy
+import json
 import hashlib
 
 import requests
 
-url = 'http://114.143.22.139/'
+from django.conf import settings as dj_settings
+
+url = dj_settings.UPI_URL
 
 params = {
-    "apiPassword": "EE560B75E235E2180107D0160",
+    "apiPassword": dj_settings.UPI_API_PASSWORD,
 }
 
 
 def get_payment_status(tran_id):
-    import ipdb; ipdb.set_trace()
     req_param = copy.copy(params)
     req_param['transactionId'] = tran_id
-    req_param['PayProMID'] = '1263'
+    req_param['PayProMID'] = dj_settings.UPI_PAY_PRO_MID
     checksum = '%s%s%s%s' % (
         req_param['apiPassword'],
         req_param['PayProMID'],
         req_param['transactionId'],
-        "D22qbAyeMaY1MW6FX2+23Q=="
+        dj_settings.UPI_SECRET
     )
-    req_param['checksum'] = checksum
+    req_param['checksum'] = hashlib.sha512(checksum).hexdigest()
     try:
         response = requests.post(
-            '{}/PayProUPI/live/upi/statusCall?partnerId={}&request=JSON_String'.format(
+            '{}/PayProUPI/live/upi/statusCall?partnerId={}&request={}'.format(
                 url,
-                "P1263",
+                dj_settings.UPI_PARTNER_ID,
+                json.dumps(req_param)
             ),
-            req_param,
+            data={},
             headers={
                 "Accept": "application/json",
                 "Content-Type": "application/x-www-form-urlencoded"
