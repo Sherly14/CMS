@@ -4,9 +4,10 @@ from zrpayment.models import Payments
 
 def poll_payments_for_lastest_status():
     payments = Payments.objects.filter(
-        status=Payments.status[0][0]
+        status=Payments.payment_status[0][0],
+        payment_mode__name="UPI",
+        vendor__name='MOUSAMBEE'
     )
-    # TODO: define status field in Payments model
     print 'polling payments status for queryset ', payments
 
     for payment_obj in payments:

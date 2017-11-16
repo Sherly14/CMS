@@ -134,7 +134,7 @@ class Payments(RowInfo):
     EXPIRED = 'Expired'
     SPAM = 'Spam'
 
-    status = (
+    payment_status = (
         ('P', PENDING),
         ('S', SUCCESS),
         ('F', FAILURE),
@@ -143,7 +143,7 @@ class Payments(RowInfo):
         ('E', EXPIRED),
         ('SP', SPAM),
     )
-    status = models.CharField(choices=status, max_length=3, default=status[0][0])
+    status = models.CharField(choices=payment_status, max_length=3, default=payment_status[0][0])
     vendor = models.ForeignKey(to='zrtransaction.Vendor', null=True, blank=True)
     mode = models.ForeignKey(PaymentMode)
     amount = models.DecimalField(decimal_places=3, default=0.00, max_digits=10)
