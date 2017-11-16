@@ -11,6 +11,7 @@ params = {
 
 
 def get_payment_status(tran_id):
+    import ipdb; ipdb.set_trace()
     req_param = copy.copy(params)
     req_param['transactionId'] = tran_id
     req_param['PayProMID'] = '1263'
@@ -21,7 +22,12 @@ def get_payment_status(tran_id):
             '{}/PayProUPI/live/upi/statusCall?partnerId={}&request=JSON_String'.format(
                 url,
                 "P1263",
-            ), req_param
+            ),
+            req_param,
+            headers={
+                "Accept": "application/json",
+                "Content-Type": "application/x-www-form-urlencoded"
+            }
         )
         return response.json()
     except:
