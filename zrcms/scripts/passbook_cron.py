@@ -4,11 +4,10 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Sum
 from django.utils import timezone
 
-from zrpayment.models import PaymentRequest, PAYMENT_REQUEST_STATUS
-from zruser.models import ZrUser
-from zrwallet.models import Passbook, Wallet
 from zrtransaction.utils import constants
+from zruser.models import ZrUser
 from zrwallet import models as zw_models
+from zrwallet.models import Passbook, Wallet
 
 logger = logging.getLogger(__name__)
 
@@ -72,11 +71,8 @@ def daily_passbook_script():
             # dmt_wallet_credit
             dmt_wallet_credit = zw_models.WalletTransactions.objects.filter(
                 payment_request__from_user=user,
-                payment_request__status__in=[
-                    PAYMENT_REQUEST_STATUS[1][0], PAYMENT_REQUEST_STATUS[3][0]
-                ],
-                payment_request__at_modified__range=(min_day, max_day)
-            ).aggregate(
+                payment_request__at_created__range=(min_day, max_day)
+            ).exclude(transaction__status__in=['F']).aggregate(
                 Sum('dmt_balance')
             ).get('dmt_balance__sum')
             if not dmt_wallet_credit:
@@ -85,11 +81,8 @@ def daily_passbook_script():
             # non_dmt_wallet_credit
             non_dmt_wallet_credit = zw_models.WalletTransactions.objects.filter(
                 payment_request__from_user=user,
-                payment_request__status__in=[
-                    PAYMENT_REQUEST_STATUS[1][0], PAYMENT_REQUEST_STATUS[3][0]
-                ],
-                payment_request__at_modified__range=(min_day, max_day)
-            ).aggregate(
+                payment_request__at_created__range=(min_day, max_day)
+            ).exclude(transaction__status__in=['F']).aggregate(
                 Sum('non_dmt_balance')
             ).get('non_dmt_balance__sum')
             if not non_dmt_wallet_credit:
@@ -103,7 +96,7 @@ def daily_passbook_script():
                     constants.TRANSACTION_STATUS_REFUNDED
                 ],
                 transaction__user=user,
-                transaction__at_modified__range=(min_day, max_day)
+                transaction__at_created__range=(min_day, max_day)
             ).aggregate(
                 Sum('dmt_balance')
             ).get('dmt_balance__sum')
@@ -118,7 +111,7 @@ def daily_passbook_script():
                     constants.TRANSACTION_STATUS_REFUNDED
                 ],
                 transaction__user=user,
-                transaction__at_modified__range=(min_day, max_day)
+                transaction__at_created__range=(min_day, max_day)
             ).aggregate(
                 Sum('non_dmt_balance')
             ).get('non_dmt_balance__sum')

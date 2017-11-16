@@ -3,7 +3,7 @@ from zrpayment.models import Payments
 
 
 def poll_payments_for_lastest_status():
-    payments = Payments.objects.all()
+    payments = Payments.objects.filter(status__in=['P'])
     # TODO: define status field in Payments model
     print 'polling payments status for queryset ', payments
 
@@ -11,8 +11,12 @@ def poll_payments_for_lastest_status():
         response = get_payment_status(payment_obj.txn_id)
         if response:
             try:
-                payment_obj.status = response['status']
-                payment_obj.transaction_response_json = response
-                payment_obj.save()
+                if response['status'] != payment_obj.status:
+                    payment_obj.status = response['status']
+                    if payment_obj.transaction_response_json:
+                        payment_obj.transaction_response_json.append(response)
+                    else:
+                        payment_obj.transaction_response_json = [response]
+                    payment_obj.save()
             except:
                 pass
