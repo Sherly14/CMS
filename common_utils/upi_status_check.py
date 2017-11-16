@@ -18,7 +18,7 @@ def get_payment_status(tran_id):
     checksum = '%s%s%s%s' % (
         req_param['apiPassword'],
         req_param['PayProMID'],
-        params['transactionId'],
+        req_param['transactionId'],
         "D22qbAyeMaY1MW6FX2+23Q=="
     )
     req_param['checksum'] = checksum
