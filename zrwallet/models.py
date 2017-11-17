@@ -80,4 +80,6 @@ class Passbook(RowInfo):
     non_dmt_closing_wallet_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
 
     def __unicode__(self):
-        return '%s Passbook' % (self.user.full_name)
+        return '%s Passbook' % (
+            self.user.full_name
+        )

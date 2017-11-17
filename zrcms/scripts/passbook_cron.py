@@ -122,7 +122,7 @@ def daily_passbook_script():
             passbook_last_entry.non_dmt_wallet_debit = non_dmt_wallet_debit
 
             passbook_last_entry.dmt_closing_balance = passbook_last_entry.dmt_opening_balance + dmt_wallet_credit - dmt_wallet_debit
-            passbook_last_entry.non_dmt_closing_balance = passbook_last_entry.non_dmt_closing_balance + non_dmt_wallet_credit - non_dmt_wallet_debit
+            passbook_last_entry.non_dmt_closing_balance = passbook_last_entry.dmt_opening_balance + non_dmt_wallet_credit - non_dmt_wallet_debit
 
             passbook_last_entry.dmt_closing_wallet_balance = wallet.dmt_balance
             passbook_last_entry.non_dmt_closing_wallet_balance = wallet.non_dmt_balance
