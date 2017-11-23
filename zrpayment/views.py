@@ -413,7 +413,6 @@ def get_report_csv(params):
             "Vendor Transaction Id",
             "Customer",
             "User",
-            "Merchant Id",
             "Additional Charges",
             "Settled",
         ])
@@ -430,7 +429,6 @@ def get_report_csv(params):
                         payment_req.vendor_txn_id,
                         payment_req.customer,
                         payment_req.user.get_full_name(),
-                        payment_req.merchant.pk if payment_req.merchant else '',
                         payment_req.additional_charges,
                         payment_req.settled,
                     ]

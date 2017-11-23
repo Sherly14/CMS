@@ -219,6 +219,12 @@ if SETUP == 'heroku':
     BROKER_USER = 'cwolziqk'
     BROKER_PASSWORD = '_DmFPc9QiXp_gF8AfrBBu_PlDmkyxtzn'
     BROKER_VHOST = 'cwolziqk'
+
+    UPI_URL = 'http://114.143.22.139/'
+    UPI_API_PASSWORD = "EE560B75E235E2180107D0160"
+    UPI_PAY_PRO_MID = "1263"
+    UPI_SECRET = "D22qbAyeMaY1MW6FX2+23Q=="
+    UPI_PARTNER_ID = "P1263"
 elif SETUP == 'prod':
     BROKER_HOST = "172.17.0.1"
     BROKER_BACKEND="redis"
@@ -230,10 +236,22 @@ elif SETUP == 'prod':
     REDIS_DB = 0
     REDIS_CONNECT_RETRY = True
     CELERY_SEND_EVENTS = True
+
+    UPI_URL = 'https://mosambee.cash/'
+    UPI_API_PASSWORD = "73A2AEC172534D23975D05093"
+    UPI_PAY_PRO_MID = "89218"
+    UPI_SECRET = "LZpydM6fLcMULdgnd6dxOA=="
+    UPI_PARTNER_ID = "M89218"
 else:
     # CELERY_BROKER_URL = 'amqp://localhost'
     BROKER_HOST = 'localhost'
     BROKER_PORT = 5672
+
+    UPI_URL = 'http://114.143.22.139/'
+    UPI_API_PASSWORD = "EE560B75E235E2180107D0160"
+    UPI_PAY_PRO_MID = "1263"
+    UPI_SECRET = "D22qbAyeMaY1MW6FX2+23Q=="
+    UPI_PARTNER_ID = "P1263"
 
 import djcelery
 djcelery.setup_loader()
@@ -241,6 +259,7 @@ djcelery.setup_loader()
 REPORTS_PATH = BASE_DIR + '/media/report'
 if not os.path.exists(REPORTS_PATH):
     os.makedirs(REPORTS_PATH)
+
 
 try:
     from local_settings import *

@@ -7,3 +7,4 @@ from zrpayment.models import *
 
 admin.site.register(PaymentMode)
 admin.site.register(MerchantPaymentRequest)
+admin.site.register(Payments)

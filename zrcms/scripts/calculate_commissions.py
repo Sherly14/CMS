@@ -18,3 +18,5 @@ transaction_utils.calculate_commission()
 from zrcms.scripts import poll_transaction_status
 poll_transaction_status.poll_transaction_status_for_refund()
 
+from zrcms.scripts import poll_payments_status
+poll_payments_status.poll_payments_for_lastest_status()
