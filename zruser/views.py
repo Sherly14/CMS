@@ -97,16 +97,17 @@ def get_merchant_qs(request):
 
         return queryset
     elif request.user.zr_admin_user.role.name == DISTRIBUTOR:
-        queryset = request.user.zr_admin_user.zr_user.all_merchant_mappings.filter(
+        merchant_id_list = list(request.user.zr_admin_user.zr_user.all_merchant_mappings.filter(
             is_active=True
-        ).order_by('-at_created')
+        ).values_list('merchant', flat=True))
+        queryset = ZrUser.objects.filter(id__in=merchant_id_list).order_by('-at_created')
         if q:
             query_filter = Q(
-                merchant__first_name__contains=q
+                first_name__icontains=q
             ) | Q(
-                merchant__last_name__contains=q
+                last_name__icontains=q
             ) | Q(
-                merchant__mobile_no__contains=q
+                mobile_no__contains=q
             )
             queryset = queryset.filter(
                 query_filter
@@ -127,23 +128,23 @@ def get_merchant_qs(request):
                 at_created__range=last_month()
             )
     elif request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
-        queryset = request.user.zr_admin_user.zr_user.merchant_sub_mappings.filter(
+        merchant_queryset = request.user.zr_admin_user.zr_user.merchant_sub_mappings.filter(
             is_active=True
         ).order_by('-at_created')
+        queryset = ZrUser.objects.filter(id__in=merchant_queryset.values_list('merchant', flat=True)).order_by('-at_created')
         if q:
             query_filter = Q(
-                merchant__first_name__contains=q
+                first_name__icontains=q
             ) | Q(
-                merchant__last_name__contains=q
+                last_name__icontains=q
             ) | Q(
-                merchant__mobile_no__contains=q
+                mobile_no__contains=q
             )
             queryset = queryset.filter(
                 query_filter
             )
         else:
             queryset = queryset
-
         if filter == 'Today':
             queryset = queryset.filter(
                 at_created__gte=datetime.datetime.now().date()
