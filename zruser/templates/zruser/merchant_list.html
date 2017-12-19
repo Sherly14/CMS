@@ -45,7 +45,7 @@
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
-                    {% if is_queryset %}
+                    {% if queryset %}
                         {% for merchant in queryset %}
                         <tr>
                             <td>{{ merchant.id }}</td>

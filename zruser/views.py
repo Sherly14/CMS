@@ -94,8 +94,6 @@ def get_merchant_qs(request):
             queryset = queryset.filter(at_created__range=last_week_range())
         elif filter == 'Last-Month':
             queryset = queryset.filter(at_created__range=last_month())
-
-        return queryset
     elif request.user.zr_admin_user.role.name == DISTRIBUTOR:
         merchant_id_list = list(request.user.zr_admin_user.zr_user.all_merchant_mappings.filter(
             is_active=True
@@ -131,7 +129,8 @@ def get_merchant_qs(request):
         merchant_queryset = request.user.zr_admin_user.zr_user.merchant_sub_mappings.filter(
             is_active=True
         ).order_by('-at_created')
-        queryset = ZrUser.objects.filter(id__in=merchant_queryset.values_list('merchant', flat=True)).order_by('-at_created')
+        queryset = ZrUser.objects.filter(id__in=merchant_queryset.values_list('merchant', flat=True)).order_by(
+            '-at_created')
         if q:
             query_filter = Q(
                 first_name__icontains=q
@@ -154,9 +153,7 @@ def get_merchant_qs(request):
                 at_created__range=last_week_range()
             )
         elif filter == 'Last-Month':
-            queryset = queryset.filter(
-                at_created__range=last_month()
-            )
+            queryset = queryset.filter(at_created__range=last_month())
 
     return queryset
 
@@ -309,7 +306,7 @@ class MerchantListView(ListView):
 
         if filter:
             context['filter_by'] = filter
-
+        context['queryset'] = queryset
         if is_user_superuser(self.request):
             activate = self.request.GET.get('activate')
             disable = self.request.GET.get('disable')
@@ -329,8 +326,6 @@ class MerchantListView(ListView):
 
                 zruser.is_active = False
                 zruser.save(update_fields=['is_active'])
-
-            context['queryset'] = queryset
 
             p = Paginator(queryset, self.paginate_by)
             try:
@@ -356,7 +351,7 @@ class MerchantListView(ListView):
                 context['has_prev_page'] = page.has_previous()
 
             context['is_queryset'] = True
-        elif self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
+        elif self.request.user.zr_admin_user.role.name in [DISTRIBUTOR, SUBDISTRIBUTOR]:
             context['merchant_map'] = queryset
             p = Paginator(context['merchant_map'], self.paginate_by)
             try:
@@ -383,7 +378,6 @@ class MerchantListView(ListView):
                 context['has_prev_page'] = page.has_previous()
 
             context['is_queryset'] = False
-
         return context
 
     def get_queryset(self):
