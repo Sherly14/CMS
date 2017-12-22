@@ -12,7 +12,7 @@ from django.http.response import Http404, HttpResponse
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
-from common_utils import user_utils, transaction_utils
+from common_utils import user_utils
 from common_utils.date_utils import last_month, last_week_range
 from common_utils.transaction_utils import get_sub_distributor_merchant_id_list_from_distributor, \
     get_merchant_id_list_from_distributor, \
@@ -43,11 +43,11 @@ def get_transactions_qs_with_dict(report_params):
         p_filter = report_params.get('period', "All")
 
     if p_filter in ['Today', 'today']:
-        q_obj = q_obj.add(Q(at_created__gte=datetime.datetime.now().date()), q_obj.connector)
+        q_obj.add(Q(at_created__gte=datetime.datetime.now().date()), q_obj.connector)
     elif p_filter in ['Last-Week' or 'last-week']:
-        q_obj = q_obj.add(Q(at_created__range=last_week_range()), q_obj.connector)
+        q_obj.add(Q(at_created__range=last_week_range()), q_obj.connector)
     elif p_filter in ['Last-Month' or 'last-month']:
-        q_obj = q_obj.add(Q(at_created__range=last_month()), q_obj.connector)
+        q_obj.add(Q(at_created__range=last_month()), q_obj.connector)
     user = get_user_model().objects.filter(pk=report_params.get('user_id')).last()
     if report_params.get('user_type') == "SU":
         pass
@@ -55,7 +55,7 @@ def get_transactions_qs_with_dict(report_params):
     elif report_params.get('user_type') == SUBDISTRIBUTOR:
         # SUB DISTRIBUTOR
         # Get merchants for sub-distributor
-        q_obj = q_obj.add(
+        q_obj.add(
             (Q(user_id__in=
                # [request.user.zr_admin_user.zr_user_id] +
                get_sub_distributor_merchant_id_list_from_sub_distributor(user.zr_admin_user.zr_user))),
@@ -64,7 +64,7 @@ def get_transactions_qs_with_dict(report_params):
     elif report_params.get('user_type') == DISTRIBUTOR:
         # DISTRIBUTOR
         # Get merchants for distrubutor and sub-distributor
-        q_obj = q_obj.add(
+        q_obj.add(
             (Q(user_id__in=
                # [request.user.zr_admin_user.zr_user_id] +
                get_merchant_id_list_from_distributor(user.zr_admin_user.zr_user) +
@@ -92,37 +92,40 @@ def get_transactions_qs(request):
         p_filter = request.GET.get('period', "All")
 
     if p_filter in ['Today', 'today']:
-        q_obj = q_obj.add(Q(at_created__gte=datetime.datetime.now().date()), q_obj.connector)
+        q_obj.add(Q(at_created__gte=datetime.datetime.now().date()), q_obj.connector)
     elif p_filter in ['Last-Week' or 'last-week']:
-        q_obj = q_obj.add(Q(at_created__range=last_week_range()), q_obj.connector)
+        q_obj.add(Q(at_created__range=last_week_range()), q_obj.connector)
     elif p_filter in ['Last-Month' or 'last-month']:
-        q_obj = q_obj.add(Q(at_created__range=last_month()), q_obj.connector)
+        q_obj.add(Q(at_created__range=last_month()), q_obj.connector)
 
     if user_utils.is_user_superuser(request):
         pass
         # If user is main admin then need to show all listing
-    elif transaction_utils.is_sub_distributor(request.user.zr_admin_user.zr_user):
+    elif request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
         # SUB DISTRIBUTOR
         # Get merchants for sub-distributor
-        q_obj = q_obj.add(
+        q_obj.add(
             (Q(user_id__in=
                # [request.user.zr_admin_user.zr_user_id] +
                get_sub_distributor_merchant_id_list_from_sub_distributor(request.user.zr_admin_user.zr_user))),
+            q_obj.AND,
             q_obj.connector
         )
     elif request.user.zr_admin_user.role.name == DISTRIBUTOR:
         # DISTRIBUTOR
         # Get merchants for distrubutor and sub-distributor
-        q_obj = q_obj.add(
+        q_obj.add(
             (Q(user_id__in=
                # [request.user.zr_admin_user.zr_user_id] +
                get_merchant_id_list_from_distributor(request.user.zr_admin_user.zr_user) +
                # get_sub_distributor_id_list_from_distributor(request.user.zr_admin_user.zr_user) +
                get_sub_distributor_merchant_id_list_from_distributor(request.user.zr_admin_user.zr_user))),
+            q_obj.AND,
             q_obj.connector
         )
 
     queryset = Transaction.objects.filter(q_obj).order_by('-at_created')
+    print(q_obj)
     return queryset
 
 
