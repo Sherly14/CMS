@@ -61,8 +61,14 @@ def daily_passbook_script():
             # dmt_wallet_credit
             dmt_wallet_credit = zw_models.WalletTransactions.objects.filter(
                 payment_request__from_user=user,
-                payment_request__at_created__range=(min_day, max_day)
-            ).exclude(transaction__status__in=['F']).aggregate(
+                payment_request__at_created__range=(min_day, max_day),
+                transaction__status__in=[
+                    constants.TRANSACTION_STATUS_SUCCESS,
+                    constants.TRANSACTION_STATUS_PENDING,
+                    constants.TRANSACTION_STATUS_REFUNDED,
+                    constants.TRANSACTION_STATUS_REFUND_PENDING
+                ]
+            ).aggregate(
                 Sum('dmt_balance')
             ).get('dmt_balance__sum')
             if not dmt_wallet_credit:
@@ -71,8 +77,14 @@ def daily_passbook_script():
             # non_dmt_wallet_credit
             non_dmt_wallet_credit = zw_models.WalletTransactions.objects.filter(
                 payment_request__from_user=user,
-                payment_request__at_created__range=(min_day, max_day)
-            ).exclude(transaction__status__in=['F']).aggregate(
+                payment_request__at_created__range=(min_day, max_day),
+                transaction__status__in=[
+                    constants.TRANSACTION_STATUS_SUCCESS,
+                    constants.TRANSACTION_STATUS_PENDING,
+                    constants.TRANSACTION_STATUS_REFUNDED,
+                    constants.TRANSACTION_STATUS_REFUND_PENDING
+                ]
+            ).aggregate(
                 Sum('non_dmt_balance')
             ).get('non_dmt_balance__sum')
             if not non_dmt_wallet_credit:
@@ -83,7 +95,8 @@ def daily_passbook_script():
                 transaction__status__in=[
                     constants.TRANSACTION_STATUS_SUCCESS,
                     constants.TRANSACTION_STATUS_PENDING,
-                    constants.TRANSACTION_STATUS_REFUNDED
+                    constants.TRANSACTION_STATUS_REFUNDED,
+                    constants.TRANSACTION_STATUS_REFUND_PENDING
                 ],
                 transaction__user=user,
                 transaction__at_created__range=(min_day, max_day)
@@ -98,7 +111,8 @@ def daily_passbook_script():
                 transaction__status__in=[
                     constants.TRANSACTION_STATUS_SUCCESS,
                     constants.TRANSACTION_STATUS_PENDING,
-                    constants.TRANSACTION_STATUS_REFUNDED
+                    constants.TRANSACTION_STATUS_REFUNDED,
+                    constants.TRANSACTION_STATUS_REFUND_PENDING
                 ],
                 transaction__user=user,
                 transaction__at_created__range=(min_day, max_day)
