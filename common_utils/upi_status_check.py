@@ -1,11 +1,13 @@
 import copy
 import json
 import hashlib
+import logging
 
 import requests
 
 from django.conf import settings as dj_settings
 
+logger = logging.getLogger(__name__)
 url = dj_settings.UPI_URL
 
 params = {
@@ -39,4 +41,7 @@ def get_payment_status(tran_id):
         )
         return response.json()
     except:
+        logger.error("Error occurred while doing request to mosambee API on transaction id(%s)" % (
+            tran_id
+        ), exc_info=True)
         return {}
