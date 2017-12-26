@@ -27,18 +27,21 @@ def get_payment_status(tran_id):
     )
     req_param['checksum'] = hashlib.sha512(checksum).hexdigest()
     try:
+        payment_url = '{}/PayProUPI/live/upi/statusCall?partnerId={}&request={}'.format(
+            url,
+            dj_settings.UPI_PARTNER_ID,
+            json.dumps(req_param)
+        )
+        logger.info("Sending UPI request to url(%s)" % (payment_url))
         response = requests.post(
-            '{}/PayProUPI/live/upi/statusCall?partnerId={}&request={}'.format(
-                url,
-                dj_settings.UPI_PARTNER_ID,
-                json.dumps(req_param)
-            ),
+            payment_url,
             data={},
             headers={
                 "Accept": "application/json",
                 "Content-Type": "application/x-www-form-urlencoded"
             }
         )
+        logger.info("Got response(%s) for url(%s)" % (response.json(), url))
         return response.json()
     except:
         logger.error("Error occurred while doing request to mosambee API on transaction id(%s)" % (
