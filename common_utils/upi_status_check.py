@@ -27,7 +27,7 @@ def get_payment_status(tran_id):
     )
     req_param['checksum'] = hashlib.sha512(checksum).hexdigest()
     try:
-        payment_url = '{}PayProUPI/live/upi/statusCall?partnerId={}&request={}'.format(
+        payment_url = '{}?partnerId={}&request={}'.format(
             url,
             dj_settings.UPI_PARTNER_ID,
             json.dumps(req_param)
