@@ -237,7 +237,7 @@ elif SETUP == 'prod':
     REDIS_CONNECT_RETRY = True
     CELERY_SEND_EVENTS = True
 
-    UPI_URL = 'https://mosambee.cash/'
+    UPI_URL = 'https://mosambee.cash/PayProWebService/live/upi/statusCall/'
     UPI_API_PASSWORD = "73A2AEC172534D23975D05093"
     UPI_PAY_PRO_MID = "89218"
     UPI_SECRET = "LZpydM6fLcMULdgnd6dxOA=="
