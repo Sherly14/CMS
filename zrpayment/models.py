@@ -17,6 +17,12 @@ PAYMENT_REQUEST_STATUS = (
     (3, 'Refund')
 )
 
+PAYMENT_REQUEST_TYPE = (
+    (0, 'Credit'),
+    (1, 'Commission')
+)
+
+
 
 class PaymentMode(RowInfo):
     name = models.CharField(max_length=64)
@@ -93,6 +99,7 @@ class PaymentRequest(RowInfo):
     comments = models.TextField(max_length=1024, null=True, blank=True)
     reject_comments = models.TextField(max_length=1024, null=True, blank=True)
     status = models.PositiveSmallIntegerField(choices=PAYMENT_REQUEST_STATUS, default=0, null=True, blank=True)
+    payment_type = models.PositiveSmallIntegerField(choices=PAYMENT_REQUEST_TYPE, default=0, null=True, blank=True)
 
     @property
     def request_type(self):
