@@ -1,0 +1,13 @@
+.idea
+.DS_Store
+*.pyc
+media
+*.dump
+*.rdb
+*.log
+logfile
+.vscode
+env
+zrcms/local_settings.py
+
+
