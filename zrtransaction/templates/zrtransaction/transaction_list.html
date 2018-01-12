@@ -32,6 +32,31 @@
                     {% endfor %}
                 </select>
             </div>
+            <div class="col-2">
+
+             <div class="col-4" id="select1">
+                <select id="user-distributor-id"  name="user-distributor-id">
+                    <option value="-1">ALL</option>
+                    {% for distributor in distributor_list %}
+                        <option value="{{ distributor.id }}" {% if  distributor.id == distributor_id %}selected{% endif %}>{{ distributor.first_name }} {{ distributor.last_name|default_if_none:""}}</option>
+                     {% endfor %}
+                </select>
+            </div>
+
+            </div>
+            <div class="col-2">
+                <select id="user-subdistributor-id" name="user-subdistributor-id">
+                    <option value="-3">ALL</option>
+                    {% for key,val in subDistMerchant.items %}
+                       <optgroup label = "{{val.0.0}} ">
+                           <option value="{{key}}"{% if key == sub_distributor_id  %}selected{% endif %}>ALL-{{val.0.0}}</option>
+                            {% for subdrow in val %}
+                                <option value="{{subdrow.1}}" {% if subdrow.1 == merchant_id %}selected{% endif %}>{{ subdrow.2 }}</option>
+                            {% endfor %}
+                        </optgroup>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
         <br>
         <div class="row">
@@ -108,8 +133,71 @@
 
     <script>
     $(document).ready(function(){
-        $('#user-transaction-id').select2();
+     distributor_id = $("#user-distributor-id").val()
+    $("#user-distributor-id").change(function()
+     {
+        var id = $(this).val();
 
+        url = window.location.pathname
+        if (id!="")
+        {
+            url += '?distributor-id='+id
+
+        }
+        window.location.assign(url)
+     });
+
+
+      $("#user-subdistributor-id").change(function(){
+            subdistributorId = $("#user-subdistributor-id").val();
+            merchantId ="";
+            distributor_id = $("#user-distributor-id").val()
+             var selectedAll = $("#user-subdistributor-id :selected").text();
+             var subdistributorAll ="";
+             if (selectedAll.includes("ALL"))
+             {
+                if(subdistributorId == -1)
+                {
+                    merchantId = subdistributorId;
+                    subdistributorId = "";
+                }
+             }
+             else
+             {
+                  merchantId = subdistributorId;
+                  subdistributorId = "";
+
+             }
+
+             url = window.location.pathname
+             if( distributor_id > 0)
+             {
+                url += '?merchant-id='+merchantId + '&distributor-id='+distributor_id ;
+             }
+             else
+             {
+                 url += '?merchant-id='+merchantId
+             }
+
+             if(subdistributorId != "")
+             {
+                url = window.location.pathname+ "?";
+                 if (distributor_id)
+                    url += "distributor-id="+distributor_id
+                url += "&sub-distributor-id="+subdistributorId
+             }
+
+
+             window.location.assign(url)
+
+
+         });
+
+
+
+        $('#user-transaction-id').select2();
+        $('#user-distributor-id').select2();
+        $('#user-subdistributor-id').select2();
 
         $('#search-btn').click(function () {
         startDate = $('#start-date').val();

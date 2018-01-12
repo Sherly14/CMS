@@ -192,14 +192,14 @@ def get_merchant_qs(request):
             )
         elif filter == 'Last-Month':
             queryset = queryset.filter(at_created__range=last_month())
-        sub_merchant_id = []
-        subDistMerchant =  zrmappings_models.SubDistributorMerchant.objects.filter(sub_distributor=request.user.zr_admin_user.zr_user)
-        if subDistMerchant:
-            for sub_dist in subDistMerchant:
-                sub_merchant_id.append(sub_dist.merchant_id)
+    sub_merchant_id = []
+    subDistMerchant =  zrmappings_models.SubDistributorMerchant.objects.filter(sub_distributor=request.user.zr_admin_user.zr_user)
+    if subDistMerchant:
+        for sub_dist in subDistMerchant:
+            sub_merchant_id.append(sub_dist.merchant_id)
 
-        if sub_merchant_id:
-            queryset=ZrUser.objects.filter(id__in=sub_merchant_id)
+    if sub_merchant_id:
+        queryset=ZrUser.objects.filter(id__in=sub_merchant_id)
 
 
     distributor_id = request.GET.get('distributor-id')
