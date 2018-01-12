@@ -119,9 +119,9 @@ def get_merchant_qs(request):
                 dist_sub_merchant_list.append(data.merchant_id)
 
         if dist_sub_merchant_list:
-            dist_sub_all_mercahnt =  ZrUser.objects.filter(id__in=dist_sub_merchant_list)
+            dist_sub_all_mercahnt = ZrUser.objects.filter(id__in=dist_sub_merchant_list).order_by('-at_created')
 
-        merchantDistlist = list(chain(usermerchantlist, dist_sub_all_mercahnt))
+        merchantDistlist = usermerchantlist|dist_sub_all_mercahnt
 
         queryset=merchantDistlist
 
@@ -134,7 +134,7 @@ def get_merchant_qs(request):
                     DISTMERCHLIST.append(d.merchant_id)
 
             if DISTMERCHLIST:
-                queryset = ZrUser.objects.filter(id__in=DISTMERCHLIST)
+                queryset = ZrUser.objects.filter(id__in=DISTMERCHLIST).order_by('-at_created')
 
 
         if q:
@@ -238,7 +238,7 @@ def get_merchant_qs(request):
         userDsitributorMerchant = ZrUser.objects.filter(id__in=distributorMerchantList)
         userSubDistributorMerchant = ZrUser.objects.filter(id__in=SubDistributorMerchantList)
 
-        merchantDataList = list(chain(userDsitributorMerchant, userSubDistributorMerchant))
+        merchantDataList = userDsitributorMerchant| userSubDistributorMerchant
 
         queryset = merchantDataList
 
@@ -393,7 +393,9 @@ def mail_report(request):
         "user_type": user_type,
         "q": request.GET.get('q', ""),
         "filter": request.GET.get('filter', ""),
-        "period": request.GET.get('period', ""),
+        "period": request.POST.get('period', ''),
+        "start_date": request.POST.get('startDate',''),
+        "end_date": request.POST.get('endDate',''),
         "user_id": request.user.id,
     }
     from zruser import tasks as zu_celery_tasks
@@ -423,8 +425,6 @@ class MerchantListView(ListView):
         merchant = []
         subDistMerchant = {}
         sub_distributor_id = self.request.GET.get('sub-distributor-id')
-
-
 
         if self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
             try:
@@ -469,9 +469,6 @@ class MerchantListView(ListView):
                 else:
                     subDistMerchant[-1] = [["MERCHANTS", distmerchant.merchant.id, distmerchant.merchant.first_name]]
 
-
-
-
         if not pg_no:
             pg_no = 1
         filter = self.request.GET.get('filter')
@@ -494,8 +491,6 @@ class MerchantListView(ListView):
         if merchant_id:
             context['merchant_id'] = int(merchant_id)
 
-
-
         if distributor_id:
             context['distributor_id'] =int(distributor_id)
 
@@ -507,11 +502,8 @@ class MerchantListView(ListView):
         if sub_distributor_id:
             context['sub_distributor_id'] = int(sub_distributor_id)
 
-        if distributor_id:
-            context['distributor_id'] = int(distributor_id)
-
-
-
+        if merchant_id:
+            context['sub_distributor_id'] = int(merchant_id)
 
         context['queryset'] = queryset
         if is_user_superuser(self.request):
@@ -599,14 +591,14 @@ class KYCRequestsView(ListView):
     def get_context_data(self, **kwargs):
         filter_by = self.request.GET.get('filter', 'All')
         q = self.request.GET.get('q', "")
-
+        user_list = ZrUser.objects.filter(is_kyc_verified=False)
         context = super(KYCRequestsView, self).get_context_data(**kwargs)
-
+        start_date = self.request.GET.get('startDate')
+        end_date = self.request.GET.get('endDate')
         queryset = self.get_queryset()
         context['filter_by'] = filter_by
         context['q'] = q
-        if not queryset:
-            return context
+        user_id = self.request.GET.get('user_id')
 
         paginator = Paginator(queryset, self.paginate_by)
         page = self.request.GET.get('page', 1)
@@ -618,6 +610,18 @@ class KYCRequestsView(ListView):
 
         context['page_obj'] = queryset
 
+        if user_list:
+            context['user_list'] = user_list
+
+        if start_date:
+            context['startDate'] = start_date
+
+        if end_date:
+            context['endDate'] = end_date
+
+        if user_id:
+            context['user_id'] = int(user_id)
+
         return context
 
     def get_queryset(self):
@@ -625,7 +629,7 @@ class KYCRequestsView(ListView):
         reject = self.request.GET.get('approve')
         filter_by = self.request.GET.get('filter', 'All')
         q = self.request.GET.get('q')
-
+        user_id = self.request.GET.get('user_id')
         if approve or reject:
             if not ZrUser.objects.filter(id=approve or reject).last():
                 raise Http404
@@ -675,6 +679,14 @@ class KYCRequestsView(ListView):
                 mobile_no__contains=q
             )
             queryset = queryset.filter(query)
+        start_date = self.request.GET.get('startDate')
+        end_date = self.request.GET.get('endDate')
+
+        if start_date != None and end_date != None:
+            queryset = queryset.filter(at_created__range=(start_date, end_date))
+
+        if user_id != None and int(user_id) > 0:
+            queryset = queryset.filter(id=user_id)
 
         return queryset
 
@@ -896,13 +908,18 @@ class DashBoardView(ListView):
 
     def get_context_data(self, *args, **kwargs):
         period = self.request.GET.get('period')
+        start_date = self.request.GET.get('startDate')
+        end_date = self.request.GET.get('endDate')
         dt_filter = {}
         if period == 'today':
-            dt_filter['at_created'] = datetime.datetime.now().date()
+          dt_filter['at_created'] = datetime.datetime.now().date()
         elif period == 'last-week':
-            dt_filter['at_created__range'] = date_utils.last_week_range()
+           dt_filter['at_created__range'] = date_utils.last_week_range()
         elif period == 'last-month':
-            dt_filter['at_created__range'] = date_utils.last_month()
+           dt_filter['at_created__range'] = date_utils.last_month()
+
+        if start_date != None and end_date != None:
+            dt_filter['at_created__range']=(start_date, end_date)
 
         context = super(DashBoardView, self).get_context_data(*args, **kwargs)
         if is_user_superuser(self.request):
@@ -1067,6 +1084,13 @@ class DashBoardView(ListView):
         context['payment_mods'] = PaymentMode.objects.all()
         context['is_user_superuser'] = is_user_superuser(request=self.request)
         context['bank'] = Bank.objects.all()
+
+        if start_date:
+            context['startDate'] = start_date
+
+        if end_date:
+            context['endDate'] = end_date
+
 
         return context
 
@@ -1458,7 +1482,6 @@ class SubDistributorListView(ListView):
         end_date = self.request.GET.get('endDate')
         sub_distributor_id = self.request.GET.get('sub-distributor-id')
         distributor_id = self.request.GET.get('distributor-id')
-      #  sub_distributor_list = zrmappings_models.DistributorSubDistributor.objects.all()
         subDistributor = {}
         sub_distributor_list =[]
 

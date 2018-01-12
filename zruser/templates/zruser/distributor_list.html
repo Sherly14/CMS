@@ -22,7 +22,7 @@
                 <div class="col-2">
                     <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
                 </div>
-                <div class="col-4">
+                <div class="col-8">
                     <select id="distributor-id"  name="distributor-id">
                         <option value="-1">ALL</option>
                         {% for distributor in distributor_list %}
@@ -32,27 +32,18 @@
                     </select>
                 </div>
             </div>
+            <br>
             <div class="row rm-margin-side">
-                <p class="head-left">PERIOD</p>
-            </div>
-            <div class="row">
-                <div class="d-flex justify-content-between" style="width:90%">
-                    <select id="period">
-                        <option value="All" {% if filter_by == "All" %}selected{% endif %}>All</option>
-                        <option value="Today" {% if filter_by == "Today" %}selected{% endif %}>Today</option>
-                        <option value="Last Week" {% if filter_by == "Last-Week" %}selected{% endif %}>Last Week</option>
-                        <option value="Last Month" {% if filter_by == "Last-Month" %}selected{% endif %}>Last Month</option>
-                    </select>
-
-                    <div style="position: relative;">
-                        <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                        <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
-                    </div>
-                    <input class="button red" type="button" value="Search" id="search-btn">
-                    <a class="nav-link" href="{% url 'user:distributor-list' %}">Reset filters</a>
-                    <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
+                <div style="position: relative;">
+                    <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                    <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
                 </div>
+                &nbsp;&nbsp;
+                <input class="button red" type="button" value="Search" id="search-btn">
+                <a class="nav-link" href="{% url 'user:distributor-list' %}">Reset filters</a>
+                <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
             </div>
+
             <br>
             <div class="row" style="padding-right: 50px;">
                 <div class="fine">
@@ -114,8 +105,7 @@
 
     $(document).ready(function()
     {
-         $('.js-example-basic-single').select2();
-         distributorId = $("#distributor-id").val();
+         $('#distributor-id').select2();
 
         $('#search-btn').click(function(){
 
@@ -135,13 +125,29 @@
                 url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
             }
 
-            if(distributorId!="")
-            {
-                 url +=  '&distributor-id='+ $("#distributor-id").val();
-            }
-
             window.location.assign(url)
         });
+
+         $('#distributor-id').change(function(){
+         distributorId = $("#distributor-id").val();
+         all = "";
+
+         var selectedAll = $("#user-transaction-id :selected").text();
+             if (selectedAll.includes("ALL"))
+             {
+                all = distributorId;
+                distributorId = ""
+                 url = window.location.pathname +'?distributor-id=' + all
+             }
+
+
+              if(distributorId !="")
+                {
+                    url = window.location.pathname +'?distributor-id=' + distributorId
+                }
+
+          window.location.assign(url)
+    });
 
         $('#period').change(function() {
             period_val = $(this).val();

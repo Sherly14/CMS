@@ -29,44 +29,34 @@
                             {% for distributor in distributor_list %}
                                 <option value="{{ distributor.id }}" {% if  distributor.id == distributor_id %}selected{% endif %}>{{ distributor.first_name }} {{ distributor.last_name|default_if_none:""}}</option>
                              {% endfor %}
-
                         </select>
                 </div>
                  {% endif %}
 
                  <div class="col-4">
                     <select id="sub-distributor-id"  name="sub-distributor-id">
-                          <option value="-1">ALL</option>
+                          <option value="-3">ALL</option>
                             {% for key,val in subDistMerchant.items %}
                                <optgroup label = "{{val.0.0}} ">
-                                   <option value="{{key}}">ALL-{{val.0.0}}</option>
+                                   <option value="{{key}}"{% if key == sub_distributor_id  %}selected{% endif %}>ALL-{{val.0.0}}</option>
                                     {% for subdrow in val %}
                                         <option value="{{subdrow.1}}" {% if subdrow.1 == merchant_id %}selected{% endif %}>{{ subdrow.2 }}</option>
                                     {% endfor %}
                                 </optgroup>
-
                             {% endfor %}
                     </select>
                 </div>
             </div>
-        <div class="row rm-margin-side">
-            <p class="head-left">PERIOD</p>
-        </div>
+        <br>
         <div class="row">
-            <div class="d-flex justify-content-between" style="width:90%">
-                <select id="period">
-                    <option value="Today" {% if filter_by == "Today" %}selected{% endif %}>Today</option>
-                    <option value="Last Week" {% if filter_by == "Last-Week" %}selected{% endif %}>Last Week</option>
-                    <option value="Last Month" {% if filter_by == "Last-Month" %}selected{% endif %}>Last Month</option>
-                </select>
-                <div style="position: relative;">
-                    <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                    <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
-                </div>
-                <a class="nav-link" href="{% url 'user:merchant-list' %}">Reset filters</a>
-                <input class="button red" type="button" value="Search" id="search-btn">
-                <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
+            <div style="position: relative;">
+                <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
             </div>
+            <a class="nav-link" href="{% url 'user:merchant-list' %}">Reset filters</a>
+            <input class="button red" type="button" value="Search" id="search-btn">
+            &nbsp;&nbsp;&nbsp;&nbsp;
+            <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
         </div>
         <br>
         <div class="row" style="padding-right: 50px;">
@@ -163,6 +153,7 @@
             merchantId ="";
             distributor_id = $("#distributor-id").val()
              var selectedAll = $("#sub-distributor-id :selected").text();
+             var subdistributorAll ="";
              if (selectedAll.includes("ALL"))
              {
                 if(subdistributorId == -1)
@@ -204,9 +195,6 @@
 
 
     $('#search-btn').click(function(){
-
-        distributorId = $("#distributor-id").val();
-        merchantId =""
         startDate = $('#start-date').val();
         endDate = $('#end-date').val();
         {% if filter_by %}
@@ -217,32 +205,14 @@
 
         if(startDate!="" && endDate!="" )
             {
+
                 url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
             }
 
-
-        if(merchantId!="")
-            {
-                 url +=  '&sub-distributor-id='+ merchantId;
-            }
-
-        if(distributorId!="")
-            {
-                 url +=  '&distributor-id='+ $("#distributor-id").val();
-            }
-
         window.location.assign(url)
     })
 
-    $('#period').change(function() {
-        period_val = $(this).val()
-        url = window.location.pathname + '?filter=' + period_val.replace(' ', '-')
-        {% if q %}
-            url += '&q={{ q }}'
-        {% endif %}
 
-        window.location.assign(url)
-    })
 
     $('#csv-download').click(function(){
         url = "{% url "user:merchant-csv" %}" + window.location.search
