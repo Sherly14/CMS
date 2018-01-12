@@ -94,9 +94,9 @@
                                         {% endif %}{% endif %}
                                     </td>
                                     <td>
-                                        {% if payment_request.status == 1 and not payment_request.status == 3 %}
-                                            <input type="button" class="button red payment change_request_id confirm_refund_select" value="Revoke" data-toggle="modal" data-target="#confirm_refund" data-slug-id="{{ payment_request.pk }}">
-                                        {% endif %}
+                                       {# {% if payment_request.status == 1 and not payment_request.status == 3 %}#}
+                                         {#   <input type="button" class="button red payment change_request_id confirm_refund_select" value="Revoke" data-toggle="modal" data-target="#confirm_refund" data-slug-id="{{ payment_request.pk }}">#}
+                                        {#{% endif %}#}
                                     </td>
                                     <td>
                                         {% if payment_request.status == 0 %}

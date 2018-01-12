@@ -39,6 +39,7 @@ class Commission(RowInfo):
     # sub_distributor_gst = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
     net_commission = models.DecimalField(max_digits=10, decimal_places=4, default=0.00)
     # zrupee_commission = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    is_settled = models.BooleanField(default=False)
 
     def gross_amount(self):
         return  self.net_commission + self.user_tds - self.user_gst
@@ -94,6 +95,7 @@ class BillPayCommissionStructure(RowInfo):
     is_default = models.BooleanField(default=False)
     is_enabled = models.BooleanField(default=True)
 
+
     def save(self, *args, **kwargs):
         # self.commission_for_zrupee = Decimal(
         #     self.commission_for_zrupee
@@ -138,6 +140,7 @@ class DMTCommissionStructure(RowInfo):
     gst_value = models.DecimalField(max_digits=7, decimal_places=4, default=0.00)
     is_enabled = models.BooleanField(default=True)
     is_default = models.BooleanField(default=False)
+
 
     def save(self, *args, **kwargs):
         self.commission_for_zrupee = Decimal(self.commission_for_zrupee).quantize(Decimal("0.00"))
