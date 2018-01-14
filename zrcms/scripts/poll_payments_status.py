@@ -1,3 +1,15 @@
+# coding: utf-8
+import os
+import django
+
+import sys
+
+sys.path.append('../')
+sys.path.append('../../')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
+django.setup()
+
+
 from common_utils.upi_status_check import get_payment_status
 from zrpayment.models import Payments
 
