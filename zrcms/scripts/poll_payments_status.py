@@ -16,7 +16,7 @@ def poll_payments_for_lastest_status():
             if response['status'] == "CONFIRMED":
                 payment_obj.status = Payments.payment_status[1][0]
                 payment_obj.transaction_response_json["%s_RESPONSE" % response['status']] = response
-            elif response['status'] == "FAILURE":
+            elif response['status'] in ["FAILURE", "FAILED"]:
                 payment_obj.status = Payments.payment_status[2][0]
                 payment_obj.transaction_response_json["%s_RESPONSE" % response['status']] = response
             elif response['status'] == "EXPIRED":
@@ -24,3 +24,7 @@ def poll_payments_for_lastest_status():
                 payment_obj.transaction_response_json["%s_RESPONSE" % response['status']] = response
 
             payment_obj.save()
+
+
+poll_payments_for_lastest_status()
+
