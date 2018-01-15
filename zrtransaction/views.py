@@ -158,6 +158,28 @@ def get_transactions_qs(request):
     if merchant_id != None and int(merchant_id) > 0:
         queryset = queryset.filter(user_id = merchant_id)
 
+
+    if sub_distributor_id != None and int(sub_distributor_id) > 0:
+        subMerchant = zrmappings_models.SubDistributorMerchant.objects.filter(sub_distributor_id=sub_distributor_id)
+        merchantlist = []
+        if subMerchant:
+            for sub_merchant in subMerchant:
+                merchantlist.append(sub_merchant.merchant_id)
+
+        if merchantlist:
+            queryset = Transaction.objects.filter(user_id__in= merchantlist)
+
+    if distributor_id != None and merchant_id == "-1":
+        distmerchantlist = []
+        DistM = zrmappings_models.DistributorMerchant.objects.filter(distributor_id=distributor_id)
+
+        if DistM:
+            for dist in DistM:
+                distmerchantlist.append(dist.merchant_id)
+
+        if distmerchantlist:
+            queryset = Transaction.objects.filter(user_id__in=distmerchantlist)
+
     return queryset
 
 
