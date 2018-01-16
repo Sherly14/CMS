@@ -180,6 +180,19 @@ def get_transactions_qs(request):
         if distmerchantlist:
             queryset = Transaction.objects.filter(user_id__in=distmerchantlist)
 
+    if merchant_id == "-1":
+        distmerchantlist = []
+        DistM = zrmappings_models.DistributorMerchant.objects.filter(distributor_id=request.user.zr_admin_user.zr_user)
+
+        if DistM:
+            for dist in DistM:
+                distmerchantlist.append(dist.merchant_id)
+
+        if distmerchantlist:
+            queryset = Transaction.objects.filter(user_id__in=distmerchantlist)
+
+
+
     return queryset
 
 
@@ -194,7 +207,6 @@ class TransactionsListView(ListView):
     def get_context_data(self, *args, **kwargs):
         context = super(TransactionsListView, self).get_context_data()
         query_string = {}
-        distributor_list = ZrUser.objects.filter(role__name=DISTRIBUTOR)
         start_date = self.request.GET.get('startDate')
         end_date = self.request.GET.get('endDate')
         merchant_id = self.request.GET.get('merchant-id')
@@ -208,13 +220,22 @@ class TransactionsListView(ListView):
 
         if user_utils.is_user_superuser(self.request):
             user_transaction_data = Transaction.objects.all().distinct('user_id').exclude(txn_id ='')
+            merchant = zrmappings_models.DistributorMerchant.objects.filter(distributor_id=distributor_id)
+            sub_distributor = zrmappings_models.DistributorSubDistributor.objects.filter(distributor_id=distributor_id)
+            distributor_list = ZrUser.objects.filter(role__name=DISTRIBUTOR)
+            context['distributor_list'] = distributor_list
 
         elif self.request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
             user_transaction_data = Transaction.objects.filter(user_id__in=get_sub_distributor_merchant_id_list_from_sub_distributor(self.request.user.zr_admin_user.zr_user)).distinct('user_id').exclude(txn_id='')
+            merchant = zrmappings_models.SubDistributorMerchant.objects.filter(sub_distributor=self.request.user.zr_admin_user.zr_user)
+            distributor_list = []
 
         elif self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
             user_transaction_data = Transaction.objects.filter(user_id__in=get_merchant_id_list_from_distributor(self.request.user.zr_admin_user.zr_user) +
                get_sub_distributor_merchant_id_list_from_distributor(self.request.user.zr_admin_user.zr_user)).distinct('user_id').exclude(txn_id='')
+            sub_distributor = zrmappings_models.DistributorSubDistributor.objects.filter(distributor=self.request.user.zr_admin_user.zr_user)
+            merchant = zrmappings_models.DistributorMerchant.objects.filter(distributor=self.request.user.zr_admin_user.zr_user)
+            distributor_list = []
 
         user_transaction_id =self.request.GET.get('user_transaction_id')
         # Search context
@@ -240,8 +261,6 @@ class TransactionsListView(ListView):
         except EmptyPage:
             raise Http404
 
-        merchant = zrmappings_models.DistributorMerchant.objects.filter(distributor_id=distributor_id)
-        sub_distributor = zrmappings_models.DistributorSubDistributor.objects.filter(distributor_id=distributor_id)
 
         if sub_distributor:
             for subdist in sub_distributor:

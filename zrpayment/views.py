@@ -29,6 +29,9 @@ from common_utils.user_utils import is_user_superuser, file_save_s3
 from zrpayment.models import PaymentRequest, Payments
 from zruser import mapping as user_map
 from zrwallet import models as zrwallet_models
+from zruser.models import ZrUser
+from zrmapping import models as zrmappings_models
+
 
 SUCCESS_MESSAGE_START = '<div class="alert alert-success" role="alert"><div class="alert-content"><i class="glyphicon glyphicon-ok-circle"></i><strong>'
 ERROR_MESSAGE_START = '<div class="alert alert-danger" role="alert"><div class="alert-content"><i class="glyphicon glyphicon-remove-circle"></i><strong>'
@@ -471,6 +474,8 @@ class PaymentRequestListView(ListView):
         from_user_id = self.request.GET.get('from_user_id')
         context = super(PaymentRequestListView, self).get_context_data(**kwargs)
         fromuser_list = PaymentRequest.objects.all().filter(to_user__role__name='ADMINSTAFF', ).distinct('from_user_id')
+        distributor_id = self.request.GET.get('distributor-id')
+        sub_distributor_list = []
         queryset = self.get_queryset()
        # if not queryset:
        #     context['filter_by'] = filter_by
@@ -512,16 +517,19 @@ class PaymentRequestListView(ListView):
         if start_date:
             context['startDate'] = start_date
 
-
-
         if end_date:
             context['endDate'] = end_date
+
+        if distributor_id:
+            context['distributor_id'] = int(distributor_id)
 
         if from_user_id:
             context['from_user_id'] = int(from_user_id)
 
         if fromuser_list:
             context['fromuser_list'] = fromuser_list
+
+
 
         return context
 

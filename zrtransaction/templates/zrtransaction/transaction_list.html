@@ -24,26 +24,16 @@
             <div class="col-2">
                 <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
             </div>
-            <div class="col-2">
-                <select id="user-transaction-id" name="user-id">
-                    <option value="-1">ALL</option>
-                    {% for userTransctionData in user_transaction_data %}
-                        <option value="{{userTransctionData.user_id}}"{% if userTransctionData.user_id == user_transaction_id %}selected{% endif %}>{{userTransctionData.user.first_name}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-2">
-
-             <div class="col-4" id="select1">
-                <select id="user-distributor-id"  name="user-distributor-id">
+             {% if distributor_list %}
+                <div class="col-2">
+                    <select id="user-distributor-id"  name="user-distributor-id">
                     <option value="-1">ALL</option>
                     {% for distributor in distributor_list %}
                         <option value="{{ distributor.id }}" {% if  distributor.id == distributor_id %}selected{% endif %}>{{ distributor.first_name }} {{ distributor.last_name|default_if_none:""}}</option>
                      {% endfor %}
                 </select>
-            </div>
-
-            </div>
+                </div>
+            {% endif %}
             <div class="col-2">
                 <select id="user-subdistributor-id" name="user-subdistributor-id">
                     <option value="-3">ALL</option>

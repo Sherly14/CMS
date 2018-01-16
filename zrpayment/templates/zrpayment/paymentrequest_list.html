@@ -28,7 +28,7 @@
                 <div class="col-2">
                     <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
                 </div>
-                <div class="col-4">
+                <div class="col-2">
                     <select id="from-user-id" name="from-user-id">
                         <option value="-1">ALL</option>
                         {% for fromuser in fromuser_list %}
@@ -270,7 +270,6 @@
 $(document).ready(function()
     {
     $('#from-user-id').select2();
-
     window.current_payment_request = null
     $('#search-btn').click(function(){
         startDate = $('#start-date').val();

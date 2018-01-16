@@ -112,18 +112,18 @@ def get_merchant_qs(request):
                 sub_distributor_list2.append(subdist2.sub_distributor_id)
 
         if sub_distributor_list2:
-           usersubdistmerch = zrmappings_models.SubDistributorMerchant.objects.filter(sub_distributor_id__in = sub_distributor_list2 )
+            usersubdistmerch = zrmappings_models.SubDistributorMerchant.objects.filter(sub_distributor_id__in = sub_distributor_list2 )
 
         if usersubdistmerch:
             for data in usersubdistmerch:
                 dist_sub_merchant_list.append(data.merchant_id)
 
         if dist_sub_merchant_list:
-            dist_sub_all_mercahnt = ZrUser.objects.filter(id__in=dist_sub_merchant_list).order_by('-at_created')
+            dist_sub_all_merchant = ZrUser.objects.filter(id__in=dist_sub_merchant_list).order_by('-at_created')
 
-        merchantDistlist = usermerchantlist|dist_sub_all_mercahnt
+        merchantDistlist = usermerchantlist | dist_sub_all_merchant
 
-        queryset=merchantDistlist
+        queryset= merchantDistlist
 
         if merchant_id == "-1":
             DISTMERCHLIST = []
@@ -288,8 +288,8 @@ def get_merchant_csv(request):
     ])
 
     for merchant in merchant_qs:
-        if not is_user_superuser(request):
-            merchant = merchant.merchant
+       # if not is_user_superuser(request):
+        #    merchant = merchant.merchant
 
         writer.writerow(
             [
