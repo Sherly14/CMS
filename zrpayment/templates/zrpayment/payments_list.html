@@ -13,38 +13,29 @@
     <div class="content-wrapper">
         <p class="head-right">Payments Table</p>
         <div class="col-12" >
-             <div class="row rm-margin-side">
-                <div class="col-2">
-                    <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-                </div>
-                <div class="col-2">
-                    <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-                </div>
-                <div class="col-2">
-                    <select id="user-payment-id" name="user-payment-id">
-                        <option value="-1">ALL</option>
-                        {% for userpayment in user_list %}
-                            <option value="{{userpayment.user_id}}"{% if userpayment.user_id == user_payment_id %}selected{% endif %}>{{userpayment.user.first_name}}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+            <div class="row rm-margin-side">
+                <p class="head-left">Date</p>
             </div>
-            <br>
             <div class="row">
-                <div style="position: relative;">
-                    <input class="search" id="search-txt" type="search" name="search" value="{% if q %}{{ q }}{% endif %}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                    <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                <div class="d-flex justify-content-between" style="width:90%">
+                    <select id="timespan-filter" >
+                        <option value="all" {% if filter_by == "all" %} selected {% endif %}>All</option>
+                        <option value="today" {% if filter_by == "today" %} selected {% endif %}>Today</option>
+                        <option value="last_week" {% if filter_by == "last_week" %} selected {% endif %}>Last Week</option>
+                        <option value="last_month" {% if filter_by == "last_month" %} selected {% endif %}>Last Month</option>
+                    </select>
+                    <div style="position: relative;">
+                        <input class="search" id="search-txt" type="search" name="search" value="{% if q %}{{ q }}{% endif %}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                        <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                    </div>
+                    <input type="button" id="search-btn" class="button red" value="Search">
+                    <a href="{% url 'payment-requests:payment-list' %}" >Reset filters</a>
+                    <button data-toggle="modal" data-target="#get_email_modal" class="button red">
+                        DOWNLOAD CSV
+                    </button>
+                    {% csrf_token %}
+                    <input type="hidden" id="request_id" value="">
                 </div>
-                &nbsp;&nbsp;
-                <input type="button" id="search-btn" class="button red" value="Search">
-                  &nbsp;&nbsp;  &nbsp;&nbsp;
-                <a href="{% url 'payment-requests:payment-list' %}" >Reset filters</a>
-                  &nbsp;&nbsp;  &nbsp;&nbsp;
-                <button data-toggle="modal" data-target="#get_email_modal" class="button red">
-                    DOWNLOAD CSV
-                </button>
-                {% csrf_token %}
-                <input type="hidden" id="request_id" value="">
             </div>
             <br>
             <div>
@@ -135,8 +126,6 @@
                     <form class="form-horizontal" method="POST" id="report_mail_form" enctype="multipart/form-data">
                         {% csrf_token %}
                         <input hidden name="period" value="{{ request.GET.period }}">
-                        <input hidden name="startDate" value="{{ request.GET.startDate }}">
-                        <input hidden name="endDate" value="{{ request.GET.endDate }}">
                         <div class="row" style="padding-left: 3rem;padding-top: 25px;">
                             <input name="q" hidden value="{{ q }}">
                             <input name="filter_by" hidden value="{{ filter_by }}">
@@ -169,108 +158,16 @@
     <!-- /.modal -->
 
 <script>
-$(document).ready(function(){
-        $('#user-payment-id').select2();
-        window.current_payment_request = null
-
-    $('#search-btn').click(function()
-    {
-        startDate = $('#start-date').val();
-        endDate = $('#end-date').val();
+    window.current_payment_request = null
+    $('#search-btn').click(function(){
         search = $('#search-txt').val();
         {% if filter_by %}
             url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}"
         {% else %}
             url = window.location.pathname + "?q=" + $('#search-txt').val()
         {% endif %}
-
-        if(startDate!="" && endDate!="" )
-            {
-                url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
-            }
-
         window.location.assign(url)
     });
-
-     $('#user-payment-id').change(function(){
-         user_payment_id = $('#user-payment-id').val();
-         all = "";
-
-         var selectedAll = $("#user-payment-id :selected").text();
-             if (selectedAll.includes("ALL"))
-             {
-                all = user_payment_id;
-                user_payment_id = ""
-                 url = window.location.pathname +'?user_payment_id=' + all
-             }
-
-
-              if(user_payment_id !="")
-                {
-                    url = window.location.pathname +'?user_payment_id=' + user_payment_id
-                }
-
-          window.location.assign(url)
-        });
-
-
-
-         var startDate = $('#start-date').val();
-         var endDate = $('#end-date').val();
-         var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
-        $('#start-date').datepicker({
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            format: 'yyyy-mm-dd',
-
-            maxDate: function () {
-            return $('#end-date').val();
-            }
-        }).on('change', function (ev)
-         {
-
-            var start = $("#start-date").val();
-            var startD = new Date(start);
-            var end = $("#end-date").val();
-            var endD = new Date(end);
-            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
-
-            $("#days").val(diff);
-
-            if(diff>31)
-            {
-               alert("date difference is greater than 31");
-               $('#start-date').val("");
-            }
-         });
-
-
-        $('#end-date').datepicker({
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            format: 'yyyy-mm-dd',
-
-            minDate: function () {
-                return $('#start-date').val();
-            }
-        }).on('change', function (ev)
-         {
-
-            var start = $("#start-date").val();
-            var startD = new Date(start);
-            var end = $("#end-date").val();
-            var endD = new Date(end);
-            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
-
-            $("#days").val(diff);
-
-            if(diff>31)
-            {
-               alert("date difference is greater than 31");
-               $('#end-date').val("");
-            }
-         });
-});
 
 </script>
 {% endblock %}

@@ -10,57 +10,27 @@
         <p class="head-right">Transactions Table</p>
     <div class="col-12" >
         <div class="row rm-margin-side">
-            <div class="col-2">
-                <p class="head-left">START DATE</p>
-            </div>
-            <div class="col-2">
-                <p class="head-left">END DATE</p>
-            </div>
+            <p class="head-left">PERIOD</p>
         </div>
-        <div class="row rm-margin-side">
-            <div class="col-2">
-                <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-            </div>
-            <div class="col-2">
-                <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-            </div>
-             {% if distributor_list %}
-                <div class="col-2">
-                    <select id="user-distributor-id"  name="user-distributor-id">
-                    <option value="-1">ALL</option>
-                    {% for distributor in distributor_list %}
-                        <option value="{{ distributor.id }}" {% if  distributor.id == distributor_id %}selected{% endif %}>{{ distributor.first_name }} {{ distributor.last_name|default_if_none:""}}</option>
-                     {% endfor %}
-                </select>
-                </div>
-            {% endif %}
-            <div class="col-2">
-                <select id="user-subdistributor-id" name="user-subdistributor-id">
-                    <option value="-3">ALL</option>
-                    {% for key,val in subDistMerchant.items %}
-                       <optgroup label = "{{val.0.0}} ">
-                           <option value="{{key}}"{% if key == sub_distributor_id  %}selected{% endif %}>ALL-{{val.0.0}}</option>
-                            {% for subdrow in val %}
-                                <option value="{{subdrow.1}}" {% if subdrow.1 == merchant_id %}selected{% endif %}>{{ subdrow.2 }}</option>
-                            {% endfor %}
-                        </optgroup>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-        <br>
         <div class="row">
-            <div style="position: relative;">
-                <input class="search" id="search-txt" type="search" name="search" value="{{ q }}"
-                       placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
-            </div>&nbsp;&nbsp;
-            <input class="button red" type="button" value="Search" id="search-btn">
-            <a class="nav-link" href="{% url 'transaction:transaction-list' %}">Reset filters</a>
-            <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
-            <input hidden id="is_data_exists" value="{% if queryset %}1{% else %}0{% endif %}">
+            <div class="d-flex justify-content-between" style="width:90%">
+                <select id="period">
+                    <option value="All" {% if filter_by == "All" %}selected{% endif %}>All</option>
+                    <option value="Today" {% if filter_by == "Today" %}selected{% endif %}>Today</option>
+                    <option value="Last Week" {% if filter_by == "Last-Week" %}selected{% endif %}>Last Week</option>
+                    <option value="Last Month" {% if filter_by == "Last-Month" %}selected{% endif %}>Last Month</option>
+                </select>
+                <div style="position: relative;">
+                    <input class="search" id="search-txt" type="search" name="search" value="{{ q }}"
+                           placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                    <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                </div>
+                <input class="button red" type="button" value="Search" id="search-btn">
+                <a class="nav-link" href="{% url 'transaction:transaction-list' %}">Reset filters</a>
+                <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
+                <input hidden id="is_data_exists" value="{% if queryset %}1{% else %}0{% endif %}">
+            </div>
         </div>
-    </div>
         <br>
         <div>
             <div class="row" style="padding-right: 50px;">
@@ -119,115 +89,26 @@
         </div>
         <br>
     </div>
-
+    </div>
 
     <script>
-    $(document).ready(function(){
-     distributor_id = $("#user-distributor-id").val()
-    $("#user-distributor-id").change(function()
-     {
-        var id = $(this).val();
-
-        url = window.location.pathname
-        if (id!="")
-        {
-            url += '?distributor-id='+id
-
-        }
-        window.location.assign(url)
-     });
-
-
-      $("#user-subdistributor-id").change(function(){
-            subdistributorId = $("#user-subdistributor-id").val();
-            merchantId ="";
-            distributor_id = $("#user-distributor-id").val()
-             var selectedAll = $("#user-subdistributor-id :selected").text();
-             var subdistributorAll ="";
-             if (selectedAll.includes("ALL"))
-             {
-                if(subdistributorId == -1)
-                {
-                    merchantId = subdistributorId;
-                    subdistributorId = "";
-                }
-             }
-             else
-             {
-                  merchantId = subdistributorId;
-                  subdistributorId = "";
-
-             }
-
-             url = window.location.pathname
-             if( distributor_id > 0)
-             {
-                url += '?merchant-id='+merchantId + '&distributor-id='+distributor_id ;
-             }
-             else
-             {
-                 url += '?merchant-id='+merchantId
-             }
-
-             if(subdistributorId != "")
-             {
-                url = window.location.pathname+ "?";
-                 if (distributor_id)
-                    url += "distributor-id="+distributor_id
-                url += "&sub-distributor-id="+subdistributorId
-             }
-
-
-             window.location.assign(url)
-
-
-         });
-
-
-
-        $('#user-transaction-id').select2();
-        $('#user-distributor-id').select2();
-        $('#user-subdistributor-id').select2();
-
         $('#search-btn').click(function () {
-        startDate = $('#start-date').val();
-        endDate = $('#end-date').val();
             {% if filter_by %}
                 url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}";
             {% else %}
                 url = window.location.pathname + "?q=" + $('#search-txt').val();
             {% endif %}
-
-         if(startDate!="" && endDate!="" )
-            {
-                url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
-            }
-
             window.location.assign(url)
         });
 
-        $('#user-transaction-id').change(function(){
-         user_transaction_id = $('#user-transaction-id').val();
-         all = "";
-
-         var selectedAll = $("#user-transaction-id :selected").text();
-             if (selectedAll.includes("ALL"))
-             {
-                all = user_transaction_id;
-                user_transaction_id = ""
-                 url = window.location.pathname +'?user_transaction_id=' + all
-             }
-
-
-              if(user_transaction_id !="")
-                {
-                    url = window.location.pathname +'?user_transaction_id=' + user_transaction_id
-                }
-
-          window.location.assign(url)
+        $('#period').change(function () {
+            period_val = $(this).val();
+            url = window.location.pathname + '?filter=' + period_val.replace(' ', '-');
+            {% if q %}
+                url += "&q={{ q }}";
+            {% endif %}
+            window.location.assign(url)
         });
-
-
 
         $('#csv-download').click(function () {
             if($("#is_data_exists").val() == "1"){
@@ -239,63 +120,6 @@
                 alert("No data available to download!!");
             }
         });
-
-        var startDate = $('#start-date').val();
-         var endDate = $('#end-date').val();
-         var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
-        $('#start-date').datepicker({
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            format: 'yyyy-mm-dd',
-
-            maxDate: function () {
-            return $('#end-date').val();
-            }
-        }).on('change', function (ev)
-         {
-
-            var start = $("#start-date").val();
-            var startD = new Date(start);
-            var end = $("#end-date").val();
-            var endD = new Date(end);
-            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
-
-            $("#days").val(diff);
-
-            if(diff>31)
-            {
-               alert("date difference is greater than 31");
-               $('#start-date').val("");
-            }
-         });
-
-
-        $('#end-date').datepicker({
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            format: 'yyyy-mm-dd',
-
-            minDate: function () {
-                return $('#start-date').val();
-            }
-        }).on('change', function (ev)
-         {
-
-            var start = $("#start-date").val();
-            var startD = new Date(start);
-            var end = $("#end-date").val();
-            var endD = new Date(end);
-            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
-
-            $("#days").val(diff);
-
-            if(diff>31)
-            {
-               alert("date difference is greater than 31");
-               $('#end-date').val("");
-            }
-         });
-     });
     </script>
 {% endblock %}
 

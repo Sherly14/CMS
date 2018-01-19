@@ -13,32 +13,15 @@
         <p class="head-right">Payment Request Sent</p>
         <div class="col-12" >
             <div class="row rm-margin-side">
-                <div class="col-2">
-                    <p class="head-left">START DATE</p>
-                </div>
-                <div class="col-2">
-                    <p class="head-left">END DATE</p>
-                </div>
+                <p class="head-left">Date</p>
             </div>
-            <div class="row rm-margin-side">
-                <div class="col-2">
-                    <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-                </div>
-                <div class="col-2">
-                    <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-                </div>
-                <div class="col-4">
-                    <select id="to-user-id" name="to-user-id">
-                        <option value="-1">ALL</option>
-                        {% for touser in touser_list %}
-                            <option value="{{touser.to_user_id}}"{% if touser.to_user_id == to_user_id %}selected{% endif %}>{{touser.to_user.first_name}} - {{touser.to_user.last_name}}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-            <br>
             <div class="row">
                 <div class="d-flex justify-content-between" style="width:90%">
+                    <select id="timespan-filter" >
+                        <option value="today" {% if filter_by == "today" %} selected {% endif %}>Today</option>
+                        <option value="last_week" {% if filter_by == "last_week" %} selected {% endif %}>Last Week</option>
+                        <option value="last_month" {% if filter_by == "last_month" %} selected {% endif %}>Last Month</option>
+                    </select>
                     <div style="position: relative;">
                         <input class="search" id="search-txt" type="search" name="search" value="{% if q %}{{ q }}{% endif %}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
                         <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
@@ -202,43 +185,15 @@
     <!-- /.modal -->
 
 <script>
-$(document).ready(function(){
-    $('#to-user-id').select2();
     $('#search-btn').click(function(){
-        startDate = $('#start-date').val();
-        endDate = $('#end-date').val();
         search = $('#search-txt').val();
         {% if filter_by %}
             url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}"
         {% else %}
             url = window.location.pathname + "?q=" + $('#search-txt').val()
         {% endif %}
-        if(startDate!="" && endDate!="" )
-            {
-                url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
-            }
         window.location.assign(url)
-    });
-
-     $('#to-user-id').change(function(){
-         to_user_id = $('#to-user-id').val();
-          all = "";
-         var selectedAll = $("#to-user-id :selected").text();
-             if (selectedAll.includes("ALL"))
-             {
-                all = to_user_id;
-                to_user_id = ""
-                 url = window.location.pathname +'?to_user_id=' + all
-             }
-
-
-              if(to_user_id !="")
-                {
-                    url = window.location.pathname +'?to_user_id=' + to_user_id
-                }
-
-          window.location.assign(url)
-    });
+    })
 
     $('#download-csv').click(function(){
         if(window.location.search) {
@@ -248,61 +203,6 @@ $(document).ready(function(){
         }
         window.location.assign(url)
     })
-    var startDate = $('#start-date').val();
-         var endDate = $('#end-date').val();
-         var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
-        $('#start-date').datepicker({
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            format: 'yyyy-mm-dd',
-
-            maxDate: function () {
-            return $('#end-date').val();
-            }
-        }).on('change', function (ev)
-         {
-
-            var start = $("#start-date").val();
-            var startD = new Date(start);
-            var end = $("#end-date").val();
-            var endD = new Date(end);
-            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
-
-            $("#days").val(diff);
-
-            if(diff>31)
-            {
-               alert("date difference is greater than 31");
-               $('#start-date').val("");
-            }
-         });
-
-         $('#end-date').datepicker({
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            format: 'yyyy-mm-dd',
-
-            minDate: function () {
-                return $('#start-date').val();
-            }
-        }).on('change', function (ev)
-         {
-
-            var start = $("#start-date").val();
-            var startD = new Date(start);
-            var end = $("#end-date").val();
-            var endD = new Date(end);
-            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
-
-            $("#days").val(diff);
-
-            if(diff>31)
-            {
-               alert("date difference is greater than 31");
-               $('#end-date').val("");
-            }
-         });
-    });
 </script>
 {% endblock %}
 

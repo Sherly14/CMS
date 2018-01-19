@@ -13,54 +13,23 @@
     <div class="content-wrapper">
         <p class="head-right">Passbook Table</p>
         <div class="col-12" >
-             <div class="row rm-margin-side">
-                <div class="col-2">
-                    <p class="head-left">START DATE</p>
-                </div>
-                <div class="col-2">
-                    <p class="head-left">END DATE</p>
-                </div>
-            </div>
             <div class="row rm-margin-side">
-                <div class="col-2">
-                    <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-                </div>
-                <div class="col-2">
-                    <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-                </div>
-                <div class="col-2">
-                    <select id="distributor-id"  name="distributor-id">
-                        <option value="-1">ALL</option>
-                        {% for distributor in distributor_list %}
-                            <option value="{{ distributor.id }}" {% if  distributor.id == distributor_id %}selected{% endif %}>{{ distributor.first_name }} {{ distributor.last_name|default_if_none:""}}</option>
-                         {% endfor %}
-                    </select>
-                </div>
-                 <div class="col-2">
-                    <select id="sub-distributor-id"  name="sub-distributor-id">
-                          <option value="-3">ALL</option>
-                            {% for key,val in subDistMerchant.items %}
-                               <optgroup label = "{{val.0.0}} ">
-                                   <option value="{{key}}"{% if key == sub_distributor_id  %}selected{% endif %}>ALL-{{val.0.0}}</option>
-                                    {% for subdrow in val %}
-                                        <option value="{{subdrow.1}}" {% if subdrow.1 == merchant_id %}selected{% endif %}>{{ subdrow.2 }}</option>
-                                    {% endfor %}
-                                </optgroup>
-                            {% endfor %}
-                    </select>
-                </div>
+                <p class="head-left">Date</p>
             </div>
-            <br>
             <div class="row">
+                <div class="d-flex justify-content-between" style="width:90%">
+                    <select id="timespan-filter" >
+                        <option value="all" {% if filter_by == "all" %} selected {% endif %}>All</option>
+                        <option value="today" {% if filter_by == "today" %} selected {% endif %}>Today</option>
+                        <option value="last_week" {% if filter_by == "last_week" %} selected {% endif %}>Last Week</option>
+                        <option value="last_month" {% if filter_by == "last_month" %} selected {% endif %}>Last Month</option>
+                    </select>
                     <div style="position: relative;">
                         <input class="search" id="search-txt" type="search" name="search" value="{% if q %}{{ q }}{% endif %}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
                         <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
                     </div>
-                &nbsp;&nbsp;&nbsp;
                     <input type="button" id="search-btn" class="button red" value="Search">
-                &nbsp;&nbsp;&nbsp;
                     <a href="{{ main_url }}" >Reset filters</a>
-                &nbsp;&nbsp;&nbsp;
                     <button data-toggle="modal" data-target="#get_email_modal" class="button red">
                         DOWNLOAD CSV
                     </button>
@@ -200,68 +169,6 @@
 
 <script>
     window.current_payment_request = null
-     $('#distributor-id').select2();
-     $('#sub-distributor-id').select2();
-
-
-     $("#distributor-id").change(function()
-     {
-        var id = $(this).val();
-
-        url = window.location.pathname
-        if (id!="")
-        {
-            url += '?distributor-id='+id
-
-        }
-        window.location.assign(url)
-     });
-
-       $("#sub-distributor-id").change(function(){
-            subdistributorId = $("#sub-distributor-id").val();
-            merchantId ="";
-            distributor_id = $("#distributor-id").val()
-             var selectedAll = $("#sub-distributor-id :selected").text();
-             var subdistributorAll ="";
-             if (selectedAll.includes("ALL"))
-             {
-                if(subdistributorId == -1)
-                {
-                    merchantId = subdistributorId;
-                    subdistributorId = "";
-                }
-             }
-             else
-             {
-                  merchantId = subdistributorId;
-                  subdistributorId = "";
-
-             }
-
-             url = window.location.pathname
-             if( distributor_id > 0)
-             {
-                url += '?merchant-id='+merchantId + '&distributor-id='+distributor_id ;
-             }
-             else
-             {
-                 url += '?merchant-id='+merchantId
-             }
-
-             if(subdistributorId != "")
-             {
-                url = window.location.pathname+ "?";
-                 if (distributor_id)
-                    url += "distributor-id="+distributor_id
-                url += "&sub-distributor-id="+subdistributorId
-             }
-
-
-             window.location.assign(url)
-
-
-         });
-
     $('#search-btn').click(function(){
         search = $('#search-txt').val();
         {% if filter_by %}
@@ -269,72 +176,8 @@
         {% else %}
             url = window.location.pathname + "?q=" + $('#search-txt').val()
         {% endif %}
-        startDate = $('#start-date').val();
-        endDate = $('#end-date').val();
-         if(startDate!="" && endDate!="" )
-            {
-
-                url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
-            }
-
         window.location.assign(url)
     });
-
-     var startDate = $('#start-date').val();
-         var endDate = $('#end-date').val();
-         var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
-        $('#start-date').datepicker({
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            format: 'yyyy-mm-dd',
-
-            maxDate: function () {
-            return $('#end-date').val();
-            }
-        }).on('change', function (ev)
-         {
-
-            var start = $("#start-date").val();
-            var startD = new Date(start);
-            var end = $("#end-date").val();
-            var endD = new Date(end);
-            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
-
-            $("#days").val(diff);
-
-            if(diff>31)
-            {
-               alert("date difference is greater than 31");
-               $('#start-date').val("");
-            }
-         });
-
-
-        $('#end-date').datepicker({
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            format: 'yyyy-mm-dd',
-
-            minDate: function () {
-                return $('#start-date').val();
-            }
-        }).on('change', function (ev)
-         {
-
-            var start = $("#start-date").val();
-            var startD = new Date(start);
-            var end = $("#end-date").val();
-            var endD = new Date(end);
-            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
-
-            $("#days").val(diff);
-
-            if(diff>31)
-            {
-               alert("date difference is greater than 31");
-               $('#end-date').val("");
-            }
-         });
 
 
 </script>
