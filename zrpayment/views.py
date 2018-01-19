@@ -29,9 +29,6 @@ from common_utils.user_utils import is_user_superuser, file_save_s3
 from zrpayment.models import PaymentRequest, Payments
 from zruser import mapping as user_map
 from zrwallet import models as zrwallet_models
-from zruser.models import ZrUser
-from zrmapping import models as zrmappings_models
-
 
 SUCCESS_MESSAGE_START = '<div class="alert alert-success" role="alert"><div class="alert-content"><i class="glyphicon glyphicon-ok-circle"></i><strong>'
 ERROR_MESSAGE_START = '<div class="alert alert-danger" role="alert"><div class="alert-content"><i class="glyphicon glyphicon-remove-circle"></i><strong>'
@@ -255,7 +252,9 @@ class AcceptPaymentRequestView(APIView):
                         payment_request.status = 1
                         payment_request.save(update_fields=['status'])
                     else:
-                        message = "Insufficient balance in (%s), Please recharge you wallet" % (','.join(balance_insufficient))
+                        message = "Insufficient balance in (%s), Please recharge you wallet" % (
+                            ','.join(balance_insufficient)
+                        )
             else:
                 message = "Payment request already {status}".format(status=payment_request.get_status_display())
 
@@ -292,6 +291,7 @@ class RejectPaymentRequestView(APIView):
 
 
 def get_payment_request_qs(request, from_user=False, to_user=False, all_user=False, all_req=False):
+    filter_by = request.GET.get('filter')
     q = request.GET.get('q')
 
     queryset = []
@@ -301,7 +301,9 @@ def get_payment_request_qs(request, from_user=False, to_user=False, all_user=Fal
         elif all_user:
             queryset = PaymentRequest.objects.all()
         else:
-          queryset = PaymentRequest.objects.filter(to_user__role__name='ADMINSTAFF',)
+            queryset = PaymentRequest.objects.filter(
+                to_user__role__name='ADMINSTAFF',
+            )
     elif request.user.zr_admin_user.role.name in ['DISTRIBUTOR', 'SUBDISTRIBUTOR']:
         # To get own payment request
         if from_user:
@@ -328,21 +330,12 @@ def get_payment_request_qs(request, from_user=False, to_user=False, all_user=Fal
         )
         queryset = queryset.filter(query)
 
-
-
-    start_date = request.GET.get('startDate')
-    end_date = request.GET.get('endDate')
-    to_user_id = request.GET.get('to_user_id')
-    from_user_id =request.GET.get('from_user_id')
-
-    if start_date != None and end_date != None:
-        queryset = queryset.filter(at_created__range=(start_date, end_date))
-
-    if from_user_id!=None and int(from_user_id) > 0:
-        queryset = queryset.filter(from_user_id=from_user_id)
-
-    if to_user_id!=None and int(to_user_id) > 0:
-        queryset = queryset.filter(to_user_id=to_user_id)
+    if filter_by == 'last_week':
+        queryset = queryset.filter(at_created__range=last_week_range())
+    elif filter_by == 'last_month':
+        queryset = queryset.filter(at_created__range=last_month())
+    elif filter_by == 'today':
+        queryset = queryset.filter(at_created__date__gte=datetime.date.today())
 
     return queryset.order_by('-at_created')
 
@@ -452,8 +445,6 @@ def payments_csv_download(request):
         "q": request.POST.get('q', ""),
         "filter": request.POST.get('filter', ""),
         "period": request.POST.get('period', ""),
-        "start_date": request.POST.get('startDate', ''),
-        "end_date": request.POST.get('endDate', ''),
         "user_id": request.user.id,
     }
     from zrpayment import tasks as payment_celery_tasks
@@ -469,28 +460,14 @@ class PaymentRequestListView(ListView):
     def get_context_data(self, **kwargs):
         filter_by = self.request.GET.get('filter')
         q = self.request.GET.get('q')
-        start_date = self.request.GET.get('startDate')
-        end_date = self.request.GET.get('endDate')
-        from_user_id = self.request.GET.get('from_user_id')
+
         context = super(PaymentRequestListView, self).get_context_data(**kwargs)
-        fromuser_list = PaymentRequest.objects.all().filter(to_user__role__name='ADMINSTAFF', ).distinct('from_user_id')
-        distributor_id = self.request.GET.get('distributor-id')
-        sub_distributor_list = []
+
         queryset = self.get_queryset()
-       # if not queryset:
-       #     context['filter_by'] = filter_by
-        #    context['q'] = q
-         #   return context
-        if is_user_superuser(self.request):
-            fromuser_list = PaymentRequest.objects.all().filter(to_user__role__name='ADMINSTAFF', ).distinct(
-                'from_user_id')
-
-        elif self.request.user.zr_admin_user.role.name in ['DISTRIBUTOR']:
-            fromuser_list = PaymentRequest.objects.all().filter(from_user=self.request.user.zr_admin_user.zr_user ).distinct(
-                'from_user_id')
-
-        elif self.request.user.zr_admin_user.role.name in ['SUBDISTRIBUTOR']:
-            fromuser_list = PaymentRequest.objects.all().filter(to_user__role__name='SUBDISTRIBUTOR', ).distinct('from_user_id')
+        if not queryset:
+            context['filter_by'] = filter_by
+            context['q'] = q
+            return context
 
         paginator = Paginator(queryset, self.paginate_by)
         page = self.request.GET.get('page', 1)
@@ -514,23 +491,6 @@ class PaymentRequestListView(ListView):
                 pass
         context['wallet'] = wallet
         context['is_superuser'] = is_user_superuser(self.request)
-        if start_date:
-            context['startDate'] = start_date
-
-        if end_date:
-            context['endDate'] = end_date
-
-        if distributor_id:
-            context['distributor_id'] = int(distributor_id)
-
-        if from_user_id:
-            context['from_user_id'] = int(from_user_id)
-
-        if fromuser_list:
-            context['fromuser_list'] = fromuser_list
-
-
-
         return context
 
     def get_queryset(self):
@@ -538,6 +498,7 @@ class PaymentRequestListView(ListView):
 
 
 def get_payment_qs(request):
+    filter_by = request.GET.get('filter')
     q = request.GET.get('q')
     queryset = Payments.objects.all()
 
@@ -561,15 +522,12 @@ def get_payment_qs(request):
         )
         queryset = queryset.filter(query)
 
-    start_date = request.GET.get('startDate')
-    end_date = request.GET.get('endDate')
-    user_payment_id = request.GET.get('user_payment_id')
-
-    if start_date != None and end_date != None:
-        queryset = queryset.filter(at_created__range=(start_date, end_date))
-
-    if user_payment_id!=None and int(user_payment_id) > 0:
-        queryset = queryset.filter(user_id=user_payment_id)
+    if filter_by == 'last_week':
+        queryset = queryset.filter(at_created__range=last_week_range())
+    elif filter_by == 'last_month':
+        queryset = queryset.filter(at_created__range=last_month())
+    elif filter_by == 'today':
+        queryset = queryset.filter(at_created__date__gte=datetime.date.today())
 
     return queryset.order_by('-at_created')
 
@@ -600,12 +558,6 @@ def get_payment_qs_dict(report_params):
     elif filter_by == 'today':
         queryset = queryset.filter(at_created__date__gte=datetime.date.today())
 
-    start_date = report_params.get('start_date')
-    end_date = report_params.get('end_date')
-
-    if start_date != None and end_date != None:
-        queryset = queryset.filter(at_created__range=(start_date, end_date))
-
     return queryset.order_by('-at_created')
 
 
@@ -616,16 +568,14 @@ class PaymentListView(ListView):
     def get_context_data(self, **kwargs):
         filter_by = self.request.GET.get('filter', 'all')
         q = self.request.GET.get('q')
-        start_date = self.request.GET.get('startDate')
-        end_date = self.request.GET.get('endDate')
-        user_payment_id = self.request.GET.get('user_payment_id')
+
         context = super(PaymentListView, self).get_context_data(**kwargs)
-        user_list = Payments.objects.all().distinct('user_id')
+
         queryset = self.get_queryset()
-       # if not queryset:
-        #    context['filter_by'] = filter_by
-         #   context['q'] = q
-          #  return context
+        if not queryset:
+            context['filter_by'] = filter_by
+            context['q'] = q
+            return context
 
         paginator = Paginator(queryset, self.paginate_by)
         page = self.request.GET.get('page', 1)
@@ -635,18 +585,6 @@ class PaymentListView(ListView):
         except PageNotAnInteger:
             queryset = paginator.page(1)
         from django.core.urlresolvers import reverse
-
-        if start_date:
-            context['startDate'] = start_date
-
-        if end_date:
-            context['endDate'] = end_date
-
-        if user_list:
-            context['user_list'] = user_list
-
-        if user_payment_id:
-            context['user_payment_id'] = int(user_payment_id)
 
         context['main_url'] = reverse('payment-requests:payment-list')
         context['page_obj'] = queryset
@@ -668,17 +606,14 @@ class PaymentRequestSentListView(ListView):
     def get_context_data(self, **kwargs):
         filter_by = self.request.GET.get('filter')
         q = self.request.GET.get('q')
-        start_date = self.request.GET.get('startDate')
-        end_date = self.request.GET.get('endDate')
-        to_user_id = self.request.GET.get('to_user_id')
-        touser_list = []
+
         context = super(PaymentRequestSentListView, self).get_context_data(**kwargs)
 
         queryset = self.get_queryset()
-        #if not queryset:
-         #   context['filter_by'] = filter_by
-          #  context['q'] = q
-           # return context
+        if not queryset:
+            context['filter_by'] = filter_by
+            context['q'] = q
+            return context
 
         paginator = Paginator(queryset, self.paginate_by)
         page = self.request.GET.get('page', 1)
@@ -691,23 +626,6 @@ class PaymentRequestSentListView(ListView):
         context['page_obj'] = queryset
         context['filter_by'] = filter_by
         context['q'] = q
-
-        if is_user_superuser(self.request):
-            touser_list = PaymentRequest.objects.all().distinct('to_user_id')
-        elif self.request.user.zr_admin_user.role.name in ['DISTRIBUTOR', 'SUBDISTRIBUTOR']:
-            touser_list = PaymentRequest.objects.filter(to_user=self.request.user.zr_admin_user.zr_user)
-
-        if start_date:
-            context['startDate'] = start_date
-
-        if end_date:
-            context['endDate'] = end_date
-
-        if touser_list:
-            context['touser_list'] = touser_list
-
-        if to_user_id:
-            context['to_user_id'] = int(to_user_id)
 
         wallet = None
         if not is_user_superuser(self.request):

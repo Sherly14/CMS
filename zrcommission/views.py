@@ -66,12 +66,6 @@ def get_commission_display_qs(request):
     elif period == 'last-month':
         queryset = queryset.filter(at_created__range=date_utils.last_month())
 
-    start_date = request.GET.get('startDate')
-    end_date = request.GET.get('endDate')
-    if start_date != None and end_date != None:
-        queryset = queryset.filter(at_created__range=(start_date, end_date))
-
-
     return queryset
 
 
@@ -84,8 +78,6 @@ class CommissionDisplay(ListView):
         pg_no = self.request.GET.get('pg-no')
         period = self.request.GET.get('period')
         search = self.request.GET.get('q')
-        start_date = self.request.GET.get('startDate')
-        end_date = self.request.GET.get('endDate')
 
         context = super(CommissionDisplay, self).get_context_data(*args, **kwargs)
         if user_utils.is_user_superuser(self.request):
@@ -113,12 +105,6 @@ class CommissionDisplay(ListView):
 
         context['period'] = period
         context['search'] = search
-
-        if start_date:
-            context['startDate'] = start_date
-
-        if end_date:
-            context['endDate'] = end_date
 
         query_result = self.get_queryset()
         p = Paginator(query_result, self.paginated_by)

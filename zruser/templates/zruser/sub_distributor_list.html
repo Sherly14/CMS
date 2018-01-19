@@ -8,48 +8,23 @@
         <p class="head-right">Sub-Distributor Table</p>
     <div class="col-12" >
         <div class="row rm-margin-side">
-                <div class="col-2">
-                    <p class="head-left">START DATE</p>
-                </div>
-                <div class="col-2">
-                    <p class="head-left">END DATE</p>
-                </div>
-            </div>
-            <div class="row rm-margin-side">
-                <div class="col-2">
-                    <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-                </div>
-                <div class="col-2">
-                    <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-                </div>
-                <div class="col-4">
-                    <select id="sub-distributor-id"  name="sub-distributor-id">
-                        <option value="-1">ALL</option>
-                            {% for key,val in subDistributor.items %}
-                                <optgroup label = "{{val.0.0}} ">
-                                     <option value="{{key}}"{% if key == distributor_id %}selected{% endif %}>ALL-{{val.0.0}}</option>
-                                    {% for subdrow in val %}
-                                        <option value="{{subdrow.1}}" {% if subdrow.1 == sub_distributor_id %}selected{% endif %}>{{ subdrow.2 }}</option>
-                                    {% endfor %}
-                                </optgroup>
-                            {% endfor %}
-                    </select>
-                </div>
-            </div>
-        <div class="row rm-margin-side">
             <p class="head-left">PERIOD</p>
         </div>
         <div class="row">
-            <div style="position: relative;">
-                <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+            <div class="d-flex justify-content-between" style="width:90%">
+                <select id="period">
+                    <option value="Today" {% if filter_by == "Today" %}selected{% endif %}>Today</option>
+                    <option value="Last Week" {% if filter_by == "Last-Week" %}selected{% endif %}>Last Week</option>
+                    <option value="Last Month" {% if filter_by == "Last-Month" %}selected{% endif %}>Last Month</option>
+                </select>
+                <div style="position: relative;">
+                    <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                    <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                </div>
+                <input class="button red" type="button" value="Search" id="search-btn">
+                <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
             </div>
-            &nbsp;&nbsp;
-            <input class="button red" type="button" value="Search" id="search-btn">
-            &nbsp;&nbsp;&nbsp;&nbsp;
-            <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
         </div>
-
         <br>
         <div class="row" style="padding-right: 50px;">
             <div class="fine">
@@ -108,131 +83,32 @@
                 {% endif %}
             </div>
         </div>
-        <div>
-
-        </div>
         <br>
     </div>
     </div>
 
 <script>
-
-    $(document).ready(function(){
-    $('#sub-distributor-id').select2();
-
-
     $('#search-btn').click(function(){
-        startDate = $('#start-date').val();
-        endDate = $('#end-date').val();
         {% if filter_by %}
             url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}"
         {% else %}
             url = window.location.pathname + "?q=" + $('#search-txt').val()
         {% endif %}
-
-        if(startDate!="" && endDate!="" )
-            {
-                url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
-            }
-
         window.location.assign(url)
     })
 
-     $('#sub-distributor-id').change(function(){
-         var subdistributorId = $('#sub-distributor-id').val();
-         var distributorId = "";
-
-         var selectedAll = $("#sub-distributor-id :selected").text();
-             if (selectedAll.includes("ALL"))
-             {
-                distributorId = subdistributorId;
-                subdistributorId = ""
-                if(distributorId!="")
-                {
-                 url =window.location.pathname +'?distributor-id='+ distributorId;
-                }
-             }
-
-
-              if(subdistributorId!="")
-                {
-                 url = window.location.pathname + '?sub-distributor-id='+ subdistributorId;
-                }
-
-          window.location.assign(url)
-    });
-
-
+    $('#period').change(function() {
+        period_val = $(this).val()
+        url = window.location.pathname + '?filter=' + period_val.replace(' ', '-')
+        {% if q %}
+            url += "&q={{ q }}"
+        {% endif %}
+        window.location.assign(url)
+    })
 
     $('#csv-download').click(function(){
         url = "{% url "user:sub-distributor-csv" %}" + window.location.search
         window.location.assign(url)
     })
-
-         var startDate = $('#start-date').val();
-         var endDate = $('#end-date').val();
-         var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
-        $('#start-date').datepicker({
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            format: 'yyyy-mm-dd',
-
-            maxDate: function () {
-            return $('#end-date').val();
-            }
-        }).on('change', function (ev)
-         {
-
-            var start = $("#start-date").val();
-            var startD = new Date(start);
-            var end = $("#end-date").val();
-            var endD = new Date(end);
-            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
-
-            $("#days").val(diff);
-
-            if(diff>31)
-            {
-               alert("date difference is greater than 31");
-               $('#start-date').val("");
-            }
-         });
-
-
-        $('#end-date').datepicker({
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            format: 'yyyy-mm-dd',
-
-            minDate: function () {
-                return $('#start-date').val();
-            }
-        }).on('change', function (ev)
-         {
-
-            var start = $("#start-date").val();
-            var startD = new Date(start);
-            var end = $("#end-date").val();
-            var endD = new Date(end);
-            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
-
-            $("#days").val(diff);
-
-            if(diff>31)
-            {
-               alert("date difference is greater than 31");
-               $('#end-date').val("");
-            }
-         });
-
-
-
-
-
-
-
-
-
-    });
 </script>
 {% endblock %}
