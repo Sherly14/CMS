@@ -19,7 +19,8 @@ from common_utils.transaction_utils import get_sub_distributor_merchant_id_list_
     get_sub_distributor_merchant_id_list_from_sub_distributor
 from zrtransaction.models import Transaction
 from zruser.mapping import DISTRIBUTOR, SUBDISTRIBUTOR
-
+from zruser.models import ZrUser
+from zrmapping import models as zrmappings_models
 
 class TransactionsDetailView(DetailView):
     queryset = Transaction.objects.all()
@@ -42,12 +43,20 @@ def get_transactions_qs_with_dict(report_params):
     if p_filter == 'All':
         p_filter = report_params.get('period', "All")
 
+    p_filter =report_params.get('start_date')
+    p_filter = report_params.get('end_date')
+
+
+    if any (date in p_filter for date in('start_date','end_date')):
+        q_obj.add(Q(at_created__range=('start_date', 'end_date')),q_obj.connector)
+
     if p_filter in ['Today', 'today']:
         q_obj.add(Q(at_created__gte=datetime.datetime.now().date()), q_obj.connector)
     elif p_filter in ['Last-Week' or 'last-week']:
         q_obj.add(Q(at_created__range=last_week_range()), q_obj.connector)
     elif p_filter in ['Last-Month' or 'last-month']:
         q_obj.add(Q(at_created__range=last_month()), q_obj.connector)
+
     user = get_user_model().objects.filter(pk=report_params.get('user_id')).last()
     if report_params.get('user_type') == "SU":
         pass
@@ -73,7 +82,11 @@ def get_transactions_qs_with_dict(report_params):
             q_obj.connector
         )
 
+
     queryset = Transaction.objects.filter(q_obj).order_by('-at_created')
+
+
+
     return queryset
 
 
@@ -86,7 +99,9 @@ def get_transactions_qs(request):
     ) | Q(
         user__mobile_no__contains=q
     )
-
+    start_date = request.GET.get('startDate')
+    end_date = request.GET.get('endDate')
+    user_transaction_id = request.GET.get('user_transaction_id')
     p_filter = request.GET.get('filter', 'All')
     if p_filter == 'All':
         p_filter = request.GET.get('period', "All")
@@ -125,7 +140,59 @@ def get_transactions_qs(request):
         )
 
     queryset = Transaction.objects.filter(q_obj).order_by('-at_created')
+
+
+
+    if user_transaction_id!=None and int(user_transaction_id) > 0:
+        queryset = queryset.filter(user_id=user_transaction_id)
+
+
+    if start_date != None and end_date != None:
+        queryset = queryset.filter(at_created__range=(start_date, end_date))
     print(q_obj)
+
+    distributor_id = request.GET.get('distributor-id')
+    merchant_id = request.GET.get('merchant-id')
+    sub_distributor_id = request.GET.get('sub-distributor-id')
+
+    if merchant_id != None and int(merchant_id) > 0:
+        queryset = queryset.filter(user_id = merchant_id)
+
+
+    if sub_distributor_id != None and int(sub_distributor_id) > 0:
+        subMerchant = zrmappings_models.SubDistributorMerchant.objects.filter(sub_distributor_id=sub_distributor_id)
+        merchantlist = []
+        if subMerchant:
+            for sub_merchant in subMerchant:
+                merchantlist.append(sub_merchant.merchant_id)
+
+        if merchantlist:
+            queryset = Transaction.objects.filter(user_id__in= merchantlist)
+
+    if distributor_id != None and merchant_id == "-1":
+        distmerchantlist = []
+        DistM = zrmappings_models.DistributorMerchant.objects.filter(distributor_id=distributor_id)
+
+        if DistM:
+            for dist in DistM:
+                distmerchantlist.append(dist.merchant_id)
+
+        if distmerchantlist:
+            queryset = Transaction.objects.filter(user_id__in=distmerchantlist)
+
+    if merchant_id == "-1":
+        distmerchantlist = []
+        DistM = zrmappings_models.DistributorMerchant.objects.filter(distributor_id=request.user.zr_admin_user.zr_user)
+
+        if DistM:
+            for dist in DistM:
+                distmerchantlist.append(dist.merchant_id)
+
+        if distmerchantlist:
+            queryset = Transaction.objects.filter(user_id__in=distmerchantlist)
+
+
+
     return queryset
 
 
@@ -140,7 +207,37 @@ class TransactionsListView(ListView):
     def get_context_data(self, *args, **kwargs):
         context = super(TransactionsListView, self).get_context_data()
         query_string = {}
+        start_date = self.request.GET.get('startDate')
+        end_date = self.request.GET.get('endDate')
+        merchant_id = self.request.GET.get('merchant-id')
+        distributor_id = self.request.GET.get('distributor-id')
+        sub_distributor_id = self.request.GET.get('sub-distributor-id')
+        sub_distributor = []
+        sub_distributor_list = []
+        sub_dist_merchant = []
+        merchant = []
+        subDistMerchant = {}
 
+        if user_utils.is_user_superuser(self.request):
+            user_transaction_data = Transaction.objects.all().distinct('user_id').exclude(txn_id ='')
+            merchant = zrmappings_models.DistributorMerchant.objects.filter(distributor_id=distributor_id)
+            sub_distributor = zrmappings_models.DistributorSubDistributor.objects.filter(distributor_id=distributor_id)
+            distributor_list = ZrUser.objects.filter(role__name=DISTRIBUTOR)
+            context['distributor_list'] = distributor_list
+
+        elif self.request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
+            user_transaction_data = Transaction.objects.filter(user_id__in=get_sub_distributor_merchant_id_list_from_sub_distributor(self.request.user.zr_admin_user.zr_user)).distinct('user_id').exclude(txn_id='')
+            merchant = zrmappings_models.SubDistributorMerchant.objects.filter(sub_distributor=self.request.user.zr_admin_user.zr_user)
+            distributor_list = []
+
+        elif self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
+            user_transaction_data = Transaction.objects.filter(user_id__in=get_merchant_id_list_from_distributor(self.request.user.zr_admin_user.zr_user) +
+               get_sub_distributor_merchant_id_list_from_distributor(self.request.user.zr_admin_user.zr_user)).distinct('user_id').exclude(txn_id='')
+            sub_distributor = zrmappings_models.DistributorSubDistributor.objects.filter(distributor=self.request.user.zr_admin_user.zr_user)
+            merchant = zrmappings_models.DistributorMerchant.objects.filter(distributor=self.request.user.zr_admin_user.zr_user)
+            distributor_list = []
+
+        user_transaction_id =self.request.GET.get('user_transaction_id')
         # Search context
         q = self.request.GET.get('q')
         if q:
@@ -163,6 +260,61 @@ class TransactionsListView(ListView):
             page = p.page(pg_no)
         except EmptyPage:
             raise Http404
+
+
+        if sub_distributor:
+            for subdist in sub_distributor:
+                sub_distributor_list.append(subdist.sub_distributor_id)
+
+        if sub_distributor_list:
+            sub_dist_merchant = zrmappings_models.SubDistributorMerchant.objects.filter(
+                sub_distributor_id__in=sub_distributor_list)
+
+        if sub_dist_merchant:
+            for sub_merchant in sub_dist_merchant:
+                if sub_merchant.sub_distributor.id in subDistMerchant:
+                    subDistMerchant[sub_merchant.sub_distributor.id].append([sub_merchant.sub_distributor.first_name, sub_merchant.merchant.id,sub_merchant.merchant.first_name])
+                else:
+                    subDistMerchant[sub_merchant.sub_distributor.id] = [[sub_merchant.sub_distributor.first_name, sub_merchant.merchant.id,sub_merchant.merchant.first_name]]
+
+        if merchant:
+            for distmerchant in merchant:
+                if -1 in subDistMerchant:
+                    subDistMerchant[-1].append(["MERCHANTS", distmerchant.merchant.id, distmerchant.merchant.first_name])
+                else:
+                    subDistMerchant[-1] = [["MERCHANTS", distmerchant.merchant.id, distmerchant.merchant.first_name]]
+
+        if start_date:
+            context['startDate'] = start_date
+
+        if end_date:
+            context['endDate'] = end_date
+
+        if user_transaction_data:
+            context['user_transaction_data'] = user_transaction_data
+
+
+        if user_transaction_id :
+            context['user_transaction_id'] =int(user_transaction_id)
+
+        if subDistMerchant:
+            context['subDistMerchant'] = subDistMerchant
+
+        if merchant_id:
+            context['merchant_id'] = int(merchant_id)
+
+        if distributor_id:
+            context['distributor_id'] =int(distributor_id)
+
+        if sub_distributor_id:
+            context['sub_distributor_id'] = int(sub_distributor_id)
+
+        if merchant_id:
+            context['sub_distributor_id'] = int(merchant_id)
+
+
+        context['distributor_list'] = distributor_list
+
 
         context['queryset'] = page.object_list
         if page.has_next():
