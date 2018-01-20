@@ -76,6 +76,7 @@
                         <th>Email</th>
                         <th>Status</th>
                         <th>Actions</th>
+                        <th>Update</th>
                     </tr>
                     {% if queryset %}
                         {% for merchant in queryset %}
@@ -93,6 +94,7 @@
                                     <a href='{% url "user:merchant-list" %}?activate={{ merchant.id }}'>Activate</a>
                                 {% endif %}
                             </td>
+                            <td> <a href='{% url "user:user-update" pk=merchant.id%}'>Update</a></td>
                         </tr>
                         {% endfor %}
                     {% else %}
@@ -104,6 +106,7 @@
                             <td>{{ map.merchant.mobile_no }}</td>
                             <td>{{ map.merchant.email }}</td>
                             <td>{% if map.merchant.is_active %}Active{% else %}Inactive{% endif %}</td>
+                            <td> <a href='{% url "user:user-update" pk=map.merchant.id%}'>Update</a></td>
                         </tr>
                         {% endfor %}
                     {% endif %}

@@ -16,7 +16,7 @@ from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonRespons
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views import View
-from django.views.generic import CreateView, DetailView, ListView
+from django.views.generic import CreateView, DetailView, ListView, UpdateView
 
 from common_utils import date_utils
 from common_utils import transaction_utils
@@ -1198,6 +1198,66 @@ class DistributorCreateView(CreateView):
 
         zrwallet_models.Wallet.objects.create(merchant=merchant_zr_user)
         return HttpResponseRedirect(reverse("user:distributor-list"))
+
+
+class UserUpdateView(View):
+    template_name = 'zruser/user_update.html'
+    kyc_doc_types = KYCDocumentType.objects.all().values_list('name', flat=True)
+
+    def get(self, request, pk,  **kwargs):
+        user = ZrUser.objects.get(id=pk)
+        merchant_form = zr_user_form.UpdateMerchantDistributorForm(initial={'first_name': user.first_name , 'last_name': user.last_name,'email': user.email })
+        return render(
+            request, self.template_name, {"merchant_form": merchant_form, "distributor": user, "kyc_doc_types": self.kyc_doc_types}
+        )
+
+    @transaction.atomic
+    def post(self, request, pk):
+        user = ZrUser.objects.get(id=pk)
+        if "save" in request.POST:
+            merchant_form = zr_user_form.UpdateMerchantDistributorForm(data=request.POST, instance=user)
+
+            if not merchant_form.is_valid():
+                return render(
+                    request, self.template_name,
+                    {
+                        'merchant_form': merchant_form,
+                        'kyc_doc_types': self.kyc_doc_types
+                    }
+                )
+
+            merchant_form.save()
+            kyc_docs = []
+            for doc_type in KYCDocumentType.objects.all().values_list('name', flat=True):
+                doc_type_name = doc_type.replace(' ', '-')
+                doc_type_id = '-'.join(['doc_id', doc_type_name])
+
+                if doc_type_name in request.POST:
+                    kyc_docs.append(
+                        {
+                            'doc_url': request.POST.get(doc_type_name),
+                            'doc_id': request.POST.get(doc_type_id),
+                            'doc_type': doc_type_name.replace('-', ' ')
+                        }
+                    )
+
+            for doc in kyc_docs:
+                KYCDetail.objects.create(
+                    type=KYCDocumentType.objects.get(name=doc['doc_type']),
+                    document_id=doc['doc_id'],
+                    document_link=doc['doc_url'],
+                    for_user=user,
+                    role=user.role
+                )
+
+        if user.role.name == DISTRIBUTOR:
+            return HttpResponseRedirect(reverse("user:distributor-list"))
+        if user.role.name == SUBDISTRIBUTOR:
+            return HttpResponseRedirect(reverse("user:sub-distributor-list"))
+        if user.role.name == MERCHANT:
+            return HttpResponseRedirect(reverse("user:merchant-list"))
+
+
 
 
 class MerchantCreateView(View):
