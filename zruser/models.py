@@ -39,7 +39,7 @@ class BusinesssType(RowInfo):
         business_types = []
         for business_type in BusinesssType.objects.all():
             business_types.append(
-                (business_type, business_type,)
+                (business_type, business_type)
             )
 
         return business_types
@@ -113,6 +113,9 @@ class ZrUser(RowInfo):
     gstin = models.CharField(max_length=20, null=True, blank=True)
 
     UPIID = models.CharField(max_length=256, null=True, blank=True)
+    business_type = models.ForeignKey(to=BusinesssType, related_name='business_type', null=True, blank=True)
+
+
 
 
 
