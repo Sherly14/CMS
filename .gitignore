@@ -10,3 +10,4 @@ logfile
 env
 zrcms/local_settings.py
 venv/
+static-serve
