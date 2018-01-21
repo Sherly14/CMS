@@ -1208,7 +1208,7 @@ class UserUpdateView(View):
         user = ZrUser.objects.get(id=pk)
         merchant_form = zr_user_form.UpdateMerchantDistributorForm(initial={'first_name': user.first_name , 'last_name': user.last_name,'email': user.email })
         return render(
-            request, self.template_name, {"merchant_form": merchant_form, "distributor": user, "kyc_doc_types": self.kyc_doc_types}
+            request, self.template_name, {"merchant_form": merchant_form, "zr_user": user, "kyc_doc_types": self.kyc_doc_types}
         )
 
     @transaction.atomic
