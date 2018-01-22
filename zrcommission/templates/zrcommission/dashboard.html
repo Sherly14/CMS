@@ -22,8 +22,22 @@
     </div>
 
     <div class="row rm-margin-side">
-        <p class="head-left">PERIOD</p>
+        <div class="col-2">
+            <p class="head-left">START DATE</p>
+        </div>
+        <div class="col-2">
+            <p class="head-left">END DATE</p>
+        </div>
     </div>
+    <div class="row rm-margin-side">
+        <div class="col-2">
+            <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
+        </div>
+        <div class="col-2">
+            <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
+        </div>
+    </div>
+    <br>
     <div class="row" style="padding: 0rem 1.5rem 0rem 3.5rem;">
         <div class="d-flex justify-content-between" style="width:100%" >
         <!-- <div class="col-md-6 pad-0"> -->
@@ -32,7 +46,7 @@
                 <!--<select>-->
                     <!--<option>Last Week</option>-->
                 <!--</select>-->
-            <div class="card card-inverse o-hidden h-100" style="height: 36px !important;width: 235px;">
+            {#<div class="card card-inverse o-hidden h-100" style="height: 36px !important;width: 235px;">#}
                         <!--<div class="card-block lightGrayBG blackTextColor">-->
                                 <!--<div class="periodEntry">-->
                                 <!--Last Week-->
@@ -40,12 +54,9 @@
                                     <!--<i class="fa fa-chevron-down per-ft-down"></i>-->
                                 <!--</div>-->
                         <!--</div>-->
-                    <select id="period" style="width: 100%;height: 100%;">
-                        <option value="today" {% if period == "today" %}selected{% endif %}>Today</option>
-                        <option value="last-week" {% if period == "last-week" %}selected{% endif %}>Last week</option>
-                        <option value="last-month" {% if period == "last-month" %}selected{% endif %}>Last month</option>
-                    </select>
-                    </div>
+
+            {#</div>#}
+
             <!-- </div> -->
             <!-- <div class="col-md-4 pad-0"> -->
             <div style="position: relative;">
@@ -78,7 +89,7 @@
 
         <div class="divTable" style="overflow: scroll" >
             <div id="constrainer">
-            <div class="">
+                <div class="">
                 <table class='header'>
                     <thead>
                         <th>Transaction ID</th>
@@ -90,24 +101,24 @@
                         <th>Net Commission</th>
                     </thead>
                 </table>
-       <div class="body">
-           <table style="width: 100%">
-               <tbody>
-               {% for com in commissions.object_list %}
-                    <tr>
-                        <td>{{ com.transaction_id }}</td>
-                        <td>{{ com.transaction.amount }}</td>
-                        <td>{{ com.transaction.type }}</td>
-                        <td>{{ com.gross_amount }}</td>
-                        <td>{{ com.user_tds }}</td>
-                        <td>{{ com.user_gst }}</td>
-                        <td>{{ com.net_commission }}</td>
-                    </tr>
-               {% endfor %}
-               </tbody>
-           </table>
-       </div>
-       </div>
+                <div class="body">
+                   <table style="width: 100%">
+                       <tbody>
+                       {% for com in commissions.object_list %}
+                            <tr>
+                                <td>{{ com.transaction_id }}</td>
+                                <td>{{ com.transaction.amount }}</td>
+                                <td>{{ com.transaction.type }}</td>
+                                <td>{{ com.gross_amount }}</td>
+                                <td>{{ com.user_tds }}</td>
+                                <td>{{ com.user_gst }}</td>
+                                <td>{{ com.net_commission }}</td>
+                            </tr>
+                       {% endfor %}
+                       </tbody>
+                   </table>
+               </div>
+            </div>
             </div>
         </div>
 
@@ -126,29 +137,99 @@
             <a href='{% url "commission:display-commission" %}?pg-no={{ commissions.next_page_number }}'>Next</a>
         {% endif %}
     {% endif %}
+</div>
     <br>
 
     <script>
+    $(document).ready(function(){
         $('#search').click(function(){
-            if($('#search-txt').val() == ''){
-                return
-            }
+            startDate = $('#start-date').val();
+            endDate = $('#end-date').val();
             qs = "{{ qs }}"
             {% if qs %}
                 url = "{% url "commission:display-commission" %}?{{ qs }}"
             {% else %}
-                url = "{% url "commission:display-commission" %}"
+               url = "{% url "commission:display-commission" %}"
             {% endif %}
+
+             if(startDate!="" && endDate!="" )
+            {
+                url = window.location.pathname +'?startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
+            }
+
 
             if(qs != '') {
                 url += '&q=' + $('#search-txt').val()
                 window.location.assign(url)
             } else {
-                url += '?q=' + $('#search-txt').val()
+                url
                 window.location.assign(url)
             }
             console.log(qs)
+
+
+            if($('#search-txt').val() == ''){
+                return
+            }
         });
+
+         var startDate = $('#start-date').val();
+         var endDate = $('#end-date').val();
+         var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+        $('#start-date').datepicker({
+            uiLibrary: 'bootstrap4',
+            iconsLibrary: 'fontawesome',
+            format: 'yyyy-mm-dd',
+
+            maxDate: function () {
+            return $('#end-date').val();
+            }
+        }).on('change', function (ev)
+         {
+
+            var start = $("#start-date").val();
+            var startD = new Date(start);
+            var end = $("#end-date").val();
+            var endD = new Date(end);
+            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
+
+            $("#days").val(diff);
+
+            if(diff>31)
+            {
+               alert("date difference is greater than 31");
+               $('#start-date').val("");
+            }
+         });
+
+
+        $('#end-date').datepicker({
+            uiLibrary: 'bootstrap4',
+            iconsLibrary: 'fontawesome',
+            format: 'yyyy-mm-dd',
+
+            minDate: function () {
+                return $('#start-date').val();
+            }
+        }).on('change', function (ev)
+         {
+
+            var start = $("#start-date").val();
+            var startD = new Date(start);
+            var end = $("#end-date").val();
+            var endD = new Date(end);
+            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
+
+            $("#days").val(diff);
+
+            if(diff>31)
+            {
+               alert("date difference is greater than 31");
+               $('#end-date').val("");
+            }
+         });
+     });
+
     </script>
 
     <script>
