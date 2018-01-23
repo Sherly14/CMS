@@ -103,6 +103,7 @@ def get_merchant_qs(request):
             is_active=True
         ).values_list('merchant', flat=True))
         usermerchantlist = ZrUser.objects.filter(id__in=merchant_id_list).order_by('-at_created')
+        merchantDistlist = usermerchantlist
         usersubdistributor = zrmappings_models.DistributorSubDistributor.objects.filter(distributor=request.user.zr_admin_user.zr_user)
         sub_distributor_list2 = []
         dist_sub_merchant_list = []
@@ -113,17 +114,14 @@ def get_merchant_qs(request):
 
         if sub_distributor_list2:
             usersubdistmerch = zrmappings_models.SubDistributorMerchant.objects.filter(sub_distributor_id__in = sub_distributor_list2 )
-
-        if usersubdistmerch:
             for data in usersubdistmerch:
                 dist_sub_merchant_list.append(data.merchant_id)
-
-        if dist_sub_merchant_list:
             dist_sub_all_merchant = ZrUser.objects.filter(id__in=dist_sub_merchant_list).order_by('-at_created')
+            merchantDistlist = merchantDistlist | dist_sub_all_mercahnt
 
-        merchantDistlist = usermerchantlist | dist_sub_all_merchant
 
-        queryset= merchantDistlist
+
+        queryset = merchantDistlist
 
         if merchant_id == "-1":
             DISTMERCHLIST = []
