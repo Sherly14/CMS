@@ -107,7 +107,7 @@ def get_merchant_qs(request):
         usersubdistributor = zrmappings_models.DistributorSubDistributor.objects.filter(distributor=request.user.zr_admin_user.zr_user)
         sub_distributor_list2 = []
         dist_sub_merchant_list = []
-        dist_sub_all_mercahnt = []
+        dist_sub_all_merchant = []
         if usersubdistributor:
             for subdist2 in usersubdistributor:
                 sub_distributor_list2.append(subdist2.sub_distributor_id)
@@ -117,7 +117,7 @@ def get_merchant_qs(request):
             for data in usersubdistmerch:
                 dist_sub_merchant_list.append(data.merchant_id)
             dist_sub_all_merchant = ZrUser.objects.filter(id__in=dist_sub_merchant_list).order_by('-at_created')
-            merchantDistlist = merchantDistlist | dist_sub_all_mercahnt
+            merchantDistlist = merchantDistlist | dist_sub_all_merchant
 
 
 
@@ -1519,7 +1519,7 @@ class SubDistributorCreateView(CreateView):
             )
 
         zrwallet_models.Wallet.objects.create(merchant=merchant_zr_user)
-        return HttpResponseRedirect(reverse("user:distributor-list"))
+        return HttpResponseRedirect(reverse("user:sub-distributor-list"))
 
 
 class SubDistributorListView(ListView):
