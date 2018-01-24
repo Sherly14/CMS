@@ -62,6 +62,8 @@
                             <th>Email</th>
                             <th>Status</th>
                             <th>Actions</th>
+                            <th>Update</th>
+
                         </tr>
                         {% for distributor in queryset %}
                             <tr>
@@ -78,6 +80,7 @@
                                         <a href='{% url "user:distributor-list" %}?activate={{ distributor.id }}'>Activate</a>
                                     {% endif %}
                                 </td>
+                                 <td> <a href='{% url "user:user-update" pk=distributor.id%}'>Update</a></td>
                             </tr>
 
                         {% endfor %}
