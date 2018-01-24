@@ -147,19 +147,18 @@
     </nav>
     <!-- Navigation /ends -->
 
-    {% block content %}
 
-    {% endblock %}
 
 {% else %}
-
     {% block logincontent %}
 
     {% endblock %}
 
 {% endif %}
 
+{% block content %}
 
+{% endblock %}
 {% block extrascripts %}
 
 {% endblock extrascripts %}
