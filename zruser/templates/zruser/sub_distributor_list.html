@@ -68,15 +68,10 @@
                         <th>Email</th>
                         <th>Status</th>
                         <th>Actions</th>
+                        <th>Update</th>
                     </tr>
                     {% for subdist_mapping in queryset %}
                         <tr>
-{#                            <td>{{ distributor.id }}</td>#}
-{#                            <td>{{ distributor.first_name }} {{ distributor.last_name |default_if_none:""}}</td>#}
-{#                            <td>{{ distributor.state }}</td>#}
-{#                            <td>{{ distributor.email }}</td>#}
-{#                            <td>{{ distributor.is_active }}</td>#}
-{#                            <td>{{ distributor. }}</td>#}
 
                             <td>{{ subdist_mapping.sub_distributor.id }}</td>
                             <td>{{ subdist_mapping.sub_distributor.first_name }} {{ subdist_mapping.subdistributor.last_name|default_if_none:""}}</td>
@@ -91,6 +86,7 @@
                                     <a href='{% url "user:sub-distributor-list" %}?activate={{ subdist_mapping.id }}'>Activate</a>
                                 {% endif %}
                             </td>
+                            <td> <a href='{% url "user:user-update" pk=subdist_mapping.sub_distributor.id%}'>Update</a></td>
                         </tr>
 
                     {% endfor %}

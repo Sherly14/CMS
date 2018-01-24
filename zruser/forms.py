@@ -80,11 +80,38 @@ class MerchantDistributorForm(forms.ModelForm):
     class Meta:
         model = ZrUser
         fields = [
-            'mobile_no', 'first_name', 'last_name', 'email', 'gender', 'city',
+            'id', 'mobile_no', 'first_name', 'last_name', 'email', 'gender', 'city',
             'state', 'pincode', 'address_line_1', 'address_line_2',
             'business_name', 'pan_no', 'gstin', 'UPIID', 'residence_address'
         ]
 
+
+class UpdateMerchantDistributorForm(forms.ModelForm):
+
+    def clean_first_name(self):
+        first_name = self.cleaned_data['first_name']
+        if ' ' in first_name:
+            raise forms.ValidationError('Space not allowed')
+        if re.findall(r'[0-9]+', first_name):
+            raise forms.ValidationError('Numbers not allowed')
+
+        return first_name
+
+
+    def __init__(self, *args, **kwargs):
+        if kwargs.get('merchant'):
+            self.Meta.fields.append('upi_id')
+            _ = kwargs.pop('upi_id')
+
+        super(UpdateMerchantDistributorForm, self).__init__(
+            *args, **kwargs
+        )
+
+    class Meta:
+        model = ZrUser
+        fields = [
+           'first_name', 'last_name', 'email'
+        ]
 
 class BankDetailForm(forms.ModelForm):
     class Meta:

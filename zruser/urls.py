@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from zruser import views as zr_user_views
 from zruser.views import DistributorDetailView, DistributorListView, MerchantListView, MerchantDetailView, \
-    DistributorCreateView, MerchantCreateView, DashBoardView, SubDistributorCreateView, SubDistributorListView
+    DistributorCreateView, MerchantCreateView, DashBoardView, SubDistributorCreateView, SubDistributorListView, UserUpdateView
 from zruser.viewsets import MerchantLeadViewSet
 
 router = DefaultRouter()
@@ -16,6 +16,7 @@ urlpatterns += [
     url(r'^distributor_list/$', DistributorListView.as_view(), name='distributor-list'),
     url(r'^sub_distributor_list/$', SubDistributorListView.as_view(), name='sub-distributor-list'),
     url(r'^distributor_details/(?P<pk>\d+)/$', DistributorDetailView.as_view(), name='distributor-details'),
+    url(r'^update/(?P<pk>\d+)/$', UserUpdateView.as_view(), name='user-update'),
     url(r'^distributor_create/$', DistributorCreateView.as_view(), name='distributor-create'),
     url(r'^distributor_csv/$', zr_user_views.download_distributor_list_csv, name="distributor-csv"),
     # url used in sub distributor csv create page do not remove it
