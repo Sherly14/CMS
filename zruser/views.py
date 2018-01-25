@@ -37,6 +37,7 @@ from zruser import forms as zr_user_form
 from zruser.models import ZrUser, UserRole, ZrAdminUser, KYCDocumentType, KYCDetail, Bank
 from zruser.utils.constants import DEFAULT_DISTRIBUTOR_MOBILE_NUMBER
 from zrwallet import models as zrwallet_models
+from django.contrib.auth.models import User
 from itertools import chain
 
 
@@ -314,6 +315,7 @@ def get_report_excel(report_params):
         ('Agent Name', 'user.full_name'),
         ('Agent City', 'user.city'),
         ('Agent Pin code', 'user.pincode'),
+        ('Agent State', 'user.state'),
 
         ('Beneficiary bank name', 'beneficiary_user.bank.bank_name'),
         ('Beneficiary bank code', 'beneficiary_user.bank.bank_code'),
@@ -1214,7 +1216,6 @@ class UserUpdateView(View):
         user = ZrUser.objects.get(id=pk)
         if "save" in request.POST:
             merchant_form = zr_user_form.UpdateMerchantDistributorForm(data=request.POST, instance=user)
-
             if not merchant_form.is_valid():
                 return render(
                     request, self.template_name,
@@ -1225,6 +1226,7 @@ class UserUpdateView(View):
                 )
 
             merchant_form.save()
+            user.zr_admin_user
             kyc_docs = []
             for doc_type in KYCDocumentType.objects.all().values_list('name', flat=True):
                 doc_type_name = doc_type.replace(' ', '-')
