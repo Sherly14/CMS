@@ -1226,7 +1226,13 @@ class UserUpdateView(View):
                 )
 
             merchant_form.save()
-            user.zr_admin_user
+            dj_user = user.zr_user.id
+            dj_user.first_name = user.first_name
+            dj_user.last_name = user.last_name
+            dj_user.email = user.email
+            dj_user.save()
+
+
             kyc_docs = []
             for doc_type in KYCDocumentType.objects.all().values_list('name', flat=True):
                 doc_type_name = doc_type.replace(' ', '-')
