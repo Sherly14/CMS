@@ -1226,11 +1226,13 @@ class UserUpdateView(View):
                 )
 
             merchant_form.save()
-            dj_user = user.zr_user.id
-            dj_user.first_name = user.first_name
-            dj_user.last_name = user.last_name
-            dj_user.email = user.email
-            dj_user.save()
+            if hasattr(user,"zr_admin_user"):
+                if hasattr(user.zr_admin_user,"id"):
+                    dj_user = user.zr_admin_user.id
+                    dj_user.first_name = user.first_name
+                    dj_user.last_name = user.last_name
+                    dj_user.email = user.email
+                    dj_user.save()
 
 
             kyc_docs = []
