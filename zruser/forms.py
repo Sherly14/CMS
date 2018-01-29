@@ -32,6 +32,7 @@ class MerchantDistributorForm(forms.ModelForm):
         min_length=10
     )
     pincode = forms.CharField(widget=forms.TextInput())
+    email = forms.EmailField(max_length=255, required=True)
 
     def clean_first_name(self):
         first_name = self.cleaned_data['first_name']
@@ -87,7 +88,7 @@ class MerchantDistributorForm(forms.ModelForm):
 
 
 class UpdateMerchantDistributorForm(forms.ModelForm):
-
+    email = forms.EmailField(max_length=255, required=True)
     def clean_first_name(self):
         first_name = self.cleaned_data['first_name']
         if ' ' in first_name:
