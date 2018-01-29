@@ -19,7 +19,8 @@ PAYMENT_REQUEST_STATUS = (
 
 PAYMENT_REQUEST_TYPE = (
     (0, 'Credit'),
-    (1, 'Commission')
+    (1, 'Commission'),
+    (2, 'Topup'),
 )
 
 
