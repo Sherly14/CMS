@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %} Topup {% endblock %}
+
+{% block content %}
+
+
+<div class="content-wrapper py-2" style="padding-left: 0.5rem; padding-right: 4rem">
+    <p class="heading-right">Topup</p>
+    <div class="container-fluid" style="position: relative;">
+        <div class="row">
+            <p class="heading-bg">PERSONAL DETAILS:</p>
+        </div>
+        <form id="add-merchant-form" method="POST">
+            <div class="row">
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <label for="from_user">Merchant</label>
+                        {{ topup_form.from_user|attr:"id:from_user"|attr:"class:fill" }}
+                        {% if topup_form.from_user.errors %}
+                            {{ topup_form.from_user.errors }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </form>
+
+    </div>
+
+{% endblock %}
