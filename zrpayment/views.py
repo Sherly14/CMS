@@ -31,11 +31,20 @@ from zruser import mapping as user_map
 from zrwallet import models as zrwallet_models
 from zruser.models import ZrUser
 from zrmapping import models as zrmappings_models
+from django.views.generic import CreateView, DetailView, ListView, UpdateView
+from zrpayment import forms as zr_payment_form
+from django.shortcuts import render
 
 
 SUCCESS_MESSAGE_START = '<div class="alert alert-success" role="alert"><div class="alert-content"><i class="glyphicon glyphicon-ok-circle"></i><strong>'
 ERROR_MESSAGE_START = '<div class="alert alert-danger" role="alert"><div class="alert-content"><i class="glyphicon glyphicon-remove-circle"></i><strong>'
 MESSAGE_END = '</strong></div>'
+MERCHANT = 'MERCHANT'
+DISTRIBUTOR = 'DISTRIBUTOR'
+SUBDISTRIBUTOR = 'SUBDISTRIBUTOR'
+BENEFICIARY = 'BENEFICIARY'
+CHECKER = 'CHECKER'
+ADMINSTAFF = 'ADMINSTAFF'
 
 
 class PaymentRequestDetailView(DetailView):
@@ -723,3 +732,17 @@ class PaymentRequestSentListView(ListView):
             return get_payment_request_qs(self.request, all_user=True, all_req=True)
         else:
             return get_payment_request_qs(self.request, from_user=True)
+
+class TopupCreateeView(CreateView):
+    template_name = 'zrtopup/topup_add.html'
+
+    def get(self, request):
+        topup_form = zr_payment_form.TopupForm()
+
+        return render(
+            request, self.template_name,
+            {
+                'topup_form': topup_form
+
+            }
+        )
