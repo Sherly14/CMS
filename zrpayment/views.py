@@ -34,6 +34,10 @@ from zrmapping import models as zrmappings_models
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from zrpayment import forms as zr_payment_form
 from django.shortcuts import render
+from django import forms
+from itertools import chain
+from django.urls import reverse
+
 
 
 SUCCESS_MESSAGE_START = '<div class="alert alert-success" role="alert"><div class="alert-content"><i class="glyphicon glyphicon-ok-circle"></i><strong>'
@@ -720,9 +724,13 @@ class PaymentRequestSentListView(ListView):
 
         wallet = None
         if not is_user_superuser(self.request):
+           try:
             wallet = zrwallet_models.Wallet.objects.get(
                 merchant=self.request.user.zr_admin_user.zr_user
             )
+           except:
+               wallet = None
+
         context['wallet'] = wallet
         context['is_superuser'] = is_user_superuser(self.request)
         return context
@@ -733,16 +741,38 @@ class PaymentRequestSentListView(ListView):
         else:
             return get_payment_request_qs(self.request, from_user=True)
 
-class TopupCreateeView(CreateView):
+class TopupCreateView(CreateView):
     template_name = 'zrtopup/topup_add.html'
 
     def get(self, request):
+        to_list = []
+        distributor_merchant =[]
+        distributor_subdistributor =[]
+
+        distributor_merchant = zrmappings_models.DistributorMerchant.objects.filter(
+            distributor_id=request.user.zr_admin_user.zr_user)
+        if distributor_merchant:
+            for distributor_merchant_map in distributor_merchant:
+                to_list.append(distributor_merchant_map.merchant)
+
+
+        distributor_subdistributor = zrmappings_models.DistributorSubDistributor.objects.filter(
+            distributor_id=request.user.zr_admin_user.zr_user)
+        if distributor_subdistributor:
+            for distributor_subdistributor_map in distributor_subdistributor:
+                to_list.append(distributor_subdistributor_map.sub_distributor)
+
         topup_form = zr_payment_form.TopupForm()
 
         return render(
             request, self.template_name,
             {
-                'topup_form': topup_form
+                'topup_form': topup_form,
+                'to_list':to_list
 
             }
         )
+
+    def post(self, request):
+        merchant_form = zr_payment_form.TopupForm(data=request.POST)
+        return HttpResponseRedirect(reverse("user:distributor-list"))
