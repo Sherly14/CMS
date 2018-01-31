@@ -16,7 +16,7 @@
                 <div class="col-sm-4">
                     <div class="form-group">
                         <label for="from_user">To User</label>
-                        <select id="touser"  name="from_user" class="fill" required>
+                        <select id="from_user"  name="from_user" class="fill" required>
                         <option value="">-----------</option>
                         {% for zr_user in to_list %}
                             <option value="{{ zr_user.id }}" >{{zr_user.first_name }} {{ zr_user.last_name|default_if_none:""}} ({{ zr_user.mobile_no|default_if_none:""}})</option>
@@ -49,17 +49,26 @@
                     <div class="form-group">
                         <label for="amount">Amount</label>
                         {{ topup_form.amount|attr:"id:amount"|attr:"class:fill" }}
-                        {% if topup_form.from_user.errors %}
-                            {{ topup_form.from_user.errors }}
+                        {% if topup_form.amount.errors %}
+                            {{ topup_form.amount.errors }}
                         {% endif %}
+
+                        {% if topup_form.dmt_amount.errors %}
+                            {{ topup_form.dmt_amount.errors }}
+                        {% endif %}
+
+                        {% if topup_form.non_dmt_amount.errors %}
+                            {{ topup_form.non_dmt_amount.errors }}
+                        {% endif %}
+
                     </div>
                 </div>
                  <div class="fill margin-top" style="padding-left:6.5rem">
                 <input class="button red" type="submit" value="Save & Submit">
             </div>
             </div>
-            <input type="hidden" name = "from_user" id="from_user">
-            <input type="hidden" name = "to_user" id="to_user">
+
+
         </form>
 
     </div>

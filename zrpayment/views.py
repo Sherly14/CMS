@@ -37,6 +37,7 @@ from django.shortcuts import render
 from django import forms
 from itertools import chain
 from django.urls import reverse
+from django.db import transaction
 
 
 
@@ -64,7 +65,7 @@ class PaymentRequestSerializer(serializers.ModelSerializer):
             'to_user', 'from_user',
             'payment_mode', 'document',
             'from_account_no', 'to_account_no',
-            'from_bank', 'to_bank'
+            'from_bank', 'to_bank','payment_type'
         )
 
 
@@ -762,7 +763,7 @@ class TopupCreateView(CreateView):
             for distributor_subdistributor_map in distributor_subdistributor:
                 to_list.append(distributor_subdistributor_map.sub_distributor)
 
-        topup_form = zr_payment_form.TopupForm()
+        topup_form = zr_payment_form.TopupForm(initial={'to_user': request.user.zr_admin_user.zr_user.id, 'payment_type' : 2 , 'payment_mode' : 3})
 
         return render(
             request, self.template_name,
@@ -773,6 +774,39 @@ class TopupCreateView(CreateView):
             }
         )
 
+    @transaction.atomic
     def post(self, request):
-        merchant_form = zr_payment_form.TopupForm(data=request.POST)
+        mutable = request.POST._mutable
+        request.POST._mutable = True
+        request.POST['to_user'] = request.user.zr_admin_user.zr_user.id
+        request.POST['payment_type'] = 2
+        request.POST['payment_mode'] = 3
+        request.POST['dmt_amount'] = 0
+        request.POST['non_dmt_amount'] = 0
+        if request.POST['type'] == "DMT":
+            request.POST['dmt_amount'] = request.POST['amount']
+        else:
+            request.POST['non_dmt_amount'] = request.POST['amount']
+
+        request.POST['from_account_no'] = 1
+        request.POST['to_account_no'] = 1
+
+        request.POST['from_bank'] = 1
+        request.POST['to_bank'] = 1
+        request.POST['comments'] = "TOPUP"
+        request.POST._mutable = mutable
+
+
+        topup_form = zr_payment_form.TopupForm(data=request.POST)
+        if not topup_form.is_valid():
+            return render(
+                request, self.template_name,
+                {
+                    'topup_form': topup_form,
+
+
+                }
+            )
+
+        topup_form.save()
         return HttpResponseRedirect(reverse("user:distributor-list"))
