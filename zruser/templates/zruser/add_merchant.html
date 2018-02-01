@@ -58,7 +58,7 @@
 {#                </div>#}
             </div>
             <div class="row">
-                <div class="col-sm-8">
+                <div class="col-sm-6">
                     <div class="form-group">
                         <label for="business">Business name</label>
                         {{ merchant_form.business_name|attr:"id:business"|attr:"class:input-80" }}
@@ -67,12 +67,21 @@
                         {% endif %}
                     </div>
                 </div>
-                <div class="col-sm-4">
+                <div class="col-sm-3">
                     <div class="form-group">
                         <label for="pan">PAN No.</label>
                         {{ merchant_form.pan_no|attr:"id:pan"|attr:"class:input-80" }}
                         {% if merchant_form.pan_no.errors %}
                             {{ merchant_form.pan_no.errors }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label for="business_type">Business Type</label>
+                        {{ merchant_form.business_type|attr:"class:fill"|attr:"id:business_type" }}
+                        {% if merchant_form.business_type.errors %}
+                            {{ merchant_form.business_type.errors }}
                         {% endif %}
                     </div>
                 </div>
