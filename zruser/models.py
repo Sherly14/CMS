@@ -29,6 +29,27 @@ class UserRole(RowInfo):
         return self.name
 
 
+class BusinesssType(RowInfo):
+    name = models.CharField(max_length=256)
+    code = models.CharField(max_length=128)
+    is_active = models.BooleanField(default=True)
+
+    @staticmethod
+    def get_business_types_form_choices():
+        business_types = []
+        for business_type in BusinesssType.objects.all():
+            business_types.append(
+                (business_type, business_type)
+            )
+
+        return business_types
+
+    class Meta:
+        verbose_name_plural = 'BusinessTypes'
+
+    def __unicode__(self):
+        return self.name
+
 class KYCDocumentType(RowInfo):
     name = models.CharField(max_length=128)
 
@@ -47,8 +68,6 @@ class KYCDocumentType(RowInfo):
 
     def __unicode__(self):
         return self.name
-
-
 class ZrAdminUser(RowInfo):
     id = models.OneToOneField(to=User, related_name='zr_admin_user', primary_key=True)
     mobile_no = models.BigIntegerField(null=True, blank=True)
@@ -94,6 +113,12 @@ class ZrUser(RowInfo):
     gstin = models.CharField(max_length=20, null=True, blank=True)
 
     UPIID = models.CharField(max_length=256, null=True, blank=True)
+    business_type = models.ForeignKey(to=BusinesssType, related_name='business_type', null=True, blank=True)
+
+
+
+
+
 
     def save(self, *args, **kwargs):
         # self.pass_word = make_password(self.pass_word)

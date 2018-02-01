@@ -27,6 +27,7 @@ admin.site.register(Sender)
 admin.site.register(Beneficiary)
 admin.site.register(SenderKYCDetail)
 admin.site.register(OTPDetail)
+admin.site.register(BusinesssType)
 
 
 class ZrMerchantLeadAdmin(admin.ModelAdmin):
