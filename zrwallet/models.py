@@ -45,8 +45,10 @@ class WalletTransactions(RowInfo):
         null=True, blank=True
     )
     dmt_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+    dmt_closing_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
 
     non_dmt_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+    non_dmt_closing_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     is_success = models.BooleanField(default=False)
 
     class Meta:
@@ -60,6 +62,26 @@ class WalletTransactions(RowInfo):
         self.non_dmt_balance = Decimal(self.non_dmt_balance).quantize(Decimal("0.00"))
 
         super(WalletTransactions, self).save(*args, **kwargs)
+
+    def dmt_opening_balance(self):
+        opening_balance = self.dmt_closing_balance + (-1 * self.dmt_balance)
+        if opening_balance < 0:
+            return 0
+        else:
+            return opening_balance
+
+    def non_dmt_opening_balance(self):
+        opening_balance = self.non_dmt_closing_balance + (-1 * self.non_dmt_balance)
+        if opening_balance < 0:
+            return 0
+        else:
+            return opening_balance
+
+    def dmtnegate(self):
+        return -self.dmt_balance
+
+    def nondmtnegate(self):
+        return -self.non_dmt_balance
 
 
 class Passbook(RowInfo):
