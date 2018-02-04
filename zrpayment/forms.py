@@ -1,4 +1,3 @@
-import re
 
 from django import forms
 from zruser.models import ZrAdminUser, ZrUser
