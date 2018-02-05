@@ -5,7 +5,6 @@ import uuid
 import decimal
 
 
-
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(cur_dir, '..'))  # NOQA
 sys.path.append(os.path.join(cur_dir, '..', '..'))
@@ -15,11 +14,10 @@ django.setup()  # NOQA
 
 from zrwallet.models import Wallet, WalletTransactions
 from django.db import transaction
-from django.http import JsonResponse
 
 
 @transaction.atomic
-def set_closing_balance(request):
+def run():
     zr_wallet = Wallet.objects.all()
     for row in zr_wallet:
         mid = row.merchant_id
@@ -41,6 +39,3 @@ def set_closing_balance(request):
                 dmt_closing_balance = r.dmt_closing_balance
                 non_dmt_closing_balance = r.non_dmt_closing_balance
                 r.save()
-
-    return JsonResponse({"success": True})
-
