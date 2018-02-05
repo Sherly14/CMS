@@ -14,5 +14,4 @@ urlpatterns = [
     url(r'^generate_topup_request/$', zr_payment_views.GenerateTopUpRequestView.as_view(), name='generate_topup_request'),
     url(r'^accept_payment_request/$', zr_payment_views.AcceptPaymentRequestView.as_view(), name='accept_payment_request'),
     url(r'^reject_payment_request/$', zr_payment_views.RejectPaymentRequestView.as_view(), name='reject_payment_request'),
-    url(r'^topup/add/$', zr_payment_views.TopupCreateView.as_view(), name='topup-add'),
 ]
