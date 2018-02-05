@@ -930,7 +930,6 @@ class GenerateTopUpRequestView(APIView):
         data = {}
         error_message = '{0} {1} {2}'.format(ERROR_MESSAGE_START,
                                              err_msg,
-
                                              MESSAGE_END)
 
         bank = Bank.objects.get(pk=1)
@@ -949,8 +948,8 @@ class GenerateTopUpRequestView(APIView):
         else:
             data['non_dmt_amount'] = data['amount']
 
-        data['from_account_no'] = 1
-        data['to_account_no'] = 1
+        data['from_account_no'] = "xxx_Topup_{0}".format(str(data['to_user']))
+        data['to_account_no'] = "xxx_Topup_{0}".format(str(data['from_user']))
 
         data['from_bank'] = bank.id
         data['to_bank'] = bank.id
