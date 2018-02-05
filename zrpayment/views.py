@@ -160,6 +160,8 @@ class RefundRequestView(APIView):
             payment_request=payment_request_instance,
             dmt_balance=payment_request_instance.dmt_amount * decimal.Decimal('-1'),
             non_dmt_balance=payment_request_instance.non_dmt_amount * decimal.Decimal('-1'),
+            dmt_closing_balance=from_user_wallet.dmt_balance,
+            non_dmt_closing_balance=from_user_wallet.non_dmt_balance,
             is_success=True
         )
 
@@ -169,6 +171,8 @@ class RefundRequestView(APIView):
             payment_request=payment_request_instance,
             dmt_balance=payment_request_instance.dmt_amount,
             non_dmt_balance=payment_request_instance.non_dmt_amount,
+            dmt_closing_balance=to_user_wallet.dmt_balance,
+            non_dmt_closing_balance=to_user_wallet.non_dmt_balance,
             is_success=True
         )
 
@@ -203,6 +207,8 @@ class AcceptPaymentRequestView(APIView):
                         payment_request=payment_request,
                         dmt_balance=payment_request.dmt_amount,
                         non_dmt_balance=payment_request.non_dmt_amount,
+                        dmt_closing_balance=zr_wallet.dmt_balance,
+                        non_dmt_closing_balance=zr_wallet.non_dmt_balance,
                         is_success=True
                     )
                     message = "Wallet updated successfully"
@@ -256,6 +262,8 @@ class AcceptPaymentRequestView(APIView):
                             payment_request=payment_request,
                             dmt_balance=payment_request.dmt_amount * decimal.Decimal('-1'),
                             non_dmt_balance=payment_request.non_dmt_amount * decimal.Decimal('-1'),
+                            dmt_closing_balance=supervisor_wallet.dmt_balance,
+                            non_dmt_closing_balance=supervisor_wallet.non_dmt_balance,
                             is_success=True
                         )
                         zrwallet_models.WalletTransactions.objects.create(
@@ -264,6 +272,8 @@ class AcceptPaymentRequestView(APIView):
                             payment_request=payment_request,
                             dmt_balance=payment_request.dmt_amount,
                             non_dmt_balance=payment_request.non_dmt_amount,
+                            dmt_closing_balance=zr_wallet.dmt_balance,
+                            non_dmt_closing_balance=zr_wallet.non_dmt_balance,
                             is_success=True
                         )
                         payment_request.status = 1
@@ -921,16 +931,10 @@ class GenerateTopUpRequestView(APIView):
     queryset = PaymentRequest.objects.all()
     permission_classes = (IsAuthenticated,)
 
-
-
     @transaction.atomic
-
     def post(self, request):
         err_msg = "Something went wrong, please try again"
         data = {}
-        error_message = '{0} {1} {2}'.format(ERROR_MESSAGE_START,
-                                             err_msg,
-                                             MESSAGE_END)
 
         bank = Bank.objects.get(pk=1)
 
@@ -995,6 +999,7 @@ class GenerateTopUpRequestView(APIView):
                     )
                     zr_wallet.dmt_balance += payment_request.dmt_amount
                     zr_wallet.non_dmt_balance += payment_request.non_dmt_amount
+
                     zr_wallet.save(
                         update_fields=[
                             'dmt_balance',
@@ -1007,15 +1012,20 @@ class GenerateTopUpRequestView(APIView):
                         payment_request=payment_request,
                         dmt_balance=payment_request.dmt_amount,
                         non_dmt_balance=payment_request.non_dmt_amount,
+                        dmt_closing_balance=zr_wallet.dmt_balance,
+                        non_dmt_closing_balance=zr_wallet.non_dmt_balance,
                         is_success=True
                     )
-                    message = "Wallet updated successfully"
+                    # "Wallet updated successfully"
                     payment_request.status = 1
                     payment_request.save(update_fields=['status'])
                 elif self.request.user.zr_admin_user.role.name in ['DISTRIBUTOR', 'SUBDISTRIBUTOR']:
+                    # Amount from supervisor_wallet transferred to zr_wallet
+                    # supervisor_wallet is self(from) wallet for TOPUP
                     supervisor_wallet = zrwallet_models.Wallet.objects.get(
                         merchant=payment_request.to_user
                     )
+                    # zr_wallet is other(to) wallet for TOPUP
                     zr_wallet = zrwallet_models.Wallet.objects.get(
                         merchant=payment_request.from_user
                     )
@@ -1041,7 +1051,7 @@ class GenerateTopUpRequestView(APIView):
                             balance_insufficient.append('NON DMT balance')
 
                     if updated:
-                        message = "Wallet updated successfully"
+                        # "Wallet updated successfully"
                         zr_wallet.save(
                             update_fields=[
                                 'dmt_balance',
@@ -1060,6 +1070,8 @@ class GenerateTopUpRequestView(APIView):
                             payment_request=payment_request,
                             dmt_balance=payment_request.dmt_amount * decimal.Decimal('-1'),
                             non_dmt_balance=payment_request.non_dmt_amount * decimal.Decimal('-1'),
+                            dmt_closing_balance=supervisor_wallet.dmt_balance,
+                            non_dmt_closing_balance=supervisor_wallet.non_dmt_balance,
                             is_success=True
                         )
                         zrwallet_models.WalletTransactions.objects.create(
@@ -1068,6 +1080,8 @@ class GenerateTopUpRequestView(APIView):
                             payment_request=payment_request,
                             dmt_balance=payment_request.dmt_amount,
                             non_dmt_balance=payment_request.non_dmt_amount,
+                            dmt_closing_balance=zr_wallet.dmt_balance,
+                            non_dmt_closing_balance=zr_wallet.non_dmt_balance,
                             is_success=True
                         )
                         payment_request.status = 1

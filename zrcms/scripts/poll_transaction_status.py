@@ -86,13 +86,16 @@ def poll_transaction_status_for_refund():
                 wallet_log.transaction = transaction
 
                 if transaction.type.name.upper() == 'DMT':
+
                     merchant_wallet.dmt_balance += refund_amount
+
                     merchant_wallet.save(
                         update_fields=[
                             'dmt_balance'
                         ]
                     )
                     wallet_log.dmt_balance = refund_amount
+                    wallet_log.dmt_closing_balance = merchant_wallet.dmt_balance
                 else:
                     merchant_wallet.non_dmt_balance += refund_amount
                     merchant_wallet.save(
@@ -101,6 +104,7 @@ def poll_transaction_status_for_refund():
                         ]
                     )
                     wallet_log.non_dmt_balance = refund_amount
+                    wallet_log.non_dmt_closing_balance = wallet_log.non_dmt_balance
                 wallet_log.save()
                 transaction.status = TRANSACTION_STATUS_REFUNDED
                 transaction.save()
