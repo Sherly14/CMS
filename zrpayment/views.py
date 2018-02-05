@@ -29,7 +29,7 @@ from common_utils.user_utils import is_user_superuser, file_save_s3
 from zrpayment.models import PaymentRequest, Payments
 from zruser import mapping as user_map
 from zrwallet import models as zrwallet_models
-from zruser.models import ZrUser
+from zruser.models import Bank
 from zrmapping import models as zrmappings_models
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
 from zrpayment import forms as zr_payment_form
@@ -921,19 +921,24 @@ class GenerateTopUpRequestView(APIView):
     queryset = PaymentRequest.objects.all()
     permission_classes = (IsAuthenticated,)
 
+
+
     @transaction.atomic
+
     def post(self, request):
+        err_msg = "Something went wrong, please try again"
         data = {}
         error_message = '{0} {1} {2}'.format(ERROR_MESSAGE_START,
-                                             "Something went wrong, please try again",
+                                             err_msg,
+
                                              MESSAGE_END)
+
+        bank = Bank.objects.get(pk=1)
 
         for detail, value in request.data.items():
             data[detail] = value
 
         # return Response(data, status=status.HTTP_200_OK)
-
-
         data['to_user'] = request.user.zr_admin_user.zr_user.id
         data['payment_type'] = 2
         data['payment_mode'] = 3
@@ -947,8 +952,8 @@ class GenerateTopUpRequestView(APIView):
         data['from_account_no'] = 1
         data['to_account_no'] = 1
 
-        data['from_bank'] = 1
-        data['to_bank'] = 1
+        data['from_bank'] = bank.id
+        data['to_bank'] = bank.id
         data['comments'] = "TOPUP"
         data['status'] = 0
 
@@ -969,6 +974,10 @@ class GenerateTopUpRequestView(APIView):
             if distributor_subdistributor:
                 for distributor_subdistributor_map in distributor_subdistributor:
                     to_list.append(distributor_subdistributor_map.sub_distributor)
+
+            error_message = '{0} {1} {2} {3}'.format(ERROR_MESSAGE_START,
+                                                 err_msg , topup_form.errors,
+                                                 MESSAGE_END)
 
             response_data = {
                 "responser": topup_form.errors,
@@ -1064,9 +1073,17 @@ class GenerateTopUpRequestView(APIView):
                         )
                         payment_request.status = 1
                         payment_request.save(update_fields=['status'])
+                        message = '{0} {1} {2}'.format(SUCCESS_MESSAGE_START,
+                                                               "TopUp sent successfully",
+                                                               MESSAGE_END)
+
                     else:
                         message = "Insufficient balance in (%s), Please recharge you wallet" % (
                         ','.join(balance_insufficient))
-            else:
-                message = "Payment request already {status}".format(status=payment_request.get_status_display())
-            return HttpResponseRedirect(reverse("payment-requests:payment-request-list"))
+
+                    response_data = {
+                        "responser": "payment_request",
+                        "message": message,
+                        "success": True
+                    }
+                return Response(response_data, status=status.HTTP_201_CREATED)
