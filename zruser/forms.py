@@ -3,6 +3,7 @@ import re
 from django import forms
 from django.contrib.auth import authenticate
 from zruser.models import ZrAdminUser, ZrUser, BankDetail, KYCDocumentType
+from zrpayment.forms import forms
 
 
 class LoginForm(forms.Form):
