@@ -26,7 +26,7 @@ from common_utils.date_utils import last_month, last_week_range
 from common_utils.transaction_utils import get_distributor_from_sub_distributor, \
     get_main_admin
 from common_utils.user_utils import is_user_superuser, file_save_s3
-from zrpayment.models import PaymentRequest, Payments
+from zrpayment.models import PaymentRequest, Payments, PaymentMode
 from zruser import mapping as user_map
 from zrwallet import models as zrwallet_models
 from zruser.models import Bank
@@ -743,188 +743,11 @@ class PaymentRequestSentListView(ListView):
             return get_payment_request_qs(self.request, from_user=True)
 
 
-class TopupCreateView(CreateView):
-    template_name = 'zrtopup/topup_add.html'
-
-    def get(self, request):
-        to_list = []
-        distributor_merchant =[]
-        distributor_subdistributor =[]
-
-        distributor_merchant = zrmappings_models.DistributorMerchant.objects.filter(
-            distributor_id=request.user.zr_admin_user.zr_user)
-        if distributor_merchant:
-            for distributor_merchant_map in distributor_merchant:
-                to_list.append(distributor_merchant_map.merchant)
-
-
-        distributor_subdistributor = zrmappings_models.DistributorSubDistributor.objects.filter(
-            distributor_id=request.user.zr_admin_user.zr_user)
-        if distributor_subdistributor:
-            for distributor_subdistributor_map in distributor_subdistributor:
-                to_list.append(distributor_subdistributor_map.sub_distributor)
-
-        topup_form = zr_payment_form.TopupForm(initial={'to_user': request.user.zr_admin_user.zr_user.id, 'payment_type' : 2 , 'payment_mode' : 3})
-
-        return render(
-            request, self.template_name,
-            {
-                'topup_form': topup_form,
-                'to_list':to_list
-
-            }
-        )
-
-    @transaction.atomic
-    def post(self, request):
-        mutable = request.POST._mutable
-        request.POST._mutable = True
-        request.POST['to_user'] = request.user.zr_admin_user.zr_user.id
-        request.POST['payment_type'] = 2
-        request.POST['payment_mode'] = 3
-        request.POST['dmt_amount'] = 0
-        request.POST['non_dmt_amount'] = 0
-        if request.POST['type'] == "DMT":
-            request.POST['dmt_amount'] = request.POST['amount']
-        else:
-            request.POST['non_dmt_amount'] = request.POST['amount']
-
-        request.POST['from_account_no'] = 1
-        request.POST['to_account_no'] = 1
-
-        request.POST['from_bank'] = 1
-        request.POST['to_bank'] = 1
-        request.POST['comments'] = "TOPUP"
-        request.POST['status'] = 0
-        request.POST._mutable = mutable
-
-        topup_form = zr_payment_form.TopupForm(data=request.POST)
-        if not topup_form.is_valid():
-            to_list = []
-            distributor_merchant = []
-            distributor_subdistributor = []
-
-            distributor_merchant = zrmappings_models.DistributorMerchant.objects.filter(
-                distributor_id=request.user.zr_admin_user.zr_user)
-            if distributor_merchant:
-                for distributor_merchant_map in distributor_merchant:
-                    to_list.append(distributor_merchant_map.merchant)
-
-            distributor_subdistributor = zrmappings_models.DistributorSubDistributor.objects.filter(
-                distributor_id=request.user.zr_admin_user.zr_user)
-            if distributor_subdistributor:
-                for distributor_subdistributor_map in distributor_subdistributor:
-                    to_list.append(distributor_subdistributor_map.sub_distributor)
-            return render(
-                request, self.template_name,
-                {
-                    'topup_form': topup_form,
-                    'to_list': to_list
-                }
-            )
-
-#updating the topup data in zrwallet table
-        payment_request = topup_form.save()
-        if payment_request:
-            if payment_request.status == 0:
-                if is_user_superuser(self.request) and payment_request.to_user.role.name == 'ADMINSTAFF':
-                    zr_wallet = zrwallet_models.Wallet.objects.get(
-                        merchant=payment_request.from_user
-                    )
-                    zr_wallet.dmt_balance += payment_request.dmt_amount
-                    zr_wallet.non_dmt_balance += payment_request.non_dmt_amount
-                    zr_wallet.save(
-                        update_fields=[
-                            'dmt_balance',
-                            'non_dmt_balance'
-                        ]
-                    )
-                    zrwallet_models.WalletTransactions.objects.create(
-                        wallet=zr_wallet,
-                        transaction=None,
-                        payment_request=payment_request,
-                        dmt_balance=payment_request.dmt_amount,
-                        non_dmt_balance=payment_request.non_dmt_amount,
-                        is_success=True
-                    )
-                    message = "Wallet updated successfully"
-                    payment_request.status = 1
-                    payment_request.save(update_fields=['status'])
-                elif self.request.user.zr_admin_user.role.name in ['DISTRIBUTOR', 'SUBDISTRIBUTOR']:
-                    supervisor_wallet = zrwallet_models.Wallet.objects.get(
-                        merchant=payment_request.to_user
-                    )
-                    zr_wallet = zrwallet_models.Wallet.objects.get(
-                        merchant=payment_request.from_user
-                    )
-                    updated = False
-
-                    balance_insufficient = []
-                    if (
-                                    supervisor_wallet.dmt_balance >= payment_request.dmt_amount and
-                                    supervisor_wallet.non_dmt_balance >= payment_request.non_dmt_amount
-                    ):
-                        # For DMT
-                        zr_wallet.dmt_balance += payment_request.dmt_amount
-                        supervisor_wallet.dmt_balance -= payment_request.dmt_amount
-
-                        # For non dmt
-                        zr_wallet.non_dmt_balance += payment_request.non_dmt_amount
-                        supervisor_wallet.non_dmt_balance -= payment_request.non_dmt_amount
-                        updated = True
-                    else:
-                        if not (supervisor_wallet.dmt_balance >= payment_request.dmt_amount):
-                            balance_insufficient.append('DMT balance')
-                        elif not (supervisor_wallet.non_dmt_balance >= payment_request.non_dmt_amount):
-                            balance_insufficient.append('NON DMT balance')
-
-                    if updated:
-                        message = "Wallet updated successfully"
-                        zr_wallet.save(
-                            update_fields=[
-                                'dmt_balance',
-                                'non_dmt_balance'
-                            ]
-                        )
-                        supervisor_wallet.save(
-                            update_fields=[
-                                'dmt_balance',
-                                'non_dmt_balance'
-                            ]
-                        )
-                        zrwallet_models.WalletTransactions.objects.create(
-                            wallet=supervisor_wallet,
-                            transaction=None,
-                            payment_request=payment_request,
-                            dmt_balance=payment_request.dmt_amount * decimal.Decimal('-1'),
-                            non_dmt_balance=payment_request.non_dmt_amount * decimal.Decimal('-1'),
-                            is_success=True
-                        )
-                        zrwallet_models.WalletTransactions.objects.create(
-                            wallet=zr_wallet,
-                            transaction=None,
-                            payment_request=payment_request,
-                            dmt_balance=payment_request.dmt_amount,
-                            non_dmt_balance=payment_request.non_dmt_amount,
-                            is_success=True
-                        )
-                        payment_request.status = 1
-                        payment_request.save(update_fields=['status'])
-                    else:
-                        message = "Insufficient balance in (%s), Please recharge you wallet" % (','.join(balance_insufficient))
-            else:
-                message = "Payment request already {status}".format(status=payment_request.get_status_display())
-            return HttpResponseRedirect(reverse("payment-requests:payment-request-list"))
-
-
 class GenerateTopUpRequestView(APIView):
     queryset = PaymentRequest.objects.all()
     permission_classes = (IsAuthenticated,)
 
-
-
     @transaction.atomic
-
     def post(self, request):
         err_msg = "Something went wrong, please try again"
         data = {}
@@ -934,13 +757,15 @@ class GenerateTopUpRequestView(APIView):
 
         bank = Bank.objects.get(pk=1)
 
+        wallet = PaymentMode.objects.all().filter(name='WALLET')
         for detail, value in request.data.items():
             data[detail] = value
 
         # return Response(data, status=status.HTTP_200_OK)
         data['to_user'] = request.user.zr_admin_user.zr_user.id
+
         data['payment_type'] = 2
-        data['payment_mode'] = 3
+        data['payment_mode'] = wallet
         data['dmt_amount'] = 0
         data['non_dmt_amount'] = 0
         if data['type'] == "DMT":
