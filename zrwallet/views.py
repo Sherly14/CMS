@@ -115,9 +115,12 @@ def get_transaction_qs(request):
 
     start_date = request.GET.get('startDate')
     end_date = request.GET.get('endDate')
-
+    distributor_id = request.GET.get('distributor-id')
     if start_date!=None and end_date!=None:
         queryset=queryset.filter(at_created__range=(start_date, end_date))
+
+    if distributor_id!=None and int(distributor_id) > 0:
+        queryset=queryset.filter(wallet_id=distributor_id)
 
     # distributor_id = request.GET.get('distributor-id')
     #
@@ -135,7 +138,6 @@ def get_transaction_qs(request):
     return queryset
 
 
-
 class PassbookListView(ListView):
     template_name = 'zwallet/passbook_list.html'
     context_object_name = 'passbook_list'
@@ -144,6 +146,7 @@ class PassbookListView(ListView):
     def get_context_data(self, *args, **kwargs):
         context = super(PassbookListView, self).get_context_data()
         passbook_list = WalletTransactions.objects.all()
+        user_list = WalletTransactions.objects.all().distinct('wallet')
         filter_by = self.request.GET.get('filter', 'all')
         q = self.request.GET.get('q')
         context['passbook_list'] = passbook_list
@@ -151,7 +154,7 @@ class PassbookListView(ListView):
         page = self.request.GET.get('page', 1)
         start_date = self.request.GET.get('startDate')
         end_date = self.request.GET.get('endDate')
-
+        distributor_id = self.request.GET.get('distributor-id')
         context = super(PassbookListView, self).get_context_data(**kwargs)
 
         if start_date:
@@ -159,6 +162,11 @@ class PassbookListView(ListView):
 
         if end_date:
             context['endDate'] = end_date
+
+        if distributor_id:
+            context['distributor_id'] = int(distributor_id)
+        if user_list:
+            context['user_list'] = user_list
 
         #queryset = self.get_queryset()
         paginator = Paginator(queryset, self.paginate_by)

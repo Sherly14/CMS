@@ -31,24 +31,12 @@
                 <div class="col-2">
                     <select id="distributor-id"  name="distributor-id">
                         <option value="-1">ALL</option>
-                        {% for distributor in distributor_list %}
-                            <option value="{{ distributor.id }}" {% if  distributor.id == distributor_id %}selected{% endif %}>{{ distributor.first_name }} {{ distributor.last_name|default_if_none:""}}</option>
+                        {% for user in user_list %}
+                            <option value="{{ user.wallet_id }}"{% if  user.wallet_id == distributor_id %}selected{% endif %}>{{ user.wallet.merchant.full_name}}</option>
                          {% endfor %}
                     </select>
                 </div>
-                 <div class="col-2">
-                    <select id="sub-distributor-id"  name="sub-distributor-id">
-                          <option value="-3">ALL</option>
-                            {% for key,val in subDistMerchant.items %}
-                               <optgroup label = "{{val.0.0}} ">
-                                   <option value="{{key}}"{% if key == sub_distributor_id  %}selected{% endif %}>ALL-{{val.0.0}}</option>
-                                    {% for subdrow in val %}
-                                        <option value="{{subdrow.1}}" {% if subdrow.1 == merchant_id %}selected{% endif %}>{{ subdrow.2 }}</option>
-                                    {% endfor %}
-                                </optgroup>
-                            {% endfor %}
-                    </select>
-                </div>
+
             </div>
             <br>
             <div class="row">
@@ -149,44 +137,39 @@
                         </table>
 
                         <br />
+                    </div>
                         {% if is_paginated %}
-                            <div class="pagination">
-                                <span class="page-links">
-                                    <span class="page-current">
-                                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-                                    </span>
-                                    {% if page_obj.has_previous %}
-                                        {% if filter_by and q %}
-                                            <a href="{{ main_url }}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}">previous</a>
-                                        {% elif q %}
-                                            <a href="{{ main_url }}?page={{ page_obj.previous_page_number }}&q={{ q }}">previous</a>
-                                        {% elif filter_by %}
-                                            <a href="{{ main_url }}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}">previous</a>
-                                        {% else %}
-                                            <a href="{{ main_url }}?page={{ page_obj.previous_page_number }}">previous</a>
-                                        {% endif %}
+                            <div class="pagination-prev">
+                                {% if page_obj.has_previous %}
+                                    {% if filter_by and q %}
+                                        <a class="button red" href="{{ main_url }}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}">previous</a>
+                                    {% elif q %}
+                                        <a class="button red" href="{{ main_url }}?page={{ page_obj.previous_page_number }}&q={{ q }}">previous</a>
+                                    {% elif filter_by %}
+                                        <a class="button red" href="{{ main_url }}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}">previous</a>
+                                    {% else %}
+                                        <a href="{{ main_url }}?page={{ page_obj.previous_page_number }}" class="button red">previous</a>
                                     {% endif %}
-                                    {% if page_obj.has_next %}
-                                        {% if filter_by and q %}
-                                            <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}">next</a>
-                                        {% elif q %}
-                                            <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&q={{ q }}">next</a>
-                                        {% elif filter_by %}
-                                            <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}">next</a>
-                                        {% else %}
-                                            <a href="{{ main_url }}?page={{ page_obj.next_page_number }}">next</a>
-                                        {% endif %}
+                                {% endif %}
+                            </div>
+                            <div class="pagination-next">
+                                {% if page_obj.has_next %}
+                                    {% if filter_by and q %}
+                                        <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}" class="button red">next</a>
+                                    {% elif q %}
+                                        <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&q={{ q }}" class="button red">next</a>
+                                    {% elif filter_by %}
+                                        <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}" class="button red">next</a>
+                                    {% else %}
+                                        <a class="button red" href="{{ main_url }}?page={{ page_obj.next_page_number }}">next</a>
                                     {% endif %}
-                                </span>
+                                {% endif %}
                             </div>
                         {% endif %}
-                    </div>
-
                 </div>
-                <br>
+
             </div>
-        </div>
-    </div>
+                <br>
 
     <!-- Modal to get Email -->
     <div id="get_email_modal" class="modal fade">
