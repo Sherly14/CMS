@@ -755,7 +755,7 @@ class GenerateTopUpRequestView(APIView):
                                              err_msg,
                                              MESSAGE_END)
 
-        bank = Bank.objects.get(pk=1)
+        bank = Bank.objects.all().first()
 
         wallet = PaymentMode.objects.all().filter(name='WALLET')
         for detail, value in request.data.items():
