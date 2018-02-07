@@ -11,3 +11,9 @@ EKO_INITIATOR_ID = os.getenv('EKO_INITIATOR_ID', '9910028267')
 EKO_DEVELOPER_KEY = os.getenv('EKO_DEVELOPER_KEY', 'becbbce45f79c6f5109f848acd540567')
 EKO_TRANSACTION_ENQUIRY_URL = os.getenv('EKO_TRANSACTION_ENQUIRY_URL',
                                         'https://staging.eko.co.in:25004/ekoapi/v1/transactions/')
+
+
+QUICKWALLET_ZR_PARTERNERID = os.getenv('QUICKWALLET_ZR_PARTERNERID', '293')
+QUICKWALLET_SECRET = os.getenv('QUICKWALLET_SECRET', '2z9WyZ823Q78kER')
+QUICKWALLET_RETAILER_CREATE_URL = os.getenv('QUICKWALLET_RETAILER_CREATE_URL',
+                                        'https://uat.quikwallet.com/api/partner/{0}/merchants/crud'.format(QUICKWALLET_ZR_PARTERNERID))

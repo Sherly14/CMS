@@ -279,7 +279,8 @@ class ServiceCircle(RowInfo):
 class VendorZruser(RowInfo):
 
     vendor = models.ForeignKey(to=Vendor, related_name='user_vendor_mappings')
-    user = models.ForeignKey(to=ZrUser, related_name='vendor_user_mappings')
+    zr_user = models.ForeignKey(to=ZrUser, related_name='vendor_user_mappings')
+    vendor_user = models.CharField(max_length=256, null=True)
     is_attached_to_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
 
