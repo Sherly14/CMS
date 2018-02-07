@@ -165,7 +165,11 @@ def calculate_commission():
             if not dmt_commission_struct:
                 raise Exception("DMT structure not found for transaction(%s)")
 
-            customer_fee = (transaction.amount * dmt_commission_struct.customer_fee) / 100
+            customer_fee = 0
+            if dmt_commission_struct.commission_type == 'P':
+                customer_fee = (transaction.amount * dmt_commission_struct.customer_fee) / 100
+            elif dmt_commission_struct.commission_type == 'F':
+                customer_fee = dmt_commission_struct.customer_fee
             if customer_fee < dmt_commission_struct.min_charge:
                 customer_fee = dmt_commission_struct.min_charge
 
