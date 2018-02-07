@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load widget_tweaks %}
 
 {% block title %} Distributors List {% endblock %}
 
@@ -84,8 +85,11 @@
                                     Non-DMT Balance : {{ user_wallet.non_dmt_balance }}
                                 </span>
                         </div>
-                        <button data-toggle="modal" data-target="#modal" class="title m-b-md button red downloadcsv mr-5">
+                        <button data-toggle="modal" data-target="#modal" class="title m-b-md button red downloadcsv mr-5" style="margin-bottom: 1em;">
                             Request Balance
+                        </button>
+                        <button data-toggle="modal" data-target="#top_up_modal" class="title m-b-md button red downloadcsv mr-5" style="margin-bottom: 1em;">
+                            Top-Up
                         </button>
                     </div>
                 </div>
@@ -350,6 +354,81 @@
         </div><!-- /.modal-dialog -->
     </div>
     <!-- /.modal -->
+
+    <!-- Modal Top-Up -->
+    <div id="top_up_modal" class="modal fade">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content" style="width: 700px;">
+                <div class="modal-header" style="    background-color: #e2e2e2;">
+                    <h1 class="modal-title" style="font-size: 1.5rem; font-size: 1.5rem;font-weight: bold;line-height: 2rem;padding-left: 12px;">Top Up</h1>
+                </div>
+                <div class="modal-body">
+
+                    <div id="top_up_modal_message" tabindex='1'></div>
+                    <form class="form-horizontal" method="POST" id="topup_request_form" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row" style="padding-left: 3rem;padding-top: 25px;">
+                            <div class="form-group col-sm-6">
+                                <label class="control-label"><b>To User</b></label>
+                                <div>
+                                    <select id="from_user" name="from_user" required>
+                                        {% for zr_user in to_list %}
+                                            <option value="{{ zr_user.id }}" >{{zr_user.first_name }} {{ zr_user.last_name|default_if_none:""}} ({{ zr_user.mobile_no|default_if_none:""}})</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if topup_form.from_user.errors %}
+                                            {{ topup_form.from_user.errors }}
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <div class="form-group col-sm-6">
+                                <label class="control-label"><b>Type</b></label>
+                                <div>
+                                    <select id="type" name="type" required>
+                                        <option value="">-----------</option>
+                                        <option value="DMT">DMT</option>
+                                        <option value="NONDMT">NON DMT</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group col-sm-6">
+                                <label class="control-label"><b>Amount</b></label>
+                                <div>
+                                    {{ topup_form.amount|attr:"id:amount"|attr:"class:fill" }}
+                                    {% if topup_form.amount.errors %}
+                                        {{ topup_form.amount.errors }}
+                                    {% endif %}
+
+                                    {% if topup_form.dmt_amount.errors %}
+                                        {{ topup_form.dmt_amount.errors }}
+                                    {% endif %}
+
+                                    {% if topup_form.non_dmt_amount.errors %}
+                                        {{ topup_form.non_dmt_amount.errors }}
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="row container" style="padding-left: 3rem;">
+                            <div class="form-group col-sm-9"></div>
+                            <div class="form-group col-sm-3" style="    position: relative;left: 13%;">
+                                <button type="submit" id="top_up_submit_request" class="pull-right submit_request button red downloadcsv mr-5" style="background-color: red" type="submit">
+                                    Top Up
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
+    <!-- /.top_up_modal -->
+
 
     <!-- Modal to get Email -->
     <div id="get_email_modal" class="modal fade">
@@ -778,7 +857,68 @@
             } else {
                 $("#ref_id").prop('required',true);
             }
-        })
+        });
+
+        var topup_request_form = $('#topup_request_form');
+
+        topup_request_form.validate({
+
+            submitHandler: function (form) {
+                <!-- AJAX Call -->
+                $('#top_up_modal_message').html("");
+                // Create an FormData object
+                var data = new FormData($('#topup_request_form')[0]);
+                {# console.log(data);#}
+                $('#submit_request').prop('disabled', true);
+                $('#submit_request').addClass('disabled');
+                $.ajax({
+                    type: "POST",
+                    enctype: 'multipart/form-data',
+                    processData: false,
+                    contentType: false,
+                    url: '/payment_request/generate_topup_request/',
+                    data: data,
+                    success: function (data) {
+                        $('#top_up_modal_message').html(data.message);
+                        if(data.success) {
+                            setTimeout(function () {
+                                window.location.reload();
+                            }, 1000);
+                        }
+                        else {
+                            setTimeout(function () {
+                                $('#top_up_modal_message').html("");
+                            }, 2000);
+                            $('#submit_request').prop('disabled', false);
+                            $('#submit_request').removeClass('disabled');
+                        }
+                    },
+                    error: function (data) {
+                        $('#top_up_modal_message').html(data.message);
+                        $('#submit_request').prop('disabled', false);
+                    }
+                });
+                <!-- AJAX Call -->
+            },
+            success: function (label) {
+                label
+                    .addClass('valid').addClass('help-block ok') // mark the current input as valid and display OK icon
+                    .closest('.control-group').removeClass('error').addClass('success'); // set success class to the control group
+                label
+                    .closest('.form-group').removeClass('has-error').addClass('has-success');
+                $(this)
+                    .closest('.col-md-4').find('.err').hide();
+                $(this)
+                    .closest('.col-md-4').find('.suc').show();
+                label
+                    .closest('.form-group').removeClass('has-error'); // set success class to the control group
+                label
+                    .closest('.form-group').removeClass('has-error'); // set success class to the control group
+
+            },
+            errorPlacement: function (error, element) {
+            }
+        });
 
     </script>
 {% endblock extrascripts %}
