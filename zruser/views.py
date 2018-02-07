@@ -29,6 +29,7 @@ from utils import constants
 from zrcommission import models as commission_models
 from zrmapping import models as zrmappings_models
 from zrpayment.models import PaymentMode
+from zrpayment import forms as zr_payment_form
 from zrtransaction import models as transaction_models
 from zrtransaction.utils.constants import RECHARGES_TYPE, TRANSACTION_STATUS_SUCCESS, \
     TRANSACTION_STATUS_FAILURE, BILLS_TYPE, TRANSACTION_STATUS_PENDING
@@ -39,6 +40,7 @@ from zruser.utils.constants import DEFAULT_DISTRIBUTOR_MOBILE_NUMBER
 from zrwallet import models as zrwallet_models
 from django.contrib.auth.models import User
 from itertools import chain
+from zrpayment.forms import forms as zr_payment_forms
 
 
 MERCHANT = 'MERCHANT'
@@ -1091,7 +1093,24 @@ class DashBoardView(ListView):
         if end_date:
             context['endDate'] = end_date
 
+        to_list=[]
+        distributor_merchant = zrmappings_models.DistributorMerchant.objects.filter(
+            distributor_id= self.request.user.zr_admin_user.zr_user)
+        if distributor_merchant:
+            for distributor_merchant_map in distributor_merchant:
+                to_list.append(distributor_merchant_map.merchant)
 
+
+        distributor_subdistributor = zrmappings_models.DistributorSubDistributor.objects.filter(
+            distributor_id=self.request.user.zr_admin_user.zr_user)
+        if distributor_subdistributor:
+            for distributor_subdistributor_map in distributor_subdistributor:
+                to_list.append(distributor_subdistributor_map.sub_distributor)
+
+        context['to_list']=to_list
+        topup_form = zr_payment_form.TopupForm()
+        # topup_form = zr_payment_form.TopupForm(initial={'to_user': request.user.zr_admin_user.zr_user.id, 'payment_type' : 2 , 'payment_mode' : 3})
+        context['topup_form']=topup_form
         return context
 
 
@@ -1264,8 +1283,6 @@ class UserUpdateView(View):
             return HttpResponseRedirect(reverse("user:sub-distributor-list"))
         if user.role.name == MERCHANT:
             return HttpResponseRedirect(reverse("user:merchant-list"))
-
-
 
 
 class MerchantCreateView(View):
@@ -1613,8 +1630,6 @@ class SubDistributorListView(ListView):
 
         if distributor_id:
             context['distributor_id'] = int(distributor_id)
-
-
 
         if sub_distributor_list:
             for subdist in sub_distributor_list:
