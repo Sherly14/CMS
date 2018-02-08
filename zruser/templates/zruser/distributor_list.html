@@ -108,49 +108,38 @@
 
     $(document).ready(function()
     {
-        $('#distributor-id').select2();
 
-        $('#search-btn').click(function(){
+         $('#distributor-id').select2();
 
-        startDate = $('#start-date').val();
-        endDate = $('#end-date').val();
+         function q(){
+             distributorId = $("#distributor-id").val();
+             startDate = $('#start-date').val();
+             endDate = $('#end-date').val();
 
-            {% if filter_by %}
-
-                url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}";
-
-            {% else %}
-                url = window.location.pathname + "?q=" + $('#search-txt').val();
-            {% endif %}
-
-            if(startDate!="" && endDate!="" )
-            {
-                url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
-            }
-
-            window.location.assign(url)
-        });
-
-         $('#distributor-id').change(function(){
-         distributorId = $("#distributor-id").val();
-         all = "";
-
-         var selectedAll = $("#user-transaction-id :selected").text();
-             if (selectedAll.includes("ALL"))
-             {
-                all = distributorId;
-                distributorId = ""
-                 url = window.location.pathname +'?distributor-id=' + all
+             if($('#search-txt').val() != "") {
+                  url = window.location.pathname + "?q=" + $('#search-txt').val();
+             } else {
+                  url = window.location.pathname + '?';
              }
 
+             if(distributorId !="")
+             {
+                 url += '&distributor-id=' + distributorId
+             }
 
-              if(distributorId !="")
-                {
-                    url = window.location.pathname +'?distributor-id=' + distributorId
-                }
+             if(startDate!="" && endDate!="" )
+             {
+                 url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
+             }
 
-          window.location.assign(url)
-    });
+             window.location.assign(url)
+         }
+
+         $('#search-btn').click(q);
+
+         $('#distributor-id').change(q);
+
+         //$('#search-txt').on('input', q);
 
         $('#period').change(function() {
             period_val = $(this).val();
@@ -177,7 +166,7 @@
             format: 'yyyy-mm-dd',
 
             maxDate: function () {
-            return $('#end-date').val();
+                return $('#end-date').val();
             }
         }).on('change', function (ev)
          {
@@ -194,7 +183,7 @@
             {
                alert("date difference is greater than 31");
                $('#start-date').val("");
-            }
+            } else if ($("#start-date").val() != '' && $("#end-date").val() != ''){q();}
          });
 
 
@@ -221,7 +210,7 @@
             {
                alert("date difference is greater than 31");
                $('#end-date').val("");
-            }
+            }else if ($("#start-date").val() != '' && $("#end-date").val() != ''){q();}
          });
 
 
