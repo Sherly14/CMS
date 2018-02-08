@@ -115,11 +115,6 @@ class ZrUser(RowInfo):
     UPIID = models.CharField(max_length=256, null=True, blank=True)
     business_type = models.ForeignKey(to=BusinesssType, related_name='business_type', null=True, blank=True)
 
-
-
-
-
-
     def save(self, *args, **kwargs):
         # self.pass_word = make_password(self.pass_word)
 

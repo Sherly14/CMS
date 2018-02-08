@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 
 from zruser import views as zr_user_views
 from zruser.views import DistributorDetailView, DistributorListView, MerchantListView, MerchantDetailView, \
-    DistributorCreateView, MerchantCreateView, DashBoardView, SubDistributorCreateView, SubDistributorListView, UserUpdateView, RetailerCreateView
+    DistributorCreateView, MerchantCreateView, DashBoardView, SubDistributorCreateView, SubDistributorListView, UserUpdateView, RetailerCreateView, RetailerListView
 from zruser.viewsets import MerchantLeadViewSet
 
 router = DefaultRouter()
@@ -35,4 +35,7 @@ urlpatterns += [
     url(r'^dashboard/$', DashBoardView.as_view(), name='dashboard'),
     url(r'^mail_report/$', zr_user_views.mail_report, name='user_mail_report'),
     url(r'^retailer_create/$', RetailerCreateView.as_view(), name='retailer-create'),
+    url(r'^retailer_list/$', RetailerListView.as_view(), name='retailer-list'),
+    url(r'^retailer_csv/$', zr_user_views.download_retailer_list_csv, name="retailer-csv"),
+
 ]

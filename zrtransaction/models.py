@@ -277,7 +277,6 @@ class ServiceCircle(RowInfo):
 
 
 class VendorZruser(RowInfo):
-
     vendor = models.ForeignKey(to=Vendor, related_name='user_vendor_mappings')
     zr_user = models.ForeignKey(to=ZrUser, related_name='vendor_user_mappings')
     vendor_user = models.CharField(max_length=256, null=True)
@@ -288,4 +287,4 @@ class VendorZruser(RowInfo):
         verbose_name_plural = 'RetailerTerminalMappings'
 
     def __unicode__(self):
-        return '%s - %s' % (self.vendor, self.user)
+        return '%s - %s' % (self.vendor, self.zr_user)

@@ -870,7 +870,6 @@ class DistributorListView(ListView):
         if end_date:
             context['endDate'] = end_date
 
-
         if distributor_id:
             context['distributor_id'] =int(distributor_id)
 
@@ -1268,6 +1267,8 @@ class UserUpdateView(View):
             return HttpResponseRedirect(reverse("user:sub-distributor-list"))
         if user.role.name == MERCHANT:
             return HttpResponseRedirect(reverse("user:merchant-list"))
+        if user.role.name == RETAILER:
+            return HttpResponseRedirect(reverse("user:retailer-list"))
 
 
 class MerchantCreateView(View):
@@ -1733,66 +1734,227 @@ class RetailerCreateView(CreateView):
                     "name": merchant_form.data['first_name']
                 }
             })
-            json_data = json.loads(response.text)
 
-            status = json_data['status']
+            if 300 > response.status_code >= 200:
+                try:
+                    json_data = json.loads(response.text)
 
-            if status=="failed":
-                return render(
-                    request, self.template_name,
-                    {
-                        "api_error":"something went wrong, please try again!"
-                    }
-                )
-            else:
-                vendor_user_id = json_data['data']['id']
-            merchant_zr_user = merchant_form.save(commit=False)
+                    if json_data:
+                        if json_data['status']:
+                            status = json_data['status']
+                            if status=="failed":
+                                return render(
+                                    request, self.template_name,
+                                    {
+                                        "api_error":"something went wrong, please try again!"
+                                    }
+                                )
+                            else:
+                                vendor_user_id = json_data['data']['id']
+                                merchant_zr_user = merchant_form.save(commit=False)
+                                merchant_zr_user.role = UserRole.objects.filter(name=RETAILER).last()
+                                password = '%s%s' % (
+                                    merchant_zr_user.pan_no.lower().strip(),
+                                    str(merchant_zr_user.mobile_no).lower().strip())
+                                merchant_zr_user.pass_word = password
+                                merchant_zr_user.retailer_id = vendor_user_id
 
-            merchant_zr_user.role = UserRole.objects.filter(name=RETAILER).last()
-            password = '%s%s' % (
-            merchant_zr_user.pan_no.lower().strip(), str(merchant_zr_user.mobile_no).lower().strip())
-            merchant_zr_user.pass_word = password
+                                merchant_zr_user.save()
 
+                                quick_wallet = transaction_models.Vendor.objects.get(name="QUICKWALLET")
+                                transaction_models.VendorZruser.objects.create(
+                                    vendor=quick_wallet,
+                                    zr_user=merchant_zr_user,
+                                    vendor_user=str(merchant_zr_user.retailer_id)
+                                )
 
+                                dj_user = dj_auth_models.User.objects.create_user(
+                                    merchant_zr_user.mobile_no,
+                                    email=merchant_zr_user.email,
+                                    password=password
+                                )
+                                bank_detail = bank_detail_form.save()
+                                bank_detail.for_user = merchant_zr_user
+                                bank_detail.save(update_fields=['for_user'])
 
-            merchant_zr_user.retailer_id = vendor_user_id
+                                ZrAdminUser.objects.create(
+                                    id=dj_user,
+                                    mobile_no=merchant_zr_user.mobile_no,
+                                    city=merchant_zr_user.city,
+                                    state=merchant_zr_user.state,
+                                    pincode=merchant_zr_user.pincode,
+                                    address=merchant_zr_user.address_line_1,
+                                    role=merchant_zr_user.role,
+                                    zr_user=merchant_zr_user
+                                )
+                                for doc in kyc_docs:
+                                    KYCDetail.objects.create(
+                                        type=KYCDocumentType.objects.get(name=doc['doc_type']),
+                                        document_id=doc['doc_id'],
+                                        document_link=doc['doc_url'],
+                                        for_user=merchant_zr_user,
+                                        role=merchant_zr_user.role
+                                    )
 
-            merchant_zr_user.save()
+                                zrwallet_models.Wallet.objects.create(merchant=merchant_zr_user)
+                                return HttpResponseRedirect(reverse("user:retailer-list"))
+                except:
+                    pass
 
-            quick_wallet = transaction_models.Vendor.objects.get(name="QUICKWALLET")
-            transaction_models.VendorZruser.objects.create(
-                vendor = quick_wallet,
-                zr_user = merchant_zr_user,
-                vendor_user = str(merchant_zr_user.retailer_id)
+            return render(
+                request, self.template_name,
+                {
+                    "api_error": "Something went wrong, please try again!"
+                }
             )
 
-            dj_user = dj_auth_models.User.objects.create_user(
-                merchant_zr_user.mobile_no,
-                email=merchant_zr_user.email,
-                password=password
-            )
-            bank_detail = bank_detail_form.save()
-            bank_detail.for_user = merchant_zr_user
-            bank_detail.save(update_fields=['for_user'])
 
-            ZrAdminUser.objects.create(
-                id=dj_user,
-                mobile_no=merchant_zr_user.mobile_no,
-                city=merchant_zr_user.city,
-                state=merchant_zr_user.state,
-                pincode=merchant_zr_user.pincode,
-                address=merchant_zr_user.address_line_1,
-                role=merchant_zr_user.role,
-                zr_user=merchant_zr_user
-            )
-            for doc in kyc_docs:
-                KYCDetail.objects.create(
-                    type=KYCDocumentType.objects.get(name=doc['doc_type']),
-                    document_id=doc['doc_id'],
-                    document_link=doc['doc_url'],
-                    for_user=merchant_zr_user,
-                    role=merchant_zr_user.role
-                )
+class RetailerListView(ListView):
+    template_name = 'zruser/retailer_list.html'
+    queryset = ZrUser.objects.filter(role__name=RETAILER)
+    context_object_name = 'retailer_list'
+    paginate_by = 10
 
-            zrwallet_models.Wallet.objects.create(merchant=merchant_zr_user)
-            return HttpResponseRedirect(reverse("user:distributor-list"))
+    def get_context_data(self, *args, **kwargs):
+        context = super(RetailerListView, self).get_context_data()
+        activate = self.request.GET.get('activate')
+        disable = self.request.GET.get('disable')
+        queryset = self.get_queryset()
+        retailer_list = ZrUser.objects.filter(role__name=RETAILER)
+        q = self.request.GET.get('q')
+        filter = self.request.GET.get('filter')
+        pg_no = self.request.GET.get('page_no', 1)
+        start_date = self.request.GET.get('startDate')
+        end_date = self.request.GET.get('endDate')
+        retailer_id = self.request.GET.get('retailer-id')
+
+        if activate:
+            zruser = ZrUser.objects.filter(id=activate).last()
+            if not zruser:
+                raise Http404
+
+            zruser.is_active = True
+            zrmappings_models.DistributorMerchant.objects.filter(
+                distributor=zruser
+            ).update(
+                is_attached_to_admin=False
+            )
+            dj_user = zruser.zr_user
+            dj_user.is_active = True
+            dj_user.save(update_fields=['is_active'])
+            zruser.save(update_fields=['is_active'])
+
+        if disable:
+            zruser = ZrUser.objects.filter(id=disable).last()
+            if not zruser:
+                raise Http404
+
+            zruser.is_active = False
+            zrmappings_models.DistributorMerchant.objects.filter(
+                distributor=zruser
+            ).update(
+                is_attached_to_admin=True
+            )
+            dj_user = zruser.zr_user
+            dj_user.is_active = False
+            dj_user.save(update_fields=['is_active'])
+            zruser.save(update_fields=['is_active'])
+
+        if q:
+            context['q'] = q
+
+        if filter:
+            context['filter_by'] = filter
+
+        if start_date:
+            context['startDate'] = start_date
+
+        if end_date:
+            context['endDate'] = end_date
+
+
+        if retailer_id:
+            context['retailer_id'] =int(retailer_id)
+
+        context['retailer_list'] = retailer_list
+        context['queryset'] = queryset
+        p = Paginator(context['queryset'], self.paginate_by)
+        try:
+            page = p.page(pg_no)
+        except EmptyPage:
+            raise Http404
+
+        context['queryset'] = page.object_list
+        query_string = {}
+        if q:
+            query_string['q'] = q
+
+        if filter:
+            query_string['filter'] = filter
+
+        if page.has_next():
+            query_string['page_no'] = page.next_page_number()
+            context['next_page_qs'] = urlencode(query_string)
+            context['has_next_page'] = page.has_next()
+        if page.has_previous():
+            query_string['page_no'] = page.previous_page_number()
+            context['prev_page_qs'] = urlencode(query_string)
+            context['has_prev_page'] = page.has_previous()
+
+        return context
+
+    def get_queryset(self):
+        return get_retailer_qs(self.request)
+
+
+def get_retailer_qs(request):
+    queryset = ZrUser.objects.filter(role__name=RETAILER).order_by('-at_created')
+    q = request.GET.get('q')
+    filter = request.GET.get('filter')
+
+    if q:
+        query_filter = Q(first_name__contains=q) | Q(last_name__contains=q) | Q(mobile_no__contains=q)
+        queryset = queryset.filter(
+            query_filter
+        )
+
+    start_date = request.GET.get('startDate')
+    end_date = request.GET.get('endDate')
+
+    if start_date!=None and end_date!=None:
+        queryset=queryset.filter(at_created__range=(start_date, end_date))
+
+    retailer_id = request.GET.get('retailer-id')
+
+    if retailer_id!=None and int(retailer_id) > 0:
+        queryset = queryset.filter(id=retailer_id)
+
+    if filter == 'Today':
+        queryset = queryset.filter(at_created__gte=datetime.datetime.now().date())
+    elif filter == 'Last-Week':
+        queryset = queryset.filter(at_created__range=last_week_range())
+    elif filter == 'Last-Month':
+        queryset = queryset.filter(at_created__range=last_month())
+
+    return queryset
+
+
+def download_retailer_list_csv(request):
+    retailer_qs = get_retailer_qs(request)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="retailers.csv"'
+    writer = csv.writer(response)
+    writer.writerow([
+        'Retailer Id', 'Retailer Name', 'DOJ', 'Mobile', 'Email', 'Status'
+    ])
+    for retailer in retailer_qs:
+        writer.writerow([
+            retailer.id,
+            retailer.first_name,
+            retailer.at_created,
+            retailer.mobile_no,
+            retailer.email,
+            'Active' if retailer.is_active else 'Inactive'
+        ])
+
+    return response

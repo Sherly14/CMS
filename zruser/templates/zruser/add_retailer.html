@@ -8,6 +8,9 @@
 
 <div class="content-wrapper py-2" style="padding-left: 0.5rem; padding-right: 4rem">
     <p class="heading-right">Add a Retailer</p>
+    {% if api_error %}
+      <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
+    {% endif %}
     <div class="container-fluid" style="position: relative;">
         <div class="row">
             <p class="heading-bg">PERSONAL DETAILS:</p>
@@ -269,9 +272,7 @@
         </form>
     </div>
     <label class="fill"></label>
-                {% if api_error %}
-                    {{ api_error }}
-                {% endif %}
+
 
 </div>
 

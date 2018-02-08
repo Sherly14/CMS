@@ -66,6 +66,12 @@
                 </li>
                 {% endif %}
 
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF"%}
+                <li class="nav-item ">
+                    <a class="nav-link text-right" href="{% url 'user:retailer-list' %}">Retailers</a>
+                </li>
+                {% endif %}
+
                 {% if request.user.zr_admin_user.role.name == "CHECKER" or request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
                 <li class="nav-item ">
                     <a class="nav-link text-right" href="{% url 'user:kyc-requests' %}">KYC Requests</a>
