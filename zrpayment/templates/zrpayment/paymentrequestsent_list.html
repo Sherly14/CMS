@@ -59,7 +59,7 @@
                 </div>
                 <div class="row scroll">
 
-                    <div style="width: 100%; overflow: scroll;">
+                    <div style="width: 100%; overflow: auto;">
                         <table>
                             <tr style="border-bottom-style: solid;">
                                 <th>Status</th>
@@ -120,24 +120,24 @@
                                     </span>
                                     {% if page_obj.has_previous %}
                                         {% if filter_by and q %}
-                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}">previous</a>
+                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}" class="button red">previous</a>
                                         {% elif q %}
-                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}&q={{ q }}">previous</a>
+                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}&q={{ q }}" class="button red">previous</a>
                                         {% elif filter_by %}
-                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}">previous</a>
+                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}" class="button red">previous</a>
                                         {% else %}
-                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}">previous</a>
+                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}" class="button red">previous</a>
                                         {% endif %}
                                     {% endif %}
                                     {% if page_obj.has_next %}
                                         {% if filter_by and q %}
-                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}">next</a>
+                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}" class="button red">next</a>
                                         {% elif q %}
-                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}&q={{ q }}">next</a>
+                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}&q={{ q }}" class="button red">next</a>
                                         {% elif filter_by %}
-                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}&filter={{ filter_by }}">next</a>
+                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}&filter={{ filter_by }}" class="button red">next</a>
                                         {% else %}
-                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}">next</a>
+                                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}" class="button red">next</a>
                                         {% endif %}
                                     {% endif %}
                                 </span>

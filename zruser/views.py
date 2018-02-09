@@ -88,7 +88,7 @@ def get_merchant_qs(request):
 
     if is_user_superuser(request):
         if q:
-            query_filter = Q(first_name__contains=q) | Q(last_name__contains=q) | Q(mobile_no__contains=q)
+            query_filter = Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(mobile_no__icontains=q)
             queryset = queryset.filter(
                 query_filter
             )
@@ -704,7 +704,7 @@ def get_distributor_qs(request):
     q = request.GET.get('q')
     filter = request.GET.get('filter')
     if q:
-        query_filter = Q(first_name__contains=q) | Q(last_name__contains=q) | Q(mobile_no__contains=q)
+        query_filter = Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(mobile_no__icontains=q)
         queryset = queryset.filter(
             query_filter
         )
@@ -747,11 +747,11 @@ def get_sub_distributor_qs(request):
 
     if q:
         query_filter = Q(
-            sub_distributor__first_name__contains=q
+            sub_distributor__first_name__icontains=q
         ) | Q(
-            sub_distributor__last_name__contains=q
+            sub_distributor__last_name__icontains=q
         ) | Q(
-            sub_distributor__mobile_no__contains=q
+            sub_distributor__mobile_no__icontains=q
         )
         queryset = queryset.filter(
             query_filter

@@ -25,7 +25,7 @@
                 <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
             </div>
              {% if distributor_list %}
-                <div class="col-2">
+                <div class="col-4">
                     <select id="user-distributor-id"  name="user-distributor-id">
                     <option value="-1">ALL</option>
                     {% for distributor in distributor_list %}
@@ -34,7 +34,7 @@
                 </select>
                 </div>
             {% endif %}
-            <div class="col-2">
+            <div class="col-4">
                 <select id="user-subdistributor-id" name="user-subdistributor-id">
                     <option value="-3">ALL</option>
                     {% for key,val in subDistMerchant.items %}
@@ -70,7 +70,7 @@
             </div>
             <div class="row scroll">
 
-                <div style="width: 100%;     overflow: scroll;">
+                <div style="width: 100%; overflow: auto;">
                     <table>
                         <tr>
                             <th>Merchant Id</th>

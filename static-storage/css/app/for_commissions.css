@@ -142,7 +142,7 @@ p.head-bg{
 
 /*scroll*/
 .scroll{
-	overflow:scroll;
+	overflow:auto;
 	background-clip:content-box;
 	background-color: #F4F3F3;
 	height:400px;

@@ -130,7 +130,7 @@ body.fixed-nav {
       height: 100vh;
       margin-top: 150px;
       /*margin-left: -70px;*/
-      padding-bottom: 56px;
+      /*padding-bottom: 56px;*/
       background: transparent;
       -webkit-flex-direction: column;
       -ms-flex-direction: column; }
