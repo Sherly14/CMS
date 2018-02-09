@@ -105,7 +105,7 @@ class DistributorSubDistributor(RowInfo):
         return '%s - %s' % (self.distributor, self.sub_distributor)
 
 
-class RetailerTerminal(RowInfo):
+class TerminalRetailer(RowInfo):
 
     retailer = models.ForeignKey(to=ZrUser, related_name='terminal_retailer_mappings')
     terminal = models.ForeignKey(to=ZrUser, related_name='retailer_terminal_mappings')
@@ -113,9 +113,7 @@ class RetailerTerminal(RowInfo):
     is_active = models.BooleanField(default=False)
 
     class Meta:
-        verbose_name_plural = 'RetailerTerminalMappings'
+        verbose_name_plural = 'TerminalRetailerMappings'
 
     def __unicode__(self):
         return '%s - %s' % (self.retailer, self.terminal)
-
-

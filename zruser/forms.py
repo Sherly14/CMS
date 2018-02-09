@@ -89,6 +89,7 @@ class MerchantDistributorForm(forms.ModelForm):
 
 class UpdateMerchantDistributorForm(forms.ModelForm):
     email = forms.EmailField(max_length=255, required=True)
+
     def clean_first_name(self):
         first_name = self.cleaned_data['first_name']
         if ' ' in first_name:
@@ -97,7 +98,6 @@ class UpdateMerchantDistributorForm(forms.ModelForm):
             raise forms.ValidationError('Numbers not allowed')
 
         return first_name
-
 
     def __init__(self, *args, **kwargs):
         if kwargs.get('merchant'):
@@ -113,6 +113,7 @@ class UpdateMerchantDistributorForm(forms.ModelForm):
         fields = [
            'first_name', 'last_name', 'email'
         ]
+
 
 class BankDetailForm(forms.ModelForm):
     class Meta:

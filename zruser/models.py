@@ -50,6 +50,7 @@ class BusinesssType(RowInfo):
     def __unicode__(self):
         return self.name
 
+
 class KYCDocumentType(RowInfo):
     name = models.CharField(max_length=128)
 
@@ -68,6 +69,8 @@ class KYCDocumentType(RowInfo):
 
     def __unicode__(self):
         return self.name
+
+
 class ZrAdminUser(RowInfo):
     id = models.OneToOneField(to=User, related_name='zr_admin_user', primary_key=True)
     mobile_no = models.BigIntegerField(null=True, blank=True)

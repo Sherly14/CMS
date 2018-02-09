@@ -23,7 +23,6 @@ PAYMENT_REQUEST_TYPE = (
 )
 
 
-
 class PaymentMode(RowInfo):
     name = models.CharField(max_length=64)
 

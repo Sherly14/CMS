@@ -41,7 +41,7 @@ from zruser.utils.constants import DEFAULT_DISTRIBUTOR_MOBILE_NUMBER
 from zrwallet import models as zrwallet_models
 from django.contrib.auth.models import User
 from itertools import chain
-from zrcms.env_vars import QUICKWALLET_ZR_PARTERNERID, QUICKWALLET_SECRET, QUICKWALLET_RETAILER_CREATE_URL
+from zrcms.env_vars import QUICKWALLET_ZR_PARTERNERID, QUICKWALLET_SECRET, QUICKWALLET_API_CRUD_URL
 
 
 MERCHANT = 'MERCHANT'
@@ -52,6 +52,8 @@ CHECKER = 'CHECKER'
 ADMINSTAFF = 'ADMINSTAFF'
 RETAILER = 'RETAILER'
 QUICKWALLET = 'QUICKWALLET'
+TERMINAL = 'TERMINAL'
+
 
 def redirect_user(request):
     user = request.user
@@ -1268,6 +1270,17 @@ class UserUpdateView(View):
         if user.role.name == MERCHANT:
             return HttpResponseRedirect(reverse("user:merchant-list"))
         if user.role.name == RETAILER:
+            try:
+                response = requests.post(QUICKWALLET_API_CRUD_URL, json={
+                    "secret": QUICKWALLET_SECRET,
+                    "action": "update",
+                    "entity": "retailer",
+                    "details": {
+                        "name": "{0} {1}".format(user.first_name, user.last_name)
+                    }
+                })
+            except:
+                pass
             return HttpResponseRedirect(reverse("user:retailer-list"))
 
 
@@ -1661,10 +1674,10 @@ class SubDistributorListView(ListView):
 
 
 class RetailerCreateView(CreateView):
-        template_name = 'zruser/add_retailer.html'
-        kyc_doc_types = KYCDocumentType.objects.all().values_list('name', flat=True)
+    template_name = 'zruser/add_retailer.html'
+    kyc_doc_types = KYCDocumentType.objects.all().values_list('name', flat=True)
 
-        def get(self, request):
+    def get(self, request):
             merchant_form = zr_user_form.MerchantDistributorForm()
             bank_detail_form = zr_user_form.BankDetailForm()
 
@@ -1677,22 +1690,18 @@ class RetailerCreateView(CreateView):
                 }
             )
 
-        @transaction.atomic
-        def post(self, request):
+    @transaction.atomic
+    def post(self, request):
             merchant_form = zr_user_form.MerchantDistributorForm(data=request.POST)
             bank_detail_form = zr_user_form.BankDetailForm(data=request.POST)
+            error = False
+            api_error = ""
 
             if not merchant_form.is_valid():
-                return render(
-                    request, self.template_name,
-                    {
-                        'merchant_form': merchant_form,
-                        'bank_detail_form': bank_detail_form,
-                        'kyc_doc_types': self.kyc_doc_types
-                    }
-                )
+                error = True
 
             if not bank_detail_form.is_valid():
+                error = True
                 return render(
                     request, self.template_name,
                     {
@@ -1708,6 +1717,7 @@ class RetailerCreateView(CreateView):
                 doc_type_id = '-'.join(['doc_id', doc_type_name])
 
                 if doc_type_name in request.POST:
+                    error = True
                     kyc_docs.append(
                         {
                             'doc_url': request.POST.get(doc_type_name),
@@ -1726,85 +1736,91 @@ class RetailerCreateView(CreateView):
             #             'kyc_error': 'KYC details are mandatory'
             #         }
             #     )
-            response = requests.post(QUICKWALLET_RETAILER_CREATE_URL, json={
-                "secret": QUICKWALLET_SECRET,
-                "action": "create",
-                "entity": "retailer",
-                "details": {
-                    "name": merchant_form.data['first_name']
-                }
-            })
+            if error == False:
+                response = requests.post(QUICKWALLET_API_CRUD_URL, json={
+                    "secret": QUICKWALLET_SECRET,
+                    "action": "create",
+                    "entity": "retailer",
+                    "details": {
+                        "name": merchant_form.data['first_name']
+                    }
+                })
 
-            if 300 > response.status_code >= 200:
-                try:
-                    json_data = json.loads(response.text)
+                if 300 > response.status_code >= 200:
+                    try:
+                        json_data = json.loads(response.text)
+                    except:
+                        pass
 
-                    if json_data:
-                        if json_data['status']:
-                            status = json_data['status']
-                            if status=="failed":
-                                return render(
-                                    request, self.template_name,
-                                    {
-                                        "api_error":"something went wrong, please try again!"
-                                    }
+                if json_data:
+                    if json_data['status']:
+                        status = json_data['status']
+                        if status=="failed":
+                            return render(
+                                request, self.template_name,
+                                {
+                                    "api_error":"something went wrong, please try again!"
+                                }
+                            )
+                        else:
+                            vendor_user_id = json_data['data']['id']
+                            merchant_zr_user = merchant_form.save(commit=False)
+                            merchant_zr_user.role = UserRole.objects.filter(name=RETAILER).last()
+                            password = '%s%s' % (
+                                merchant_zr_user.pan_no.lower().strip(),
+                                str(merchant_zr_user.mobile_no).lower().strip())
+                            merchant_zr_user.pass_word = password
+                            merchant_zr_user.retailer_id = vendor_user_id
+
+                            merchant_zr_user.save()
+
+                            quick_wallet = transaction_models.Vendor.objects.get(name="QUICKWALLET")
+                            transaction_models.VendorZruser.objects.create(
+                                vendor=quick_wallet,
+                                zr_user=merchant_zr_user,
+                                vendor_user=str(merchant_zr_user.retailer_id)
+                            )
+
+                            dj_user = dj_auth_models.User.objects.create_user(
+                                merchant_zr_user.mobile_no,
+                                email=merchant_zr_user.email,
+                                password=password
+                            )
+                            bank_detail = bank_detail_form.save()
+                            bank_detail.for_user = merchant_zr_user
+                            bank_detail.save(update_fields=['for_user'])
+
+                            ZrAdminUser.objects.create(
+                                id=dj_user,
+                                mobile_no=merchant_zr_user.mobile_no,
+                                city=merchant_zr_user.city,
+                                state=merchant_zr_user.state,
+                                pincode=merchant_zr_user.pincode,
+                                address=merchant_zr_user.address_line_1,
+                                role=merchant_zr_user.role,
+                                zr_user=merchant_zr_user
+                            )
+                            for doc in kyc_docs:
+                                KYCDetail.objects.create(
+                                    type=KYCDocumentType.objects.get(name=doc['doc_type']),
+                                    document_id=doc['doc_id'],
+                                    document_link=doc['doc_url'],
+                                    for_user=merchant_zr_user,
+                                    role=merchant_zr_user.role
                                 )
-                            else:
-                                vendor_user_id = json_data['data']['id']
-                                merchant_zr_user = merchant_form.save(commit=False)
-                                merchant_zr_user.role = UserRole.objects.filter(name=RETAILER).last()
-                                password = '%s%s' % (
-                                    merchant_zr_user.pan_no.lower().strip(),
-                                    str(merchant_zr_user.mobile_no).lower().strip())
-                                merchant_zr_user.pass_word = password
-                                merchant_zr_user.retailer_id = vendor_user_id
 
-                                merchant_zr_user.save()
-
-                                quick_wallet = transaction_models.Vendor.objects.get(name="QUICKWALLET")
-                                transaction_models.VendorZruser.objects.create(
-                                    vendor=quick_wallet,
-                                    zr_user=merchant_zr_user,
-                                    vendor_user=str(merchant_zr_user.retailer_id)
-                                )
-
-                                dj_user = dj_auth_models.User.objects.create_user(
-                                    merchant_zr_user.mobile_no,
-                                    email=merchant_zr_user.email,
-                                    password=password
-                                )
-                                bank_detail = bank_detail_form.save()
-                                bank_detail.for_user = merchant_zr_user
-                                bank_detail.save(update_fields=['for_user'])
-
-                                ZrAdminUser.objects.create(
-                                    id=dj_user,
-                                    mobile_no=merchant_zr_user.mobile_no,
-                                    city=merchant_zr_user.city,
-                                    state=merchant_zr_user.state,
-                                    pincode=merchant_zr_user.pincode,
-                                    address=merchant_zr_user.address_line_1,
-                                    role=merchant_zr_user.role,
-                                    zr_user=merchant_zr_user
-                                )
-                                for doc in kyc_docs:
-                                    KYCDetail.objects.create(
-                                        type=KYCDocumentType.objects.get(name=doc['doc_type']),
-                                        document_id=doc['doc_id'],
-                                        document_link=doc['doc_url'],
-                                        for_user=merchant_zr_user,
-                                        role=merchant_zr_user.role
-                                    )
-
-                                zrwallet_models.Wallet.objects.create(merchant=merchant_zr_user)
-                                return HttpResponseRedirect(reverse("user:retailer-list"))
-                except:
-                    pass
+                            zrwallet_models.Wallet.objects.create(merchant=merchant_zr_user)
+                            return HttpResponseRedirect(reverse("user:retailer-list"))
+            if error == False:
+                api_error = "Something went wrong, please try again!"
 
             return render(
                 request, self.template_name,
                 {
-                    "api_error": "Something went wrong, please try again!"
+                    'merchant_form': merchant_form,
+                    'bank_detail_form': bank_detail_form,
+                    'kyc_doc_types': self.kyc_doc_types,
+                    'api_error' : api_error
                 }
             )
 
@@ -1834,11 +1850,11 @@ class RetailerListView(ListView):
                 raise Http404
 
             zruser.is_active = True
-            zrmappings_models.DistributorMerchant.objects.filter(
-                distributor=zruser
-            ).update(
-                is_attached_to_admin=False
-            )
+            # zrmappings_models.TerminalRetailer.objects.filter(
+            #     retailer=zruser
+            # ).update(
+            #     is_attached_to_admin=False
+            # )
             dj_user = zruser.zr_user
             dj_user.is_active = True
             dj_user.save(update_fields=['is_active'])
@@ -1850,11 +1866,11 @@ class RetailerListView(ListView):
                 raise Http404
 
             zruser.is_active = False
-            zrmappings_models.DistributorMerchant.objects.filter(
-                distributor=zruser
-            ).update(
-                is_attached_to_admin=True
-            )
+            # zrmappings_models.TerminalRetailer.objects.filter(
+            #     retailer=zruser
+            # ).update(
+            #     is_attached_to_admin=True
+            # )
             dj_user = zruser.zr_user
             dj_user.is_active = False
             dj_user.save(update_fields=['is_active'])
@@ -1871,7 +1887,6 @@ class RetailerListView(ListView):
 
         if end_date:
             context['endDate'] = end_date
-
 
         if retailer_id:
             context['retailer_id'] =int(retailer_id)
