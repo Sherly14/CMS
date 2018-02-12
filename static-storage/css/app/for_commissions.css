@@ -105,10 +105,20 @@ p.head-bg{
 
 /*row padding and margin for this page*/
 .row{
-	padding-left:3rem;
-	padding-right:1rem;
+	padding-left:2rem;
+	padding-right:2rem;
+	margin: 0;
 }
 
+.row.rm-margin-side .row{
+	padding-left:15px;
+	padding-right:15px;
+}
+
+.row.rm-margin-side .row.scroll{
+    padding:0;
+    margin:0 15px;
+}
 
 
 /*aline for table*/

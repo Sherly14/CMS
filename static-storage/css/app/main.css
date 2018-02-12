@@ -284,3 +284,7 @@ body {
 .padding-50{
     padding-right: 50px;
 }
+
+.div-width-100{
+    width: 100%;
+}
