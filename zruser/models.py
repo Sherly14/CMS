@@ -323,3 +323,75 @@ class MerchantLead(RowInfo):
 
     def __unicode__(self):
         return '%s - (%s)' % (self.name, self.mobile_no)
+
+
+class ZrTerminal(RowInfo):
+    mobile_no = models.BigIntegerField(
+        unique=True, null=False, blank=False,
+    )
+    first_name = models.CharField(max_length=128)
+    last_name = models.CharField(max_length=128, null=True, blank=True)
+    pass_word = models.CharField(max_length=256, null=True, blank=True)
+    email = models.EmailField(max_length=64, null=True, blank=True)
+    gender = models.CharField(max_length=2, choices=GENDER_CHOICES, null=True, blank=True)
+    role = models.ForeignKey(to=UserRole, related_name='zr_terminals')
+
+    city = models.CharField(max_length=256, null=True, blank=True)
+    state = models.CharField(max_length=256, null=True, blank=True)
+    pincode = models.IntegerField(null=True, blank=True)
+    address_line_1 = models.CharField(max_length=512, null=True, blank=True)
+    address_line_2 = models.CharField(max_length=512, null=True, blank=True)
+
+    is_active = models.BooleanField(default=True)
+    is_kyc_verified = models.BooleanField(default=False)
+    is_mobile_verified = models.BooleanField(default=False)
+    business_name = models.CharField(max_length=256, null=True, blank=True)
+    residence_address = models.CharField(max_length=256, null=True, blank=True)
+    pan_no = models.CharField(max_length=10, null=True, blank=True)
+    gstin = models.CharField(max_length=20, null=True, blank=True)
+
+    UPIID = models.CharField(max_length=256, null=True, blank=True)
+    business_type = models.ForeignKey(to=BusinesssType, related_name='terminal_business_type', null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        # self.pass_word = make_password(self.pass_word)
+
+        super(ZrTerminal, self).save(*args, **kwargs)
+
+    def check_password(self, password):
+        return check_password(password, self.pass_word)
+
+    def get_full_name(self):
+        if self.last_name:
+            return '%s %s' % (self.first_name, self.last_name)
+        else:
+            return self.first_name
+
+    @property
+    def full_name(self):
+        return self.get_full_name()
+
+    def send_welcome_email(self, password):
+        portal_url = None
+        if self.role.name == 'MERCHANT':
+            portal_url = 'zrupee.com'
+        else:
+            portal_url = 'cms.zrupee.com'
+
+        email_utils.send_email(
+            'Hello and welcome To Zrupee!',
+            self.email,
+            'user_welcome_email',
+            {
+                'username': self.mobile_no,
+                'password': password,
+                'portal_url': portal_url
+            },
+            is_html=True
+        )
+
+    class Meta:
+        verbose_name_plural = 'ZrTerminals'
+
+    def __unicode__(self):
+        return '%s - (%s)' % (self.mobile_no, self.first_name)

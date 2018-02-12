@@ -3,7 +3,9 @@ from rest_framework.routers import DefaultRouter
 
 from zruser import views as zr_user_views
 from zruser.views import DistributorDetailView, DistributorListView, MerchantListView, MerchantDetailView, \
-    DistributorCreateView, MerchantCreateView, DashBoardView, SubDistributorCreateView, SubDistributorListView, UserUpdateView, RetailerCreateView, RetailerListView
+                        DistributorCreateView, MerchantCreateView, DashBoardView, SubDistributorCreateView, \
+                        SubDistributorListView, UserUpdateView, RetailerCreateView, RetailerListView, \
+                        TerminalCreateView, TerminalListView
 from zruser.viewsets import MerchantLeadViewSet
 
 router = DefaultRouter()
@@ -37,5 +39,7 @@ urlpatterns += [
     url(r'^retailer_create/$', RetailerCreateView.as_view(), name='retailer-create'),
     url(r'^retailer_list/$', RetailerListView.as_view(), name='retailer-list'),
     url(r'^retailer_csv/$', zr_user_views.download_retailer_list_csv, name="retailer-csv"),
-
+    url(r'^terminal_create/$', TerminalCreateView.as_view(), name='terminal-create'),
+    url(r'^terminal_list/$', TerminalListView.as_view(), name='terminal-list'),
+    url(r'^terminal_csv/$', zr_user_views.download_terminal_list_csv, name="terminal-csv"),
 ]

@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 
 from django.db import models
 
-from zruser.models import ZrUser, Sender, Beneficiary
+from zruser.models import ZrUser, Sender, Beneficiary, ZrTerminal
 from zrutils.common.modelutils import RowInfo
 
 
@@ -105,15 +105,15 @@ class DistributorSubDistributor(RowInfo):
         return '%s - %s' % (self.distributor, self.sub_distributor)
 
 
-class TerminalRetailer(RowInfo):
+class RetailerTerminal(RowInfo):
 
     retailer = models.ForeignKey(to=ZrUser, related_name='terminal_retailer_mappings')
-    terminal = models.ForeignKey(to=ZrUser, related_name='retailer_terminal_mappings')
+    terminal = models.ForeignKey(to=ZrTerminal, related_name='retailer_terminal_mappings')
     is_attached_to_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
 
     class Meta:
-        verbose_name_plural = 'TerminalRetailerMappings'
+        verbose_name_plural = 'RetailerTerminalMappings'
 
     def __unicode__(self):
         return '%s - %s' % (self.retailer, self.terminal)

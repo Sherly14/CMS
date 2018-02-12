@@ -78,9 +78,18 @@
                 </li>
                 {% endif %}
 
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "DISTRIBUTOR" %}
                 <li class="nav-item ">
                     <a class="nav-link text-right" href="{% url 'user:merchant-list' %}">Merchants</a>
                 </li>
+                {% endif %}
+
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "RETAILER" %}
+                <li class="nav-item ">
+                    <a class="nav-link text-right" href="{% url 'user:terminal-list' %}">Terminals</a>
+                </li>
+                {% endif %}
+
                 <li class="nav-item">
                     <a class="nav-link text-right" href="{% url 'transaction:transaction-list' %}">Transactions</a>
                 </li>
@@ -88,6 +97,7 @@
                     <a class="nav-link text-right" href="{% url 'payment-requests:payment-request-list' %}">Payment Requests</a>
                     <span class="badge badge-pill badge-outline">{{ request|payment_req_cnt }}</span></a>
                 </li>
+
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
                 <li class="nav-item">
                     <a class="nav-link text-right " href="{% url 'commission:display-commission' %}">Commissions</a>
@@ -123,7 +133,7 @@
             </ul>
 
             <ul class="navbar-nav ml-auto">
-                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" or request.user.zr_admin_user.role.name == "RETAILER" %}
                 <li class="nav-item leftMargin headerText">
                     <a class="nav-link wheatTextColor" href="{% url 'user:dashboard' %}">Dashboard</a>
                 </li>
@@ -132,6 +142,12 @@
                 {% if request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
                 <li class="nav-item leftMargin headerText">
                     <a class="nav-link wheatTextColor" href="{% url 'user:merchant-create' %}">Add Merchant</a>
+                </li>
+                {% endif %}
+
+                {% if request.user.zr_admin_user.role.name == "RETAILER" %}
+                <li class="nav-item leftMargin headerText">
+                    <a class="nav-link wheatTextColor" href="{% url 'user:terminal-create' %}">Add Terminal</a>
                 </li>
                 {% endif %}
 

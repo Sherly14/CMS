@@ -2,7 +2,7 @@ import re
 
 from django import forms
 from django.contrib.auth import authenticate
-from zruser.models import ZrAdminUser, ZrUser, BankDetail, KYCDocumentType
+from zruser.models import ZrAdminUser, ZrUser, BankDetail, ZrTerminal, KYCDocumentType
 
 
 class LoginForm(forms.Form):
@@ -80,6 +80,52 @@ class MerchantDistributorForm(forms.ModelForm):
 
     class Meta:
         model = ZrUser
+        fields = [
+            'id', 'mobile_no', 'first_name', 'last_name', 'email', 'gender', 'city',
+            'state', 'pincode', 'address_line_1', 'address_line_2',
+            'business_name', 'pan_no', 'gstin', 'UPIID', 'residence_address', 'business_type'
+        ]
+
+
+class TerminalRetailerForm(forms.ModelForm):
+    mobile_no = forms.CharField(
+        widget=forms.TextInput(attrs={'type': 'tel'}),
+        max_length=10,
+        min_length=10
+    )
+
+    email = forms.EmailField(max_length=255, required=True)
+
+    def clean_first_name(self):
+        first_name = self.cleaned_data['first_name']
+        if ' ' in first_name:
+            raise forms.ValidationError('Space not allowed')
+        if re.findall(r'[0-9]+', first_name):
+            raise forms.ValidationError('Numbers not allowed')
+
+        return first_name
+
+    def clean_mobile_no(self):
+        mobile_no = self.cleaned_data['mobile_no']
+        if ZrTerminal.objects.filter(mobile_no=mobile_no).count():
+            raise forms.ValidationError('Mobile number already exist')
+
+        if not mobile_no.isdigit():
+            raise forms.ValidationError('Invalid mobile number')
+
+        return mobile_no
+
+    def __init__(self, *args, **kwargs):
+        # if kwargs.get('terminal'):
+        #     self.Meta.fields.append('terminal')
+        #     _ = kwargs.pop('terminal')
+
+        super(TerminalRetailerForm, self).__init__(
+            *args, **kwargs
+        )
+
+    class Meta:
+        model = ZrTerminal
         fields = [
             'id', 'mobile_no', 'first_name', 'last_name', 'email', 'gender', 'city',
             'state', 'pincode', 'address_line_1', 'address_line_2',
