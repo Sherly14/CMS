@@ -11,11 +11,12 @@
     {% if api_error %}
       <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
     {% endif %}
+
+    <form id="add-merchant-form" method="POST">
     <div class="container-fluid" style="position: relative;">
         <div class="row">
             <p class="heading-bg">PERSONAL DETAILS:</p>
         </div>
-        <form id="add-merchant-form" method="POST">
             <div class="row">
                 <div class="col-sm-2">
                     <div class="form-group">
@@ -268,12 +269,10 @@
                 <input class="button red" type="submit" value="Save & Submit">
             </div>
         </div>
+    </div>
         {% csrf_token %}
         </form>
-    </div>
     <label class="fill"></label>
-
-
 </div>
 
 <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.12.min.js"></script>

@@ -24,10 +24,10 @@
                     <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
                 </div>
                 <div class="col-8">
-                    <select id="retailer-id"  name="retailer-id">
+                    <select id="terminal-id"  name="terminal-id">
                         <option value="-1">ALL</option>
-                        {% for retailer in terminal_list %}
-                            <option value="{{ retailer.id }}" {% if  retailer.id == retailer_id %}selected{% endif %}>{{ retailer.first_name }} {{ retailer.last_name|default_if_none:""}}</option>
+                        {% for terminal in terminal_list %}
+                            <option value="{{ terminal.id }}" {% if  terminal.id == terminal_id %}selected{% endif %}>{{ terminal.first_name }} {{ terminal.last_name|default_if_none:""}}</option>
                          {% endfor %}
 
                     </select>
@@ -41,7 +41,7 @@
                 </div>
                 &nbsp;&nbsp;
                 <input class="button red" type="button" value="Search" id="search-btn">
-                <a class="nav-link" href="{% url 'user:retailer-list' %}">Reset filters</a>
+                <a class="nav-link" href="{% url 'user:terminal-list' %}">Reset filters</a>
                 <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
             </div>
 
@@ -101,14 +101,13 @@
             </div>
             <br>
         </div>
-
     </div>
 
 <script>
 
     $(document).ready(function()
     {
-        $('#retailer-id').select2();
+        $('#terminal-id').select2();
         $('#search-btn').click(function(){
         startDate = $('#start-date').val();
         endDate = $('#end-date').val();
@@ -127,23 +126,23 @@
             window.location.assign(url)
         });
 
-         $('#retailer-id').change(function(){
-         retailerId = $("#retailer-id").val();
+         $('#terminal-id').change(function(){
+         terminalId = $("#terminal-id").val();
          all = "";
 
          var selectedAll = $("#user-transaction-id :selected").text();
              if (selectedAll.includes("ALL"))
              {
-                all = retailerId;
-                retailerId = ""
-                 url = window.location.pathname +'?retailer-id=' + all
+                all = terminalId;
+                terminalId = ""
+                 url = window.location.pathname +'?terminal-id=' + all
              }
-              if(retailerId !="")
+              if(terminalId !="")
                 {
-                    url = window.location.pathname +'?retailer-id=' + retailerId
+                    url = window.location.pathname +'?terminal-id=' + terminalId
                 }
           window.location.assign(url)
-    });
+        });
 
         $('#period').change(function() {
             period_val = $(this).val();
@@ -156,7 +155,7 @@
 
         $('#csv-download').click(function()
         {
-            url = "{% url "user:retailer-csv" %}" + window.location.search;
+            url = "{% url "user:terminal-csv" %}" + window.location.search;
             window.location.assign(url)
         });
          var startDate = $('#start-date').val();

@@ -1210,17 +1210,26 @@ class UserUpdateView(View):
     kyc_doc_types = KYCDocumentType.objects.all().values_list('name', flat=True)
 
     def get(self, request, pk,  **kwargs):
-        user = ZrUser.objects.get(id=pk)
-        merchant_form = zr_user_form.UpdateMerchantDistributorForm(initial={'first_name': user.first_name , 'last_name': user.last_name,'email': user.email })
-        return render(
-            request, self.template_name, {"merchant_form": merchant_form, "zr_user": user, "kyc_doc_types": self.kyc_doc_types}
-        )
+        if request.user.zr_admin_user.role.name == "RETAILER":
+            user = ZrTerminal.objects.get(id=pk)
+            merchant_form = zr_user_form.UpdateMerchantTerminalForm(
+                initial={'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email})
+            return render(
+                request, self.template_name, {"merchant_form": merchant_form, "zr_user": user}
+            )
+        else:
+            user = ZrUser.objects.get(id=pk)
+            merchant_form = zr_user_form.UpdateMerchantDistributorForm(
+                initial={'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email})
+            return render(
+                request, self.template_name,
+                {"merchant_form": merchant_form, "zr_user": user, "kyc_doc_types": self.kyc_doc_types}
+            )
 
     @transaction.atomic
     def post(self, request, pk):
-        user = ZrUser.objects.get(id=pk)
-
-        if user.role.name != TERMINAL:
+        if request.user.zr_admin_user.role.name != "RETAILER":
+            user = ZrUser.objects.get(id=pk)
             if "save" in request.POST:
                 merchant_form = zr_user_form.UpdateMerchantDistributorForm(data=request.POST, instance=user)
                 if not merchant_form.is_valid():
@@ -1240,7 +1249,6 @@ class UserUpdateView(View):
                         dj_user.last_name = user.last_name
                         dj_user.email = user.email
                         dj_user.save()
-
 
                 kyc_docs = []
                 for doc_type in KYCDocumentType.objects.all().values_list('name', flat=True):
@@ -1264,10 +1272,30 @@ class UserUpdateView(View):
                         for_user=user,
                         role=user.role
                     )
+            if user.role.name == DISTRIBUTOR:
+                return HttpResponseRedirect(reverse("user:distributor-list"))
+            if user.role.name == SUBDISTRIBUTOR:
+                return HttpResponseRedirect(reverse("user:sub-distributor-list"))
+            if user.role.name == MERCHANT:
+                return HttpResponseRedirect(reverse("user:merchant-list"))
+            if user.role.name == RETAILER:
+                try:
+                    response = requests.post(QUICKWALLET_API_CRUD_URL, json={
+                        "secret": QUICKWALLET_SECRET,
+                        "action": "update",
+                        "entity": "retailer",
+                        "details": {
+                            "name": "{0}".format(user.first_name)
+                        }
+                    })
+                except:
+                    pass
+                return HttpResponseRedirect(reverse("user:retailer-list"))
 
         else:
+            user = ZrTerminal.objects.get(id=pk)
             if "save" in request.POST:
-                merchant_form = zr_user_form.UpdateMerchantDistributorForm(data=request.POST, instance=user)
+                merchant_form = zr_user_form.UpdateMerchantTerminalForm(data=request.POST, instance=user)
                 if not merchant_form.is_valid():
                     return render(
                         request, self.template_name,
@@ -1278,27 +1306,6 @@ class UserUpdateView(View):
                     )
 
                 merchant_form.save()
-
-        if user.role.name == DISTRIBUTOR:
-            return HttpResponseRedirect(reverse("user:distributor-list"))
-        if user.role.name == SUBDISTRIBUTOR:
-            return HttpResponseRedirect(reverse("user:sub-distributor-list"))
-        if user.role.name == MERCHANT:
-            return HttpResponseRedirect(reverse("user:merchant-list"))
-        if user.role.name == RETAILER:
-            try:
-                response = requests.post(QUICKWALLET_API_CRUD_URL, json={
-                    "secret": QUICKWALLET_SECRET,
-                    "action": "update",
-                    "entity": "retailer",
-                    "details": {
-                        "name": "{0}".format(user.first_name)
-                    }
-                })
-            except:
-                pass
-            return HttpResponseRedirect(reverse("user:retailer-list"))
-        if user.role.name == TERMINAL:
             try:
                 response = requests.post(QUICKWALLET_API_CRUD_URL, json={
                     "secret": QUICKWALLET_SECRET,
@@ -1310,7 +1317,8 @@ class UserUpdateView(View):
                 })
             except:
                 pass
-            return HttpResponseRedirect(reverse("user:terminal-list"))
+            if user.role.name == TERMINAL:
+                return HttpResponseRedirect(reverse("user:terminal-list"))
 
 
 class MerchantCreateView(View):
@@ -1533,8 +1541,6 @@ class SubDistributorCreateView(CreateView):
         bank_detail = bank_detail_form.save()
         bank_detail.for_user = merchant_zr_user
         bank_detail.save(update_fields=['for_user'])
-
-        print(dj_user)
 
         ZrAdminUser.objects.create(
             id=dj_user,
@@ -1881,11 +1887,6 @@ class RetailerListView(ListView):
                 raise Http404
 
             zruser.is_active = True
-            # zrmappings_models.RetailerTerminal.objects.filter(
-            #     retailer=zruser
-            # ).update(
-            #     is_attached_to_admin=False
-            # )
             dj_user = zruser.zr_user
             dj_user.is_active = True
             dj_user.save(update_fields=['is_active'])
@@ -1897,11 +1898,6 @@ class RetailerListView(ListView):
                 raise Http404
 
             zruser.is_active = False
-            # zrmappings_models.RetailerTerminal.objects.filter(
-            #     retailer=zruser
-            # ).update(
-            #     is_attached_to_admin=True
-            # )
             dj_user = zruser.zr_user
             dj_user.is_active = False
             dj_user.save(update_fields=['is_active'])
@@ -2031,10 +2027,6 @@ class TerminalCreateView(CreateView):
 
         if not merchant_form.is_valid():
             error = True
-
-        # if not bank_detail_form.is_valid():
-        #     error = True
-
             return render(
                 request, self.template_name,
                 {
@@ -2046,9 +2038,7 @@ class TerminalCreateView(CreateView):
 
         if error == False:
             retailer_id = request.user.zr_admin_user.zr_user_id
-            print(retailer_id)
             retailer_api_id = transaction_models.VendorZruser.objects.get(zr_user=retailer_id)
-            print(retailer_api_id.vendor_user)
 
             response = requests.post(QUICKWALLET_API_CRUD_URL, json={
                 "secret": QUICKWALLET_SECRET,
@@ -2059,13 +2049,11 @@ class TerminalCreateView(CreateView):
                     "retailerid": int(retailer_api_id.vendor_user)
                 }
             })
-
             if 300 > response.status_code >= 200:
                 try:
                     json_data = json.loads(response.text)
                 except:
                     pass
-
             if json_data:
                 if json_data['status']:
                     status = json_data['status']
@@ -2078,20 +2066,14 @@ class TerminalCreateView(CreateView):
                         )
                     else:
                         terminal_id = json_data['data']['id']
-                        print(terminal_id)
                         merchant_zr_user = merchant_form.save(commit=False)
 
                         merchant_zr_user.role = UserRole.objects.filter(name=TERMINAL).last()
-                        # password = '%s' % (str(merchant_zr_user.mobile_no).lower().strip())
-                        # merchant_zr_user.pass_word = password
-                        # merchant_zr_user.terminal_id = terminal_id
                         merchant_zr_user.save()
-                        # TODO QUICKWALLET must be changed as per the vendor name
                         quick_wallet = transaction_models.Vendor.objects.get(name=QUICKWALLET)
 
                         if request.user.zr_admin_user.role.name == RETAILER:
                             retailer = request.user.zr_admin_user.zr_user
-                            print(retailer)
                             zrmappings_models.RetailerTerminal.objects.create(
                                 retailer=retailer,
                                 terminal=merchant_zr_user,
@@ -2116,24 +2098,11 @@ class TerminalCreateView(CreateView):
                 'api_error' : api_error
             }
         )
-        # elif is_user_superuser(request):
-        #     distributor = ZrUser.objects.filter(mobile_no=DEFAULT_DISTRIBUTOR_MOBILE_NUMBER).last()
-        #     if not distributor:
-        #         raise Exception("Default distributor zuser not found in database")
-        #     zrmappings_models.DistributorMerchant.objects.create(
-        #         distributor=distributor,
-        #         sub_distributor=merchant_zr_user,
-        #         is_active=True
-        #     )
-        # else:
-        #     raise Exception("Request user must be reatailer")
-        #
-        # zrwallet_models.Wallet.objects.create(merchant=merchant_zr_user)
 
 
 class TerminalListView(ListView):
     template_name = 'zruser/terminal_list.html'
-    queryset = ZrUser.objects.filter(role__name=TERMINAL)
+    queryset = ZrTerminal.objects.filter(role__name=TERMINAL)
     context_object_name = 'terminal_list'
     paginate_by = 10
 
@@ -2142,7 +2111,7 @@ class TerminalListView(ListView):
         activate = self.request.GET.get('activate')
         disable = self.request.GET.get('disable')
         queryset = self.get_queryset()
-        terminal_list = ZrUser.objects.filter(role__name=TERMINAL)
+        terminal_list = ZrTerminal.objects.filter(role__name=TERMINAL)
         q = self.request.GET.get('q')
         filter = self.request.GET.get('filter')
         pg_no = self.request.GET.get('page_no', 1)
@@ -2154,26 +2123,14 @@ class TerminalListView(ListView):
             zruser = ZrTerminal.objects.filter(id=activate).last()
             if not zruser:
                 raise Http404
-
             zruser.is_active = True
-            # zrmappings_models.RetailerTerminal.objects.filter(
-            #     retailer=zruser
-            # ).update(
-            #     is_attached_to_admin=False
-            # )
             zruser.save(update_fields=['is_active'])
 
         if disable:
             zruser = ZrTerminal.objects.filter(id=disable).last()
             if not zruser:
                 raise Http404
-
             zruser.is_active = False
-            # zrmappings_models.RetailerTerminal.objects.filter(
-            #     retailer=zruser
-            # ).update(
-            #     is_attached_to_admin=True
-            # )
             zruser.save(update_fields=['is_active'])
 
         if q:
@@ -2255,21 +2212,21 @@ def get_terminal_qs(request):
 
 
 def download_terminal_list_csv(request):
-    sub_distributor_mapping_qs = get_sub_distributor_qs(request)  # get_distributor_qs(request)
+    terminal_qs = get_terminal_qs(request)
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="subdistributors.csv"'
+    response['Content-Disposition'] = 'attachment; filename="terminals.csv"'
     writer = csv.writer(response)
     writer.writerow([
-        'Sub Distributor Id', 'Sub Distributor Name', 'DOJ', 'Mobile', 'Email', 'Status'
+        'Terminal Id', 'Terminal Name', 'DOJ', 'Mobile', 'Email', 'Status'
     ])
-    for sub_distributor_map_item in sub_distributor_mapping_qs:
+    for terminal in terminal_qs:
         writer.writerow([
-            sub_distributor_map_item.sub_distributor.id,
-            sub_distributor_map_item.sub_distributor.first_name,
-            sub_distributor_map_item.at_created,
-            sub_distributor_map_item.sub_distributor.mobile_no,
-            sub_distributor_map_item.sub_distributor.email,
-            'Active' if sub_distributor_map_item.is_active else 'Inactive'
+            terminal.id,
+            terminal.first_name,
+            terminal.at_created,
+            terminal.mobile_no,
+            terminal.email,
+            'Active' if terminal.is_active else 'Inactive'
         ])
 
     return response

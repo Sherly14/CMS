@@ -5,14 +5,17 @@
 
 {% block content %}
 
-
 <div class="content-wrapper py-2" style="padding-left: 0.5rem; padding-right: 4rem">
     <p class="heading-right">Add a Terminal</p>
+    {% if api_error %}
+      <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
+    {% endif %}
+
+    <form id="add-merchant-form" method="POST">
     <div class="container-fluid" style="position: relative;">
         <div class="row">
             <p class="heading-bg">PERSONAL DETAILS:</p>
         </div>
-        <form id="add-merchant-form" method="POST">
             <div class="row">
                 <div class="col-sm-2">
                     <div class="form-group">
@@ -44,10 +47,7 @@
                 <div class="col-sm-4">
                     <div class="form-group">
                         <label for="email">E-mail ID</label>
-                        {{ merchant_form.email|attr:"id:email"|attr:"class:fill" }}
-                        {% if merchant_form.email.errors %}
-                            {{ merchant_form.email.errors }}
-                        {% endif %}
+                        {{ merchant_form.email|attr:"id:email" }}
                     </div>
                 </div>
             </div>
@@ -61,14 +61,87 @@
                         {% endif %}
                     </div>
                 </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label for="pan">PAN No.</label>
+                        {{ merchant_form.pan_no|attr:"id:pan"|attr:"class:input-80" }}
+                        {% if merchant_form.pan_no.errors %}
+                            {{ merchant_form.pan_no.errors }}
+                        {% endif %}
+                    </div>
+                </div>
+                 <div class="col-sm-3">
+                    <div class="form-group">
+                        <label for="business_type">Terminal Type</label>
+                        {{ merchant_form.business_type|attr:"class:fill"|attr:"id:business_type" }}
+                        {% if merchant_form.business_type.errors %}
+                            {{ merchant_form.business_type.errors }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        {{ merchant_form.address_line_1|attr:"class:fill"|attr:"id:address" }}
+                        {% if merchant_form.address_line_1.errors %}
+                            {{ merchant_form.address_line_1.errors }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
 
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="residence_address">Residence Address</label>
+                        {{ merchant_form.residence_address|attr:"class:fill"|attr:"id:residence_address" }}
+                        {% if merchant_form.residence_address.errors %}
+                            {{ merchant_form.residence_address.errors }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        {{ merchant_form.city|attr:"class:fill"|attr:"id:city" }}
+                        {% if merchant_form.city.errors %}
+                            {{ merchant_form.city.errors }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        {{ merchant_form.state|attr:"class:fill"|attr:"id:state" }}
+                        {% if merchant_form.state.errors %}
+                            {{ merchant_form.state.errors }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label for="pincode">Pincode</label>
+                        {{ merchant_form.pincode|attr:"class:fill"|attr:"id:pincode" }}
+                        {% if merchant_form.pincode.errors %}
+                            {{ merchant_form.pincode.errors }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+    </div>
+        <div class="col-md-5 colAlignment" style="float:right;">
             <div class="fill margin-top" style="padding-left:6.5rem">
                 <input class="button red" type="submit" value="Save & Submit">
             </div>
         </div>
         {% csrf_token %}
         </form>
-    </div>
+    <label class="fill"></label>
 </div>
 
 <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.12.min.js"></script>

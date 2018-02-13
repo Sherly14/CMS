@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
 
-{% block title %} Update {{zr_user.role.name|title}} {% endblock %}
+{% block title %}
+Update {{zr_user.role.name|title}}
+{% endblock %}
 
 {% block content %}
 
@@ -27,7 +29,6 @@
                     <div class="form-group">
                         <label for="lastname">Last Name</label>
                         {{distributor.last_name}}
-
                         {{ merchant_form.last_name|attr:"id:lastname"|attr:"class:fill"  }}
                         {% if merchant_form.last_name.errors %}
                             {{ merchant_form.last_name.errors }}
@@ -44,51 +45,45 @@
                         {% endif %}
                     </div>
                 </div>
-
-
-    </div>
-
-    <div class="container-fluid margin-bot">
-        <div class="col-md-7 colAlignment">
-            <div class="row margin-top">
-                <p class="heading-bg">KYC PROOFS:</p>
             </div>
-            <div class="row margin-top">
-                <label class="fill" for="doc_type">Select Document Type</label>
-                <!-- <div class="btn-group">
-                <button  id="doc_type" type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">select<span class="glyphicon glyphicon-chevron-down"></span></button>
-                <ul class="dropdown-menu">
-                    <li><a href="#">doc1</a></li>
-                    <li><a href="#">doc2</a></li>
-                </ul>
-            </div> -->
-                <select id="doc_type">
-                    {% for doc_type in kyc_doc_types %}
-                        <option value="{{ doc_type }}">{{ doc_type }}</option>
-                    {% endfor %}
-               - </select>
-                <input type="file" id="kyc-file" style="display:none;">
-                <input class="button yellow bg mr-5" type="button" value="upload" id="upload-kyc-btn" onclick="upload_kyc_doc()">
-                <p id="file-err-msg" style="display:none;">
-                    {% if kyc_error %}
-                        <h6 style="color:red">{{ kyc_error }}</h6>
-                    {% endif %}
-                </p>
+            {% if request.user.zr_admin_user.role.name != "RETAILER" %}
+            <div class="container-fluid margin-bot">
+                <div class="col-md-7 colAlignment">
+                    <div class="row margin-top">
+                        <p class="heading-bg">KYC PROOFS:</p>
+                    </div>
+                    <div class="row margin-top">
+                        <label class="fill" for="doc_type">Select Document Type</label>
+                        <!-- <div class="btn-group">
+                        <button  id="doc_type" type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">select<span class="glyphicon glyphicon-chevron-down"></span></button>
+                        <ul class="dropdown-menu">
+                            <li><a href="#">doc1</a></li>
+                            <li><a href="#">doc2</a></li>
+                        </ul>
+                    </div> -->
+                        <select id="doc_type">
+                            {% for doc_type in kyc_doc_types %}
+                                <option value="{{ doc_type }}">{{ doc_type }}</option>
+                            {% endfor %}
+                       - </select>
+                        <input type="file" id="kyc-file" style="display:none;">
+                        <input class="button yellow bg mr-5" type="button" value="upload" id="upload-kyc-btn" onclick="upload_kyc_doc()">
+                        <p id="file-err-msg" style="display:none;">
+                            {% if kyc_error %}
+                                <h6 style="color:red">{{ kyc_error }}</h6>
+                            {% endif %}
+                        </p>
 
+                    </div>
+                    <div class="row margin-top" id="kyc-docs">
+                    </div>
+                </div>
             </div>
-            <div class="row margin-top" id="kyc-docs">
-            </div>
+            {% endif %}
             <div class="fill margin-top" style="padding-left:6.5rem">
-
                 <input class="button red" type="submit" name = "save" value="Save & Submit">
-
             </div>
             <input class="button yellow bg mr-5" type="submit" name="cancel" value="Cancel" />
-
-
-        </div>
-    </div>
-
 
         {% csrf_token %}
         </form>

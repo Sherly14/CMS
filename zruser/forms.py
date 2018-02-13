@@ -94,8 +94,6 @@ class TerminalRetailerForm(forms.ModelForm):
         min_length=10
     )
 
-    email = forms.EmailField(max_length=255, required=True)
-
     def clean_first_name(self):
         first_name = self.cleaned_data['first_name']
         if ' ' in first_name:
@@ -156,6 +154,32 @@ class UpdateMerchantDistributorForm(forms.ModelForm):
 
     class Meta:
         model = ZrUser
+        fields = [
+           'first_name', 'last_name', 'email'
+        ]
+
+
+class UpdateMerchantTerminalForm(forms.ModelForm):
+    def clean_first_name(self):
+        first_name = self.cleaned_data['first_name']
+        if ' ' in first_name:
+            raise forms.ValidationError('Space not allowed')
+        if re.findall(r'[0-9]+', first_name):
+            raise forms.ValidationError('Numbers not allowed')
+
+        return first_name
+
+    def __init__(self, *args, **kwargs):
+        if kwargs.get('merchant'):
+            self.Meta.fields.append('upi_id')
+            _ = kwargs.pop('upi_id')
+
+        super(UpdateMerchantTerminalForm, self).__init__(
+            *args, **kwargs
+        )
+
+    class Meta:
+        model = ZrTerminal
         fields = [
            'first_name', 'last_name', 'email'
         ]
