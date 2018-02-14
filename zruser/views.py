@@ -23,7 +23,7 @@ from common_utils import transaction_utils
 from common_utils import zrupee_security
 from common_utils.date_utils import last_month, last_week_range
 from common_utils.report_util import get_excel_doc, update_excel_doc
-from common_utils.user_utils import is_user_superuser
+from common_utils.user_utils import is_user_superuser, is_zruser_djuser
 from mapping import *
 from utils import constants
 from zrcommission import models as commission_models
@@ -637,16 +637,18 @@ class KYCRequestsView(ListView):
                 raise Http404
             else:
                 status = None
+                zruser = ZrUser.objects.filter(id=approve).last()
+
                 if approve:
                     status = constants.KYC_APPROVAL_CHOICES[1][0]
+                    zruser.is_kyc_verified = True
+
                 elif reject:
                     status = constants.KYC_APPROVAL_CHOICES[2][0]
 
-                zruser = ZrUser.objects.filter(id=approve).last()
                 zruser.kyc_details.all().update(
                     approval_status=status
                 )
-                zruser.is_kyc_verified = True
                 zruser.save(update_fields=['is_kyc_verified'])
 
                 if zruser.is_kyc_verified and status == constants.KYC_APPROVAL_CHOICES[1][0]:
@@ -654,7 +656,7 @@ class KYCRequestsView(ListView):
                     zruser.pass_word = password
                     zruser.save(update_fields=['pass_word'])
 
-                    if zruser.role.name != MERCHANT:
+                    if is_zruser_djuser(zruser):
                         dj_user = zruser.zr_user.id
                         dj_user.set_password(password)
                         dj_user.save()

@@ -4,67 +4,69 @@
 
 {% block content %}
 
-    <div class="content-wrapper">
-        <p class="head-right">Merchant Table</p>
-    <div class="col-12" >
-        <div class="row rm-margin-side">
-                <div class="col-2">
-                    <p class="head-left">START DATE</p>
-                </div>
-                <div class="col-2">
-                    <p class="head-left">END DATE</p>
-                </div>
+<div class="content-wrapper">
+    <p class="head-right">Merchant Table</p>
+    <div class="row rm-margin-side">
+            <div class="col-2">
+                <p class="head-left">START DATE</p>
             </div>
-            <div class="row rm-margin-side">
-                <div class="col-2">
-                    <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-                </div>
-                <div class="col-2">
-                    <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-                </div>
-                {% if distributor_list %}
-                 <div class="col-4" id="select1">
-                        <select id="distributor-id"  name="distributor-id">
-                            <option value="-1">ALL</option>
-                            {% for distributor in distributor_list %}
-                                <option value="{{ distributor.id }}" {% if  distributor.id == distributor_id %}selected{% endif %}>{{ distributor.first_name }} {{ distributor.last_name|default_if_none:""}}</option>
-                             {% endfor %}
-                        </select>
-                </div>
-                 {% endif %}
+            <div class="col-2">
+                <p class="head-left">END DATE</p>
+            </div>
+        </div>
+    <div class="row rm-margin-side">
+        <div class="col-2">
+        <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
+        </div>
+        <div class="col-2">
+        <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
+        </div>
+        {% if distributor_list %}
+            <div class="col-4" id="select1">
+            <select id="distributor-id"  name="distributor-id">
+                <option value="-1">ALL</option>
+                {% for distributor in distributor_list %}
+                    <option value="{{ distributor.id }}" {% if  distributor.id == distributor_id %}selected{% endif %}>{{ distributor.first_name }} {{ distributor.last_name|default_if_none:""}}</option>
+                 {% endfor %}
+            </select>
+        </div>
+        {% endif %}
 
-                 <div class="col-4">
-                    <select id="sub-distributor-id"  name="sub-distributor-id">
-                          <option value="-3">ALL</option>
-                            {% for key,val in subDistMerchant.items %}
-                               <optgroup label = "{{val.0.0}} ">
-                                   <option value="{{key}}"{% if key == sub_distributor_id  %}selected{% endif %}>ALL-{{val.0.0}}</option>
-                                    {% for subdrow in val %}
-                                        <option value="{{subdrow.1}}" {% if subdrow.1 == merchant_id %}selected{% endif %}>{{ subdrow.2 }}</option>
-                                    {% endfor %}
-                                </optgroup>
-                            {% endfor %}
-                    </select>
+        <div class="col-4">
+            <select id="sub-distributor-id"  name="sub-distributor-id">
+                <option value="-3">ALL</option>
+                {% for key,val in subDistMerchant.items %}
+                    <optgroup label = "{{val.0.0}} ">
+                        <option value="{{key}}"{% if key == sub_distributor_id  %}selected{% endif %}>ALL-{{val.0.0}}</option>
+                        {% for subdrow in val %}
+                            <option value="{{subdrow.1}}" {% if subdrow.1 == merchant_id %}selected{% endif %}>{{ subdrow.2 }}</option>
+                        {% endfor %}
+                    </optgroup>
+                {% endfor %}
+            </select>
+        </div>
+        <br>
+        <div class="div-width-100">
+            <br>
+            <div class="row">
+                <div class="d-flex justify-content-between align-items-center" style="width: 100%;">
+                    <div style="position: relative;">
+                        <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                        <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                    </div>
+                                        <input class="button red" type="button" value="Search" id="search-btn">
+
+                    <a class="nav-link" href="{% url 'user:merchant-list' %}">Reset filters</a>
+                    <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
+                    </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="fine">
+                    <p class="head-bg">Merchants</p>
                 </div>
             </div>
-        <br>
-        <div class="row">
-            <div style="position: relative;">
-                <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
-            </div>
-            <a class="nav-link" href="{% url 'user:merchant-list' %}">Reset filters</a>
-            <input class="button red" type="button" value="Search" id="search-btn">
-            &nbsp;&nbsp;&nbsp;&nbsp;
-            <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
-        </div>
-        <br>
-        <div class="row" style="padding-right: 50px;">
-            <div class="fine">
-                <p class="head-bg">Merchants</p>
-            </div>
-        </div>
-        <div class="row scroll">
+            <div class="row scroll">
 
             <div style="width: 100%;">
                 <table>
@@ -125,9 +127,9 @@
                 {% endif %}
             </div>
         </div>
-        <br>
+        </div>
     </div>
-    </div>
+</div>
 
 <script>
  $(document).ready(function(){

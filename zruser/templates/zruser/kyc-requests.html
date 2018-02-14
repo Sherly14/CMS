@@ -4,184 +4,152 @@
 
 {% block content %}
 
-    <div class="content-wrapper">
-        <p class="head-right">Merchant Table</p>
-    <div class="col-12" >
-        <div class="row rm-margin-side">
-            <div class="col-2">
-                <p class="head-left">START DATE</p>
-            </div>
-            <div class="col-2">
-                <p class="head-left">END DATE</p>
-            </div>
+<div class="content-wrapper">
+    <p class="head-right">Merchant Table</p>
+    <div class="row rm-margin-side">
+        <div class="col-2">
+            <p class="head-left">START DATE</p>
         </div>
-        <div class="row rm-margin-side">
-            <div class="col-2">
-                <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-            </div>
-            <div class="col-2">
-                <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-            </div>
-            <div class="col-2">
-                <select id="user-id" name="user-id">
-                    <option value="-1">ALL</option>
-                    {% for userData in user_list %}
-                        <option value="{{userData.id}}"{% if userData.id == user_id %}selected{% endif %}>{{userData.first_name}}-{{userData.last_name}}</option>
-                    {% endfor %}
-                </select>
-            </div>
+        <div class="col-2">
+            <p class="head-left">END DATE</p>
         </div>
-        <br>
-        <div class="row">
-            <div style="position: relative;">
-                <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
-            </div>
-            &nbsp;&nbsp;&nbsp;
-            <input class="button red" type="button" value="Search" id="search-btn">
-            <a class="nav-link" href="{% url 'user:kyc-requests' %}">Reset filters</a>
-            <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
+    </div>
+    <div class="row rm-margin-side">
+        <div class="col-2">
+            <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
         </div>
-
-        <br>
-        <div class="row" style="padding-right: 50px;">
-            <div class="fine">
-                <p class="head-bg">KYC Requests</p>
-            </div>
+        <div class="col-2">
+            <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
         </div>
-        <div class="row scroll">
-
-            <div style="width: 100%;">
-                <table>
-                    <tr>
-                        <th>Name</th>
-                        <th>Type</th>
-                        <th>Doj</th>
-                        <th>KYC1</th>
-                        <th>KYC1 Type</th>
-                        <th>KYC2</th>
-                        <th>KYC2 Type</th>
-                        <th>Status</th>
-                        <th></th>
-                    </tr>
-                    {% for kyc_req in object_list %}
-                    <tr>
-                        <td>{{ kyc_req.first_name }} {% if kyc_req.last_name %}{{ kyc_req.last_name }}{% endif %} </td>
-                        <td>{{ kyc_req.role.name }}</td>
-                        <td>{{ kyc_req.at_created|date:"d/m/Y" }}</td>
-                        {% for kyc in kyc_req.kyc_details.all %}
-                            <td><a href="{{ kyc.get_download_url }}">Download</a></td>
-                            <td>{{ kyc.type }}</td>
+        <div class="col-4">
+            <select id="user-id" name="user-id">
+                <option value="-1">ALL</option>
+                {% for userData in user_list %}
+                    <option value="{{userData.id}}"{% if userData.id == user_id %}selected{% endif %}>{{userData.first_name}}-{{userData.last_name}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="div-width-100">
+            <br>
+            <div class="row">
+                <div class="d-flex justify-content-between align-items-center" style="width: 100%;">
+                    <div style="position: relative;">
+                        <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                        <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                    </div>
+                    <input class="button red" type="button" value="Search" id="search-btn">
+                    <a class="nav-link" href="{% url 'user:kyc-requests' %}">Reset filters</a>
+                    <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="fine">
+                    <p class="head-bg">KYC Requests</p>
+                </div>
+            </div>
+            <div class="row scroll">
+                <div style="width: 100%;">
+                    <table>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Doj</th>
+                            <th>KYC's</th>
+                            <th>Status</th>
+                            <th></th>
+                        </tr>
+                        {% for kyc_req in object_list %}
+                        <tr>
+                            <td>{{ kyc_req.first_name }} {% if kyc_req.last_name %}{{ kyc_req.last_name }}{% endif %} </td>
+                            <td>{{ kyc_req.role.name }}</td>
+                            <td>{{ kyc_req.at_created|date:"d/m/Y" }}</td>
+                            <td>
+                                {% if kyc_req.kyc_details.all.count > 0 %}
+                                    {% for kyc in kyc_req.kyc_details.all %}
+                                        {% if kyc.approval_status != 'A' %}
+                                            <a href="{{ kyc.get_download_url }}">{{kyc.type}}</a>
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                                {% if kyc_req.kyc_details.all.count == 0 %}
+                                    No kyc documents
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if kyc_req.kyc_details.last.approval_status == 'I' %}
+                                    In Process
+                                {% elif kyc_req.kyc_details.last.approval_status == 'A' %}
+                                    Approved
+                                {% elif kyc_req.kyc_details.last.approval_status == 'R' %}
+                                    Rejected
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if kyc_req.kyc_details.all.count %}
+                                    <a href='{% url "user:kyc-requests" %}?approve={{ kyc_req.id }}'>Approve</a>
+                                    <a href='{% url "user:kyc-requests" %}?reject={{ kyc_req.id }}'>Reject</a>
+                                {% endif %}
+                            </td>
+                        </tr>
                         {% endfor %}
-                        {% if kyc_req.kyc_details.all.count == 1 %}
-                            <td></td>
-                            <td></td>
-                        {% endif %}
-                        {% if kyc_req.kyc_details.all.count == 0 %}
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        {% endif %}
-                        <td>
-                            <h1></h1>
-                            {% if kyc_req.kyc_details.last.approval_status == 'I' %}
-                                In Process
-                            {% elif kyc_req.kyc_details.last.approval_status == 'A' %}
-                                Approved
-                            {% elif kyc_req.kyc_details.last.approval_status == 'R' %}
-                                Rejected
+                    </table>
+                </div>
+                    {% if is_paginated %}
+                        <div class="pagination-prev">
+                          {% if page_obj.has_previous %}
+                              <a href="?page={{ page_obj.previous_page_number }}" class="button red">
+                               <span>Previous</span>
+                              </a>
+                          {% endif %}
+                        </div>
+
+                        <div class="pagination-next">
+                            {% if page_obj.has_next %}
+                                  <a href="?page={{ page_obj.next_page_number }}" class="button red">
+                                      <span>Next</span>
+                                  </a>
                             {% endif %}
-                        </td>
-                        <td>
-                            {% if kyc_req.kyc_details.all.count %}
-                                <a href='{% url "user:kyc-requests" %}?approve={{ kyc_req.id }}'>Approve</a>
-                                <a href='{% url "user:kyc-requests" %}?reject={{ kyc_req.id }}'>Reject</a>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </table>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
-                {% if is_paginated %}
-
-                    <div class="pagination-prev">
-                      {% if page_obj.has_previous %}
-                          <a href="?page={{ page_obj.previous_page_number }}" >
-                           <span>Previous</span>
-                          </a>
-                      {% else %}
-{#                        <li class="disabled">#}
-                          <a href="#" class="disabled">
-                            <span>Previous</span>
-                          </a>
-{#                        </li>#}
-                      {% endif %}
-                    </div>
-
-                    <div class="pagination-next">
-                      {% if page_obj.has_next %}
-                          <a href="?page={{ page_obj.next_page_number }}" >
-                            <span>Next</span>
-                          </a>
-                      {% else %}
-                          <a href="#" {% if not page_obj.has_next %}class="disabled"{% endif %}>
-                            <span>Next</span>
-                          </a>
-                      {% endif %}
-                    </div>
-
-                {% endif %}
         </div>
-        <br>
-    </div>
-    </div>
+
+</div>
 
 <script>
  $(document).ready(function()
     {
     $('#user-id').select2();
 
+ function q(){
+             userId = $("#user-id").val();
+             startDate = $('#start-date').val();
+             endDate = $('#end-date').val();
 
-    $('#search-btn').click(function(){
-        startDate = $('#start-date').val();
-        endDate = $('#end-date').val();
-
-        {% if filter_by %}
-            url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}";
-        {% else %}
-            url = window.location.pathname + "?q=" + $('#search-txt').val();
-        {% endif %}
-
-         if(startDate!="" && endDate!="" )
-            {
-                url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
-            }
-
-        window.location.assign(url)
-    });
-
-    $('#user-id').change(function(){
-         user_id = $('#user-id').val();
-          all = "";
-         var selectedAll = $("#user-id :selected").text();
-             if (selectedAll.includes("ALL"))
-             {
-                all = user_id;
-                user_id = ""
-                 url = window.location.pathname +'?user_id=' + all
+             if($('#search-txt').val() != "") {
+                  url = window.location.pathname + "?q=" + $('#search-txt').val();
+             } else {
+                  url = window.location.pathname + '?';
              }
 
+             if(userId !="")
+             {
+                 url += '&user_id=' + userId
+             }
 
-              if(user_id !="")
-                {
-                    url = window.location.pathname +'?user_id=' + user_id
-                }
+             if(startDate!="" && endDate!="" )
+             {
+                 url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
+             }
 
-          window.location.assign(url)
-    });
+             window.location.assign(url)
+         }
 
+    $('#search-btn').click(q);
 
+    $('#user-id').change(q);
 
     $('#period').change(function() {
         period_val = $(this).val();
@@ -222,7 +190,7 @@
             {
                alert("date difference is greater than 31");
                $('#start-date').val("");
-            }
+            }else if ($("#start-date").val() != '' && $("#end-date").val() != ''){q();}
          });
 
 
@@ -249,7 +217,7 @@
             {
                alert("date difference is greater than 31");
                $('#end-date').val("");
-            }
+            }else if ($("#start-date").val() != '' && $("#end-date").val() != ''){q();}
          });
         });
 

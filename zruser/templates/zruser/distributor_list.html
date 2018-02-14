@@ -4,48 +4,46 @@
 
 {% block content %}
 
-    <div class="content-wrapper">
-        <p class="head-right">Distributor Table</p>
-        <div class="col-12" >
-            <div class="row rm-margin-side">
-                    <div class="col-2">
-                        <p class="head-left">START DATE</p>
-                    </div>
-                    <div class="col-2">
-                        <p class="head-left">END DATE</p>
-                    </div>
+<div class="content-wrapper">
+    <p class="head-right">Distributor Table</p>
+    <div class="row rm-margin-side">
+            <div class="col-2">
+                <p class="head-left">START DATE</p>
             </div>
-            <div class="row rm-margin-side">
-                <div class="col-2">
-                    <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-                </div>
-                <div class="col-2">
-                    <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-                </div>
-                <div class="col-8">
-                    <select id="distributor-id"  name="distributor-id">
-                        <option value="-1">ALL</option>
-                        {% for distributor in distributor_list %}
-                            <option value="{{ distributor.id }}" {% if  distributor.id == distributor_id %}selected{% endif %}>{{ distributor.first_name }} {{ distributor.last_name|default_if_none:""}}</option>
-                         {% endfor %}
-
-                    </select>
+            <div class="col-2">
+                <p class="head-left">END DATE</p>
+            </div>
+    </div>
+    <div class="row rm-margin-side">
+        <div class="col-2">
+            <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
+        </div>
+        <div class="col-2">
+            <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
+        </div>
+        <div class="col-4">
+            <select id="distributor-id"  name="distributor-id">
+                <option value="-1">ALL</option>
+                {% for distributor in distributor_list %}
+                    <option value="{{ distributor.id }}" {% if  distributor.id == distributor_id %}selected{% endif %}>{{ distributor.first_name }} {{ distributor.last_name|default_if_none:""}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="div-width-100">
+            <br>
+            <div class="row">
+                <div class="d-flex justify-content-between align-items-center" style="width: 100%;">
+                    <div style="position: relative;">
+                        <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                        <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                    </div>
+                    <input class="button red" type="button" value="Search" id="search-btn">
+                    <a class="nav-link" href="{% url 'user:distributor-list' %}">Reset filters</a>
+                    <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
                 </div>
             </div>
             <br>
-            <div class="row rm-margin-side">
-                <div style="position: relative;">
-                    <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                    <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
-                </div>
-                &nbsp;&nbsp;
-                <input class="button red" type="button" value="Search" id="search-btn">
-                <a class="nav-link" href="{% url 'user:distributor-list' %}">Reset filters</a>
-                <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
-            </div>
-
-            <br>
-            <div class="row" style="padding-right: 50px;">
+            <div class="row">
                 <div class="fine">
                     <p class="head-bg">List of Distributors</p>
                 </div>
@@ -88,20 +86,21 @@
                 </div>
                 <div class="pagination-prev">
                 {% if has_prev_page %}
-                    <a href="{% url "user:distributor-list" %}?{{prev_page_qs}}" class="button red" >Prev</a>
+                    <a href="{% url 'user:distributor-list' %}?{{prev_page_qs}}" class="button red" >Prev</a>
                 {% endif %}
                 </div>
 
                 <div class="pagination-next">
                     {% if has_next_page %}
-                        <a href="{% url "user:distributor-list" %}?{{next_page_qs}}" class="button red" >Next</a>
+                        <a href="{% url 'user:distributor-list' %}?{{next_page_qs}}" class="button red" >Next</a>
                     {% endif %}
                 </div>
             </div>
             <br>
         </div>
-
     </div>
+    <br>
+</div>
 
 <script>
 
