@@ -65,7 +65,8 @@ Update {{zr_user.role.name|title}}
                             {% for doc_type in kyc_doc_types %}
                                 <option value="{{ doc_type }}">{{ doc_type }}</option>
                             {% endfor %}
-                       - </select>
+                        </select>
+                        <!--<label class="fill">Not Manadatory for Terminals</label>-->
                         <input type="file" id="kyc-file" style="display:none;">
                         <input class="button yellow bg mr-5" type="button" value="upload" id="upload-kyc-btn" onclick="upload_kyc_doc()">
                         <p id="file-err-msg" style="display:none;">

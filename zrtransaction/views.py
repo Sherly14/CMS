@@ -22,6 +22,7 @@ from zruser.mapping import DISTRIBUTOR, SUBDISTRIBUTOR
 from zruser.models import ZrUser
 from zrmapping import models as zrmappings_models
 
+
 class TransactionsDetailView(DetailView):
     queryset = Transaction.objects.all()
     context_object_name = 'transaction'
@@ -260,7 +261,6 @@ class TransactionsListView(ListView):
             page = p.page(pg_no)
         except EmptyPage:
             raise Http404
-
 
         if sub_distributor:
             for subdist in sub_distributor:

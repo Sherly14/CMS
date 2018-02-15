@@ -275,18 +275,19 @@ class ServiceCircle(RowInfo):
         return '%s - %s - %s' % (self.name, self.code, self.is_enabled)
 
 
-class VendorZruser(RowInfo):
+class VendorZrRetailer(RowInfo):
     vendor = models.ForeignKey(to=Vendor, related_name='user_vendor_mappings')
     zr_user = models.ForeignKey(to=ZrUser, related_name='vendor_user_mappings')
     vendor_user = models.CharField(max_length=256, null=True)
+    company_id = models.CharField(max_length=256, null=True)
     is_attached_to_admin = models.BooleanField(default=False)
     is_active = models.BooleanField(default=False)
 
     class Meta:
-        verbose_name_plural = 'VendorZruserMappings'
+        verbose_name_plural = 'VendorZrRetailerMappings'
 
     def __unicode__(self):
-        return '%s - %s - %s' % (self.vendor, self.zr_user, self.vendor_user)
+        return '%s - %s - %s - %s' % (self.vendor, self.zr_user, self.vendor_user, self.company_id)
 
 
 class VendorZrTerminal(RowInfo):

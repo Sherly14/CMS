@@ -1291,6 +1291,7 @@ class UserUpdateView(View):
                 except:
                     pass
                 return HttpResponseRedirect(reverse("user:retailer-list"))
+            return HttpResponseRedirect(reverse("user:terminal-list"))
 
         else:
             user = ZrTerminal.objects.get(id=pk)
@@ -1306,17 +1307,17 @@ class UserUpdateView(View):
                     )
 
                 merchant_form.save()
-            try:
-                response = requests.post(QUICKWALLET_API_CRUD_URL, json={
-                    "secret": QUICKWALLET_SECRET,
-                    "action": "update",
-                    "entity": "outlet",
-                    "details": {
-                        "name": "{0}".format(user.first_name)
-                    }
-                })
-            except:
-                pass
+                try:
+                    response = requests.post(QUICKWALLET_API_CRUD_URL, json={
+                        "secret": QUICKWALLET_SECRET,
+                        "action": "update",
+                        "entity": "outlet",
+                        "details": {
+                            "name": "{0}".format(user.first_name)
+                        }
+                    })
+                except:
+                    pass
             if user.role.name == TERMINAL:
                 return HttpResponseRedirect(reverse("user:terminal-list"))
 
@@ -1801,21 +1802,22 @@ class RetailerCreateView(CreateView):
                             )
                         else:
                             vendor_user_id = json_data['data']['id']
+                            company_id = json_data['data']['companyid']
                             merchant_zr_user = merchant_form.save(commit=False)
                             merchant_zr_user.role = UserRole.objects.filter(name=RETAILER).last()
                             password = '%s%s' % (
                                 merchant_zr_user.pan_no.lower().strip(),
                                 str(merchant_zr_user.mobile_no).lower().strip())
                             merchant_zr_user.pass_word = password
-                            merchant_zr_user.retailer_id = vendor_user_id
 
                             merchant_zr_user.save()
 
                             quick_wallet = transaction_models.Vendor.objects.get(name="QUICKWALLET")
-                            transaction_models.VendorZruser.objects.create(
+                            transaction_models.VendorZrRetailer.objects.create(
                                 vendor=quick_wallet,
                                 zr_user=merchant_zr_user,
-                                vendor_user=str(merchant_zr_user.retailer_id)
+                                vendor_user=str(vendor_user_id),
+                                company_id=str(company_id)
                             )
 
                             dj_user = dj_auth_models.User.objects.create_user(
