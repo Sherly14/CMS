@@ -20,6 +20,13 @@ def is_user_superuser(request):
     return False
 
 
+def is_user_retailer(request):
+    if request.user.is_authenticated():
+        if request.user.zr_admin_user.role.name == "RETAILER":
+            return True
+    return False
+
+
 def get_unique_id():
     return uuid.uuid4()
 

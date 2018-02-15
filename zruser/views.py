@@ -25,7 +25,7 @@ from common_utils import transaction_utils
 from common_utils import zrupee_security
 from common_utils.date_utils import last_month, last_week_range
 from common_utils.report_util import get_excel_doc, update_excel_doc
-from common_utils.user_utils import is_user_superuser
+from common_utils.user_utils import is_user_superuser, is_user_retailer
 from mapping import *
 from utils import constants
 from zrcommission import models as commission_models
@@ -1096,7 +1096,6 @@ class DashBoardView(ListView):
         if end_date:
             context['endDate'] = end_date
 
-
         return context
 
 
@@ -1210,7 +1209,7 @@ class UserUpdateView(View):
     kyc_doc_types = KYCDocumentType.objects.all().values_list('name', flat=True)
 
     def get(self, request, pk,  **kwargs):
-        if request.user.zr_admin_user.role.name == "RETAILER":
+        if is_user_retailer(request):
             user = ZrTerminal.objects.get(id=pk)
             merchant_form = zr_user_form.UpdateMerchantTerminalForm(
                 initial={'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email})
@@ -1228,7 +1227,7 @@ class UserUpdateView(View):
 
     @transaction.atomic
     def post(self, request, pk):
-        if request.user.zr_admin_user.role.name != "RETAILER":
+        if not is_user_retailer(request):
             user = ZrUser.objects.get(id=pk)
             if "save" in request.POST:
                 merchant_form = zr_user_form.UpdateMerchantDistributorForm(data=request.POST, instance=user)
@@ -2040,7 +2039,7 @@ class TerminalCreateView(CreateView):
 
         if error == False:
             retailer_id = request.user.zr_admin_user.zr_user_id
-            retailer_api_id = transaction_models.VendorZruser.objects.get(zr_user=retailer_id)
+            retailer_api_id = transaction_models.VendorZrRetailer.objects.get(zr_user=retailer_id)
 
             response = requests.post(QUICKWALLET_API_CRUD_URL, json={
                 "secret": QUICKWALLET_SECRET,
@@ -2074,7 +2073,7 @@ class TerminalCreateView(CreateView):
                         merchant_zr_user.save()
                         quick_wallet = transaction_models.Vendor.objects.get(name=QUICKWALLET)
 
-                        if request.user.zr_admin_user.role.name == RETAILER:
+                        if is_user_retailer(request):
                             retailer = request.user.zr_admin_user.zr_user
                             zrmappings_models.RetailerTerminal.objects.create(
                                 retailer=retailer,

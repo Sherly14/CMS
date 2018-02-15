@@ -529,8 +529,6 @@ class PaymentRequestListView(ListView):
         if fromuser_list:
             context['fromuser_list'] = fromuser_list
 
-
-
         return context
 
     def get_queryset(self):
