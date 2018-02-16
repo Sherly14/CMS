@@ -2181,7 +2181,7 @@ class TerminalListView(ListView):
 
 
 def get_terminal_qs(request):
-    queryset = ZrTerminal.objects.filter(role__name=TERMINAL).order_by('-at_created')
+    queryset = ZrTerminal.objects.filter(role__name=TERMINAL).order_by('at_created')
     q = request.GET.get('q')
     filter = request.GET.get('filter')
 
@@ -2231,3 +2231,15 @@ def download_terminal_list_csv(request):
         ])
 
     return response
+
+
+class UserCardListView(View):
+
+    template_name = 'zruser/user_loyaltycard.html'
+
+    def get(self, request, pk,  **kwargs):
+        if is_user_retailer(request):
+            user = ZrTerminal.objects.get(id=pk)
+            return render(
+                request, self.template_name, {"terminal": user}
+            )

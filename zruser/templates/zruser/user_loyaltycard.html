@@ -1,11 +1,13 @@
 {% extends 'base.html' %}
+<!--{% load widget_tweaks %}-->
 
-{% block title %} Terminals List {% endblock %}
+{% block title %}LoyatyCardList{% endblock %}
 
 {% block content %}
 
     <div class="content-wrapper">
-        <p class="head-right">Terminal Table</p>
+        <p class="head-right">{{ terminal.first_name }}'s-LoyaltyCards</p>
+        <p class="head-right"><a href="#">Add Card</a></p>
         <div class="col-12" >
 
             <div class="row rm-margin-side">
@@ -26,9 +28,9 @@
                 <div class="col-8">
                     <select id="terminal-id"  name="terminal-id">
                         <option value="-1">ALL</option>
-                        {% for terminal in terminal_list %}
-                            <option value="{{ terminal.id }}" {% if  terminal.id == terminal_id %}selected{% endif %}>{{ terminal.first_name }} {{ terminal.last_name|default_if_none:""}}</option>
-                         {% endfor %}
+                        <!--{% for terminal in terminal_list %}-->
+                            <!--<option value="{{ terminal.id }}" {% if  terminal.id == terminal_id %}selected{% endif %}>{{ terminal.first_name }} {{ terminal.last_name|default_if_none:""}}</option>-->
+                         <!--{% endfor %}-->
 
                     </select>
                 </div>
@@ -48,7 +50,7 @@
             <br>
             <div class="row" style="padding-right: 50px;">
                 <div class="fine">
-                    <p class="head-bg">List of Terminals</p>
+                    <p class="head-bg">List of Cards</p>
                 </div>
             </div>
             <div class="row scroll">
@@ -56,50 +58,88 @@
                 <div style="width: 100%;">
                     <table>
                         <tr>
-                            <th>Terminal Id</th>
-                            <th>Terminal Name</th>
-                            <th>DOJ</th>
+                            <th>Card Id</th>
+                            <th>Card Name</th>
+                            <th>Created</th>
                             <th>Mobile No</th>
-                            <th>Email</th>
                             <th>Status</th>
                             <th>Actions</th>
-                            <th>Card Management</th>
-                            <th>Update</th>
-
+                            <th>Delete</th>
+                            <th>Recharge</th>
+                            <th>Recharge History</th>
                         </tr>
-                        {% for terminal in queryset %}
-                            <tr>
-                                <td>{{ terminal.id }}</td>
-                                <td>{{ terminal.first_name }} {{ terminal.last_name|default_if_none:""}}</td>
-                                <td>{{ terminal.at_created }}</td>
-                                <td>{{ terminal.mobile_no }}</td>
-                                <td>{{ terminal.email }}</td>
-                                <td>{% if terminal.is_active %}Active{% else %}Inactive{% endif %}</td>
-                                <td>
-                                    {% if terminal.is_active %}
-                                        <a href='{% url "user:terminal-list" %}?disable={{ terminal.id }}'>Disable</a>
-                                    {% else %}
-                                        <a href='{% url "user:terminal-list" %}?activate={{ terminal.id }}'>Activate</a>
-                                    {% endif %}
-                                </td>
-                                 <td> <a href='{% url "user:user-loyaltycard" pk=terminal.id%}'>CardList</a></td>
-                                 <td> <a href='{% url "user:user-update" pk=terminal.id%}'>Update</a></td>
-                            </tr>
+                        <!--{% for terminal in queryset %}-->
+                            <!--<tr>-->
+                                <!--<td>{{ terminal.id }}</td>-->
+                                <!--<td>{{ terminal.first_name }} {{ terminal.last_name|default_if_none:""}}</td>-->
+                                <!--<td>{{ terminal.at_created }}</td>-->
+                                <!--<td>{{ terminal.mobile_no }}</td>-->
+                                <!--<td>{{ terminal.email }}</td>-->
+                                <!--<td>{% if terminal.is_active %}Active{% else %}Inactive{% endif %}</td>-->
+                                <!--<td>-->
+                                    <!--{% if terminal.is_active %}-->
+                                        <!--<a href='{% url "user:terminal-list" %}?disable={{ terminal.id }}'>Disable</a>-->
+                                    <!--{% else %}-->
+                                        <!--<a href='{% url "user:terminal-list" %}?activate={{ terminal.id }}'>Activate</a>-->
+                                    <!--{% endif %}-->
+                                <!--</td>-->
+                                 <!--<td> <a href='{% url "user:user-cardlist" pk=terminal.id%}'>CardList</a></td>-->
+                                 <!--<td> <a href='{% url "user:user-update" pk=terminal.id%}'>Update</a></td>-->
+                            <!--</tr>-->
 
-                        {% endfor %}
+                        <!--{% endfor %}-->
+                        <tr>
+                                <td>1</td>
+                                <td>abc123</td>
+                                <td>2018-02-15 10:49:26.474+05:30</td>
+                                <td>9876543210</td>
+                                <td>Active</td>
+                                <td>
+                                    <a href='#'>Disable</a>
+                                </td>
+                                 <td> <a href='#'>Delete</a></td>
+                                 <td> <a href='#'>Recharge</a></td>
+                                 <td> <a href='#'>GetHistory</a></td>
+                        </tr>
+                        <tr>
+                                <td>2</td>
+                                <td>bbc123</td>
+                                <td>2018-02-15 10:57:26.474+05:30</td>
+                                <td>9876543444</td>
+                                <td>Deactive</td>
+                                <td>
+                                    <a href='#'>Activate</a>
+                                </td>
+                                 <td> <a href='#'>Delete</a></td>
+                                 <td> <a href='#'>Recharge</a></td>
+                                 <td> <a href='#'>GetHistory</a></td>
+                        </tr>
+                        <tr>
+                                <td>3</td>
+                                <td>ccc123</td>
+                                <td>2018-02-15 11:41:26.474+05:30</td>
+                                <td>9826262626</td>
+                                <td>Active</td>
+                                <td>
+                                    <a href='#'>Disable</a>
+                                </td>
+                                 <td> <a href='#'>Delete</a></td>
+                                 <td> <a href='#'>Recharge</a></td>
+                                 <td> <a href='#'>GetHistory</a></td>
+                        </tr>
                     </table>
                 </div>
-                <div class="pagination-prev">
-                {% if has_prev_page %}
-                    <a href="{% url "user:terminal-list" %}?{{prev_page_qs}}" class="button red" >Prev</a>
-                {% endif %}
-                </div>
+                <!--<div class="pagination-prev">-->
+                <!--{% if has_prev_page %}-->
+                    <!--<a href="{% url "user:terminal-list" %}?{{prev_page_qs}}" class="button red" >Prev</a>-->
+                <!--{% endif %}-->
+                <!--</div>-->
 
-                <div class="pagination-next">
-                    {% if has_next_page %}
-                        <a href="{% url "user:terminal-list" %}?{{next_page_qs}}" class="button red" >Next</a>
-                    {% endif %}
-                </div>
+                <!--<div class="pagination-next">-->
+                    <!--{% if has_next_page %}-->
+                        <!--<a href="{% url "user:terminal-list" %}?{{next_page_qs}}" class="button red" >Next</a>-->
+                    <!--{% endif %}-->
+                <!--</div>-->
             </div>
             <br>
         </div>
