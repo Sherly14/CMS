@@ -1754,7 +1754,7 @@ class RetailerCreateView(CreateView):
                 doc_type_id = '-'.join(['doc_id', doc_type_name])
 
                 if doc_type_name in request.POST:
-                    error = True
+                    # error = False
                     kyc_docs.append(
                         {
                             'doc_url': request.POST.get(doc_type_name),
@@ -1763,16 +1763,16 @@ class RetailerCreateView(CreateView):
                         }
                     )
 
-            # if not kyc_docs:
-            #     return render(
-            #         request, self.template_name,
-            #         {
-            #             'merchant_form': merchant_form,
-            #             'bank_detail_form': bank_detail_form,
-            #             'kyc_doc_types': self.kyc_doc_types,
-            #             'kyc_error': 'KYC details are mandatory'
-            #         }
-            #     )
+            if not kyc_docs:
+                return render(
+                    request, self.template_name,
+                    {
+                        'merchant_form': merchant_form,
+                        'bank_detail_form': bank_detail_form,
+                        'kyc_doc_types': self.kyc_doc_types,
+                        'kyc_error': 'KYC details are mandatory'
+                    }
+                )
             if error==False:
                 response = requests.post(QUICKWALLET_API_CRUD_URL, json={
                     "secret": QUICKWALLET_SECRET,
@@ -2067,9 +2067,13 @@ class TerminalCreateView(CreateView):
                         )
                     else:
                         terminal_id = json_data['data']['id']
+                        password = zrupee_security.generate_password()
                         merchant_zr_user = merchant_form.save(commit=False)
-
+                        r_email = request.user.zr_admin_user.zr_user.email
+                        merchant_zr_user.pass_word = password
                         merchant_zr_user.role = UserRole.objects.filter(name=TERMINAL).last()
+                        merchant_zr_user.send_welcome_email_RT(password, r_email)
+
                         merchant_zr_user.save()
                         quick_wallet = transaction_models.Vendor.objects.get(name=QUICKWALLET)
 
@@ -2181,7 +2185,16 @@ class TerminalListView(ListView):
 
 
 def get_terminal_qs(request):
-    queryset = ZrTerminal.objects.filter(role__name=TERMINAL).order_by('at_created')
+    queryset = zrmappings_models.RetailerTerminal.objects.none()
+    if request.user.zr_admin_user:
+        try:
+            queryset = request.user.zr_admin_user.zr_user.terminal_retailer_mappings.order_by('at_created')
+        except:
+            pass
+
+    if is_user_superuser(request):
+        queryset = zrmappings_models.RetailerTerminal.objects.order_by('at_created')
+
     q = request.GET.get('q')
     filter = request.GET.get('filter')
 

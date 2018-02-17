@@ -105,7 +105,6 @@
 
 <script>
 
-
     $(document).ready(function()
     {
         $('#distributor-id').select2();
@@ -143,12 +142,10 @@
                  url = window.location.pathname +'?distributor-id=' + all
              }
 
-
               if(distributorId !="")
                 {
                     url = window.location.pathname +'?distributor-id=' + distributorId
                 }
-
           window.location.assign(url)
     });
 
@@ -160,8 +157,6 @@
             {% endif %}
             window.location.assign(url)
         });
-
-
 
         $('#csv-download').click(function()
         {
@@ -181,7 +176,6 @@
             }
         }).on('change', function (ev)
          {
-
             var start = $("#start-date").val();
             var startD = new Date(start);
             var end = $("#end-date").val();
@@ -197,7 +191,6 @@
             }
          });
 
-
         $('#end-date').datepicker({
             uiLibrary: 'bootstrap4',
             iconsLibrary: 'fontawesome',
@@ -208,7 +201,6 @@
             }
         }).on('change', function (ev)
          {
-
             var start = $("#start-date").val();
             var startD = new Date(start);
             var end = $("#end-date").val();
@@ -223,15 +215,7 @@
                $('#end-date').val("");
             }
          });
-
-
-
-
-
-
-
-
-
     });
+
 </script>
 {% endblock %}

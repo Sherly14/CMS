@@ -371,16 +371,16 @@ class ZrTerminal(RowInfo):
     def full_name(self):
         return self.get_full_name()
 
-    def send_welcome_email(self, password):
+    def send_welcome_email_RT(self, password, r_email):
         portal_url = None
         if self.role.name == 'MERCHANT':
             portal_url = 'zrupee.com'
         else:
             portal_url = 'cms.zrupee.com'
 
-        email_utils.send_email(
+        email_utils.send_email_multiple(
             'Hello and welcome To Zrupee!',
-            self.email,
+            [self.email, r_email],
             'user_welcome_email',
             {
                 'username': self.mobile_no,
