@@ -148,6 +148,9 @@
 
                 {% if request.user.zr_admin_user.role.name == "RETAILER" %}
                 <li class="nav-item leftMargin headerText">
+                    <a class="nav-link wheatTextColor" href="{% url 'user:card-create' %}">Add Cards</a>
+                </li>
+                <li class="nav-item leftMargin headerText">
                     <a class="nav-link wheatTextColor" href="{% url 'user:terminal-create' %}">Add Terminal</a>
                 </li>
                 {% endif %}
