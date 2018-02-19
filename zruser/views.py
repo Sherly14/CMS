@@ -97,7 +97,6 @@ def get_merchant_qs(request):
                 query_filter
             )
 
-
         if filter == 'Today':
             queryset = queryset.filter(at_created__gte=datetime.datetime.now().date())
         elif filter == 'Last-Week':
@@ -126,8 +125,6 @@ def get_merchant_qs(request):
             dist_sub_all_merchant = ZrUser.objects.filter(id__in=dist_sub_merchant_list).order_by('-at_created')
             merchantDistlist = merchantDistlist | dist_sub_all_merchant
 
-
-
         queryset = merchantDistlist
 
         if merchant_id == "-1":
@@ -140,7 +137,6 @@ def get_merchant_qs(request):
 
             if DISTMERCHLIST:
                 queryset = ZrUser.objects.filter(id__in=DISTMERCHLIST).order_by('-at_created')
-
 
         if q:
             query_filter = Q(
@@ -198,14 +194,13 @@ def get_merchant_qs(request):
         elif filter == 'Last-Month':
             queryset = queryset.filter(at_created__range=last_month())
     sub_merchant_id = []
-    subDistMerchant =  zrmappings_models.SubDistributorMerchant.objects.filter(sub_distributor=request.user.zr_admin_user.zr_user)
+    subDistMerchant = zrmappings_models.SubDistributorMerchant.objects.filter(sub_distributor=request.user.zr_admin_user.zr_user)
     if subDistMerchant:
         for sub_dist in subDistMerchant:
             sub_merchant_id.append(sub_dist.merchant_id)
 
     if sub_merchant_id:
         queryset=ZrUser.objects.filter(id__in=sub_merchant_id)
-
 
     distributor_id = request.GET.get('distributor-id')
 
@@ -257,7 +252,6 @@ def get_merchant_qs(request):
 
         if distmerchantlist:
             queryset = ZrUser.objects.filter(id__in=distmerchantlist)
-
 
     if sub_distributor_id != None and int(sub_distributor_id) > 0:
         subMerchant = zrmappings_models.SubDistributorMerchant.objects.filter(sub_distributor_id=sub_distributor_id)
@@ -421,7 +415,7 @@ class MerchantListView(ListView):
         end_date = self.request.GET.get('endDate')
         q = self.request.GET.get('q')
         pg_no = self.request.GET.get('page_no')
-       # sub_dist_merchant_list =zrmappings_models.SubDistributorMerchant.objects.all()
+        # sub_dist_merchant_list =zrmappings_models.SubDistributorMerchant.objects.all()
         distributor_list = ZrUser.objects.filter(role__name=DISTRIBUTOR)
         merchant_id = self.request.GET.get('merchant-id')
         distributor_id = self.request.GET.get('distributor-id')
@@ -773,7 +767,6 @@ def get_sub_distributor_qs(request):
 
     if distributor_id != None and int(distributor_id) > 0:
         queryset = queryset.filter(distributor_id=distributor_id)
-
 
     if sub_distributor_id != None and int(sub_distributor_id) > 0:
         queryset = queryset.filter(sub_distributor_id=sub_distributor_id)
@@ -1293,6 +1286,7 @@ class UserUpdateView(View):
             return HttpResponseRedirect(reverse("user:terminal-list"))
 
         else:
+
             user = ZrTerminal.objects.get(id=pk)
             if "save" in request.POST:
                 merchant_form = zr_user_form.UpdateMerchantTerminalForm(data=request.POST, instance=user)
@@ -1609,7 +1603,6 @@ class SubDistributorListView(ListView):
         if self.request.user.zr_admin_user:
             try:
                 sub_distributor_list = zrmappings_models.DistributorSubDistributor.objects.filter(distributor=self.request.user.zr_admin_user.zr_user)
-
             except:
                 pass
 
@@ -1667,15 +1660,13 @@ class SubDistributorListView(ListView):
         if distributor_id:
             context['distributor_id'] = int(distributor_id)
 
-
-
         if sub_distributor_list:
             for subdist in sub_distributor_list:
                 if subdist.distributor.id in subDistributor:
                     subDistributor[subdist.distributor.id].append([subdist.distributor.first_name, subdist.sub_distributor.id,subdist.sub_distributor.first_name])
                 else:
                     subDistributor[subdist.distributor.id] = [[subdist.distributor.first_name, subdist.sub_distributor.id,subdist.sub_distributor.first_name]]
-                    #subDistributor[subdist.distributor.id] = [subdist.distributor.first_name, subdist.sub_distributor.id,subdist.sub_distributor.first_name]
+                    # subDistributor[subdist.distributor.id] = [subdist.distributor.first_name, subdist.sub_distributor.id,subdist.sub_distributor.first_name]
 
         context['queryset'] = queryset
 
@@ -2123,6 +2114,17 @@ class TerminalListView(ListView):
         start_date = self.request.GET.get('startDate')
         end_date = self.request.GET.get('endDate')
         terminal_id = self.request.GET.get('terminal-id')
+        retailer_id = self.request.GET.get('retailer-id')
+        terminaldict = {}
+
+        if self.request.user.zr_admin_user:
+            try:
+                terminal_list = zrmappings_models.RetailerTerminal.objects.filter(retailer=self.request.user.zr_admin_user.zr_user)
+            except:
+                pass
+
+        if is_user_superuser(self.request):
+            terminal_list = zrmappings_models.RetailerTerminal.objects.all()
 
         if activate:
             zruser = ZrTerminal.objects.filter(id=activate).last()
@@ -2130,6 +2132,12 @@ class TerminalListView(ListView):
                 raise Http404
             zruser.is_active = True
             zruser.save(update_fields=['is_active'])
+            zrmappings_models.RetailerTerminal.objects.filter(
+                terminal=zruser
+            ).update(
+                # is_active=True,
+                is_attached_to_admin=False
+            )
 
         if disable:
             zruser = ZrTerminal.objects.filter(id=disable).last()
@@ -2137,6 +2145,23 @@ class TerminalListView(ListView):
                 raise Http404
             zruser.is_active = False
             zruser.save(update_fields=['is_active'])
+            zrmappings_models.RetailerTerminal.objects.filter(
+                terminal=zruser
+            ).update(
+                # is_active=False,
+                is_attached_to_admin=True
+            )
+
+        if terminal_list:
+            for terminal in terminal_list:
+                if terminal.retailer.id in terminaldict:
+                    terminaldict[terminal.retailer.id].append(
+                        [terminal.retailer.first_name, terminal.terminal.id,
+                         terminal.terminal.first_name])
+                else:
+                    terminaldict[terminal.retailer.id] = [
+                        [terminal.retailer.first_name, terminal.terminal.id,
+                         terminal.terminal.first_name]]
 
         if q:
             context['q'] = q
@@ -2150,9 +2175,14 @@ class TerminalListView(ListView):
         if end_date:
             context['endDate'] = end_date
 
+        if terminaldict:
+            context['terminaldict']=terminaldict
+
         if terminal_id:
             context['terminal_id'] = int(terminal_id)
 
+        if retailer_id:
+            context['retailer_id'] = int(retailer_id)
         context['terminal_list'] = terminal_list
         context['queryset'] = queryset
         p = Paginator(context['queryset'], self.paginate_by)
@@ -2212,8 +2242,13 @@ def get_terminal_qs(request):
 
     terminal_id = request.GET.get('terminal-id')
 
+    retailer_id = request.GET.get('retailer-id')
+
+    if retailer_id != None and int(retailer_id) > 0:
+        queryset = queryset.filter(retailer_id=retailer_id)
+
     if terminal_id != None and int(terminal_id) > 0:
-        queryset = queryset.filter(id=terminal_id)
+        queryset = queryset.filter(terminal_id=terminal_id)
 
     if filter == 'Today':
         queryset = queryset.filter(at_created__gte=datetime.datetime.now().date())
@@ -2235,12 +2270,12 @@ def download_terminal_list_csv(request):
     ])
     for terminal in terminal_qs:
         writer.writerow([
-            terminal.id,
-            terminal.first_name,
-            terminal.at_created,
-            terminal.mobile_no,
-            terminal.email,
-            'Active' if terminal.is_active else 'Inactive'
+            terminal.terminal.id,
+            terminal.terminal.first_name,
+            terminal.terminal.at_created,
+            terminal.terminal.mobile_no,
+            terminal.terminal.email,
+            'Active' if terminal.terminal.is_active else 'Inactive'
         ])
 
     return response
@@ -2251,7 +2286,7 @@ class UserCardListView(View):
     template_name = 'zruser/user_loyaltycard.html'
 
     def get(self, request, pk,  **kwargs):
-        if is_user_retailer(request):
+        if is_user_retailer(request) or is_user_superuser(request):
             user = ZrTerminal.objects.get(id=pk)
             return render(
                 request, self.template_name, {"terminal": user}

@@ -78,12 +78,12 @@
                             <td>{{ subdist_mapping.at_created }}</td>
                             <td>{{ subdist_mapping.sub_distributor.mobile_no }}</td>
                             <td>{{ subdist_mapping.sub_distributor.email }}</td>
-                            <td>{% if subdist_mapping.is_active %}Active{% else %}Inactive{% endif %}</td>
+                            <td>{% if subdist_mapping.sub_distributor.is_active %}Active{% else %}Inactive{% endif %}</td>
                             <td>
-                                {% if subdist_mapping.is_active %}
-                                    <a href='{% url "user:sub-distributor-list" %}?disable={{ subdist_mapping.id }}'>Disable</a>
+                                {% if subdist_mapping.sub_distributor.is_active %}
+                                    <a href='{% url "user:sub-distributor-list" %}?disable={{ subdist_mapping.sub_distributor.id }}'>Disable</a>
                                 {% else %}
-                                    <a href='{% url "user:sub-distributor-list" %}?activate={{ subdist_mapping.id }}'>Activate</a>
+                                    <a href='{% url "user:sub-distributor-list" %}?activate={{ subdist_mapping.sub_distributor.id }}'>Activate</a>
                                 {% endif %}
                             </td>
                             <td> <a href='{% url "user:user-update" pk=subdist_mapping.sub_distributor.id%}'>Update</a></td>
@@ -115,7 +115,6 @@
 
     $(document).ready(function(){
     $('#sub-distributor-id').select2();
-
 
     $('#search-btn').click(function(){
         startDate = $('#start-date').val();
@@ -149,16 +148,12 @@
                 }
              }
 
-
               if(subdistributorId!="")
                 {
                  url = window.location.pathname + '?sub-distributor-id='+ subdistributorId;
                 }
-
           window.location.assign(url)
     });
-
-
 
     $('#csv-download').click(function(){
         url = "{% url "user:sub-distributor-csv" %}" + window.location.search
@@ -178,7 +173,6 @@
             }
         }).on('change', function (ev)
          {
-
             var start = $("#start-date").val();
             var startD = new Date(start);
             var end = $("#end-date").val();
@@ -193,7 +187,6 @@
                $('#start-date').val("");
             }
          });
-
 
         $('#end-date').datepicker({
             uiLibrary: 'bootstrap4',
@@ -220,14 +213,6 @@
                $('#end-date').val("");
             }
          });
-
-
-
-
-
-
-
-
 
     });
 </script>

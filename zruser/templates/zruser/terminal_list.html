@@ -23,13 +23,18 @@
                 <div class="col-2">
                     <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
                 </div>
-                <div class="col-8">
+
+                <div class="col-4">
                     <select id="terminal-id"  name="terminal-id">
                         <option value="-1">ALL</option>
-                        {% for terminal in terminal_list %}
-                            <option value="{{ terminal.id }}" {% if  terminal.id == terminal_id %}selected{% endif %}>{{ terminal.first_name }} {{ terminal.last_name|default_if_none:""}}</option>
-                         {% endfor %}
-
+                            {% for key,val in terminaldict.items %}
+                                <optgroup label = "{{val.0.0}} ">
+                                     <option value="{{key}}"{% if key == retailer_id %}selected{% endif %}>ALL-{{val.0.0}}</option>
+                                    {% for subdrow in val %}
+                                        <option value="{{subdrow.1}}" {% if subdrow.1 == terminal_id %}selected{% endif %}>{{ subdrow.2 }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endfor %}
                     </select>
                 </div>
             </div>
@@ -69,20 +74,20 @@
                         </tr>
                         {% for terminal in queryset %}
                             <tr>
-                                <td>{{ terminal.id }}</td>
-                                <td>{{ terminal.first_name }} {{ terminal.last_name|default_if_none:""}}</td>
-                                <td>{{ terminal.at_created }}</td>
-                                <td>{{ terminal.mobile_no }}</td>
-                                <td>{{ terminal.email }}</td>
-                                <td>{% if terminal.is_active %}Active{% else %}Inactive{% endif %}</td>
+                                <td>{{ terminal.terminal.id }}</td>
+                                <td>{{ terminal.terminal.first_name }} {{ terminal.terminal.last_name|default_if_none:""}}</td>
+                                <td>{{ terminal.terminal.at_created }}</td>
+                                <td>{{ terminal.terminal.mobile_no }}</td>
+                                <td>{{ terminal.terminal.email }}</td>
+                                <td>{% if terminal.terminal.is_active %}Active{% else %}Inactive{% endif %}</td>
                                 <td>
-                                    {% if terminal.is_active %}
+                                    {% if terminal.terminal.is_active %}
                                         <a href='{% url "user:terminal-list" %}?disable={{ terminal.id }}'>Disable</a>
                                     {% else %}
                                         <a href='{% url "user:terminal-list" %}?activate={{ terminal.id }}'>Activate</a>
                                     {% endif %}
                                 </td>
-                                 <td> <a href='{% url "user:user-loyaltycard" pk=terminal.id%}'>CardList</a></td>
+                                 <td> <a href='{% url "user:user-loyaltycard" pk=terminal.terminal.id%}'>CardList</a></td>
                                  <td> <a href='{% url "user:user-update" pk=terminal.id%}'>Update</a></td>
                             </tr>
 
@@ -128,22 +133,26 @@
             window.location.assign(url)
         });
 
-         $('#terminal-id').change(function(){
-         terminalId = $("#terminal-id").val();
-         all = "";
+     $('#terminal-id').change(function(){
+             var terminalId = $("#terminal-id").val();
+             var retailerId = "";
 
-         var selectedAll = $("#user-transaction-id :selected").text();
-             if (selectedAll.includes("ALL"))
-             {
-                all = terminalId;
-                terminalId = ""
-                 url = window.location.pathname +'?terminal-id=' + all
-             }
-              if(terminalId !="")
-                {
-                    url = window.location.pathname +'?terminal-id=' + terminalId
-                }
-          window.location.assign(url)
+             var selectedAll = $("#terminal-id :selected").text();
+                 if (selectedAll.includes("ALL"))
+                 {
+                    retailerId = terminalId;
+                    terminalId = ""
+                    if(retailerId!="")
+                    {
+                     url =window.location.pathname +'?retailer-id='+ retailerId;
+                    }
+                 }
+
+                  if(terminalId!="")
+                    {
+                     url = window.location.pathname + '?terminal-id='+ terminalId;
+                    }
+              window.location.assign(url)
         });
 
         $('#period').change(function() {
