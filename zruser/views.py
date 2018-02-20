@@ -41,7 +41,8 @@ from zruser.utils.constants import DEFAULT_DISTRIBUTOR_MOBILE_NUMBER
 from zrwallet import models as zrwallet_models
 from django.contrib.auth.models import User
 from itertools import chain
-from zrcms.env_vars import QUICKWALLET_ZR_PARTERNERID, QUICKWALLET_SECRET, QUICKWALLET_API_CRUD_URL,QUICKWALLET_API_CARD_URL
+from zrcms.env_vars import QUICKWALLET_ZR_PARTERNERID, QUICKWALLET_SECRET, QUICKWALLET_API_CRUD_URL,\
+    QUICKWALLET_API_CARD_URL, QUICKWALLET_API_LISTCARD_URL
 
 
 MERCHANT = 'MERCHANT'
@@ -1915,11 +1916,9 @@ class RetailerListView(ListView):
             dj_user.is_active = False
             dj_user.save(update_fields=['is_active'])
             zruser.save(update_fields=['is_active'])
-            print(zruser.id)
 
             try:
                 vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=int(zruser.id))
-                print(vendor.vendor_user)
                 response = requests.post(QUICKWALLET_API_CRUD_URL, json={
                     "secret": QUICKWALLET_SECRET,
                     "action": "update",
@@ -1929,7 +1928,6 @@ class RetailerListView(ListView):
                         "isactive": "N"
                     }
                 })
-                print(response)
             except:
                 pass
 
@@ -2366,69 +2364,60 @@ class UserCardCreateView(CreateView):
 
     @transaction.atomic
     def post(self, request):
-
+        quantity = request.POST.get('quantity', '')
+        zr_retailer_id = request.user.zr_admin_user.zr_user.id
+        vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
         response = requests.post(QUICKWALLET_API_CARD_URL, json={"secret": QUICKWALLET_SECRET,
-                                                                 "retailerid": 12,
-                                                                 "qty": request.POST.get()})
+                                                                 "retailerid": vendor.vendor_user,
+                                                                 "qty": int(quantity)})
         if 300 > response.status_code >= 200:
             try:
                 json_data = json.loads(response.text)
+                if json_data:
+                    if json_data['status']:
+                        status = json_data['status']
+                        if status == "failed":
+                            return render(
+                                request, self.template_name,
+                                {
+                                    "api_error": "something went wrong, please try again!"
+                                }
+                            )
+                        else:
+                            return HttpResponseRedirect(reverse("user:dashboard"))
             except:
                 pass
-        if json_data:
-            if json_data['status']:
-                status = json_data['status']
-                if status == "failed":
-                    return render(
-                        request, self.template_name,
-                        {
-                            "api_error": "something went wrong, please try again!"
-                        }
-                    )
-                else:
-                    terminal_id = json_data['data']['id']
-                    # password = zrupee_security.generate_password()
-                    # merchant_zr_user = merchant_form.save(commit=False)
-                    # r_email = request.user.zr_admin_user.zr_user.email
-                    # merchant_zr_user.pass_word = password
-                    # merchant_zr_user.role = UserRole.objects.filter(name=TERMINAL).last()
-                    # merchant_zr_user.send_welcome_email_RT(password, r_email)
-                    #
-                    # merchant_zr_user.save()
-                    # quick_wallet = transaction_models.Vendor.objects.get(name=QUICKWALLET)
-                    #
-                    # if is_user_retailer(request):
-                    #     retailer = request.user.zr_admin_user.zr_user
-                    #     zrmappings_models.RetailerTerminal.objects.create(
-                    #         retailer=retailer,
-                    #         terminal=merchant_zr_user,
-                    #         is_active=True
-                    #     )
-                    #
-                    # transaction_models.VendorZrTerminal.objects.create(
-                    #     vendor=quick_wallet,
-                    #     zr_terminal=merchant_zr_user,
-                    #     vendor_user=terminal_id,
-                    #     is_active=True
-                    # )
-                    # return HttpResponseRedirect(reverse("user:terminal-list"))
-
-        # if error == False:
-        #     api_error = "Something went wrong, please try again!"
-        #
-        # return render(
-        #     request, self.template_name,
-        #     {
-        #         'api_error' : api_error
-        #     }
-        # )
-
-
-class UserCardListView(ListView):
-    template_name = 'zruser/user_loyaltycard.html'
-    def get(self, request, pk,  **kwargs):
-        if is_user_retailer(request) or is_user_superuser(request):
-            user = ZrTerminal.objects.get(id=pk)
             return render(
-                request, self.template_name, {"terminal": user}
+                request, self.template_name,
+                {
+                    "api_error": "something went wrong, please try again!"
+                }
+            )
+
+
+class UserCardListView(View):
+    template_name = 'zruser/loyaltycard_list.html'
+    paginate_by = 10
+
+    def get(self, request, **kwargs):
+
+        zr_retailer_id = request.user.zr_admin_user.zr_user.id
+        vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
+        response = requests.post(QUICKWALLET_API_LISTCARD_URL, json={
+            "secret": QUICKWALLET_SECRET,
+            "retailerid": vendor.vendor_user
+        })
+        if 300 > response.status_code >= 200:
+            try:
+                json_data = json.loads(response.text)
+                loyalty_cards = json_data['data']['loyaltycards']
+
+                return render(
+                    request, self.template_name, {"loyalty_cards": loyalty_cards}
+                )
+            except:
+                pass
+
+            return render(
+                request, self.template_name, {"api_error": "something went wrong, please try again!"}
             )

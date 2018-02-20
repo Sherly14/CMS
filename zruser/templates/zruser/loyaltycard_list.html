@@ -6,8 +6,10 @@
 {% block content %}
 
     <div class="content-wrapper">
-        <p class="head-right">{{ terminal.first_name.upper }}'s-LoyaltyCards</p>
-        <p class="head-right"><a href="#">Add Card</a></p>
+        <p class="head-right">{{ request.user.zr_admin_user.zr_user.first_name.upper }}'s-LoyaltyCards</p>
+        {% if api_error %}
+            <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
+        {% endif %}
         <div class="col-12" >
 
             <div class="row rm-margin-side">
@@ -31,7 +33,6 @@
                         <!--{% for terminal in terminal_list %}-->
                             <!--<option value="{{ terminal.id }}" {% if  terminal.id == terminal_id %}selected{% endif %}>{{ terminal.first_name }} {{ terminal.last_name|default_if_none:""}}</option>-->
                          <!--{% endfor %}-->
-
                     </select>
                 </div>
             </div>
@@ -59,74 +60,24 @@
                     <table>
                         <tr>
                             <th>Card Id</th>
-                            <th>Card Name</th>
+                            <th>Card Number</th>
                             <th>Created</th>
+                            <th>Name</th>
+                            <th>Balance</th>
                             <th>Mobile No</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                            <th>Delete</th>
-                            <th>Recharge</th>
-                            <th>Recharge History</th>
                         </tr>
-                        <!--{% for terminal in queryset %}-->
-                            <!--<tr>-->
-                                <!--<td>{{ terminal.id }}</td>-->
-                                <!--<td>{{ terminal.first_name }} {{ terminal.last_name|default_if_none:""}}</td>-->
-                                <!--<td>{{ terminal.at_created }}</td>-->
-                                <!--<td>{{ terminal.mobile_no }}</td>-->
-                                <!--<td>{{ terminal.email }}</td>-->
-                                <!--<td>{% if terminal.is_active %}Active{% else %}Inactive{% endif %}</td>-->
-                                <!--<td>-->
-                                    <!--{% if terminal.is_active %}-->
-                                        <!--<a href='{% url "user:terminal-list" %}?disable={{ terminal.id }}'>Disable</a>-->
-                                    <!--{% else %}-->
-                                        <!--<a href='{% url "user:terminal-list" %}?activate={{ terminal.id }}'>Activate</a>-->
-                                    <!--{% endif %}-->
-                                <!--</td>-->
-                                 <!--<td> <a href='{% url "user:user-cardlist" pk=terminal.id%}'>CardList</a></td>-->
-                                 <!--<td> <a href='{% url "user:user-update" pk=terminal.id%}'>Update</a></td>-->
-                            <!--</tr>-->
 
-                        <!--{% endfor %}-->
-                        <tr>
-                                <td>1</td>
-                                <td>abc123</td>
-                                <td>2018-02-15 10:49:26.474+05:30</td>
-                                <td>9876543210</td>
-                                <td>Active</td>
-                                <td>
-                                    <a href='#'>Disable</a>
-                                </td>
-                                 <td> <a href='#'>Delete</a></td>
-                                 <td> <a href='#'>Recharge</a></td>
-                                 <td> <a href='#'>GetHistory</a></td>
-                        </tr>
-                        <tr>
-                                <td>2</td>
-                                <td>bbc123</td>
-                                <td>2018-02-15 10:57:26.474+05:30</td>
-                                <td>9876543444</td>
-                                <td>Deactive</td>
-                                <td>
-                                    <a href='#'>Activate</a>
-                                </td>
-                                 <td> <a href='#'>Delete</a></td>
-                                 <td> <a href='#'>Recharge</a></td>
-                                 <td> <a href='#'>GetHistory</a></td>
-                        </tr>
-                        <tr>
-                                <td>3</td>
-                                <td>ccc123</td>
-                                <td>2018-02-15 11:41:26.474+05:30</td>
-                                <td>9826262626</td>
-                                <td>Active</td>
-                                <td>
-                                    <a href='#'>Disable</a>
-                                </td>
-                                 <td> <a href='#'>Delete</a></td>
-                                 <td> <a href='#'>Recharge</a></td>
-                                 <td> <a href='#'>GetHistory</a></td>
-                        </tr>
+                        {% for card in loyalty_cards %}
+                            <tr>
+                                <td>{{ card.prepaidcardid }}</td>
+                                <td>{{ card.cardnumber }}</td>
+                                <td>{{ card.created_at }}</td>
+                                <td>{{ card.name }}</td>
+                                <td>{{ card.balance }}</td>
+                                <td>{{ card.mobile }}</td>
+                            </tr>
+                        {% endfor %}
+
                     </table>
                 </div>
                 <!--<div class="pagination-prev">-->

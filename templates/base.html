@@ -83,6 +83,11 @@
                     <a class="nav-link text-right" href="{% url 'user:terminal-list' %}">Terminals</a>
                 </li>
                 {% endif %}
+                {% if request.user.zr_admin_user.role.name == "RETAILER" %}
+                <li class="nav-item ">
+                    <a class="nav-link text-right" href="{% url 'user:loyaltycard-list' %}">Loyalty Cards</a>
+                </li>
+                {% endif %}
 
                 {% if request.user.zr_admin_user.role.name == "CHECKER" or request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
                 <li class="nav-item ">
