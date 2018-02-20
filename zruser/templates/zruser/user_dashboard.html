@@ -26,7 +26,7 @@
                     <div class="col-2 float-left">
                         <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
                     </div>
-                    <div class="float-left mar_l_10">
+                    <div class="float-left mar_l_10" style="margin-left: 15px;">
                        <input type="button" id="search-btn" class="button red" value="Search">
                     </div>
 
@@ -365,7 +365,7 @@
                             <div class="form-group col-sm-6">
                                 <label class="control-label"><b>To User</b></label>
                                 <div>
-                                    <select id="from_user" name="from_user" required>
+                                    <select id="from_user" name="from_user" required style="padding-left:5px">
                                         {% for zr_user in to_list %}
                                             <option value="{{ zr_user.id }}" >{{zr_user.first_name }} {{ zr_user.last_name|default_if_none:""}} ({{ zr_user.mobile_no|default_if_none:""}})</option>
                                         {% endfor %}
@@ -379,7 +379,7 @@
                             <div class="form-group col-sm-6">
                                 <label class="control-label"><b>Type</b></label>
                                 <div>
-                                    <select id="type" name="type" required>
+                                    <select id="type" name="type" required style="padding-left:5px">
                                         <option value="">-----------</option>
                                         <option value="DMT">DMT</option>
                                         <option value="NONDMT">NON DMT</option>
@@ -390,7 +390,7 @@
                             <div class="form-group col-sm-6">
                                 <label class="control-label"><b>Amount</b></label>
                                 <div>
-                                    {{ topup_form.amount|attr:"id:amount"|attr:"class:fill" }}
+                                    {{ topup_form.amount|attr:"id:amount"|attr:"class:fill padding-left-5" }}
                                     {% if topup_form.amount.errors %}
                                         {{ topup_form.amount.errors }}
                                     {% endif %}
