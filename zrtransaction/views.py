@@ -32,11 +32,11 @@ def get_transactions_qs_with_dict(report_params):
     q_obj = Q()
     if q:
         q_obj = Q(
-            user__first_name__contains=q
+            user__first_name__icontains=q
         ) | Q(
-            user__last_name__contains=q
+            user__last_name__icontains=q
         ) | Q(
-            user__mobile_no__contains=q
+            user__mobile_no__icontains=q
         )
 
     p_filter = report_params.get('filter', 'All')
@@ -93,11 +93,11 @@ def get_transactions_qs_with_dict(report_params):
 def get_transactions_qs(request):
     q = request.GET.get('q', "")
     q_obj = Q(
-        user__first_name__contains=q
+        user__first_name__icontains=q
     ) | Q(
-        user__last_name__contains=q
+        user__last_name__icontains=q
     ) | Q(
-        user__mobile_no__contains=q
+        user__mobile_no__icontains=q
     )
     start_date = request.GET.get('startDate')
     end_date = request.GET.get('endDate')
