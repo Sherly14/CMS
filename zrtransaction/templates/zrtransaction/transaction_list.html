@@ -6,73 +6,73 @@
 
 {% block content %}
 
-    <div class="content-wrapper">
-        <p class="head-right">Transactions Table</p>
-    <div class="col-12" >
-        <div class="row rm-margin-side">
-            <div class="col-2">
-                <p class="head-left">START DATE</p>
-            </div>
-            <div class="col-2">
-                <p class="head-left">END DATE</p>
-            </div>
+<div class="content-wrapper">
+    <p class="head-right">Transactions Table</p>
+    <div class="row rm-margin-side">
+        <div class="col-2">
+            <p class="head-left">START DATE</p>
         </div>
-        <div class="row rm-margin-side">
-            <div class="col-2">
-                <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-            </div>
-            <div class="col-2">
-                <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-            </div>
-             {% if distributor_list %}
-                <div class="col-2">
-                    <select id="user-distributor-id"  name="user-distributor-id">
-                    <option value="-1">ALL</option>
-                    {% for distributor in distributor_list %}
-                        <option value="{{ distributor.id }}" {% if  distributor.id == distributor_id %}selected{% endif %}>{{ distributor.first_name }} {{ distributor.last_name|default_if_none:""}}</option>
-                     {% endfor %}
-                </select>
-                </div>
-            {% endif %}
-            <div class="col-2">
-                <select id="user-subdistributor-id" name="user-subdistributor-id">
-                    <option value="-3">ALL</option>
-                    {% for key,val in subDistMerchant.items %}
-                       <optgroup label = "{{val.0.0}} ">
-                           <option value="{{key}}"{% if key == sub_distributor_id  %}selected{% endif %}>ALL-{{val.0.0}}</option>
-                            {% for subdrow in val %}
-                                <option value="{{subdrow.1}}" {% if subdrow.1 == merchant_id %}selected{% endif %}>{{ subdrow.2 }}</option>
-                            {% endfor %}
-                        </optgroup>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-        <br>
-        <div class="row">
-            <div style="position: relative;">
-                <input class="search" id="search-txt" type="search" name="search" value="{{ q }}"
-                       placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
-            </div>&nbsp;&nbsp;
-            <input class="button red" type="button" value="Search" id="search-btn">
-            <a class="nav-link" href="{% url 'transaction:transaction-list' %}">Reset filters</a>
-            <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
-            <input hidden id="is_data_exists" value="{% if queryset %}1{% else %}0{% endif %}">
+        <div class="col-2">
+            <p class="head-left">END DATE</p>
         </div>
     </div>
-        <br>
-        <div>
-            <div class="row" style="padding-right: 50px;">
+    <div class="row rm-margin-side">
+         <div class="col-2">
+            <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
+        </div>
+         <div class="col-2">
+            <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
+        </div>
+         {% if distributor_list %}
+            <div class="col-4">
+                <select id="user-distributor-id"  name="user-distributor-id">
+                <option value="-1">ALL</option>
+                {% for distributor in distributor_list %}
+                    <option value="{{ distributor.id }}" {% if  distributor.id == distributor_id %}selected{% endif %}>{{ distributor.first_name }} {{ distributor.last_name|default_if_none:""}}</option>
+                 {% endfor %}
+            </select>
+            </div>
+         {% endif %}
+         <div class="col-4">
+            <select id="user-subdistributor-id" name="user-subdistributor-id">
+                <option value="-3">ALL</option>
+                {% for key,val in subDistMerchant.items %}
+                   <optgroup label = "{{val.0.0}} ">
+                       <option value="{{key}}"{% if key == sub_distributor_id  %}selected{% endif %}>ALL-{{val.0.0}}</option>
+                        {% for subdrow in val %}
+                            <option value="{{subdrow.1}}" {% if subdrow.1 == merchant_id %}selected{% endif %}>{{ subdrow.2 }}</option>
+                        {% endfor %}
+                    </optgroup>
+                {% endfor %}
+            </select>
+        </div>
+         <div class="div-width-100">
+             <br>
+             <div class="row">
+                 <div class="align-items-center div-width-100">
+                    <div class="float-left">
+                        <input class="search" id="search-txt" type="search" name="search" value="{{ q }}"
+                               placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                        <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                    </div>
+                    <input class="button red float-left mar_l_10" type="button" value="Search" id="search-btn">
+                    <input class="button red float-right" type="button" value="DOWNLOAD CSV" id="csv-download">
+                    <a class="nav-link float-right" href="{% url 'transaction:transaction-list' %}">Reset filters</a>
+                    <input hidden id="is_data_exists" value="{% if queryset %}1{% else %}0{% endif %}">
+                 </div>
+             </div>
+             <br>
+             <div class="row">
                 <div class="fine">
                     <p class="head-bg">Transactions</p>
                 </div>
             </div>
-            <div class="row scroll">
+             <div class="row scroll">
 
-                <div style="width: 100%;     overflow: scroll;">
-                    <table>
-                        <tr>
+                 <div class="div-width-100">
+                     <table>
+                         <tr>
+                            <th>Transaction Id</th>
                             <th>Merchant Id</th>
                             <th>Vendor Txn Id</th>
                             <th>status</th>
@@ -84,9 +84,10 @@
                             <th>Additional charges</th>
                             <th>Transaction type</th>
                             <th>Service provider</th>
-                        </tr>
-                        {% for transaction in queryset %}
+                         </tr>
+                         {% for transaction in queryset %}
                             <tr>
+                                <td>{{ transaction.id }}</td>
                                 <td>{{ transaction.user.id }}</td>
                                 <td>{{ transaction.vendor_txn_id }}</td>
                                 <td>{{ transaction.get_status_display }}</td>
@@ -99,26 +100,31 @@
                                 <td>{{ transaction.type }}</td>
                                 <td>{{ transaction.service_provider.name }}</td>
                             </tr>
-                        {% endfor %}
-                    </table>
-                </div>
-                <div class="pagination-prev">
-                    {% if has_prev_page %}
-                        <a href="{% url 'transaction:transaction-list' %}?{{ prev_page_qs }}" class="button red">Prev</a>
-                    {% endif %}
-                </div>
-
-                <div class="pagination-next">
-                    {% if has_next_page %}
-                        <a href="{% url 'transaction:transaction-list' %}?{{ next_page_qs }} " class="button red">Next</a>
-                    {% endif %}
-                </div>
-
-
-            </div>
-        </div>
-        <br>
+                         {% endfor %}
+                     </table>
+                     <br/>
+                     {% if is_paginated %}
+                         <div class="pagination">
+                             {% if has_prev_page %}
+                                <div class="pagination-prev">
+                                    <a href="{% url 'transaction:transaction-list' %}?{{ prev_page_qs }}" class="button red">Prev</a>
+                                </div>
+                             {% endif %}
+                             {% if has_next_page %}
+                                <div class="pagination-next">
+                                    <a href="{% url 'transaction:transaction-list' %}?{{ next_page_qs }} " class="button red">Next</a>
+                                </div>
+                             {% endif %}
+                         </div>
+                     {% endif %}
+                 </div>
+                 <br/><br/>
+             </div>
+             <br>
+         </div>
     </div>
+
+</div>
 
 
     <script>
