@@ -68,7 +68,9 @@
                             <th>Email</th>
                             <th>Status</th>
                             <th>Actions</th>
-                            <th>Card Management</th>
+                            <!--{% if request.user.zr_admin_user.role.name == "RETAILER" %}-->
+                            <!--<th>Card Management</th>-->
+                            <!--{% endif %}-->
                             <th>Update</th>
 
                         </tr>
@@ -87,7 +89,9 @@
                                         <a href='{% url "user:terminal-list" %}?activate={{ terminal.id }}'>Activate</a>
                                     {% endif %}
                                 </td>
-                                 <td> <a href='{% url "user:user-loyaltycard" pk=terminal.terminal.id%}'>CardList</a></td>
+                                <!--{% if request.user.zr_admin_user.role.name == "RETAILER" %}-->
+                                 <!--<td> <a href='{% url "user:user-loyaltycard" pk=terminal.terminal.id%}'>CardList</a></td>-->
+                                <!--{% endif %}-->
                                  <td> <a href='{% url "user:user-update" pk=terminal.id%}'>Update</a></td>
                             </tr>
 
