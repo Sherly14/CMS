@@ -22,7 +22,7 @@
         <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
         </div>
         {% if distributor_list %}
-            <div class="col-4" id="select1">
+            <div class="col-3" id="select1" style="margin-left:10px;">
             <select id="distributor-id"  name="distributor-id">
                 <option value="-1">ALL</option>
                 {% for distributor in distributor_list %}
@@ -32,7 +32,7 @@
         </div>
         {% endif %}
 
-        <div class="col-4">
+        <div class="col-3" style="margin-left:60px;">
             <select id="sub-distributor-id"  name="sub-distributor-id">
                 <option value="-3">ALL</option>
                 {% for key,val in subDistMerchant.items %}
