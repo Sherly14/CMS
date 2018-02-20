@@ -32,14 +32,14 @@
         <div class="div-width-100">
             <br>
             <div class="row">
-                <div class="d-flex justify-content-between align-items-center" style="width: 100%;">
-                    <div style="position: relative;">
+                <div class="align-items-center div-width-100">
+                    <div class="float-left">
                         <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
                         <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
                     </div>
-                    <input class="button red" type="button" value="Search" id="search-btn">
-                    <a class="nav-link" href="{% url 'user:kyc-requests' %}">Reset filters</a>
-                    <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
+                    <input class="button red float-left mar_l_10" type="button" value="Search" id="search-btn">
+                    <input class="button red float-right" type="button" value="DOWNLOAD CSV" id="csv-download">
+                    <a class="nav-link float-right" href="{% url 'user:kyc-requests' %}">Reset filters</a>
                 </div>
             </div>
             <br>
@@ -52,6 +52,7 @@
                 <div style="width: 100%;">
                     <table>
                         <tr>
+                            <th>id</th>
                             <th>Name</th>
                             <th>Type</th>
                             <th>Doj</th>
@@ -61,18 +62,18 @@
                         </tr>
                         {% for kyc_req in object_list %}
                         <tr>
+                            <td>{{kyc_req.id}}</td>
                             <td>{{ kyc_req.first_name }} {% if kyc_req.last_name %}{{ kyc_req.last_name }}{% endif %} </td>
                             <td>{{ kyc_req.role.name }}</td>
                             <td>{{ kyc_req.at_created|date:"d/m/Y" }}</td>
                             <td>
-                                {% if kyc_req.kyc_details.all.count > 0 %}
+                                {% if kyc_req.in_process %}
                                     {% for kyc in kyc_req.kyc_details.all %}
-                                        {% if kyc.approval_status != 'A' %}
+                                        {% if kyc.approval_status == 'I' %}
                                             <a href="{{ kyc.get_download_url }}">{{kyc.type}}</a>
                                         {% endif %}
                                     {% endfor %}
-                                {% endif %}
-                                {% if kyc_req.kyc_details.all.count == 0 %}
+                                {% else %}
                                     No kyc documents
                                 {% endif %}
                             </td>
@@ -86,7 +87,7 @@
                                 {% endif %}
                             </td>
                             <td>
-                                {% if kyc_req.kyc_details.all.count %}
+                                {% if kyc_req.in_process %}
                                     <a href='{% url "user:kyc-requests" %}?approve={{ kyc_req.id }}'>Approve</a>
                                     <a href='{% url "user:kyc-requests" %}?reject={{ kyc_req.id }}'>Reject</a>
                                 {% endif %}
@@ -94,27 +95,34 @@
                         </tr>
                         {% endfor %}
                     </table>
-                </div>
-                    {% if is_paginated %}
-                        <div class="pagination-prev">
-                          {% if page_obj.has_previous %}
-                              <a href="?page={{ page_obj.previous_page_number }}" class="button red">
-                               <span>Previous</span>
-                              </a>
-                          {% endif %}
-                        </div>
-
-                        <div class="pagination-next">
+                    <br/>
+                     {% if is_paginated %}
+                        <div class="pagination">
+                            {% if page_obj.has_previous %}
+                                <div class="pagination-prev">
+                                    <a href="?page={{ page_obj.previous_page_number }}" class="button red">
+                                    <span>Prev</span>
+                                    </a>
+                                </div>
+                            {% endif %}
                             {% if page_obj.has_next %}
-                                  <a href="?page={{ page_obj.next_page_number }}" class="button red">
-                                      <span>Next</span>
-                                  </a>
+                                <div class="pagination-next">
+                                    <a href="?page={{ page_obj.next_page_number }}" class="button red">
+                                          <span>Next</span>
+                                    </a>
+                                </div>
                             {% endif %}
                         </div>
                     {% endif %}
                 </div>
+
+                <br/>
+                <br/>
+                </div>
+            <br/>
             </div>
         </div>
+    <br/>
 
 </div>
 

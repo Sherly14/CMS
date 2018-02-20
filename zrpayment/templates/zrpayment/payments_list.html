@@ -12,96 +12,103 @@
 
     <div class="content-wrapper">
         <p class="head-right">Payments Table</p>
-        <div class="col-12" >
-             <div class="row rm-margin-side">
-                <div class="col-2">
-                    <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-                </div>
-                <div class="col-2">
-                    <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-                </div>
-                <div class="col-2">
-                    <select id="user-payment-id" name="user-payment-id">
-                        <option value="-1">ALL</option>
-                        {% for userpayment in user_list %}
-                            <option value="{{userpayment.user_id}}"{% if userpayment.user_id == user_payment_id %}selected{% endif %}>{{userpayment.user.first_name}}</option>
-                        {% endfor %}
-                    </select>
-                </div>
+        <div class="row rm-margin-side">
+            <div class="col-2">
+                <p class="head-left">START DATE</p>
             </div>
-            <br>
-            <div class="row">
-                <div style="position: relative;">
-                    <input class="search" id="search-txt" type="search" name="search" value="{% if q %}{{ q }}{% endif %}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                    <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
-                </div>
-                <input type="button" id="search-btn" class="button red" value="Search">
-                <a href="{% url 'payment-requests:payment-list' %}" >Reset filters</a>
-                <button data-toggle="modal" data-target="#get_email_modal" class="button red">
-                    DOWNLOAD CSV
-                </button>
-                {% csrf_token %}
-                <input type="hidden" id="request_id" value="">
+            <div class="col-2">
+                <p class="head-left">END DATE</p>
             </div>
-            <br>
-            <div>
-                <div class="row" style="padding-right: 50px;">
-                    <div class="fine">
-                        <p class="head-bg">New Requests</p>
+        </div>
+        <div class="row rm-margin-side">
+            <div class="col-2">
+                <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
+            </div>
+            <div class="col-2">
+                <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
+            </div>
+            <div class="col-2">
+                <select id="user-payment-id" name="user-payment-id">
+                    <option value="-1">ALL</option>
+                    {% for userpayment in user_list %}
+                        <option value="{{userpayment.user_id}}"{% if userpayment.user_id == user_payment_id %}selected{% endif %}>{{userpayment.user.first_name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="div-width-100">
+                <br>
+                <div class="row">
+                    <div class="align-items-center div-width-100">
+                        <div class="float-left">
+                            <input class="search" id="search-txt" type="search" name="search" value="{% if q %}{{ q }}{% endif %}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                            <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                        </div>
+                        <input type="button" id="search-btn" class="button red float-left mar_l_10" value="Search">
+                        <button data-toggle="modal" data-target="#get_email_modal" class="button red float-right mar_l_10">
+                            DOWNLOAD CSV
+                        </button>
+                        <a href="{% url 'payment-requests:payment-list' %}" class="float-right mar_l_10">Reset filters</a>
+                        {% csrf_token %}
+                        <input type="hidden" id="request_id" value="">
                     </div>
                 </div>
-                <div class="row scroll">
+                <br>
+                <div>
+                    <div class="row" >
+                        <div class="fine">
+                            <p class="head-bg">New Requests</p>
+                        </div>
+                    </div>
+                    <div class="row scroll">
 
-                    <div class="col-xs-12">
-                        <table>
-                            <tr style="border-bottom-style: solid;">
-                                <th>Mode</th>
-                                <th>Vendor</th>
-                                <th>Amount</th>
-                                <th>Transaction Id</th>
-                                <th>Vendor Transaction Id</th>
-                                <th>Customer</th>
-                                <th>User</th>
-                                <th>Additional Charges</th>
-                                <th>Settled</th>
-                            </tr>
-                            {% for payment in payment_list %}
-                                <tr>
-                                    <td>{{ payment.mode }}</td>
-                                    <td>{{ payment.vendor.name|default:"N/A" }}</td>
-                                    <td>{{ payment.amount }}</td>
-                                    <td>{{ payment.txn_id }}</td>
-                                    <td>{{ payment.vendor_txn_id }}</td>
-                                    <td>{{ payment.customer }}</td>
-                                    <td>{{ payment.user }}</td>
-                                    <td>{{ payment.additional_charges }}</td>
-                                    <td>{{ payment.settled }}</td>
+                        <div class="div-width-100">
+                            <table>
+                                <tr style="border-bottom-style: solid;">
+                                    <th>Mode</th>
+                                    <th>Vendor</th>
+                                    <th>Amount</th>
+                                    <th>Transaction Id</th>
+                                    <th>Vendor Transaction Id</th>
+                                    <th>Customer</th>
+                                    <th>User</th>
+                                    <th>Additional Charges</th>
+                                    <th>Settled</th>
                                 </tr>
-                            {% endfor %}
-                        </table>
+                                {% for payment in payment_list %}
+                                    <tr>
+                                        <td>{{ payment.mode }}</td>
+                                        <td>{{ payment.vendor.name|default:"N/A" }}</td>
+                                        <td>{{ payment.amount }}</td>
+                                        <td>{{ payment.txn_id }}</td>
+                                        <td>{{ payment.vendor_txn_id }}</td>
+                                        <td>{{ payment.customer }}</td>
+                                        <td>{{ payment.user }}</td>
+                                        <td>{{ payment.additional_charges }}</td>
+                                        <td>{{ payment.settled }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
 
-                        <br />
-                        {% if is_paginated %}
-                            <div class="pagination">
-                                <!--<span class="page-links">-->
-                                    <div class="page-current">
-                                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
-                                    </div>
+                            <br />
+                            {% if is_paginated %}
+                                <div class="pagination">
+                                    <!--<span class="page-links">-->
+
                                     {% if page_obj.has_previous %}
                                     <div class="pagination-prev">
                                         {% if filter_by and q %}
-                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}" class="button red">previous</a>
+                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}" class="button red">prev</a>
                                         {% elif q %}
-                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.previous_page_number }}&q={{ q }}" class="button red">previous</a>
+                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.previous_page_number }}&q={{ q }}" class="button red">prev</a>
                                         {% elif filter_by %}
-                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}" class="button red">previous</a>
+                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}" class="button red">prev</a>
                                         {% else %}
-                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.previous_page_number }}" class="button red">previous</a>
+                                            <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.previous_page_number }}" class="button red">prev</a>
                                         {% endif %}
                                     </div>
                                     {% endif %}
                                     {% if page_obj.has_next %}
-                                      <div class="pagination-next">
+                                    <div class="pagination-next">
                                         {% if filter_by and q %}
                                             <a href="{% url 'payment-requests:payment-list' %}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}" class="button red">next</a>
                                         {% elif q %}
@@ -113,15 +120,16 @@
                                         {% endif %}
                                     {% endif %}
                                     </div>
-                                </span>
-                            </div>
-                        {% endif %}
+                                </div>
+                                <br/>
+                            {% endif %}
+                        </div>
                     </div>
-
+                    <br>
                 </div>
-                <br>
             </div>
         </div>
+
     </div>
 
     <!-- Modal to get Email -->

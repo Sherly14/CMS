@@ -21,7 +21,6 @@ def is_user_superuser(request):
 
 
 def is_zruser_djuser(zruser):
-    # import pdb; pdb.set_trace()
     if (zruser.role.name == "ADMINSTAFF" or
         zruser.role.name == "DISTRIBUTOR" or
             zruser.role.name == "SUBDISTRIBUTOR"):

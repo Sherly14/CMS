@@ -14,17 +14,23 @@
 
 <div class="modal-dialog">
     <div class="modal-content modal-prop">
-        <div class="modal-header">
-          <h2 class="text-center">Zrupee Management</h2>
-        </div>
+        <!--<div class="modal-header">-->
+          <!--<h2 class="text-center">Zrupee Management</h2>-->
+        <!--</div>-->
+        <br/>
+        <br/>
          <div class="modal-body">
              <form id="login-form" method="post" role="form" style="display: block;"> {% csrf_token %}
-                 <div class="form-group">
-                     <input type="text" name="username" id="username" class="form-control input-lg" placeholder="Username"/>
+                 <div class="form-group row justify-content-center">
+                     <div class="col-7">
+                        <input type="text" name="username" id="username" class="form-control input-lg " placeholder="Username"/>
+                     </div>
                  </div>
 
-                 <div class="form-group">
-                     <input type="password" name="password" id="password" class="form-control input-lg" placeholder="Password"/>
+                 <div class="form-group row justify-content-center">
+                     <div class="col-7">
+                        <input type="password" name="password" id="password" class="form-control input-lg" placeholder="Password"/>
+                     </div>
                  </div>
                 {% if login_form.non_field_errors %}
                     <ul class='form-errors'>
@@ -38,9 +44,11 @@
                     <label for="remember"> Remember Me</label>
                 </div>
 
-                 <div class="form-group">
-                     <input type="submit" name="login-submit" id="login-submit" class="btn btn-block btn-lg btn-primary login-submit" value="Login"/>
-                     <span class="pull-right"><a href="{% url 'password_reset'%}">Forgot Password</a></span>
+                 <div class="form-group row justify-content-center">
+                     <div class="col-7">
+                         <input type="submit" name="login-submit" id="login-submit" class="btn btn-block btn-md btn-primary login-submit" value="Login"/>
+                         <span class="pull-right"><a href="{% url 'password_reset'%}">Forgot Password</a></span>
+                     </div>
                  </div>
              </form>
          </div>

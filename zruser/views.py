@@ -624,11 +624,14 @@ class KYCRequestsView(ListView):
         if user_id:
             context['user_id'] = int(user_id)
 
+        # print 'context - ', context
+        import pprint
+        # pprint.pprint(context)
         return context
 
     def get_queryset(self):
         approve = self.request.GET.get('approve')
-        reject = self.request.GET.get('approve')
+        reject = self.request.GET.get('reject')
         filter_by = self.request.GET.get('filter', 'All')
         q = self.request.GET.get('q')
         user_id = self.request.GET.get('user_id')
@@ -637,7 +640,7 @@ class KYCRequestsView(ListView):
                 raise Http404
             else:
                 status = None
-                zruser = ZrUser.objects.filter(id=approve).last()
+                zruser = ZrUser.objects.filter(id=approve or reject).last()
 
                 if approve:
                     status = constants.KYC_APPROVAL_CHOICES[1][0]
@@ -646,7 +649,7 @@ class KYCRequestsView(ListView):
                 elif reject:
                     status = constants.KYC_APPROVAL_CHOICES[2][0]
 
-                zruser.kyc_details.all().update(
+                zruser.kyc_details.filter(approval_status='I').update(
                     approval_status=status
                 )
                 zruser.save(update_fields=['is_kyc_verified'])
@@ -666,6 +669,7 @@ class KYCRequestsView(ListView):
         queryset = ZrUser.objects.filter(
             is_kyc_verified=False
         ).order_by('-at_created')
+
         if filter_by == "Last-Week":
             queryset = queryset.filter(at_created__range=last_week_range())
         elif filter_by == "Last-Month":

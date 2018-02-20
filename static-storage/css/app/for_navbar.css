@@ -30,7 +30,9 @@ body.fixed-nav {
 
 /*wrapper for the column */
 .content-wrapper {
-  background: white; }
+  background: white;
+    min-height: 95vh;
+  }
   @media (min-width: 992px) {
     .content-wrapper {
       margin-left: 230px; } }
@@ -130,7 +132,7 @@ body.fixed-nav {
       left: 0;
       overflow: hidden;
       flex-direction: column;
-      height: 100vh;
+      //height: 100vh;
       margin-top: 150px;
       /*margin-left: -70px;*/
       /*padding-bottom: 56px;*/

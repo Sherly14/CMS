@@ -49,15 +49,15 @@
          <div class="div-width-100">
              <br>
              <div class="row">
-                 <div class="d-flex justify-content-between align-items-center" style="width: 100%;">
-                    <div style="position: relative;">
-                    <input class="search" id="search-txt" type="search" name="search" value="{{ q }}"
-                           placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                    <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                 <div class="align-items-center div-width-100">
+                    <div class="float-left">
+                        <input class="search" id="search-txt" type="search" name="search" value="{{ q }}"
+                               placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                        <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
                     </div>
-                    <input class="button red" type="button" value="Search" id="search-btn">
-                    <a class="nav-link" href="{% url 'transaction:transaction-list' %}">Reset filters</a>
-                    <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
+                    <input class="button red float-left mar_l_10" type="button" value="Search" id="search-btn">
+                    <input class="button red float-right" type="button" value="DOWNLOAD CSV" id="csv-download">
+                    <a class="nav-link float-right" href="{% url 'transaction:transaction-list' %}">Reset filters</a>
                     <input hidden id="is_data_exists" value="{% if queryset %}1{% else %}0{% endif %}">
                  </div>
              </div>
@@ -69,9 +69,9 @@
             </div>
              <div class="row scroll">
 
-                <div class="col-xs-12">
-                    <table>
-                        <tr>
+                 <div class="div-width-100">
+                     <table>
+                         <tr>
                             <th>Transaction Id</th>
                             <th>Merchant Id</th>
                             <th>Vendor Txn Id</th>
@@ -84,8 +84,8 @@
                             <th>Additional charges</th>
                             <th>Transaction type</th>
                             <th>Service provider</th>
-                        </tr>
-                        {% for transaction in queryset %}
+                         </tr>
+                         {% for transaction in queryset %}
                             <tr>
                                 <td>{{ transaction.id }}</td>
                                 <td>{{ transaction.user.id }}</td>
@@ -100,23 +100,26 @@
                                 <td>{{ transaction.type }}</td>
                                 <td>{{ transaction.service_provider.name }}</td>
                             </tr>
-                        {% endfor %}
-                    </table>
-                </div>
-                <div class="pagination-prev">
-                    {% if has_prev_page %}
-                        <a href="{% url 'transaction:transaction-list' %}?{{ prev_page_qs }}" class="button red">Prev</a>
-                    {% endif %}
-                </div>
-
-                <div class="pagination-next">
-                    {% if has_next_page %}
-                        <a href="{% url 'transaction:transaction-list' %}?{{ next_page_qs }} " class="button red">Next</a>
-                    {% endif %}
-                </div>
-
-
-            </div>
+                         {% endfor %}
+                     </table>
+                     <br/>
+                     {% if is_paginated %}
+                         <div class="pagination">
+                             {% if has_prev_page %}
+                                <div class="pagination-prev">
+                                    <a href="{% url 'transaction:transaction-list' %}?{{ prev_page_qs }}" class="button red">Prev</a>
+                                </div>
+                             {% endif %}
+                             {% if has_next_page %}
+                                <div class="pagination-next">
+                                    <a href="{% url 'transaction:transaction-list' %}?{{ next_page_qs }} " class="button red">Next</a>
+                                </div>
+                             {% endif %}
+                         </div>
+                     {% endif %}
+                 </div>
+                 <br/><br/>
+             </div>
              <br>
          </div>
     </div>
