@@ -3,6 +3,14 @@
     border-color: transparent;
 }
 
+.btn.btn-primary.login-submit:active,
+.btn.btn-primary.login-submit:hover,
+.btn.btn-primary.login-submit:focus  {
+    background-color: #d84646;
+    border-color: transparent;
+    box-shadow: none;
+}
+
 .modal-prop{
     box-shadow: 0 9px 16px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
     border: 0px
