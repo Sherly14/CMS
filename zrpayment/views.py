@@ -350,9 +350,7 @@ def get_payment_request_qs(request, from_user=False, to_user=False, all_user=Fal
     from_user_id =request.GET.get('from_user_id')
 
     if start_date != None and end_date != None:
-        print 'date filter', start_date, end_date
         queryset = queryset.filter(at_created__range=(start_date, end_date))
-        print 'qs -', queryset
 
     if from_user_id!=None and int(from_user_id) > 0:
         queryset = queryset.filter(from_user_id=from_user_id)
@@ -370,8 +368,8 @@ def merchant_payment_req_csv_download(request):
     else:
         qs = get_payment_request_qs(request, to_user=True)
 
-    # if request.user.zr_admin_user.zr_user.role.name == 'ADMINSTAFF':
-    qs = get_payment_request_qs(request, all_user=True)
+    if request.user.zr_admin_user.zr_user.role.name == 'ADMINSTAFF':
+        qs = get_payment_request_qs(request, all_user=True)
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename="payment-requests.csv"'

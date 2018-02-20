@@ -624,9 +624,6 @@ class KYCRequestsView(ListView):
         if user_id:
             context['user_id'] = int(user_id)
 
-        # print 'context - ', context
-        import pprint
-        # pprint.pprint(context)
         return context
 
     def get_queryset(self):
