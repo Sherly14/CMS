@@ -70,7 +70,7 @@
                                 {% if kyc_req.in_process %}
                                     {% for kyc in kyc_req.kyc_details.all %}
                                         {% if kyc.approval_status == 'I' %}
-                                            <a href="{{ kyc.get_download_url }}">{{kyc.type}}</a>
+                                            <a href="{{ kyc.get_download_url }}">{{kyc.type}}</a> |
                                         {% endif %}
                                     {% endfor %}
                                 {% else %}
