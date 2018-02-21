@@ -36,7 +36,10 @@ def file_save_s3(file_obj, directory="default", user_id=""):
     # Create unique file name
     file_name = str(get_unique_id()) + '.' + (file_obj._get_name().split('.')[-1].lower())
     # file_name = str(get_unique_id()) + '.' + (file_obj._get_name().split('.')[-1].lower())
-    s3.upload_fileobj(file_obj, "zrupee-credit-request-documents", file_name, ExtraArgs={'ACL': 'public-read'})
+    try:
+        s3.upload_fileobj(file_obj, "zrupee-credit-request-documents", file_name, ExtraArgs={'ACL': 'public-read'})
+    except:
+        pass
     s3_url = "{}/{}/{}".format('https://s3.ap-south-1.amazonaws.com', "zrupee-credit-request-documents", file_name)
     return s3_url
 
