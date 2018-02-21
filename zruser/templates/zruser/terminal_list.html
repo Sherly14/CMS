@@ -89,7 +89,7 @@
                                         <a href='{% url "user:terminal-list" %}?activate={{ terminal.id }}'>Activate</a>
                                     {% endif %}
                                 </td>
-                                 <td> <a href='{% url "user:user-update" pk=terminal.id%}'>Update</a></td>
+                                 <td> <a href='{% url "user:terminal-update" pk=terminal.id%}'>Update</a></td>
                             </tr>
 
                         {% endfor %}

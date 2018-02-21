@@ -5,7 +5,8 @@ from zruser import views as zr_user_views
 from zruser.views import DistributorDetailView, DistributorListView, MerchantListView, MerchantDetailView, \
                         DistributorCreateView, MerchantCreateView, DashBoardView, SubDistributorCreateView, \
                         SubDistributorListView, UserUpdateView, RetailerCreateView, RetailerListView, \
-                        TerminalCreateView, TerminalListView, UserCardCreateView, UserCardListView
+                        TerminalCreateView, TerminalListView, UserCardCreateView, UserCardListView, TerminalUpdateView
+
 from zruser.viewsets import MerchantLeadViewSet
 
 router = DefaultRouter()
@@ -42,6 +43,8 @@ urlpatterns += [
     url(r'^terminal_create/$', TerminalCreateView.as_view(), name='terminal-create'),
     url(r'^terminal_list/$', TerminalListView.as_view(), name='terminal-list'),
     url(r'^terminal_csv/$', zr_user_views.download_terminal_list_csv, name="terminal-csv"),
+    url(r'^terminal_update/(?P<pk>\d+)/$', TerminalUpdateView.as_view(), name='terminal-update'),
+
     url(r'^loyaltycards_create/$', UserCardCreateView.as_view(), name='card-create'),
     url(r'^loyaltycard_list/$', UserCardListView.as_view(), name='loyaltycard-list')
 ]

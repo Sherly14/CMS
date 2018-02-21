@@ -1203,125 +1203,80 @@ class UserUpdateView(View):
     kyc_doc_types = KYCDocumentType.objects.all().values_list('name', flat=True)
 
     def get(self, request, pk,  **kwargs):
-        if is_user_retailer(request):
-            user = ZrTerminal.objects.get(id=pk)
-            merchant_form = zr_user_form.UpdateMerchantTerminalForm(
-                initial={'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email})
-            return render(
-                request, self.template_name, {"merchant_form": merchant_form, "zr_user": user}
-            )
-        else:
-            user = ZrUser.objects.get(id=pk)
-            merchant_form = zr_user_form.UpdateMerchantDistributorForm(
-                initial={'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email})
-            return render(
-                request, self.template_name,
-                {"merchant_form": merchant_form, "zr_user": user, "kyc_doc_types": self.kyc_doc_types}
-            )
+        user = ZrUser.objects.get(id=pk)
+        merchant_form = zr_user_form.UpdateMerchantDistributorForm(
+            initial={'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email})
+        return render(
+            request, self.template_name,
+            {"merchant_form": merchant_form, "zr_user": user, "kyc_doc_types": self.kyc_doc_types}
+        )
 
     @transaction.atomic
     def post(self, request, pk):
-        if not is_user_retailer(request):
-            user = ZrUser.objects.get(id=pk)
-            if "save" in request.POST:
-                merchant_form = zr_user_form.UpdateMerchantDistributorForm(data=request.POST, instance=user)
-                if not merchant_form.is_valid():
-                    return render(
-                        request, self.template_name,
+        user = ZrUser.objects.get(id=pk)
+        if "save" in request.POST:
+            merchant_form = zr_user_form.UpdateMerchantDistributorForm(data=request.POST, instance=user)
+            if not merchant_form.is_valid():
+                return render(
+                    request, self.template_name,
+                    {
+                        'merchant_form': merchant_form,
+                        'kyc_doc_types': self.kyc_doc_types
+                    }
+                )
+
+            merchant_form.save()
+            if hasattr(user, "zr_user"):
+                if hasattr(user.zr_user,"id"):
+                    dj_user = user.zr_user.id
+                    dj_user.first_name = user.first_name
+                    dj_user.last_name = user.last_name
+                    dj_user.email = user.email
+                    dj_user.save()
+
+            kyc_docs = []
+            for doc_type in KYCDocumentType.objects.all().values_list('name', flat=True):
+                doc_type_name = doc_type.replace(' ', '-')
+                doc_type_id = '-'.join(['doc_id', doc_type_name])
+
+                if doc_type_name in request.POST:
+                    kyc_docs.append(
                         {
-                            'merchant_form': merchant_form,
-                            'kyc_doc_types': self.kyc_doc_types
+                            'doc_url': request.POST.get(doc_type_name),
+                            'doc_id': request.POST.get(doc_type_id),
+                            'doc_type': doc_type_name.replace('-', ' ')
                         }
                     )
 
-                merchant_form.save()
-                if hasattr(user, "zr_user"):
-                    if hasattr(user.zr_user,"id"):
-                        dj_user = user.zr_user.id
-                        dj_user.first_name = user.first_name
-                        dj_user.last_name = user.last_name
-                        dj_user.email = user.email
-                        dj_user.save()
-
-                kyc_docs = []
-                for doc_type in KYCDocumentType.objects.all().values_list('name', flat=True):
-                    doc_type_name = doc_type.replace(' ', '-')
-                    doc_type_id = '-'.join(['doc_id', doc_type_name])
-
-                    if doc_type_name in request.POST:
-                        kyc_docs.append(
-                            {
-                                'doc_url': request.POST.get(doc_type_name),
-                                'doc_id': request.POST.get(doc_type_id),
-                                'doc_type': doc_type_name.replace('-', ' ')
-                            }
-                        )
-
-                for doc in kyc_docs:
-                    KYCDetail.objects.create(
-                        type=KYCDocumentType.objects.get(name=doc['doc_type']),
-                        document_id=doc['doc_id'],
-                        document_link=doc['doc_url'],
-                        for_user=user,
-                        role=user.role
-                    )
-            if user.role.name == DISTRIBUTOR:
-                return HttpResponseRedirect(reverse("user:distributor-list"))
-            if user.role.name == SUBDISTRIBUTOR:
-                return HttpResponseRedirect(reverse("user:sub-distributor-list"))
-            if user.role.name == MERCHANT:
-                return HttpResponseRedirect(reverse("user:merchant-list"))
-            if user.role.name == RETAILER:
-                try:
-                    userid = transaction_models.VendorZrRetailer.objects.get(zr_user=user.id)
-                    response = requests.post(QUICKWALLET_API_CRUD_URL, json={
-                        "secret": QUICKWALLET_SECRET,
-                        "action": "update",
-                        "entity": "retailer",
-                        "details": {
-                            "id": userid.vendor_user,
-                            "name": "{0}".format(user.first_name)
-                        }
-                    })
-                except:
-                    pass
-                return HttpResponseRedirect(reverse("user:retailer-list"))
-            return HttpResponseRedirect(reverse("user:terminal-list"))
-
-        else:
-
-            user = ZrTerminal.objects.get(id=pk)
-            if "save" in request.POST:
-                merchant_form = zr_user_form.UpdateMerchantTerminalForm(data=request.POST, instance=user)
-                if not merchant_form.is_valid():
-                    return render(
-                        request, self.template_name,
-                        {
-                            'merchant_form': merchant_form,
-                            'kyc_doc_types': self.kyc_doc_types
-                        }
-                    )
-
-                merchant_form.save()
-                # TODO: waiting for quickwallet update
-                # print(user.id)
-                # try:
-                #     userid = transaction_models.VendorZrTerminal.objects.get(zr_terminal=user.id)
-                #     print(userid.vendor_user)
-                #     response = requests.post(QUICKWALLET_API_CRUD_URL, json={
-                #         "secret": QUICKWALLET_SECRET,
-                #         "action": "update",
-                #         "entity": "outlet",
-                #         "details": {
-                #             "id": userid.vendor_user,
-                #             "name": "{0}".format(user.first_name)
-                #         }
-                #     })
-                #     print(response)
-                # except:
-                #     pass
-            if user.role.name == TERMINAL:
-                return HttpResponseRedirect(reverse("user:terminal-list"))
+            for doc in kyc_docs:
+                KYCDetail.objects.create(
+                    type=KYCDocumentType.objects.get(name=doc['doc_type']),
+                    document_id=doc['doc_id'],
+                    document_link=doc['doc_url'],
+                    for_user=user,
+                    role=user.role
+                )
+        if user.role.name == DISTRIBUTOR:
+            return HttpResponseRedirect(reverse("user:distributor-list"))
+        if user.role.name == SUBDISTRIBUTOR:
+            return HttpResponseRedirect(reverse("user:sub-distributor-list"))
+        if user.role.name == MERCHANT:
+            return HttpResponseRedirect(reverse("user:merchant-list"))
+        if user.role.name == RETAILER:
+            try:
+                userid = transaction_models.VendorZrRetailer.objects.get(zr_user=user.id)
+                response = requests.post(QUICKWALLET_API_CRUD_URL, json={
+                    "secret": QUICKWALLET_SECRET,
+                    "action": "update",
+                    "entity": "retailer",
+                    "details": {
+                        "id": userid.vendor_user,
+                        "name": "{0}".format(user.first_name)
+                    }
+                })
+            except:
+                pass
+            return HttpResponseRedirect(reverse("user:retailer-list"))
 
 
 class MerchantCreateView(View):
@@ -2351,6 +2306,51 @@ def download_terminal_list_csv(request):
         ])
 
     return response
+
+
+class TerminalUpdateView(View):
+    template_name = 'zruser/terminal_update.html'
+
+    def get(self, request, pk,  **kwargs):
+            user = ZrTerminal.objects.get(id=pk)
+            merchant_form = zr_user_form.UpdateMerchantTerminalForm(
+                initial={'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email})
+            return render(
+                request, self.template_name, {"merchant_form": merchant_form, "zr_user": user}
+            )
+
+    @transaction.atomic
+    def post(self, request, pk):
+        user = ZrTerminal.objects.get(id=pk)
+        if "save" in request.POST:
+            merchant_form = zr_user_form.UpdateMerchantTerminalForm(data=request.POST, instance=user)
+            if not merchant_form.is_valid():
+                return render(
+                    request, self.template_name,
+                    {
+                        'merchant_form': merchant_form
+                    }
+                )
+
+            merchant_form.save()
+            # TODO: waiting for quickwallet update
+            # print(user.id)
+            # try:
+            #     userid = transaction_models.VendorZrTerminal.objects.get(zr_terminal=user.id)
+            #     print(userid.vendor_user)
+            #     response = requests.post(QUICKWALLET_API_CRUD_URL, json={
+            #         "secret": QUICKWALLET_SECRET,
+            #         "action": "update",
+            #         "entity": "outlet",
+            #         "details": {
+            #             "id": userid.vendor_user,
+            #             "name": "{0}".format(user.first_name)
+            #         }
+            #     })
+            #     print(response)
+            # except:
+            #     pass
+        return HttpResponseRedirect(reverse("user:terminal-list"))
 
 
 class UserCardCreateView(CreateView):

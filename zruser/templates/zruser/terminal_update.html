@@ -46,39 +46,7 @@ Update {{zr_user.role.name|title}}
                     </div>
                 </div>
             </div>
-            <div class="container-fluid margin-bot">
-                <div class="col-md-7 colAlignment">
-                    <div class="row margin-top">
-                        <p class="heading-bg">KYC PROOFS:</p>
-                    </div>
-                    <div class="row margin-top">
-                        <label class="fill" for="doc_type">Select Document Type</label>
-                        <!-- <div class="btn-group">
-                        <button  id="doc_type" type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">select<span class="glyphicon glyphicon-chevron-down"></span></button>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">doc1</a></li>
-                            <li><a href="#">doc2</a></li>
-                        </ul>
-                    </div> -->
-                        <select id="doc_type">
-                            {% for doc_type in kyc_doc_types %}
-                                <option value="{{ doc_type }}">{{ doc_type }}</option>
-                            {% endfor %}
-                        </select>
-                        <!--<label class="fill">Not Manadatory for Terminals</label>-->
-                        <input type="file" id="kyc-file" style="display:none;">
-                        <input class="button yellow bg mr-5" type="button" value="upload" id="upload-kyc-btn" onclick="upload_kyc_doc()">
-                        <p id="file-err-msg" style="display:none;">
-                            {% if kyc_error %}
-                                <h6 style="color:red">{{ kyc_error }}</h6>
-                            {% endif %}
-                        </p>
 
-                    </div>
-                    <div class="row margin-top" id="kyc-docs">
-                    </div>
-                </div>
-            </div>
             <div class="fill margin-top" style="padding-left:6.5rem">
                 <input class="button red" type="submit" name = "save" value="Save & Submit">
             </div>
@@ -91,18 +59,6 @@ Update {{zr_user.role.name|title}}
 
 <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.12.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
-<script type="text/undercore-template" id="upload-kyc-doc">
-    <div class="col-md-6" id="<%=div_id%>">
-        <h5 class="fill"><%=document_type%></span></h5>
-        <h5><i><%=document_name%></i>
-            <a class="kyc-href" href="<%=file_download_url%>" target="_blank">
-                <i class="fa fa-download kyc-href" style="margin-left:0.5rem;"></i>
-            </a>
-        </h5><span class="fill">
-            </span>
-        <input class="button yellow small remove-kyc" doc_type="<%=document_type%>" type="button" value="Remove">
-    </div>
-</script>
 
 <script type="text/undercore-template" id="form-hidden-input">
     <input type="hidden" id="<%=id%>" name="<%=id%>" value="<%=value%>" >
