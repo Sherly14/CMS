@@ -89,9 +89,6 @@
                                         <a href='{% url "user:terminal-list" %}?activate={{ terminal.id }}'>Activate</a>
                                     {% endif %}
                                 </td>
-                                <!--{% if request.user.zr_admin_user.role.name == "RETAILER" %}-->
-                                 <!--<td> <a href='{% url "user:user-loyaltycard" pk=terminal.terminal.id%}'>CardList</a></td>-->
-                                <!--{% endif %}-->
                                  <td> <a href='{% url "user:user-update" pk=terminal.id%}'>Update</a></td>
                             </tr>
 
