@@ -5,7 +5,8 @@ from zruser import views as zr_user_views
 from zruser.views import DistributorDetailView, DistributorListView, MerchantListView, MerchantDetailView, \
                         DistributorCreateView, MerchantCreateView, DashBoardView, SubDistributorCreateView, \
                         SubDistributorListView, UserUpdateView, RetailerCreateView, RetailerListView, \
-                        TerminalCreateView, TerminalListView, UserCardCreateView, UserCardListView, TerminalUpdateView
+                        TerminalCreateView, TerminalListView, UserCardCreateView, UserCardListView,\
+                        TerminalUpdateView, TerminalView, GenerateOTPView
 
 from zruser.viewsets import MerchantLeadViewSet
 
@@ -44,7 +45,10 @@ urlpatterns += [
     url(r'^terminal_list/$', TerminalListView.as_view(), name='terminal-list'),
     url(r'^terminal_csv/$', zr_user_views.download_terminal_list_csv, name="terminal-csv"),
     url(r'^terminal_update/(?P<pk>\d+)/$', TerminalUpdateView.as_view(), name='terminal-update'),
+    url(r'^terminal_view/(?P<pk>\d+)/$', TerminalView.as_view(), name='terminal-view'),
 
     url(r'^loyaltycards_create/$', UserCardCreateView.as_view(), name='card-create'),
-    url(r'^loyaltycard_list/$', UserCardListView.as_view(), name='loyaltycard-list')
+    url(r'^loyaltycard_list/$', UserCardListView.as_view(), name='loyaltycard-list'),
+    url(r'^generate_otp/(?P<pk>\d+)$', GenerateOTPView.as_view(), name='generate-otp')
+
 ]

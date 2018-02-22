@@ -68,11 +68,8 @@
                             <th>Email</th>
                             <th>Status</th>
                             <th>Actions</th>
-                            <!--{% if request.user.zr_admin_user.role.name == "RETAILER" %}-->
-                            <!--<th>Card Management</th>-->
-                            <!--{% endif %}-->
                             <th>Update</th>
-
+                            <th>Manage</th>
                         </tr>
                         {% for terminal in queryset %}
                             <tr>
@@ -90,6 +87,9 @@
                                     {% endif %}
                                 </td>
                                  <td> <a href='{% url "user:terminal-update" pk=terminal.id%}'>Update</a></td>
+                                {% if request.user.zr_admin_user.role.name == "RETAILER" %}
+                                 <td> <a href='{% url "user:terminal-view" pk=terminal.id%}'>Access</a></td>
+                                {% endif %}
                             </tr>
 
                         {% endfor %}

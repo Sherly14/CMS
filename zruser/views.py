@@ -2353,6 +2353,49 @@ class TerminalUpdateView(View):
         return HttpResponseRedirect(reverse("user:terminal-list"))
 
 
+class TerminalView(View):
+    template_name = 'zruser/terminal_view.html'
+
+    def get(self, request, pk,  **kwargs):
+            user = ZrTerminal.objects.get(id=pk)
+            return render(
+                request, self.template_name, {"zr_user": user}
+            )
+
+    @transaction.atomic
+    def post(self, request, pk):
+        user = ZrTerminal.objects.get(id=pk)
+        if "save" in request.POST:
+            merchant_form = zr_user_form.UpdateMerchantTerminalForm(data=request.POST, instance=user)
+            if not merchant_form.is_valid():
+                return render(
+                    request, self.template_name,
+                    {
+                        'merchant_form': merchant_form
+                    }
+                )
+
+            merchant_form.save()
+            # TODO: waiting for quickwallet update
+            # print(user.id)
+            # try:
+            #     userid = transaction_models.VendorZrTerminal.objects.get(zr_terminal=user.id)
+            #     print(userid.vendor_user)
+            #     response = requests.post(QUICKWALLET_API_CRUD_URL, json={
+            #         "secret": QUICKWALLET_SECRET,
+            #         "action": "update",
+            #         "entity": "outlet",
+            #         "details": {
+            #             "id": userid.vendor_user,
+            #             "name": "{0}".format(user.first_name)
+            #         }
+            #     })
+            #     print(response)
+            # except:
+            #     pass
+        return HttpResponseRedirect(reverse("user:terminal-list"))
+
+
 class UserCardCreateView(CreateView):
     template_name = 'zruser/card_create.html'
 
@@ -2421,3 +2464,46 @@ class UserCardListView(View):
             return render(
                 request, self.template_name, {"api_error": "something went wrong, please try again!"}
             )
+
+
+class GenerateOTPView(View):
+    template_name = 'zruser/generate_otp.html'
+
+    def get(self, request, pk,  **kwargs):
+            user = ZrTerminal.objects.get(id=pk)
+            return render(
+                request, self.template_name, {"zr_user": user}
+            )
+
+    @transaction.atomic
+    def post(self, request, pk):
+        user = ZrTerminal.objects.get(id=pk)
+        if "save" in request.POST:
+            merchant_form = zr_user_form.UpdateMerchantTerminalForm(data=request.POST, instance=user)
+            if not merchant_form.is_valid():
+                return render(
+                    request, self.template_name,
+                    {
+                        'merchant_form': merchant_form
+                    }
+                )
+
+            merchant_form.save()
+            # TODO: waiting for quickwallet update
+            # print(user.id)
+            # try:
+            #     userid = transaction_models.VendorZrTerminal.objects.get(zr_terminal=user.id)
+            #     print(userid.vendor_user)
+            #     response = requests.post(QUICKWALLET_API_CRUD_URL, json={
+            #         "secret": QUICKWALLET_SECRET,
+            #         "action": "update",
+            #         "entity": "outlet",
+            #         "details": {
+            #             "id": userid.vendor_user,
+            #             "name": "{0}".format(user.first_name)
+            #         }
+            #     })
+            #     print(response)
+            # except:
+            #     pass
+        return HttpResponseRedirect(reverse("user:terminal-list"))
