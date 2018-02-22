@@ -302,7 +302,7 @@ class SenderKYCDetail(RowInfo):
 
 class OTPDetail(RowInfo):
     challengeId = models.CharField(max_length=64)
-    user = models.ForeignKey(to=ZrUser, related_name='all_otps')
+    entityId = models.CharField(max_length=200, default = "zruser_1")
     mobile_no = models.BigIntegerField()
     expiry = models.DateTimeField()
     otp = models.CharField(max_length=64)
