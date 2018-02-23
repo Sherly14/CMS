@@ -69,7 +69,9 @@
                             <th>Status</th>
                             <th>Actions</th>
                             <th>Update</th>
+                            {% if request.user.zr_admin_user.role.name == "RETAILER" %}
                             <th>Manage</th>
+                            {% endif %}
                         </tr>
                         {% for terminal in queryset %}
                             <tr>

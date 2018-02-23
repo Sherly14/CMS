@@ -2022,14 +2022,16 @@ class TerminalCreateView(CreateView):
         if error == False:
             retailer_id = request.user.zr_admin_user.zr_user_id
             retailer_api_id = transaction_models.VendorZrRetailer.objects.get(zr_user=retailer_id)
-
+            udoutlet = ZrTerminal.objects.last()
+            id = int(udoutlet.id) + 1
             response = requests.post(QUICKWALLET_API_CRUD_URL, json={
                 "secret": QUICKWALLET_SECRET,
                 "action": "create",
                 "entity": "outlet",
                 "details": {
                     "name": merchant_form.data['first_name'],
-                    "retailerid": int(retailer_api_id.vendor_user)
+                    "retailerid": int(retailer_api_id.vendor_user),
+                    "udoutletid": id
                 }
             })
             if 300 > response.status_code >= 200:
@@ -2130,23 +2132,19 @@ class TerminalListView(ListView):
                 is_attached_to_admin=False
             )
 
-            # TODO: waiting for quickwallet update
-            # print(zruser.id)
-            # try:
-            #     vendor = transaction_models.VendorZrTerminal.objects.get(zr_terminal=int(zruser.id))
-            #     print(vendor.vendor_user)
-            #     response = requests.post(QUICKWALLET_API_CRUD_URL, json={
-            #         "secret": QUICKWALLET_SECRET,
-            #         "action": "update",
-            #         "entity": "outlet",
-            #         "details": {
-            #             "id": vendor.vendor_user,
-            #             "isactive": "Y"
-            #         }
-            #     })
-            #     print(response)
-            # except:
-            #     pass
+            try:
+                response = requests.post(QUICKWALLET_API_CRUD_URL, json={
+                    "secret": QUICKWALLET_SECRET,
+                    "action": "update",
+                    "entity": "outlet",
+                    "details": {
+                        "udoutletid": int(activate),
+                        "isactive": "Y"
+                    }
+                })
+                json_data = json.loads(response.text)
+            except:
+                pass
 
         if disable:
             zruser = ZrTerminal.objects.filter(id=disable).last()
@@ -2161,23 +2159,19 @@ class TerminalListView(ListView):
                 is_attached_to_admin=True
             )
 
-            # TODO: waiting for quickwallet update
-            # print(zruser.id)
-            # try:
-            #     vendor = transaction_models.VendorZrTerminal.objects.get(zr_terminal=int(zruser.id))
-            #     print(vendor.vendor_user)
-            #     response = requests.post(QUICKWALLET_API_CRUD_URL, json={
-            #         "secret": QUICKWALLET_SECRET,
-            #         "action": "update",
-            #         "entity": "outlet",
-            #         "details": {
-            #             "id": vendor.vendor_user,
-            #             "isactive": "N"
-            #         }
-            #     })
-            #     print(response)
-            # except:
-            #     pass
+            try:
+                response = requests.post(QUICKWALLET_API_CRUD_URL, json={
+                    "secret": QUICKWALLET_SECRET,
+                    "action": "update",
+                    "entity": "outlet",
+                    "details": {
+                        "udoutletid": int(disable),
+                        "isactive": "N"
+                    }
+                })
+                json_data = json.loads(response.text)
+            except:
+                pass
 
         if terminal_list:
             for terminal in terminal_list:
@@ -2333,23 +2327,18 @@ class TerminalUpdateView(View):
                 )
 
             merchant_form.save()
-            # TODO: waiting for quickwallet update
-            # print(user.id)
-            # try:
-            #     userid = transaction_models.VendorZrTerminal.objects.get(zr_terminal=user.id)
-            #     print(userid.vendor_user)
-            #     response = requests.post(QUICKWALLET_API_CRUD_URL, json={
-            #         "secret": QUICKWALLET_SECRET,
-            #         "action": "update",
-            #         "entity": "outlet",
-            #         "details": {
-            #             "id": userid.vendor_user,
-            #             "name": "{0}".format(user.first_name)
-            #         }
-            #     })
-            #     print(response)
-            # except:
-            #     pass
+            try:
+                response = requests.post(QUICKWALLET_API_CRUD_URL, json={
+                    "secret": QUICKWALLET_SECRET,
+                    "action": "update",
+                    "entity": "outlet",
+                    "details": {
+                        "udoutletid": user.id,
+                        "name": "{0}".format(user.first_name)
+                    }
+                })
+            except:
+                pass
         return HttpResponseRedirect(reverse("user:terminal-list"))
 
 
@@ -2358,42 +2347,43 @@ class TerminalView(View):
 
     def get(self, request, pk,  **kwargs):
             user = ZrTerminal.objects.get(id=pk)
+            operation = "ACCESS"
             return render(
-                request, self.template_name, {"zr_user": user}
+                request, self.template_name, {"zr_user": user, "operation": operation}
             )
 
-    @transaction.atomic
-    def post(self, request, pk):
-        user = ZrTerminal.objects.get(id=pk)
-        if "save" in request.POST:
-            merchant_form = zr_user_form.UpdateMerchantTerminalForm(data=request.POST, instance=user)
-            if not merchant_form.is_valid():
-                return render(
-                    request, self.template_name,
-                    {
-                        'merchant_form': merchant_form
-                    }
-                )
-
-            merchant_form.save()
-            # TODO: waiting for quickwallet update
-            # print(user.id)
-            # try:
-            #     userid = transaction_models.VendorZrTerminal.objects.get(zr_terminal=user.id)
-            #     print(userid.vendor_user)
-            #     response = requests.post(QUICKWALLET_API_CRUD_URL, json={
-            #         "secret": QUICKWALLET_SECRET,
-            #         "action": "update",
-            #         "entity": "outlet",
-            #         "details": {
-            #             "id": userid.vendor_user,
-            #             "name": "{0}".format(user.first_name)
-            #         }
-            #     })
-            #     print(response)
-            # except:
-            #     pass
-        return HttpResponseRedirect(reverse("user:terminal-list"))
+    # @transaction.atomic
+    # def post(self, request, pk):
+    #     user = ZrTerminal.objects.get(id=pk)
+    #     if "save" in request.POST:
+    #         merchant_form = zr_user_form.UpdateMerchantTerminalForm(data=request.POST, instance=user)
+    #         if not merchant_form.is_valid():
+    #             return render(
+    #                 request, self.template_name,
+    #                 {
+    #                     'merchant_form': merchant_form
+    #                 }
+    #             )
+    #
+    #         merchant_form.save()
+    #         # TODO: waiting for quickwallet update
+    #         # print(user.id)
+    #         # try:
+    #         #     userid = transaction_models.VendorZrTerminal.objects.get(zr_terminal=user.id)
+    #         #     print(userid.vendor_user)
+    #         #     response = requests.post(QUICKWALLET_API_CRUD_URL, json={
+    #         #         "secret": QUICKWALLET_SECRET,
+    #         #         "action": "update",
+    #         #         "entity": "outlet",
+    #         #         "details": {
+    #         #             "id": userid.vendor_user,
+    #         #             "name": "{0}".format(user.first_name)
+    #         #         }
+    #         #     })
+    #         #     print(response)
+    #         # except:
+    #         #     pass
+    #     return HttpResponseRedirect(reverse("user:terminal-list"))
 
 
 class UserCardCreateView(CreateView):

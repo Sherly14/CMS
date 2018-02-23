@@ -76,19 +76,19 @@
                 </li>
                 {% endif %}
 
-                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "RETAILER" and zr_user.role.name != "TERMINAL" %}
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "RETAILER" and operation != "ACCESS" %}
                 <li class="nav-item ">
                     <a class="nav-link text-right" href="{% url 'user:terminal-list' %}">Terminals</a>
                 </li>
                 {% endif %}
-                {% if request.user.zr_admin_user.role.name == "RETAILER" and zr_user.role.name != "TERMINAL" %}
+                {% if request.user.zr_admin_user.role.name == "RETAILER" and operation != "ACCESS" %}
                 <li class="nav-item ">
                     <a class="nav-link text-right" href="{% url 'user:loyaltycard-list' %}">Loyalty Cards</a>
                 </li>
                 {% endif %}
-                {% if zr_user.role.name == "TERMINAL" %}
+                {% if zr_user.role.name == "TERMINAL" and operation == "ACCESS" %}
                 <li class="nav-item ">
-                    <a class="nav-link text-right" href="#">GenerateOTP</a>
+                    <a class="nav-link text-right" href='{% url "user:generate-otp" pk=user.id %}'>GenerateOTP</a>
                 </li>
                 <li class="nav-item ">
                     <a class="nav-link text-right" href="#">Issue to Mobile No</a>
