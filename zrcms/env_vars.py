@@ -21,3 +21,5 @@ QUICKWALLET_API_CARD_URL = os.getenv('QUICKWALLET_API_CARD_URL',
                                         'https://uat.quikwallet.com/api/partner/{0}/loyaltycards/create'.format(QUICKWALLET_ZR_PARTERNERID))
 QUICKWALLET_API_LISTCARD_URL = os.getenv('QUICKWALLET_API_LISTCARD_URL',
                                         'https://uat.quikwallet.com/api/partner/{0}/loyaltycards'.format(QUICKWALLET_ZR_PARTERNERID))
+QUICKWALLET_API_GENERATEOTP_URL = os.getenv('QUICKWALLET_API_GENERATEOTP_URL',
+                                        'https://uat.quikwallet.com/api/partner/{0}/loyaltycards/generateotp'.format(QUICKWALLET_ZR_PARTERNERID))

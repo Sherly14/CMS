@@ -42,7 +42,7 @@ from zrwallet import models as zrwallet_models
 from django.contrib.auth.models import User
 from itertools import chain
 from zrcms.env_vars import QUICKWALLET_ZR_PARTERNERID, QUICKWALLET_SECRET, QUICKWALLET_API_CRUD_URL,\
-    QUICKWALLET_API_CARD_URL, QUICKWALLET_API_LISTCARD_URL
+    QUICKWALLET_API_CARD_URL, QUICKWALLET_API_LISTCARD_URL, QUICKWALLET_API_GENERATEOTP_URL
 
 
 MERCHANT = 'MERCHANT'
@@ -1747,7 +1747,7 @@ class RetailerCreateView(CreateView):
                 if json_data:
                     if json_data['status']:
                         status = json_data['status']
-                        if status=="failed":
+                        if status == "failed":
                             return render(
                                 request, self.template_name,
                                 {
@@ -2310,7 +2310,7 @@ class TerminalUpdateView(View):
             merchant_form = zr_user_form.UpdateMerchantTerminalForm(
                 initial={'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email})
             return render(
-                request, self.template_name, {"merchant_form": merchant_form, "zr_user": user}
+                request, self.template_name, {"merchant_form": merchant_form, "terminal_user": user}
             )
 
     @transaction.atomic
@@ -2347,9 +2347,8 @@ class TerminalView(View):
 
     def get(self, request, pk,  **kwargs):
             user = ZrTerminal.objects.get(id=pk)
-            operation = "ACCESS"
             return render(
-                request, self.template_name, {"zr_user": user, "operation": operation}
+                request, self.template_name, {"zr_user": user}
             )
 
     # @transaction.atomic
@@ -2461,6 +2460,7 @@ class GenerateOTPView(View):
 
     def get(self, request, pk,  **kwargs):
             user = ZrTerminal.objects.get(id=pk)
+            # operation = "ACCESS"
             return render(
                 request, self.template_name, {"zr_user": user}
             )
@@ -2469,31 +2469,48 @@ class GenerateOTPView(View):
     def post(self, request, pk):
         user = ZrTerminal.objects.get(id=pk)
         if "save" in request.POST:
-            merchant_form = zr_user_form.UpdateMerchantTerminalForm(data=request.POST, instance=user)
-            if not merchant_form.is_valid():
-                return render(
-                    request, self.template_name,
-                    {
-                        'merchant_form': merchant_form
-                    }
-                )
+            cardnumber = request.POST.get('cardnumber', '')
+            udoutletid = request.POST.get('udoutletid', '')
+            mobile = request.POST.get('mobile', '')
+            # validation
+            if cardnumber:
+                error = False
+            if mobile:
+                if mobile.isdigit():
+                    error=False
+                if(len(mobile)<10):
+                    error=True
 
-            merchant_form.save()
-            # TODO: waiting for quickwallet update
-            # print(user.id)
-            # try:
-            #     userid = transaction_models.VendorZrTerminal.objects.get(zr_terminal=user.id)
-            #     print(userid.vendor_user)
-            #     response = requests.post(QUICKWALLET_API_CRUD_URL, json={
-            #         "secret": QUICKWALLET_SECRET,
-            #         "action": "update",
-            #         "entity": "outlet",
-            #         "details": {
-            #             "id": userid.vendor_user,
-            #             "name": "{0}".format(user.first_name)
-            #         }
-            #     })
-            #     print(response)
-            # except:
-            #     pass
-        return HttpResponseRedirect(reverse("user:terminal-list"))
+            if int(udoutletid) != int(user.id):
+                error = True
+
+            if error == False:
+                try:
+                    response = requests.post(QUICKWALLET_API_GENERATEOTP_URL, json={
+                        "secret": QUICKWALLET_SECRET,
+                        "cardnumber": int(cardnumber),
+                        "udoutletid": int(udoutletid),
+                        "mobile": int(mobile)
+                    })
+                    if 300 > response.status_code >= 200:
+                        try:
+                            json_data = json.loads(response.text)
+                        except:
+                            pass
+
+                    if json_data:
+                        if json_data['status']:
+                            status = json_data['status']
+                            if status == "failed":
+                                error = True
+                            else:
+                                success = "OTP Send to {0}".format(mobile)
+                                return render(
+                                    request, self.template_name, {"zr_user": user, "success": success}
+                                )
+                except:
+                    pass
+            if error == True:
+                return render(
+                    request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
+                )

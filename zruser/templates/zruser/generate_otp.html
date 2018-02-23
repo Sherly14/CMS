@@ -7,29 +7,35 @@
 
 <div class="content-wrapper py-2" style="padding-left: 0.5rem; padding-right: 4rem">
     <p class="heading-right">GenerateOTP |{{zr_user.role.name|title}}</p>
+    {% if api_error %}
+      <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
+    {% endif %}
+    {% if success %}
+      <div class="alert alert-success" id="success_msg" style="text-align:center">{{ success }}</div>
+    {% endif %}
     <div class="container-fluid" style="position: relative;">
         <div class="row">
             <p class="heading-bg">DETAILS:</p>
         </div>
         <form id="add-merchant-form" method="POST">
             <div class="row">
-                <div class="col-sm-2">
+                <div class="col-sm-2" style="margin-right:20px;">
                     <div class="form-group">
                         <label for="cardnumber">Card Number</label>
-                        <input type="number" name="cardnumber" value="cardnumber" REQUIRED>
+                            <input type="number" name="cardnumber" value="cardnumber" REQUIRED>
                     </div>
                 </div>
-                <div class="col-sm-2">
+                <div class="col-sm-2" style="margin-right:20px;">
                     <div class="form-group">
                         <label for="udoutletid">OutletId</label>
-                        <input type="number" name="udoutletid" value="zruser.id" readonly>
+                        <input type="number" name="udoutletid" value="{{zr_user.id}}" readonly>
                     </div>
                 </div>
 
-                <div class="col-sm-4">
+                <div class="col-sm-2" style="margin-right:20px;">
                     <div class="form-group">
                         <label for="mobileno">Mobile Number</label>
-                        <input type="number" name="mobileno" value="mobileno" REQUIRED>
+                        <input type="number" name="mobile" REQUIRED>
                     </div>
                 </div>
             </div>
