@@ -91,19 +91,19 @@
                     <a class="nav-link text-right" href='{% url "user:generate-otp" pk=zr_user.id %}'>GenerateOTP</a>
                 </li>
                 <li class="nav-item ">
-                    <a class="nav-link text-right" href="#">Issue to Mobile No</a>
+                    <a class="nav-link text-right" href='{% url "user:issue-mobile" pk=zr_user.id %}'>Issue to Mobile No</a>
                 </li>
                 <li class="nav-item ">
-                    <a class="nav-link text-right" href="#">Activate</a>
+                    <a class="nav-link text-right" href='{% url "user:activate-card" pk=zr_user.id %}'>Activate</a>
                 </li>
                 <li class="nav-item ">
-                    <a class="nav-link text-right" href="#">Recharge</a>
+                    <a class="nav-link text-right" href='{% url "user:recharge-card" pk=zr_user.id %}'>Recharge</a>
                 </li>
                 <li class="nav-item ">
-                    <a class="nav-link text-right" href="#">Pay</a>
+                    <a class="nav-link text-right" href='{% url "user:pay" pk=zr_user.id %}'>Pay</a>
                 </li>
                 <li class="nav-item ">
-                    <a class="nav-link text-right" href="#">Deactivate</a>
+                    <a class="nav-link text-right" href='{% url "user:deactivate-card" pk=zr_user.id %}'>Deactivate</a>
                 </li>
                 <br><br><br><br><br><br><br><br><br>
                 <li class="nav-item ">

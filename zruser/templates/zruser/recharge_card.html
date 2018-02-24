@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
 
-{% block title %}GenerateOTP{% endblock %}
+{% block title %}Recharge Card{% endblock %}
 
 {% block content %}
 
 <div class="content-wrapper py-2" style="padding-left: 0.5rem; padding-right: 4rem">
-    <p class="heading-right">GenerateOTP |{{zr_user.first_name|title}}</p>
+    <p class="heading-right">Recharge Card |{{zr_user.first_name|title}}</p>
     {% if api_error %}
       <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
     {% endif %}
@@ -25,6 +25,7 @@
                             <input type="text" style="border: 2px solid; border-color: #aaa; padding-left: 0rem;" name="cardnumber" REQUIRED>
                     </div>
                 </div>
+
                 <div class="col-sm-2" style="margin-right:20px;">
                     <div class="form-group">
                         <label for="udoutletid">OutletId</label>
@@ -33,19 +34,19 @@
                 </div>
 
                 <div class="col-sm-2" style="margin-right:20px;">
-                    <div class="form-group">
-                        <label for="mobileno">Mobile Number</label>
-                        <input type="number" style="border: 2px solid; border-color: #aaa;" name="mobile" REQUIRED>
+                   <div class="form-group">
+                        <label for="amount">Amount</label>
+                        <input type="number" style="border: 2px solid; border-color: #aaa;" min="1" name="amount" REQUIRED>
                     </div>
                 </div>
+
             </div>
 
             <div class="row">
             <div class="fill margin-top" style="padding-left:6.5rem">
-                <input class="button red" type="submit" name = "save" value="Generate OTP">
+                <input class="button red" type="submit" name = "save" value="Recharge Card">
             </div>
             </div>
-
         {% csrf_token %}
         </form>
     </div>

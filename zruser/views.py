@@ -42,7 +42,8 @@ from zrwallet import models as zrwallet_models
 from django.contrib.auth.models import User
 from itertools import chain
 from zrcms.env_vars import QUICKWALLET_ZR_PARTERNERID, QUICKWALLET_SECRET, QUICKWALLET_API_CRUD_URL,\
-    QUICKWALLET_API_CARD_URL, QUICKWALLET_API_LISTCARD_URL, QUICKWALLET_API_GENERATEOTP_URL
+    QUICKWALLET_API_CARD_URL, QUICKWALLET_API_LISTCARD_URL, QUICKWALLET_API_GENERATEOTP_URL, QUICKWALLET_API_ISSUE_MOBILE_URL,\
+    QUICKWALLET_API_ACTIVATE_CARD_URL, QUICKWALLET_API_RECHARGE_CARD_URL, QUICKWALLET_API_PAY_URL, QUICKWALLET_API_DEACTIVATE_CARD_URL
 
 
 MERCHANT = 'MERCHANT'
@@ -2460,7 +2461,6 @@ class GenerateOTPView(View):
 
     def get(self, request, pk,  **kwargs):
             user = ZrTerminal.objects.get(id=pk)
-            # operation = "ACCESS"
             return render(
                 request, self.template_name, {"zr_user": user}
             )
@@ -2473,13 +2473,12 @@ class GenerateOTPView(View):
             udoutletid = request.POST.get('udoutletid', '')
             mobile = request.POST.get('mobile', '')
             # validation
-            if cardnumber:
-                error = False
+            error = False
+            if not cardnumber:
+                error = True
             if mobile:
-                if mobile.isdigit():
-                    error=False
-                if(len(mobile)<10):
-                    error=True
+                if not mobile.isdigit() and (len(mobile)<10):
+                    error = True
 
             if int(udoutletid) != int(user.id):
                 error = True
@@ -2514,3 +2513,334 @@ class GenerateOTPView(View):
                 return render(
                     request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
                 )
+
+        return render(
+            request, self.template_name, {"zr_user": user}
+        )
+
+
+class IssueMobileView(View):
+    template_name = 'zruser/issue_to_mobile.html'
+
+    def get(self, request, pk,  **kwargs):
+            user = ZrTerminal.objects.get(id=pk)
+            return render(
+                request, self.template_name, {"zr_user": user}
+            )
+
+    @transaction.atomic
+    def post(self, request, pk):
+        user = ZrTerminal.objects.get(id=pk)
+        if "save" in request.POST:
+            cardnumber = request.POST.get('cardnumber', '')
+            udoutletid = request.POST.get('udoutletid', '')
+            mobile = request.POST.get('mobile', '')
+            otp = request.POST.get('otp', '')
+            # validation
+            error = False
+            if not cardnumber:
+                error = True
+            if mobile:
+                if not mobile.isdigit() and (len(mobile)<10):
+                    error = True
+
+            if int(udoutletid) != int(user.id):
+                error = True
+
+            if error == False:
+                try:
+                    response = requests.post(QUICKWALLET_API_ISSUE_MOBILE_URL, json={
+                        "secret": QUICKWALLET_SECRET,
+                        "cardnumber": int(cardnumber),
+                        "udoutletid": int(udoutletid),
+                        "mobile": int(mobile),
+                        "otp": otp
+                    })
+                    if 300 > response.status_code >= 200:
+                        try:
+                            json_data = json.loads(response.text)
+                        except:
+                            pass
+
+                    if json_data:
+                        if json_data['status']:
+                            status = json_data['status']
+                            if status == "failed":
+                                error = True
+                            else:
+                                success = "{0} issued to {1}".format(cardnumber, mobile)
+                                return render(
+                                    request, self.template_name, {"zr_user": user, "success": success}
+                                )
+                except:
+                    pass
+            if error == True:
+                return render(
+                    request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
+                )
+
+        return render(
+            request, self.template_name, {"zr_user": user}
+        )
+
+
+class ActivateCardView(View):
+    template_name = 'zruser/activate_card.html'
+
+    def get(self, request, pk,  **kwargs):
+            user = ZrTerminal.objects.get(id=pk)
+            return render(
+                request, self.template_name, {"zr_user": user}
+            )
+
+    @transaction.atomic
+    def post(self, request, pk):
+        user = ZrTerminal.objects.get(id=pk)
+        if "save" in request.POST:
+            cardnumber = request.POST.get('cardnumber', '')
+            udoutletid = request.POST.get('udoutletid', '')
+            mobile = request.POST.get('mobile', '')
+            otp = request.POST.get('otp', '')
+            # validation
+            error = False
+            if not cardnumber:
+                error = True
+            if mobile:
+                if not mobile.isdigit() and (len(mobile)<10):
+                    error = True
+
+            if int(udoutletid) != int(user.id):
+                error = True
+
+            if error == False:
+                try:
+                    response = requests.post(QUICKWALLET_API_ACTIVATE_CARD_URL, json={
+                        "secret": QUICKWALLET_SECRET,
+                        "cardnumber": int(cardnumber),
+                        "udoutletid": int(udoutletid),
+                        "mobile": int(mobile),
+                        "otp": otp
+                    })
+                    if 300 > response.status_code >= 200:
+                        try:
+                            json_data = json.loads(response.text)
+                        except:
+                            pass
+
+                    if json_data:
+                        if json_data['status']:
+                            status = json_data['status']
+                            if status == "failed":
+                                error = True
+                            else:
+                                success = "{0} Activated".format(cardnumber)
+                                return render(
+                                    request, self.template_name, {"zr_user": user, "success": success}
+                                )
+                except:
+                    pass
+            if error == True:
+                return render(
+                    request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
+                )
+
+        return render(
+            request, self.template_name, {"zr_user": user}
+        )
+
+
+class RechargeCardView(View):
+    template_name = 'zruser/recharge_card.html'
+
+    def get(self, request, pk,  **kwargs):
+            user = ZrTerminal.objects.get(id=pk)
+            return render(
+                request, self.template_name, {"zr_user": user}
+            )
+
+    @transaction.atomic
+    def post(self, request, pk):
+        user = ZrTerminal.objects.get(id=pk)
+        if "save" in request.POST:
+            cardnumber = request.POST.get('cardnumber', '')
+            udoutletid = request.POST.get('udoutletid', '')
+            amount = request.POST.get('amount', '')
+            # validation
+            error = False
+            if not cardnumber:
+                error = True
+            if amount:
+                if not amount.isdigit() and amount <= 0:
+                    error = True
+
+            if int(udoutletid) != int(user.id):
+                error = True
+
+            if error == False:
+                try:
+                    response = requests.post(QUICKWALLET_API_RECHARGE_CARD_URL, json={
+                        "secret": QUICKWALLET_SECRET,
+                        "cardnumber": int(cardnumber),
+                        "udoutletid": int(udoutletid),
+                        "amount": int(amount)
+                    })
+                    if 300 > response.status_code >= 200:
+                        try:
+                            json_data = json.loads(response.text)
+                        except:
+                            pass
+
+                    if json_data:
+                        if json_data['status']:
+                            status = json_data['status']
+                            if status == "failed":
+                                error = True
+                            else:
+                                success = "Rs. {0} added to {1}".format(amount, cardnumber)
+                                return render(
+                                    request, self.template_name, {"zr_user": user, "success": success}
+                                )
+                except:
+                    pass
+            if error == True:
+                return render(
+                    request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
+                )
+
+        return render(
+            request, self.template_name, {"zr_user": user}
+        )
+
+
+class PayView(View):
+    template_name = 'zruser/pay.html'
+
+    def get(self, request, pk, **kwargs):
+        user = ZrTerminal.objects.get(id=pk)
+        return render(
+            request, self.template_name, {"zr_user": user}
+        )
+
+    @transaction.atomic
+    def post(self, request, pk):
+        user = ZrTerminal.objects.get(id=pk)
+        if "save" in request.POST:
+            cardnumber = request.POST.get('cardnumber', '')
+            udoutletid = request.POST.get('udoutletid', '')
+            mobile = request.POST.get('mobile', '')
+            otp = request.POST.get('otp', '')
+            amount = request.POST.get('amount', '')
+            # validation
+            error = False
+            if not cardnumber:
+                error = True
+            if mobile:
+                if not mobile.isdigit() and (len(mobile)) < 10:
+                    error = True
+
+            if int(udoutletid) != int(user.id):
+                error = True
+
+            if error == False:
+                try:
+                    response = requests.post(QUICKWALLET_API_PAY_URL, json={
+                        "secret": QUICKWALLET_SECRET,
+                        "cardnumber": int(cardnumber),
+                        "udoutletid": int(udoutletid),
+                        "mobile": int(mobile),
+                        "otp": otp,
+                        "amount": int(amount)
+                    })
+                    if 300 > response.status_code >= 200:
+                        try:
+                            json_data = json.loads(response.text)
+                        except:
+                            pass
+
+                    if json_data:
+                        if json_data['status']:
+                            status = json_data['status']
+                            if status == "failed":
+                                error = True
+                            else:
+                                success = "Rs. {0} paid".format(amount)
+                                return render(
+                                    request, self.template_name, {"zr_user": user, "success": success}
+                                )
+                except:
+                    pass
+            if error == True:
+                return render(
+                    request, self.template_name,
+                    {"zr_user": user, "api_error": "something went wrong, please try again!"}
+                )
+
+        return render(
+            request, self.template_name, {"zr_user": user}
+        )
+
+
+class DeactivateCardView(View):
+    template_name = 'zruser/deactivate_card.html'
+
+    def get(self, request, pk,  **kwargs):
+            user = ZrTerminal.objects.get(id=pk)
+            return render(
+                request, self.template_name, {"zr_user": user}
+            )
+
+    @transaction.atomic
+    def post(self, request, pk):
+        user = ZrTerminal.objects.get(id=pk)
+        if "save" in request.POST:
+            cardnumber = request.POST.get('cardnumber', '')
+            udoutletid = request.POST.get('udoutletid', '')
+            mobile = request.POST.get('mobile', '')
+            otp = request.POST.get('otp', '')
+            # validation
+            error = False
+            if not cardnumber:
+                error = True
+            if mobile:
+                if not mobile.isdigit() and (len(mobile)<10):
+                    error=True
+
+            if int(udoutletid) != int(user.id):
+                error = True
+
+            if error == False:
+                try:
+                    response = requests.post(QUICKWALLET_API_DEACTIVATE_CARD_URL, json={
+                        "secret": QUICKWALLET_SECRET,
+                        "cardnumber": int(cardnumber),
+                        "udoutletid": int(udoutletid),
+                        "mobile": int(mobile),
+                        "otp": otp
+                    })
+                    if 300 > response.status_code >= 200:
+                        try:
+                            json_data = json.loads(response.text)
+                        except:
+                            pass
+
+                    if json_data:
+                        if json_data['status']:
+                            status = json_data['status']
+                            if status == "failed":
+                                error = True
+                            else:
+                                success = "{0} Deactivated".format(cardnumber)
+                                return render(
+                                    request, self.template_name, {"zr_user": user, "success": success}
+                                )
+                except:
+                    pass
+            if error == True:
+                return render(
+                    request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
+                )
+
+        return render(
+            request, self.template_name, {"zr_user": user}
+        )
+
