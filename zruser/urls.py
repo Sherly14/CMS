@@ -7,7 +7,7 @@ from zruser.views import DistributorDetailView, DistributorListView, MerchantLis
                         SubDistributorListView, UserUpdateView, RetailerCreateView, RetailerListView, \
                         TerminalCreateView, TerminalListView, UserCardCreateView, UserCardListView,\
                         TerminalUpdateView, TerminalView, GenerateOTPView, IssueMobileView, ActivateCardView,\
-                        RechargeCardView, PayView, DeactivateCardView
+                        RechargeCardView, PayView, DeactivateCardView, PaymentHistoryView, OfferCreateView
 
 from zruser.viewsets import MerchantLeadViewSet
 
@@ -56,5 +56,7 @@ urlpatterns += [
     url(r'^recharge_card/(?P<pk>\d+)$', RechargeCardView.as_view(), name='recharge-card'),
     url(r'^pay/(?P<pk>\d+)$', PayView.as_view(), name='pay'),
     url(r'^deactivate_card/(?P<pk>\d+)$', DeactivateCardView.as_view(), name='deactivate-card'),
+    url(r'^payment_history/$', PaymentHistoryView.as_view(), name='payment-history'),
+    url(r'^offer_create/$', OfferCreateView.as_view(), name='offer-create'),
 
 ]

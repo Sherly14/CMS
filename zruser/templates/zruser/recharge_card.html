@@ -39,13 +39,12 @@
                         <input type="number" style="border: 2px solid; border-color: #aaa;" min="1" name="amount" REQUIRED>
                     </div>
                 </div>
-
             </div>
 
             <div class="row">
-            <div class="fill margin-top" style="padding-left:6.5rem">
-                <input class="button red" type="submit" name = "save" value="Recharge Card">
-            </div>
+                <div class="fill margin-top" style="padding-left:6.5rem">
+                    <input class="button red" type="submit" name = "save" value="Recharge Card">
+                </div>
             </div>
         {% csrf_token %}
         </form>

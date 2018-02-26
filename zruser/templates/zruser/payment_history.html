@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 <!--{% load widget_tweaks %}-->
 
-{% block title %}LoyatyCardList{% endblock %}
+{% block title %}PaymentHistoryList{% endblock %}
 
 {% block content %}
 
     <div class="content-wrapper">
-        <p class="head-right">{{ request.user.zr_admin_user.zr_user.first_name.upper }}'s-LoyaltyCards</p>
+        <p class="head-right">{{ request.user.zr_admin_user.zr_user.first_name.upper }}'s-Payment History</p>
         {% if api_error %}
             <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
         {% endif %}
@@ -51,7 +51,7 @@
             <br>
             <div class="row" style="padding-right: 50px;">
                 <div class="fine">
-                    <p class="head-bg">List of Cards</p>
+                    <p class="head-bg">Payments</p>
                 </div>
             </div>
             <div class="row scroll">
@@ -59,22 +59,31 @@
                 <div style="width: 100%;">
                     <table>
                         <tr>
-                            <th>Card Id</th>
-                            <th>Card Number</th>
-                            <th>Created</th>
+                            <th>Id</th>
+                            <th>Bill Number</th>
+                            <th>Amount</th>
+                            <th>Settled Amount</th>
+                            <th>Tip</th>
+                            <th>Discount</th>
+                            <th>State</th>
+                            <th>Create Date</th>
+                            <th>Update Date</th>
                             <th>Name</th>
-                            <th>Balance</th>
-                            <th>Mobile No</th>
+
                         </tr>
 
-                        {% for card in loyalty_cards %}
+                        {% for payment in payments %}
                             <tr>
-                                <td>{{ card.prepaidcardid }}</td>
-                                <td>{{ card.cardnumber }}</td>
-                                <td>{{ card.created_at }}</td>
-                                <td>{{ card.name }}</td>
-                                <td>{{ card.balance }}</td>
-                                <td>{{ card.mobile }}</td>
+                                <td>{{ payment.id }}</td>
+                                <td>{{ payment.billnumber }}</td>
+                                <td>{{ payment.amount }}</td>
+                                <td>{{ payment.settledamount }}</td>
+                                <td>{{ payment.tip }}</td>
+                                <td>{{ payment.discount }}</td>
+                                <td>{{ payment.state }}</td>
+                                <td>{{ payment.createdat }}</td>
+                                <td>{{ payment.updatedat }}</td>
+                                <td>{{ payment.name }}</td>
                             </tr>
                         {% endfor %}
 

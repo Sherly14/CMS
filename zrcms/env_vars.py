@@ -35,3 +35,5 @@ QUICKWALLET_API_PAY_URL = os.getenv('QUICKWALLET_API_PAY_URL',
                                         'https://uat.quikwallet.com/api/partner/{0}/loyaltycards/pay'.format(QUICKWALLET_ZR_PARTERNERID))
 QUICKWALLET_API_DEACTIVATE_CARD_URL = os.getenv('QUICKWALLET_API_DEACTIVATE_CARD_URL',
                                         'https://uat.quikwallet.com/api/partner/{0}/loyaltycards/deactivate'.format(QUICKWALLET_ZR_PARTERNERID))
+QUICKWALLET_PAYMENT_HISTORY_URL = os.getenv('QUICKWALLET_PAYMENT_HISTORY_URL',
+                                        'https://uat.quikwallet.com/api/partner/{0}/paymenthistory'.format(QUICKWALLET_ZR_PARTERNERID))
