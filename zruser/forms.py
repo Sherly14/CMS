@@ -55,11 +55,11 @@ class MerchantDistributorForm(forms.ModelForm):
 
     def clean_mobile_no(self):
         mobile_no = self.cleaned_data['mobile_no']
-        if ZrUser.objects.filter(mobile_no=mobile_no).count():
-            raise forms.ValidationError('Mobile number already exist')
-
         if not mobile_no.isdigit():
             raise forms.ValidationError('Invalid mobile number')
+
+        if ZrUser.objects.filter(mobile_no=mobile_no).count():
+            raise forms.ValidationError('Mobile number already exist')
 
         return mobile_no
 

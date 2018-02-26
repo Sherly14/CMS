@@ -39,9 +39,9 @@ def get_commission_display_qs(request):
     query_filter = Q(
         commission_user__mobile_no__contains=search
     ) | Q(
-        commission_user__first_name__contains=search
+        commission_user__first_name__icontains=search
     ) | Q(
-        commission_user__last_name__contains=search
+        commission_user__last_name__icontains=search
     )
     if user_utils.is_user_superuser(request):
         if search:

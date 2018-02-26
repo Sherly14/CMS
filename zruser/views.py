@@ -23,7 +23,7 @@ from common_utils import transaction_utils
 from common_utils import zrupee_security
 from common_utils.date_utils import last_month, last_week_range
 from common_utils.report_util import get_excel_doc, update_excel_doc
-from common_utils.user_utils import is_user_superuser
+from common_utils.user_utils import is_user_superuser, is_zruser_djuser
 from mapping import *
 from utils import constants
 from zrcommission import models as commission_models
@@ -88,7 +88,7 @@ def get_merchant_qs(request):
 
     if is_user_superuser(request):
         if q:
-            query_filter = Q(first_name__contains=q) | Q(last_name__contains=q) | Q(mobile_no__contains=q)
+            query_filter = Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(mobile_no__icontains=q)
             queryset = queryset.filter(
                 query_filter
             )
@@ -628,7 +628,7 @@ class KYCRequestsView(ListView):
 
     def get_queryset(self):
         approve = self.request.GET.get('approve')
-        reject = self.request.GET.get('approve')
+        reject = self.request.GET.get('reject')
         filter_by = self.request.GET.get('filter', 'All')
         q = self.request.GET.get('q')
         user_id = self.request.GET.get('user_id')
@@ -637,16 +637,18 @@ class KYCRequestsView(ListView):
                 raise Http404
             else:
                 status = None
+                zruser = ZrUser.objects.filter(id=approve or reject).last()
+
                 if approve:
                     status = constants.KYC_APPROVAL_CHOICES[1][0]
+                    zruser.is_kyc_verified = True
+
                 elif reject:
                     status = constants.KYC_APPROVAL_CHOICES[2][0]
 
-                zruser = ZrUser.objects.filter(id=approve).last()
-                zruser.kyc_details.all().update(
+                zruser.kyc_details.filter(approval_status='I').update(
                     approval_status=status
                 )
-                zruser.is_kyc_verified = True
                 zruser.save(update_fields=['is_kyc_verified'])
 
                 if zruser.is_kyc_verified and status == constants.KYC_APPROVAL_CHOICES[1][0]:
@@ -654,7 +656,7 @@ class KYCRequestsView(ListView):
                     zruser.pass_word = password
                     zruser.save(update_fields=['pass_word'])
 
-                    if zruser.role.name != MERCHANT:
+                    if is_zruser_djuser(zruser):
                         dj_user = zruser.zr_user.id
                         dj_user.set_password(password)
                         dj_user.save()
@@ -664,6 +666,7 @@ class KYCRequestsView(ListView):
         queryset = ZrUser.objects.filter(
             is_kyc_verified=False
         ).order_by('-at_created')
+
         if filter_by == "Last-Week":
             queryset = queryset.filter(at_created__range=last_week_range())
         elif filter_by == "Last-Month":
@@ -704,7 +707,7 @@ def get_distributor_qs(request):
     q = request.GET.get('q')
     filter = request.GET.get('filter')
     if q:
-        query_filter = Q(first_name__contains=q) | Q(last_name__contains=q) | Q(mobile_no__contains=q)
+        query_filter = Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(mobile_no__icontains=q)
         queryset = queryset.filter(
             query_filter
         )
@@ -747,11 +750,11 @@ def get_sub_distributor_qs(request):
 
     if q:
         query_filter = Q(
-            sub_distributor__first_name__contains=q
+            sub_distributor__first_name__icontains=q
         ) | Q(
-            sub_distributor__last_name__contains=q
+            sub_distributor__last_name__icontains=q
         ) | Q(
-            sub_distributor__mobile_no__contains=q
+            sub_distributor__mobile_no__icontains=q
         )
         queryset = queryset.filter(
             query_filter

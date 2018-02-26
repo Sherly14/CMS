@@ -20,6 +20,14 @@ def is_user_superuser(request):
     return False
 
 
+def is_zruser_djuser(zruser):
+    if (zruser.role.name == "ADMINSTAFF" or
+        zruser.role.name == "DISTRIBUTOR" or
+            zruser.role.name == "SUBDISTRIBUTOR"):
+        return True
+    return False
+
+
 def get_unique_id():
     return uuid.uuid4()
 
@@ -28,7 +36,10 @@ def file_save_s3(file_obj, directory="default", user_id=""):
     # Create unique file name
     file_name = str(get_unique_id()) + '.' + (file_obj._get_name().split('.')[-1].lower())
     # file_name = str(get_unique_id()) + '.' + (file_obj._get_name().split('.')[-1].lower())
-    s3.upload_fileobj(file_obj, "zrupee-credit-request-documents", file_name, ExtraArgs={'ACL': 'public-read'})
+    try:
+        s3.upload_fileobj(file_obj, "zrupee-credit-request-documents", file_name, ExtraArgs={'ACL': 'public-read'})
+    except:
+        pass
     s3_url = "{}/{}/{}".format('https://s3.ap-south-1.amazonaws.com', "zrupee-credit-request-documents", file_name)
     return s3_url
 

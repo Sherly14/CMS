@@ -115,11 +115,6 @@ class ZrUser(RowInfo):
     UPIID = models.CharField(max_length=256, null=True, blank=True)
     business_type = models.ForeignKey(to=BusinesssType, related_name='business_type', null=True, blank=True)
 
-
-
-
-
-
     def save(self, *args, **kwargs):
         # self.pass_word = make_password(self.pass_word)
 
@@ -156,6 +151,10 @@ class ZrUser(RowInfo):
             },
             is_html=True
         )
+
+    @property
+    def in_process(self):
+        return self.kyc_details.filter(approval_status='I').count()
 
     class Meta:
         verbose_name_plural = 'ZrUsers'
@@ -303,7 +302,7 @@ class SenderKYCDetail(RowInfo):
 
 class OTPDetail(RowInfo):
     challengeId = models.CharField(max_length=64)
-    user = models.ForeignKey(to=ZrUser, related_name='all_otps')
+    entityId = models.CharField(max_length=200, default = "zruser_1")
     mobile_no = models.BigIntegerField()
     expiry = models.DateTimeField()
     otp = models.CharField(max_length=64)
