@@ -1988,25 +1988,20 @@ def download_retailer_list_csv(request):
 
 class TerminalCreateView(CreateView):
     template_name = 'zruser/add_terminal.html'
-    kyc_doc_types = KYCDocumentType.objects.all().values_list('name', flat=True)
 
     def get(self, request):
         merchant_form = zr_user_form.TerminalRetailerForm()
-        bank_detail_form = zr_user_form.BankDetailForm()
 
         return render(
             request, self.template_name,
             {
-                'merchant_form': merchant_form,
-                'bank_detail_form': bank_detail_form,
-                'kyc_doc_types': self.kyc_doc_types
+                'merchant_form': merchant_form
             }
         )
 
     @transaction.atomic
     def post(self, request):
         merchant_form = zr_user_form.TerminalRetailerForm(data=request.POST)
-        bank_detail_form = zr_user_form.BankDetailForm(data=request.POST)
         error = False
 
         if not merchant_form.is_valid():
@@ -2014,17 +2009,14 @@ class TerminalCreateView(CreateView):
             return render(
                 request, self.template_name,
                 {
-                    'merchant_form': merchant_form,
-                    'bank_detail_form': bank_detail_form,
-                    'kyc_doc_types': self.kyc_doc_types
+                    'merchant_form': merchant_form
                 }
             )
 
         if error == False:
             retailer_id = request.user.zr_admin_user.zr_user_id
             retailer_api_id = transaction_models.VendorZrRetailer.objects.get(zr_user=retailer_id)
-            udoutlet = ZrTerminal.objects.last()
-            id = int(udoutlet.id) + 1
+            id = request.POST.get('mobile_no','')
             response = requests.post(QUICKWALLET_API_CRUD_URL, json={
                 "secret": QUICKWALLET_SECRET,
                 "action": "create",
@@ -2032,7 +2024,7 @@ class TerminalCreateView(CreateView):
                 "details": {
                     "name": merchant_form.data['first_name'],
                     "retailerid": int(retailer_api_id.vendor_user),
-                    "udoutletid": id
+                    "udoutletid": int(id)
                 }
             })
             if 300 > response.status_code >= 200:
@@ -2366,7 +2358,6 @@ class TerminalView(View):
     #             )
     #
     #         merchant_form.save()
-    #         # TODO: waiting for quickwallet update
     #         # print(user.id)
     #         # try:
     #         #     userid = transaction_models.VendorZrTerminal.objects.get(zr_terminal=user.id)
@@ -2480,7 +2471,7 @@ class GenerateOTPView(View):
                 if not mobile.isdigit() and (len(mobile)<10):
                     error = True
 
-            if int(udoutletid) != int(user.id):
+            if int(udoutletid) != int(user.mobile_no):
                 error = True
 
             if error == False:
@@ -2544,7 +2535,7 @@ class IssueMobileView(View):
                 if not mobile.isdigit() and (len(mobile)<10):
                     error = True
 
-            if int(udoutletid) != int(user.id):
+            if int(udoutletid) != int(user.mobile_no):
                 error = True
 
             if error == False:
@@ -2609,7 +2600,7 @@ class ActivateCardView(View):
                 if not mobile.isdigit() and (len(mobile)<10):
                     error = True
 
-            if int(udoutletid) != int(user.id):
+            if int(udoutletid) != int(user.mobile_no):
                 error = True
 
             if error == False:
@@ -2673,7 +2664,7 @@ class RechargeCardView(View):
                 if not amount.isdigit() and amount <= 0:
                     error = True
 
-            if int(udoutletid) != int(user.id):
+            if int(udoutletid) != int(user.mobile_no):
                 error = True
 
             if error == False:
@@ -2738,7 +2729,7 @@ class PayView(View):
                 if not mobile.isdigit() and (len(mobile)) < 10:
                     error = True
 
-            if int(udoutletid) != int(user.id):
+            if int(udoutletid) != int(user.mobile_no):
                 error = True
 
             if error == False:
@@ -2805,7 +2796,7 @@ class DeactivateCardView(View):
                 if not mobile.isdigit() and (len(mobile)<10):
                     error=True
 
-            if int(udoutletid) != int(user.id):
+            if int(udoutletid) != int(user.mobile_no):
                 error = True
 
             if error == False:
@@ -2843,4 +2834,3 @@ class DeactivateCardView(View):
         return render(
             request, self.template_name, {"zr_user": user}
         )
-

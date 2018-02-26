@@ -38,7 +38,7 @@
                 <div class="col-sm-2">
                     <div class="form-group">
                         <label for="phone">Phone No.</label>
-                        {{ merchant_form.mobile_no|attr:"id:phone"|attr:"class:fill" }}
+                        {{ merchant_form.mobile_no|attr:"id:phone"|attr:"name:phone"|attr:"class:fill" }}
                         {% if merchant_form.mobile_no.errors %}
                             {{ merchant_form.mobile_no.errors }}
                         {% endif %}
