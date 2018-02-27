@@ -59,20 +59,6 @@
                 <div style="width: 100%;">
                     <table>
                         <tr>
-                            <td>{{ subdist_mapping.sub_distributor.id }}</td>
-                            <td>{{ subdist_mapping.sub_distributor.first_name }} {{ subdist_mapping.subdistributor.last_name|default_if_none:""}}</td>
-                            <td>{{ subdist_mapping.at_created }}</td>
-                            <td>{{ subdist_mapping.sub_distributor.mobile_no }}</td>
-                            <td>{{ subdist_mapping.sub_distributor.email }}</td>
-                            <td>{% if subdist_mapping.sub_distributor.is_active %}Active{% else %}Inactive{% endif %}</td>
-                            <td>
-                                {% if subdist_mapping.sub_distributor.is_active %}
-                                    <a href='{% url "user:sub-distributor-list" %}?disable={{ subdist_mapping.sub_distributor.id }}'>Disable</a>
-                                {% else %}
-                                    <a href='{% url "user:sub-distributor-list" %}?activate={{ subdist_mapping.sub_distributor.id }}'>Activate</a>
-                                {% endif %}
-                            </td>
-                            <td> <a href='{% url "user:user-update" pk=subdist_mapping.sub_distributor.id%}'>Update</a></td>
                             <th>Sub-Distributor Id</th>
                             <th>Sub-Distributor Name</th>
                             <th>DOJ</th>
@@ -81,7 +67,6 @@
                             <th>Status</th>
                             <th>Actions</th>
                             <th>Update</th>
-
                         </tr>
                         {% for subdist_mapping in queryset %}
                             <tr>
@@ -132,22 +117,6 @@
     $(document).ready(function(){
     $('#sub-distributor-id').select2();
 
-    $('#search-btn').click(function(){
-        startDate = $('#start-date').val();
-        endDate = $('#end-date').val();
-        {% if filter_by %}
-            url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}"
-        {% else %}
-            url = window.location.pathname + "?q=" + $('#search-txt').val()
-        {% endif %}
-
-        if(startDate!="" && endDate!="" )
-            {
-                url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
-            }
-
-        window.location.assign(url)
-    })
     function q(){
              subDistributorId = $("#sub-distributor-id").val();
              startDate = $('#start-date').val();
@@ -169,18 +138,14 @@
                  url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
              }
 
-              if(subdistributorId!="")
-                {
-                 url = window.location.pathname + '?sub-distributor-id='+ subdistributorId;
-                }
-          window.location.assign(url)
-    });
              window.location.assign(url)
          }
 
     $('#search-btn').click(q)
 
     $('#sub-distributor-id').change(q);
+
+
 
     $('#csv-download').click(function(){
         url = "{% url "user:sub-distributor-csv" %}" + window.location.search
@@ -200,6 +165,7 @@
             }
         }).on('change', function (ev)
          {
+
             var start = $("#start-date").val();
             var startD = new Date(start);
             var end = $("#end-date").val();
@@ -214,6 +180,7 @@
                $('#start-date').val("");
             } else if ($("#start-date").val() != '' && $("#end-date").val() != ''){q();}
          });
+
 
         $('#end-date').datepicker({
             uiLibrary: 'bootstrap4',
@@ -240,6 +207,14 @@
                $('#end-date').val("");
             } else if ($("#start-date").val() != '' && $("#end-date").val() != ''){q();}
          });
+
+
+
+
+
+
+
+
 
     });
 </script>
