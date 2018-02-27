@@ -4,75 +4,61 @@
 
 {% block content %}
 
-    <div class="content-wrapper">
-        <p class="head-right">Sub-Distributor Table</p>
-    <div class="col-12" >
-        <div class="row rm-margin-side">
-                <div class="col-2">
-                    <p class="head-left">START DATE</p>
-                </div>
-                <div class="col-2">
-                    <p class="head-left">END DATE</p>
-                </div>
-            </div>
-            <div class="row rm-margin-side">
-                <div class="col-2">
-                    <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-                </div>
-                <div class="col-2">
-                    <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-                </div>
-                <div class="col-4">
-                    <select id="sub-distributor-id"  name="sub-distributor-id">
-                        <option value="-1">ALL</option>
-                            {% for key,val in subDistributor.items %}
-                                <optgroup label = "{{val.0.0}} ">
-                                     <option value="{{key}}"{% if key == distributor_id %}selected{% endif %}>ALL-{{val.0.0}}</option>
-                                    {% for subdrow in val %}
-                                        <option value="{{subdrow.1}}" {% if subdrow.1 == sub_distributor_id %}selected{% endif %}>{{ subdrow.2 }}</option>
-                                    {% endfor %}
-                                </optgroup>
+<div class="content-wrapper">
+    <p class="head-right">Sub-Distributor Table</p>
+    <div class="row rm-margin-side">
+        <div class="col-2">
+            <p class="head-left">START DATE</p>
+        </div>
+        <div class="col-2">
+            <p class="head-left">END DATE</p>
+        </div>
+    </div>
+    <div class="row rm-margin-side">
+        <div class="col-2">
+            <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
+        </div>
+        <div class="col-2">
+            <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
+        </div>
+        <div class="col-4">
+            <select id="sub-distributor-id"  name="sub-distributor-id">
+                <option value="-1">ALL</option>
+                    {% for key,val in subDistributor.items %}
+                        <optgroup label = "{{val.0.0}} ">
+                             <option value="{{key}}"{% if key == distributor_id %}selected{% endif %}>ALL-{{val.0.0}}</option>
+                            {% for subdrow in val %}
+                                <option value="{{subdrow.1}}" {% if subdrow.1 == sub_distributor_id %}selected{% endif %}>{{ subdrow.2 }}</option>
                             {% endfor %}
-                    </select>
+                        </optgroup>
+                    {% endfor %}
+            </select>
+        </div>
+        <div class="div-width-100">
+            <!--<p class="head-left">PERIOD</p>-->
+            <br>
+            <div class="row">
+                <div class="align-items-center div-width-100">
+                    <div class="float-left">
+                        <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                        <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                    </div>
+                    <input class="button red float-left mar_l_10" type="button" value="Search" id="search-btn">
+                    <input class="button red float-right" type="button" value="DOWNLOAD CSV" id="csv-download">
+                    <a class="nav-link float-right" href="{% url 'user:sub-distributor-list' %}">Reset filters</a>
                 </div>
             </div>
-        <div class="row rm-margin-side">
-            <p class="head-left">PERIOD</p>
-        </div>
-        <div class="row">
-            <div style="position: relative;">
-                <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+            <br>
+            <div class="row">
+                <div class="fine">
+                    <p class="head-bg">List of Sub-Distributors</p>
+                </div>
             </div>
-            &nbsp;&nbsp;
-            <input class="button red" type="button" value="Search" id="search-btn">
-            &nbsp;&nbsp;&nbsp;&nbsp;
-            <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
-        </div>
+            <div class="row scroll">
 
-        <br>
-        <div class="row" style="padding-right: 50px;">
-            <div class="fine">
-                <p class="head-bg">List of Sub-Distributors</p>
-            </div>
-        </div>
-        <div class="row scroll">
-
-            <div style="width: 100%;">
-                <table>
-                    <tr>
-                        <th>Sub-Distributor Id</th>
-                        <th>Sub-Distributor Name</th>
-                        <th>DOJ</th>
-                        <th>Mobile No</th>
-                        <th>Email</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                        <th>Update</th>
-                    </tr>
-                    {% for subdist_mapping in queryset %}
+                <div style="width: 100%;">
+                    <table>
                         <tr>
-
                             <td>{{ subdist_mapping.sub_distributor.id }}</td>
                             <td>{{ subdist_mapping.sub_distributor.first_name }} {{ subdist_mapping.subdistributor.last_name|default_if_none:""}}</td>
                             <td>{{ subdist_mapping.at_created }}</td>
@@ -87,29 +73,59 @@
                                 {% endif %}
                             </td>
                             <td> <a href='{% url "user:user-update" pk=subdist_mapping.sub_distributor.id%}'>Update</a></td>
+                            <th>Sub-Distributor Id</th>
+                            <th>Sub-Distributor Name</th>
+                            <th>DOJ</th>
+                            <th>Mobile No</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                            <th>Update</th>
+
                         </tr>
+                        {% for subdist_mapping in queryset %}
+                            <tr>
 
-                    {% endfor %}
-                </table>
-            </div>
-            <div class="pagination-prev">
-                {% if has_prev_page %}
-                    <a href="{% url "user:sub-distributor-list" %}?{{prev_page_qs}}" class="button red">Prev</a>
+                                <td>{{ subdist_mapping.sub_distributor.id }}</td>
+                                <td>{{ subdist_mapping.sub_distributor.first_name }} {{ subdist_mapping.subdistributor.last_name|default_if_none:""}}</td>
+                                <td>{{ subdist_mapping.at_created }}</td>
+                                <td>{{ subdist_mapping.sub_distributor.mobile_no }}</td>
+                                <td>{{ subdist_mapping.sub_distributor.email }}</td>
+                                <td>{% if subdist_mapping.is_active %}Active{% else %}Inactive{% endif %}</td>
+                                <td>
+                                    {% if subdist_mapping.is_active %}
+                                        <a href='{% url "user:sub-distributor-list" %}?disable={{ subdist_mapping.id }}'>Disable</a>
+                                    {% else %}
+                                        <a href='{% url "user:sub-distributor-list" %}?activate={{ subdist_mapping.id }}'>Activate</a>
+                                    {% endif %}
+                                </td>
+                                <td> <a href='{% url "user:user-update" pk=subdist_mapping.sub_distributor.id%}'>Update</a></td>
+                            </tr>
+
+                        {% endfor %}
+                    </table><br/>
+                     {% if is_paginated %}
+                    <div class="pagination">
+                        {% if has_prev_page %}
+                            <div class="pagination-prev">
+                                <a href="{% url 'user:sub-distributor-list' %}?{{prev_page_qs}}" class="button red">Prev</a>
+                            </div>
+                        {% endif %}
+                        {% if has_next_page %}
+                            <div class="pagination-next">
+                                    <a href="{% url 'user:sub-distributor-list' %}?{{next_page_qs}}" class="button red">Next</a>
+                            </div>
+                        {% endif %}
+                    </div>
                 {% endif %}
-            </div>
+                </div>
 
-            <div class="pagination-next">
-                {% if has_next_page %}
-                    <a href="{% url "user:sub-distributor-list" %}?{{next_page_qs}}" class="button red">Next</a>
-                {% endif %}
             </div>
+            <div>
         </div>
-        <div>
-
-        </div>
-        <br>
     </div>
-    </div>
+</div>
+</div>
 
 <script>
 
@@ -132,20 +148,25 @@
 
         window.location.assign(url)
     })
+    function q(){
+             subDistributorId = $("#sub-distributor-id").val();
+             startDate = $('#start-date').val();
+             endDate = $('#end-date').val();
 
-     $('#sub-distributor-id').change(function(){
-         var subdistributorId = $('#sub-distributor-id').val();
-         var distributorId = "";
+             if($('#search-txt').val() != "") {
+                  url = window.location.pathname + "?q=" + $('#search-txt').val();
+             } else {
+                  url = window.location.pathname + '?';
+             }
 
-         var selectedAll = $("#sub-distributor-id :selected").text();
-             if (selectedAll.includes("ALL"))
+             if(subDistributorId !="")
              {
-                distributorId = subdistributorId;
-                subdistributorId = ""
-                if(distributorId!="")
-                {
-                 url =window.location.pathname +'?distributor-id='+ distributorId;
-                }
+                 url += '&sub-distributor-id=' + subDistributorId
+             }
+
+             if(startDate!="" && endDate!="" )
+             {
+                 url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
              }
 
               if(subdistributorId!="")
@@ -154,6 +175,12 @@
                 }
           window.location.assign(url)
     });
+             window.location.assign(url)
+         }
+
+    $('#search-btn').click(q)
+
+    $('#sub-distributor-id').change(q);
 
     $('#csv-download').click(function(){
         url = "{% url "user:sub-distributor-csv" %}" + window.location.search
@@ -185,7 +212,7 @@
             {
                alert("date difference is greater than 31");
                $('#start-date').val("");
-            }
+            } else if ($("#start-date").val() != '' && $("#end-date").val() != ''){q();}
          });
 
         $('#end-date').datepicker({
@@ -211,7 +238,7 @@
             {
                alert("date difference is greater than 31");
                $('#end-date').val("");
-            }
+            } else if ($("#start-date").val() != '' && $("#end-date").val() != ''){q();}
          });
 
     });

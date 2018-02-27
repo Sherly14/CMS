@@ -4,55 +4,53 @@
 
 {% block content %}
 
-    <div class="content-wrapper">
-        <p class="head-right">Distributor Table</p>
-        <div class="col-12" >
-            <div class="row rm-margin-side">
-                    <div class="col-2">
-                        <p class="head-left">START DATE</p>
-                    </div>
-                    <div class="col-2">
-                        <p class="head-left">END DATE</p>
-                    </div>
+<div class="content-wrapper">
+    <p class="head-right">Distributor Table</p>
+    <div class="row rm-margin-side">
+            <div class="col-2">
+                <p class="head-left">START DATE</p>
             </div>
-            <div class="row rm-margin-side">
-                <div class="col-2">
-                    <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-                </div>
-                <div class="col-2">
-                    <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-                </div>
-                <div class="col-8">
-                    <select id="distributor-id"  name="distributor-id">
-                        <option value="-1">ALL</option>
-                        {% for distributor in distributor_list %}
-                            <option value="{{ distributor.id }}" {% if  distributor.id == distributor_id %}selected{% endif %}>{{ distributor.first_name }} {{ distributor.last_name|default_if_none:""}}</option>
-                         {% endfor %}
+            <div class="col-2">
+                <p class="head-left">END DATE</p>
+            </div>
+    </div>
+    <div class="row rm-margin-side">
+        <div class="col-2">
+            <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
+        </div>
+        <div class="col-2">
+            <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
+        </div>
+        <div class="col-4">
+            <select id="distributor-id"  name="distributor-id">
+                <option value="-1">ALL</option>
+                {% for distributor in distributor_list %}
+                    <option value="{{ distributor.id }}" {% if  distributor.id == distributor_id %}selected{% endif %}>{{ distributor.first_name }} {{ distributor.last_name|default_if_none:""}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="div-width-100">
+            <br>
+            <div class="row">
+                <div class="align-items-center div-width-100">
+                    <div style="" class="float-left">
+                        <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                        <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                    </div>
+                    <input class="button red float-left mar_l_10" type="button" value="Search" id="search-btn">
+                    <input class="button red float-right" type="button" value="DOWNLOAD CSV" id="csv-download">
 
-                    </select>
+                    <a class="nav-link float-right" href="{% url 'user:distributor-list' %}">Reset filters</a>
                 </div>
             </div>
             <br>
-            <div class="row rm-margin-side">
-                <div style="position: relative;">
-                    <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                    <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
-                </div>
-                &nbsp;&nbsp;
-                <input class="button red" type="button" value="Search" id="search-btn">
-                <a class="nav-link" href="{% url 'user:distributor-list' %}">Reset filters</a>
-                <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
-            </div>
-
-            <br>
-            <div class="row" style="padding-right: 50px;">
+            <div class="row">
                 <div class="fine">
                     <p class="head-bg">List of Distributors</p>
                 </div>
             </div>
             <div class="row scroll">
-
-                <div style="width: 100%;">
+                <div class="div-width-100">
                     <table>
                         <tr>
                             <th>Distributor Id</th>
@@ -85,62 +83,57 @@
 
                         {% endfor %}
                     </table>
-                </div>
-                <div class="pagination-prev">
-                {% if has_prev_page %}
-                    <a href="{% url "user:distributor-list" %}?{{prev_page_qs}}" class="button red" >Prev</a>
-                {% endif %}
-                </div>
-
-                <div class="pagination-next">
-                    {% if has_next_page %}
-                        <a href="{% url "user:distributor-list" %}?{{next_page_qs}}" class="button red" >Next</a>
+                    <br>
+                    {% if is_paginated %}
+                        <div class="pagination">
+                            {% if has_prev_page %}
+                            <div class="pagination-prev">
+                                <a href="{% url 'user:distributor-list' %}?{{prev_page_qs}}" class="button red" >Prev</a>
+                            </div>
+                            {% endif %}
+                            {% if has_next_page %}
+                            <div class="pagination-next">
+                                <a href="{% url 'user:distributor-list' %}?{{next_page_qs}}" class="button red" >Next</a>
+                            </div>
+                            {% endif %}
+                        </div>
                     {% endif %}
                 </div>
             </div>
             <br>
         </div>
-
     </div>
+    <br>
+</div>
 
 <script>
 
     $(document).ready(function()
     {
-        $('#distributor-id').select2();
 
-        $('#search-btn').click(function(){
+         $('#distributor-id').select2();
 
-        startDate = $('#start-date').val();
-        endDate = $('#end-date').val();
+         function q(){
+             distributorId = $("#distributor-id").val();
+             startDate = $('#start-date').val();
+             endDate = $('#end-date').val();
 
-            {% if filter_by %}
-
-                url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}";
-
-            {% else %}
-                url = window.location.pathname + "?q=" + $('#search-txt').val();
-            {% endif %}
-
-            if(startDate!="" && endDate!="" )
-            {
-                url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
-            }
-
-            window.location.assign(url)
-        });
-
-         $('#distributor-id').change(function(){
-         distributorId = $("#distributor-id").val();
-         all = "";
-
-         var selectedAll = $("#user-transaction-id :selected").text();
-             if (selectedAll.includes("ALL"))
-             {
-                all = distributorId;
-                distributorId = ""
-                 url = window.location.pathname +'?distributor-id=' + all
+             if($('#search-txt').val() != "") {
+                  url = window.location.pathname + "?q=" + $('#search-txt').val();
+             } else {
+                  url = window.location.pathname + '?';
              }
+
+             if(distributorId !="")
+             {
+                 url += '&distributor-id=' + distributorId
+             }
+
+             if(startDate!="" && endDate!="" )
+             {
+                 url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
+             }
+
 
               if(distributorId !="")
                 {
@@ -148,6 +141,16 @@
                 }
           window.location.assign(url)
     });
+
+             window.location.assign(url)
+         }
+
+         $('#search-btn').click(q);
+
+         $('#distributor-id').change(q);
+
+         //$('#search-txt').on('input', q);
+
 
         $('#period').change(function() {
             period_val = $(this).val();
@@ -172,7 +175,7 @@
             format: 'yyyy-mm-dd',
 
             maxDate: function () {
-            return $('#end-date').val();
+                return $('#end-date').val();
             }
         }).on('change', function (ev)
          {
@@ -188,7 +191,7 @@
             {
                alert("date difference is greater than 31");
                $('#start-date').val("");
-            }
+            } else if ($("#start-date").val() != '' && $("#end-date").val() != ''){q();}
          });
 
         $('#end-date').datepicker({
@@ -213,7 +216,7 @@
             {
                alert("date difference is greater than 31");
                $('#end-date').val("");
-            }
+            }else if ($("#start-date").val() != '' && $("#end-date").val() != ''){q();}
          });
     });
 

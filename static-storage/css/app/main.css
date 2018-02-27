@@ -120,10 +120,21 @@ body {
     box-shadow: 2px 3px 10px #E5E5E5
 }
 .button.red{
-    background-color: #DB3725;
+    background-color: #f44336;
     box-shadow: 0 10px 27px 0 rgba(0, 0, 0, 0.13);
     font-weight: 100;
     border-radius: 3px;
+}
+a.button.red{
+    text-decoration: none;
+}
+
+.button.red:hover {
+    background-color: red;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
 }
 
 .button.downloadcsv{
@@ -283,4 +294,16 @@ body {
 
 .padding-50{
     padding-right: 50px;
+}
+
+.div-width-100{
+    width: 100%;
+}
+
+.mar_l_10{
+    margin-left:10px;
+}
+
+.padding-left-5{
+    padding-left: 5px!important;
 }

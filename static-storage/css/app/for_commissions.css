@@ -13,13 +13,13 @@ p {
 
 p.head-right{
 	color: #313131;
-    padding: 20px 0px 30px 0px;
+    padding: 10px 0px 10px 0px;
     width: 100%;
     text-align: right;
     font-size: 25px;
     font-weight: 100;
     letter-spacing: 0.1rem;
-    padding-right: 50px;
+    padding-right: 45px;
 }
 p.head-left{
 	font-size: 1em;
@@ -27,13 +27,15 @@ p.head-left{
     margin: 0.5rem;
 }
 p.inr{
-	font-size: 30px;
+	font-size: 20px;
     width: 100%;
-    padding: 25px 2rem 60px 2rem;
+    padding: 20px 20px 20px 15px;
     color: #818181;
     font-weight: 300;
-    letter-spacing: 5px;
+    letter-spacing: 2px;
     color: #313131;
+    border-bottom: 1px dotted;
+    margin-bottom: 10px;
 }
 
 /*headings*/
@@ -105,10 +107,20 @@ p.head-bg{
 
 /*row padding and margin for this page*/
 .row{
-	padding-left:3rem;
-	padding-right:1rem;
+	padding-left:2rem;
+	padding-right:2rem;
+	margin: 0;
 }
 
+.row.rm-margin-side .row{
+	padding-left:15px;
+	padding-right:15px;
+}
+
+.row.rm-margin-side .row.scroll{
+    padding:0;
+    margin:0 15px;
+}
 
 
 /*aline for table*/
@@ -142,10 +154,10 @@ p.head-bg{
 
 /*scroll*/
 .scroll{
-	overflow:scroll;
+	overflow:auto;
 	background-clip:content-box;
 	background-color: #F4F3F3;
-	height:400px;
+	min-height:150px;
     padding-right: 50px;
 }
 
@@ -168,10 +180,12 @@ p.head-bg{
 
 .pagination-prev{
     margin: 0 auto;
+    margin-bottom: 15px;
 }
 
 .pagination-next{
     margin: 0 auto;
+    margin-bottom: 15px;
 }
 
 

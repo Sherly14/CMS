@@ -12,7 +12,7 @@
     border: 2px solid #DC3826;
     background-color: transparent;
     position: absolute;
-    right: 35px;
+    right: 15px;
     top: 10px;
     border-radius: 11px;
 }
@@ -30,7 +30,9 @@ body.fixed-nav {
 
 /*wrapper for the column */
 .content-wrapper {
-  background: white; }
+  background: white;
+    min-height: 95vh;
+  }
   @media (min-width: 992px) {
     .content-wrapper {
       margin-left: 230px; } }
@@ -117,7 +119,10 @@ body.fixed-nav {
 
 @media (min-width: 992px) {
   #mainNav .navbar-brand {
-    width: 250px; }
+    width: 250px;
+    padding-left: 20px;
+
+   }
   #mainNav .navbar-collapse {
     overflow: visible;
     max-height: none; }
@@ -125,22 +130,22 @@ body.fixed-nav {
       position: absolute;
       top: 0;
       left: 0;
-      overflow: auto;
+      overflow: hidden;
       flex-direction: column;
-      height: 100vh;
+      //height: 100vh;
       margin-top: 150px;
       /*margin-left: -70px;*/
-      padding-bottom: 56px;
+      /*padding-bottom: 56px;*/
       background: transparent;
       -webkit-flex-direction: column;
       -ms-flex-direction: column; }
       #mainNav .navbar-collapse .navbar-nav.sidebar-nav > .nav-item {
-        width: 250px;
+        width: 230px;
         padding: 0; }
       #mainNav .navbar-collapse .navbar-nav.sidebar-nav > .nav-item > .nav-link {
         font-weight: 100;
         font-size: 0.8rem;
-        padding: 10px 70px 10px 0px;}
+        padding: 10px 50px 10px 0px;}
       #mainNav .navbar-collapse .navbar-nav.sidebar-nav > .nav-item > .nav-link.active {
         background-color: #2E2E2E;
         /*border-radius: 2rem;*/
