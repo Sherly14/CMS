@@ -1,0 +1,264 @@
+{% extends 'base.html' %}
+<!--{% load widget_tweaks %}-->
+
+{% block title %}OfferList{% endblock %}
+
+{% block content %}
+
+    <div class="content-wrapper">
+        <p class="head-right">Offers</p>
+        {% if api_error %}
+            <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
+        {% endif %}
+        <div class="col-12" >
+
+            <div class="row" style="padding-right: 50px;">
+                <div class="fine">
+                    <p class="head-bg">List of Offers</p>
+                </div>
+            </div>
+            <div class="row scroll">
+
+                <div style="width: 100%;">
+                    <table>
+                        <tr>
+                            <th>Id</th>
+                            <th>Min</th>
+                            <th>Short Desc</th>
+                            <th>Long Desc</th>
+                            <th>Redemption</th>
+                            <th>Is_Active</th>
+                            <th>Dis</th>
+                            <th>Proxy</th>
+                            <th>Cashback</th>
+                            <th>Type</th>
+                            <th>Availability</th>
+                            <th>Assign_To_Retailer</th>
+                        </tr>
+
+                        {% for offer in offers %}
+                            <tr>
+                                <td>{{ offer.id }}</td>
+                                <td>{{ offer.min }}</td>
+                                <td>{{ offer.sdesc }}</td>
+                                <td>{{ offer.ldesc }}</td>
+                                <td>{{ offer.redemptions }}</td>
+                                <td>{{ offer.isactive }}</td>
+                                <td>{{ offer.dis }}</td>
+                                <td>{{ offer.proxy }}</td>
+                                <td>{{ offer.cashback }}</td>
+                                <td>{{ offer.type }}</td>
+                                <td>{{ offer.availability }}</td>
+                                <td> <button data-toggle="modal" data-target="#get_assigned">Assign</button></td>
+                            </tr>
+                        {% endfor %}
+
+                    </table>
+                </div>
+                <!--<div class="pagination-prev">-->
+                <!--{% if has_prev_page %}-->
+                    <!--<a href="{% url "user:terminal-list" %}?{{prev_page_qs}}" class="button red" >Prev</a>-->
+                <!--{% endif %}-->
+                <!--</div>-->
+
+                <!--<div class="pagination-next">-->
+                    <!--{% if has_next_page %}-->
+                        <!--<a href="{% url "user:terminal-list" %}?{{next_page_qs}}" class="button red" >Next</a>-->
+                    <!--{% endif %}-->
+                <!--</div>-->
+            </div>
+            <br>
+        </div>
+    </div>
+
+<!-- Modal to get Email -->
+    <div id="get_assigned" class="modal fade">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content" style="width: 700px;">
+                <div class="modal-header" style="background-color: #e2e2e2;">
+                    <h1 class="modal-title" style="font-size: 1.5rem; font-size: 1.5rem;font-weight: bold;line-height: 2rem;padding-left: 12px;">Assign Offer To Retailer</h1>
+                </div>
+                <div class="modal-body">
+
+                    <form class="form-horizontal" method="POST" id="retailer_assign_form" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <input type="text" name="offer_id" value="{{ request.GET.offer.id }}" readonly>
+                        <div class="row" style="padding-left: 3rem;padding-top: 25px;">
+                            <div class="form-group col-sm-12">
+                                <label class="control-label"><b>Retailer</b></label>
+                                <div>
+                                    <input type="text" class="form-control" name="retailer" id="retailer" style="box-shadow: 0px 0px;border-style: solid;" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row container" style="padding-left: 3rem;">
+                            <div class="form-group col-sm-3">
+                            </div>
+                            <div class="form-group col-sm-6">
+                                <button type="submit" id="mail_report" class="pull-right submit_request button red downloadcsv mr-5" style="background-color: red">
+                                    Mail a report
+                                </button>
+                            </div>
+                            <div class="form-group col-sm-3" style=" position: relative;left: 13%;">
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="alert alert-danger" id="alert_msg" style="display:none;">
+                    </div>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal -->
+
+
+<script>
+    var data = new FormData($('#challan_request_form')[0]);
+                {# console.log(data);#}
+                $('#submit_request').prop('disabled', true);
+                $('#submit_request').addClass('disabled');
+                $.ajax({
+                    type: "POST",
+                    enctype: 'multipart/form-data',
+                    processData: false,
+                    contentType: false,
+                    url: '/payment_request/generate_payment_request/',
+                    data: data,
+                    success: function (data) {
+                        $('#modal_message').html(data.message);
+                        if(data.success) {
+                            setTimeout(function () {
+                                window.location.reload();
+                            }, 1000);
+                        }
+                        else {
+                            setTimeout(function () {
+                                $('#modal_message').html("");
+                            }, 2000);
+                            $('#submit_request').prop('disabled', false);
+                            $('#submit_request').removeClass('disabled');
+                        }
+                    },
+                    error: function (data) {
+                        $('#modal_message').html(data.message);
+                        $('#submit_request').prop('disabled', false);
+                    }
+                });
+                <!-- AJAX Call -->
+            }
+        });
+
+</script>
+
+
+<script>
+
+    $(document).ready(function()
+    {
+        $('#terminal-id').select2();
+        $('#search-btn').click(function(){
+        startDate = $('#start-date').val();
+        endDate = $('#end-date').val();
+
+            {% if filter_by %}
+                url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}";
+            {% else %}
+                url = window.location.pathname + "?q=" + $('#search-txt').val();
+            {% endif %}
+
+            if(startDate!="" && endDate!="" )
+            {
+                url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
+            }
+
+            window.location.assign(url)
+        });
+
+         $('#terminal-id').change(function(){
+         terminalId = $("#terminal-id").val();
+         all = "";
+
+         var selectedAll = $("#user-transaction-id :selected").text();
+             if (selectedAll.includes("ALL"))
+             {
+                all = terminalId;
+                terminalId = ""
+                 url = window.location.pathname +'?terminal-id=' + all
+             }
+              if(terminalId !="")
+                {
+                    url = window.location.pathname +'?terminal-id=' + terminalId
+                }
+          window.location.assign(url)
+        });
+
+        $('#period').change(function() {
+            period_val = $(this).val();
+            url = window.location.pathname + '?filter=' + period_val.replace(' ', '-');
+            {% if q %}
+                url += "&q={{ q }}";
+            {% endif %}
+            window.location.assign(url)
+        });
+
+        $('#csv-download').click(function()
+        {
+            url = "{% url "user:terminal-csv" %}" + window.location.search;
+            window.location.assign(url)
+        });
+         var startDate = $('#start-date').val();
+         var endDate = $('#end-date').val();
+         var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+        $('#start-date').datepicker({
+            uiLibrary: 'bootstrap4',
+            iconsLibrary: 'fontawesome',
+            format: 'yyyy-mm-dd',
+
+            maxDate: function () {
+            return $('#end-date').val();
+            }
+        }).on('change', function (ev)
+         {
+            var start = $("#start-date").val();
+            var startD = new Date(start);
+            var end = $("#end-date").val();
+            var endD = new Date(end);
+            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
+
+            $("#days").val(diff);
+
+            if(diff>31)
+            {
+               alert("date difference is greater than 31");
+               $('#start-date').val("");
+            }
+         });
+
+        $('#end-date').datepicker({
+            uiLibrary: 'bootstrap4',
+            iconsLibrary: 'fontawesome',
+            format: 'yyyy-mm-dd',
+
+            minDate: function () {
+                return $('#start-date').val();
+            }
+        }).on('change', function (ev)
+         {
+            var start = $("#start-date").val();
+            var startD = new Date(start);
+            var end = $("#end-date").val();
+            var endD = new Date(end);
+            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
+
+            $("#days").val(diff);
+
+            if(diff>31)
+            {
+               alert("date difference is greater than 31");
+               $('#end-date').val("");
+            }
+         });
+    });
+</script>
+{% endblock %}

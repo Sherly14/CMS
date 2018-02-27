@@ -11,6 +11,10 @@
       <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
     {% endif %}
 
+    {% if success %}
+      <div class="alert alert-success" id="success_msg" style="text-align:center">{{ success }}</div>
+    {% endif %}
+
     <form id="add-card-form" method="POST">
     <div class="container-fluid" style="position: relative;">
         <div class="row">
@@ -19,86 +23,88 @@
 
             <div class="row">
                 <div class="row">
-                    <div class="col-sm-2" style="margin-right:20px;">
+                    <div class="col-md-2" style="margin-right:30px;">
                         <div class="form-group">
                             <label for="id">Id</label>
-                                <input type="text" style="border: 2px solid; border-color: #aaa; padding-left: 0rem;" name="id" REQUIRED>
+                                <input type="text" style="border: 2px solid; border-color: #aaa; padding-left: 0.5rem;" name="id" REQUIRED>
                         </div>
                     </div>
 
-                    <div class="col-sm-2" style="margin-right:20px;">
+                    <div class="col-sm-2" style="margin-right:30px;">
                         <div class="form-group">
-                            <label for="type">type</label>
-                                <input type="number" style="border: 2px solid; border-color: #aaa; padding-left: 0rem;" name="type" REQUIRED>
+                            <label for="type">Type</label>
+                                <input type="number" style="border: 2px solid; border-color: #aaa; padding-left: 0.5rem;" name="type" REQUIRED>
                         </div>
                     </div>
 
-                    <div class="col-sm-2" style="margin-right:20px;">
+                    <div class="col-sm-2" style="margin-right:30px;">
                         <div class="form-group">
                             <label for="availability">Availability</label>
-                            <input type="number" style="border: 2px solid; border-color: #aaa;" min="1" name="availability" REQUIRED>
+                            <input type="number" style="border: 2px solid; border-color: #aaa; padding-left: 0.5rem;" min="1" name="availability" REQUIRED>
                         </div>
                     </div>
 
-                    <div class="col-sm-2" style="margin-right:20px;">
+                    <div class="col-sm-2" style="margin-right:30px;">
                        <div class="form-group">
                             <label for="redemptions">Redemptions</label>
-                            <input type="number" style="border: 2px solid; border-color: #aaa;" min="1" name="redemptions   " REQUIRED>
+                            <input type="number" style="border: 2px solid; border-color: #aaa; padding-left: 0.5rem;" min="1" name="redemptions" REQUIRED>
                         </div>
                     </div>
 
-                    <div class="col-sm-2" style="margin-right:20px;">
-                       <div class="form-group">
-                            <label for="min">Min</label>
-                            <input type="number" style="border: 2px solid; border-color: #aaa;" min="1" name="min" REQUIRED>
-                        </div>
-                    </div>
                 </div>
+
                 <div class="row">
-                    <div class="col-md-6" style="margin-right:20px;">
+                    <div class="col-md-6" style="margin-right:50px;">
                         <div class="form-group">
                             <label for="short_desc">Short Description</label>
-                            <input type="text" style="border: 2px solid; border-color: #aaa;" name="short_desc" REQUIRED>
+                            <input type="text" style="border: 2px solid; border-color: #aaa; padding-left: 0.5rem;" name="short_desc" REQUIRED>
                         </div>
                     </div>
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6" style="margin-right:20px;">
+                    <div class="col-md-6" >
                        <div class="form-group">
                             <label for="long_desc">Long Description</label>
-                            <input type="text" style="border: 2px solid; border-color: #aaa;" name="long_desc" REQUIRED>
+                            <input type="longtext" style="border: 2px solid; border-color: #aaa; padding-left: 0.5rem; width: 33rem;" name="long_desc" REQUIRED>
                         </div>
                     </div>
                 </div>
 
                 <div class="row">
-                    <div class="col-sm-2" style="margin-right:20px;">
+                    <div class="col-sm-2" style="margin-right:1px;">
                        <div class="form-group">
-                            <label for="cashback">cashback</label>
+                            <label for="cashback">Cashback</label>
                             <!--<input type="text" style="border: 2px solid; border-color: #aaa;" name="cashback" REQUIRED>-->
-                           <select style="border: 2px solid; border-color: #aaa;" name="cashback" default="true" REQUIRED>
+                           <select style="border: 2px solid; border-color: #aaa; width: 6rem;" name="cashback" default="true" REQUIRED>
                                 <option value="true">True</option>
                                 <option value="false">False</option>
                            </select>
                         </div>
                     </div>
 
-                    <div class="col-sm-2" style="margin-right:20px; margin-left:20px;">
+                    <div class="col-sm-2" style="margin-left: 5px;">
                        <div class="form-group">
-                            <label for="isactive">isactive</label>
+                            <label for="isactive">Isactive</label>
                             <!--<input type="text" style="border: 2px solid; border-color: #aaa;" name="cashback" REQUIRED>-->
-                           <select style="border: 2px solid; border-color: #aaa;" name="isactive" default="true" REQUIRED>
+                           <select style="border: 2px solid; border-color: #aaa; width: 6rem;" name="isactive" default="true" REQUIRED>
                                 <option value="true">True</option>
                                 <option value="false">False</option>
                            </select>
                         </div>
                     </div>
 
-                    <div class="col-sm-2" style="margin-right:20px;">
+                    <div class="col-sm-2" style="margin-right:40px;">
                        <div class="form-group">
-                            <label for="dis">dis</label>
-                            <input type="number" style="border: 2px solid; border-color: #aaa; margin-left:20px;" min="1" name="dis" REQUIRED>
+                            <label for="min">Min</label>
+                            <input type="number" style="border: 2px solid; border-color: #aaa; padding-left: 0.5rem;" min="1" name="min" REQUIRED>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-2" style="margin-left:20px;">
+                       <div class="form-group">
+                            <label for="dis">Dis</label>
+                            <input type="number" style="border: 2px solid; border-color: #aaa; padding-left: 0.5rem;" min="1" name="dis" REQUIRED>
                         </div>
                     </div>
                 </div>
@@ -107,7 +113,7 @@
     </div>
         <div class="col-md-5 colAlignment" style="float:right;">
             <div class="fill margin-top" style="padding-left:6.5rem">
-                <input class="button red" type="submit" value="Create Offer">
+                <input class="button red" type="submit" name = "save" value="Create Offer">
             </div>
         </div>
         {% csrf_token %}
@@ -128,6 +134,16 @@
             </span>
         <input class="button yellow small remove-kyc" doc_type="<%=document_type%>" type="button" value="Remove">
     </div>
+</script>
+
+<script>
+$(document).ready(function () {
+window.setTimeout(function() {
+    $(".alert").fadeTo(1000, 0).slideUp(1000, function(){
+        $(this).remove();
+    });
+}, 5000);
+});
 </script>
 
 <script type="text/undercore-template" id="form-hidden-input">

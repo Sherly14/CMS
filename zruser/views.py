@@ -44,7 +44,7 @@ from itertools import chain
 from zrcms.env_vars import QUICKWALLET_ZR_PARTERNERID, QUICKWALLET_SECRET, QUICKWALLET_API_CRUD_URL,\
     QUICKWALLET_API_CARD_URL, QUICKWALLET_API_LISTCARD_URL, QUICKWALLET_API_GENERATEOTP_URL, QUICKWALLET_API_ISSUE_MOBILE_URL,\
     QUICKWALLET_API_ACTIVATE_CARD_URL, QUICKWALLET_API_RECHARGE_CARD_URL, QUICKWALLET_API_PAY_URL, QUICKWALLET_API_DEACTIVATE_CARD_URL,\
-    QUICKWALLET_PAYMENT_HISTORY_URL
+    QUICKWALLET_PAYMENT_HISTORY_URL, QUICKWALLET_CREATE_OFFER_URL, QUICKWALLET_OFFER_LIST_URL
 
 
 MERCHANT = 'MERCHANT'
@@ -2873,104 +2873,122 @@ class PaymentHistoryView(View):
 
 class OfferCreateView(CreateView):
     template_name = 'zruser/offer_create.html'
-    kyc_doc_types = KYCDocumentType.objects.all().values_list('name', flat=True)
 
     def get(self, request):
-        merchant_form = zr_user_form.MerchantDistributorForm()
-        bank_detail_form = zr_user_form.BankDetailForm()
 
         return render(
-            request, self.template_name,
-            {
-                'merchant_form': merchant_form,
-                'bank_detail_form': bank_detail_form,
-                'kyc_doc_types': self.kyc_doc_types
-            }
+            request, self.template_name
         )
 
     @transaction.atomic
     def post(self, request):
-        merchant_form = zr_user_form.MerchantDistributorForm(data=request.POST)
-        bank_detail_form = zr_user_form.BankDetailForm(data=request.POST)
+        if "save" in request.POST:
+            id = request.POST.get('id', '')
+            type = request.POST.get('type', '')
+            availability = request.POST.get('availability', '')
+            redemptions = request.POST.get('redemptions', '')
+            short_desc = request.POST.get('short_desc', '')
+            long_desc = request.POST.get('long_desc', '')
+            cashback = request.POST.get('cashback', '')
+            isactive = request.POST.get('isactive', '')
+            min = request.POST.get('min', '')
+            dis = request.POST.get('dis', '')
 
-        if not merchant_form.is_valid():
-            return render(
-                request, self.template_name,
-                {
-                    'merchant_form': merchant_form,
-                    'bank_detail_form': bank_detail_form,
-                    'kyc_doc_types': self.kyc_doc_types
-                }
-            )
+            # validation
+            error = False
+            # if not cardnumber:
+            #     error = True
+            # if mobile:
+            #     if not mobile.isdigit() and (len(mobile)) < 10:
+            #         error = True
+            #
+            # if int(udoutletid) != int(user.mobile_no):
+            #     error = True
 
-        if not bank_detail_form.is_valid():
-            return render(
-                request, self.template_name,
-                {
-                    'merchant_form': merchant_form,
-                    'bank_detail_form': bank_detail_form,
-                    'kyc_doc_types': self.kyc_doc_types
-                }
-            )
+            if error == False:
+                try:
+                    response = requests.post(QUICKWALLET_CREATE_OFFER_URL, json={"secret": QUICKWALLET_SECRET,
+                                                        "details":{
+                                                        "id": int(id),
+                                                        "sdesc": short_desc,
+                                                        "ldesc": long_desc,
+                                                        "min": int(min),
+                                                        "type": int(type),
+                                                        "availability": int(availability),
+                                                        "redemptions": int(redemptions),
+                                                        "cashback": cashback,
+                                                        "isactive": isactive,
+                                                        "dis": int(dis)
+                                                         }
+                                                    })
+                    if 300 > response.status_code >= 200:
+                        try:
+                            json_data = json.loads(response.text)
+                        except:
+                            pass
 
-        kyc_docs = []
-        for doc_type in KYCDocumentType.objects.all().values_list('name', flat=True):
-            doc_type_name = doc_type.replace(' ', '-')
-            doc_type_id = '-'.join(['doc_id', doc_type_name])
+                    if json_data:
+                        if json_data['status']:
+                            status = json_data['status']
+                            if status == "failed":
+                                error = True
+                            else:
+                                print(json_data)
+                                success = "Offer {0} Created".format(id)
+                                return render(
+                                    request, self.template_name, {"success": success}
+                                )
+                except:
+                    pass
+        return render(
+            request, self.template_name)
 
-            if doc_type_name in request.POST:
-                kyc_docs.append(
-                    {
-                        'doc_url': request.POST.get(doc_type_name),
-                        'doc_id': request.POST.get(doc_type_id),
-                        'doc_type': doc_type_name.replace('-', ' ')
-                    }
+
+class OfferListView(View):
+    template_name = 'zruser/offer_list.html'
+    paginate_by = 10
+
+    def get(self, request, **kwargs):
+
+        response = requests.post(QUICKWALLET_OFFER_LIST_URL, json={
+            "secret": QUICKWALLET_SECRET
+        })
+        if 300 > response.status_code >= 200:
+            try:
+                json_data = json.loads(response.text)
+                offers = json_data['data']['offers']
+
+                return render(
+                    request, self.template_name, {"offers": offers}
                 )
+            except:
+                pass
 
-        if not kyc_docs:
             return render(
-                request, self.template_name,
-                {
-                    'merchant_form': merchant_form,
-                    'bank_detail_form': bank_detail_form,
-                    'kyc_doc_types': self.kyc_doc_types,
-                    'kyc_error': 'KYC details are mandatory'
-                }
+                request, self.template_name, {"api_error": "something went wrong, please try again!"}
             )
 
-        merchant_zr_user = merchant_form.save(commit=False)
-        merchant_zr_user.role = UserRole.objects.filter(name=DISTRIBUTOR).last()
-        password = '%s%s' % (merchant_zr_user.pan_no.lower().strip(), str(merchant_zr_user.mobile_no).lower().strip())
-        merchant_zr_user.pass_word = password
-        merchant_zr_user.save()
 
-        dj_user = dj_auth_models.User.objects.create_user(
-            merchant_zr_user.mobile_no,
-            email=merchant_zr_user.email,
-            password=password
-        )
-        bank_detail = bank_detail_form.save()
-        bank_detail.for_user = merchant_zr_user
-        bank_detail.save(update_fields=['for_user'])
+class AssignRetailerView(View):
+    template_name = 'zruser/offer_list.html'
+    paginate_by = 10
 
-        ZrAdminUser.objects.create(
-            id=dj_user,
-            mobile_no=merchant_zr_user.mobile_no,
-            city=merchant_zr_user.city,
-            state=merchant_zr_user.state,
-            pincode=merchant_zr_user.pincode,
-            address=merchant_zr_user.address_line_1,
-            role=merchant_zr_user.role,
-            zr_user=merchant_zr_user
-        )
-        for doc in kyc_docs:
-            KYCDetail.objects.create(
-                type=KYCDocumentType.objects.get(name=doc['doc_type']),
-                document_id=doc['doc_id'],
-                document_link=doc['doc_url'],
-                for_user=merchant_zr_user,
-                role=merchant_zr_user.role
+    def get(self, request, **kwargs):
+
+        response = requests.post(QUICKWALLET_OFFER_LIST_URL, json={
+            "secret": QUICKWALLET_SECRET
+        })
+        if 300 > response.status_code >= 200:
+            try:
+                json_data = json.loads(response.text)
+                offers = json_data['data']['offers']
+
+                return render(
+                    request, self.template_name, {"offers": offers}
+                )
+            except:
+                pass
+
+            return render(
+                request, self.template_name, {"api_error": "something went wrong, please try again!"}
             )
-
-        zrwallet_models.Wallet.objects.create(merchant=merchant_zr_user)
-        return HttpResponseRedirect(reverse("user:distributor-list"))

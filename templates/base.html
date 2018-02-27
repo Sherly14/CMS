@@ -56,6 +56,9 @@
                 <li class="nav-item ">
                     <a class="nav-link text-right" href="{% url 'user:distributor-list' %}">Distributors</a>
                 </li>
+                <li class="nav-item ">
+                    <a class="nav-link text-right" href="{% url 'user:offer-list' %}">Offers</a>
+                </li>
                 {% endif %}
 
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "DISTRIBUTOR" %}
