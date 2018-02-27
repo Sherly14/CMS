@@ -6,7 +6,8 @@
 {% block content %}
 
     <div class="content-wrapper">
-        <p class="head-right">{{ request.user.zr_admin_user.zr_user.first_name.upper }}'s-Payment History</p>
+        <p class="head-right">Payment History</p>
+
         {% if api_error %}
             <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
         {% endif %}

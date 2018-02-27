@@ -81,7 +81,7 @@
                     <a class="nav-link text-right" href="{% url 'user:terminal-list' %}">Terminals</a>
                 </li>
                 <li class="nav-item ">
-                    <a class="nav-link text-right" href="{% url 'user:payment-history' %}">Payment History</a>
+                    <a class="nav-link text-right" href="{% url 'user:payment-history' pk=0 %}">Payment History</a>
                 </li>
                 {% endif %}
                 {% if request.user.zr_admin_user.role.name == "RETAILER" and zr_user.role.name != "TERMINAL"%}
@@ -108,7 +108,10 @@
                 <li class="nav-item ">
                     <a class="nav-link text-right" href='{% url "user:deactivate-card" pk=zr_user.id %}'>Deactivate</a>
                 </li>
-                <br><br><br><br><br><br><br><br><br>
+                <li class="nav-item ">
+                    <a class="nav-link text-right" href="{% url 'user:payment-history' pk=zr_user.id %}">Payment History</a>
+                </li>
+                <br><br><br><br><br><br><br><br>
                 <li class="nav-item ">
                     <a class="nav-link text-right" href="{% url 'user:dashboard' %}">Back to Retailer</a>
                 </li>

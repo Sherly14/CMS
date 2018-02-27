@@ -2841,13 +2841,19 @@ class PaymentHistoryView(View):
     template_name = 'zruser/payment_history.html'
 
     @transaction.atomic
-    def get(self, request):
-        if is_user_retailer(request):
+    def get(self, request, pk, **kwargs):
+        if pk != '0':
+            user = ZrTerminal.objects.get(id=pk)
+            response = requests.post(QUICKWALLET_PAYMENT_HISTORY_URL, json={"secret": QUICKWALLET_SECRET,
+                                                                            "udoutletid": int(user.mobile_no)})
+        elif is_user_retailer(request):
+            user = None
             zr_retailer_id = request.user.zr_admin_user.zr_user.id
             vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
             response = requests.post(QUICKWALLET_PAYMENT_HISTORY_URL, json={"secret": QUICKWALLET_SECRET,
                                                                      "retailerid": vendor.vendor_user})
-        else:
+        elif is_user_superuser(request):
+            user = None
             response = requests.post(QUICKWALLET_PAYMENT_HISTORY_URL, json={"secret": QUICKWALLET_SECRET})
 
         if 300 > response.status_code >= 200:
@@ -2855,7 +2861,7 @@ class PaymentHistoryView(View):
                 json_data = json.loads(response.text)
                 payments = json_data['data']['payments']
                 return render(
-                    request, self.template_name, {"payments": payments}
+                    request, self.template_name, {"payments": payments, "zr_user": user}
                 )
             except:
                 pass
@@ -2866,7 +2872,7 @@ class PaymentHistoryView(View):
 
 
 class OfferCreateView(CreateView):
-    template_name = 'zruser/add_distributor.html'
+    template_name = 'zruser/offer_create.html'
     kyc_doc_types = KYCDocumentType.objects.all().values_list('name', flat=True)
 
     def get(self, request):

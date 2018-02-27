@@ -28,28 +28,6 @@
 
                     <div class="col-sm-2" style="margin-right:20px;">
                         <div class="form-group">
-                            <label for="sdesc">Short Description</label>
-                            <input type="text" style="border: 2px solid; border-color: #aaa;" name="sdesc" REQUIRED>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-2" style="margin-right:20px;">
-                       <div class="form-group">
-                            <label for="ldesc">Long Description</label>
-                            <input type="text" style="border: 2px solid; border-color: #aaa;" name="ldesc" REQUIRED>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-2" style="margin-right:20px;">
-                       <div class="form-group">
-                            <label for="min">Min</label>
-                            <input type="number" style="border: 2px solid; border-color: #aaa;" min="1" name="min" REQUIRED>
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-sm-2" style="margin-right:20px;">
-                        <div class="form-group">
                             <label for="type">type</label>
                                 <input type="number" style="border: 2px solid; border-color: #aaa; padding-left: 0rem;" name="type" REQUIRED>
                         </div>
@@ -71,23 +49,56 @@
 
                     <div class="col-sm-2" style="margin-right:20px;">
                        <div class="form-group">
+                            <label for="min">Min</label>
+                            <input type="number" style="border: 2px solid; border-color: #aaa;" min="1" name="min" REQUIRED>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6" style="margin-right:20px;">
+                        <div class="form-group">
+                            <label for="short_desc">Short Description</label>
+                            <input type="text" style="border: 2px solid; border-color: #aaa;" name="short_desc" REQUIRED>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6" style="margin-right:20px;">
+                       <div class="form-group">
+                            <label for="long_desc">Long Description</label>
+                            <input type="text" style="border: 2px solid; border-color: #aaa;" name="long_desc" REQUIRED>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-2" style="margin-right:20px;">
+                       <div class="form-group">
                             <label for="cashback">cashback</label>
                             <!--<input type="text" style="border: 2px solid; border-color: #aaa;" name="cashback" REQUIRED>-->
-                           <select style="border: 2px solid; border-color: #aaa;" name="cashback">
-                                <option value="True">True</option>
-                                <option value="False">False</option>
+                           <select style="border: 2px solid; border-color: #aaa;" name="cashback" default="true" REQUIRED>
+                                <option value="true">True</option>
+                                <option value="false">False</option>
+                           </select>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-2" style="margin-right:20px; margin-left:20px;">
+                       <div class="form-group">
+                            <label for="isactive">isactive</label>
+                            <!--<input type="text" style="border: 2px solid; border-color: #aaa;" name="cashback" REQUIRED>-->
+                           <select style="border: 2px solid; border-color: #aaa;" name="isactive" default="true" REQUIRED>
+                                <option value="true">True</option>
+                                <option value="false">False</option>
                            </select>
                         </div>
                     </div>
 
                     <div class="col-sm-2" style="margin-right:20px;">
                        <div class="form-group">
-                            <label for="cashback">isactive</label>
-                            <!--<input type="text" style="border: 2px solid; border-color: #aaa;" name="cashback" REQUIRED>-->
-                           <select style="border: 2px solid; border-color: #aaa;" name="cashback">
-                                <option value="True">True</option>
-                                <option value="False">False</option>
-                           </select>
+                            <label for="dis">dis</label>
+                            <input type="number" style="border: 2px solid; border-color: #aaa; margin-left:20px;" min="1" name="dis" REQUIRED>
                         </div>
                     </div>
                 </div>
@@ -96,7 +107,7 @@
     </div>
         <div class="col-md-5 colAlignment" style="float:right;">
             <div class="fill margin-top" style="padding-left:6.5rem">
-                <input class="button red" type="submit" value="Create & Save Cards">
+                <input class="button red" type="submit" value="Create Offer">
             </div>
         </div>
         {% csrf_token %}
