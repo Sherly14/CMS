@@ -33,6 +33,7 @@ exl = pd.read_excel(
 )
 
 
+
 for index, df in exl.iterrows():
     distributor = df[0]
     vendor = df[1]
@@ -103,6 +104,7 @@ for index, df in exl.iterrows():
         print 'Vendor not found'
         continue
 
+
     print index + 1, transaction_type_object, vendor_object
 
     if transaction_type_object and vendor_object:
@@ -113,6 +115,7 @@ for index, df in exl.iterrows():
             vendor=vendor_object
         ).count() == 0:
             print 'Service Provider Id not found'
+
         else:
             service_provider_object = transaction_models.ServiceProvider.objects.get(
                 name=service_provider,
