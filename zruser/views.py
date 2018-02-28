@@ -50,7 +50,7 @@ from itertools import chain
 from zrcms.env_vars import QUICKWALLET_ZR_PARTERNERID, QUICKWALLET_SECRET, QUICKWALLET_API_CRUD_URL,\
     QUICKWALLET_API_CARD_URL, QUICKWALLET_API_LISTCARD_URL, QUICKWALLET_API_GENERATEOTP_URL, QUICKWALLET_API_ISSUE_MOBILE_URL,\
     QUICKWALLET_API_ACTIVATE_CARD_URL, QUICKWALLET_API_RECHARGE_CARD_URL, QUICKWALLET_API_PAY_URL, QUICKWALLET_API_DEACTIVATE_CARD_URL,\
-    QUICKWALLET_PAYMENT_HISTORY_URL, QUICKWALLET_CREATE_OFFER_URL, QUICKWALLET_OFFER_LIST_URL
+    QUICKWALLET_PAYMENT_HISTORY_URL, QUICKWALLET_CREATE_OFFER_URL, QUICKWALLET_OFFER_LIST_URL, QUICKWALLET_OFFER_ASSIGN_TO_RETAILER_URL
 
 MERCHANT = 'MERCHANT'
 DISTRIBUTOR = 'DISTRIBUTOR'
@@ -2355,7 +2355,7 @@ class TerminalUpdateView(View):
                     "action": "update",
                     "entity": "outlet",
                     "details": {
-                        "udoutletid": user.id,
+                        "udoutletid": user.mobile_no,
                         "name": "{0}".format(user.first_name)
                     }
                 })
@@ -2940,13 +2940,13 @@ class OfferCreateView(CreateView):
                                                         "id": int(id),
                                                         "sdesc": short_desc,
                                                         "ldesc": long_desc,
-                                                        "min": int(min),
-                                                        "type": int(type),
-                                                        "availability": int(availability),
-                                                        "redemptions": int(redemptions),
+                                                        "min": min,
+                                                        "type": type,
+                                                        "availability": availability,
+                                                        "redemptions": redemptions,
                                                         "cashback": cashback,
                                                         "isactive": isactive,
-                                                        "dis": int(dis)
+                                                        "dis": dis
                                                          }
                                                     })
                     if 300 > response.status_code >= 200:
@@ -2961,7 +2961,6 @@ class OfferCreateView(CreateView):
                             if status == "failed":
                                 error = True
                             else:
-                                print(json_data)
                                 success = "Offer {0} Created".format(id)
                                 return render(
                                     request, self.template_name, {"success": success}
@@ -2976,7 +2975,7 @@ class OfferListView(View):
     template_name = 'zruser/offer_list.html'
     paginate_by = 10
 
-    def get(self, request, **kwargs):
+    def get(self, request, api_error=None, success=None, **kwargs):
 
         response = requests.post(QUICKWALLET_OFFER_LIST_URL, json={
             "secret": QUICKWALLET_SECRET
@@ -2985,9 +2984,10 @@ class OfferListView(View):
             try:
                 json_data = json.loads(response.text)
                 offers = json_data['data']['offers']
-
+                retailer_list = ZrUser.objects.filter(role__name=RETAILER)
                 return render(
-                    request, self.template_name, {"offers": offers}
+                    request, self.template_name,
+                    {"offers": offers, "retailer_list": retailer_list, "api_error": api_error, "success": success}
                 )
             except:
                 pass
@@ -2996,27 +2996,47 @@ class OfferListView(View):
                 request, self.template_name, {"api_error": "something went wrong, please try again!"}
             )
 
+    def post(self, request, **kwargs):
 
-class AssignRetailerView(View):
-    template_name = 'zruser/offer_list.html'
-    paginate_by = 10
+        retailer_id = request.POST.get('retailer','')
+        offer_id = request.POST.get('offer_id','')
+        order_id_list = []
+        order_id_list.append(str(offer_id))
 
-    def get(self, request, **kwargs):
+        vendor = transaction_models.VendorZrRetailer.objects.get(zr_user = retailer_id)
 
-        response = requests.post(QUICKWALLET_OFFER_LIST_URL, json={
-            "secret": QUICKWALLET_SECRET
-        })
-        if 300 > response.status_code >= 200:
-            try:
-                json_data = json.loads(response.text)
-                offers = json_data['data']['offers']
+        # validations
+        error = False
+        # if not retailer_id:
+        #         error = True
+        #
+        # if not offer_id:
+        #     error = True
+        #
+        # if error == False:
+        try:
+            response = requests.post(QUICKWALLET_OFFER_ASSIGN_TO_RETAILER_URL, json={
+                "secret": QUICKWALLET_SECRET,
+                "offerids": order_id_list,
+                "retailerid": vendor.vendor_user
+            })
+            if 300 > response.status_code >= 200:
+                try:
+                    json_data = json.loads(response.text)
+                except:
+                    pass
 
-                return render(
-                    request, self.template_name, {"offers": offers}
-                )
-            except:
-                pass
-
-            return render(
-                request, self.template_name, {"api_error": "something went wrong, please try again!"}
-            )
+            if json_data:
+                if json_data['status']:
+                    status = json_data['status']
+                    if status == "failed":
+                        error = True
+                    else:
+                        success = "{0} assigned to {1}".format(offer_id, retailer_id)
+                        return self.get(request, success)
+        except:
+            pass
+        if error == True:
+            api_error = "something went wrong, please try again!"
+            return self.get(request, api_error)
+        return self.get(request)

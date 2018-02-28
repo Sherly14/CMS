@@ -41,3 +41,5 @@ QUICKWALLET_CREATE_OFFER_URL = os.getenv('QUICKWALLET_CREATE_OFFER_URL',
                                         'https://uat.quikwallet.com/api/partner/{0}/offers/create'.format(QUICKWALLET_ZR_PARTERNERID))
 QUICKWALLET_OFFER_LIST_URL = os.getenv('QUICKWALLET_OFFER_LIST_URL',
                                         'https://uat.quikwallet.com/api/partner/{0}/offers'.format(QUICKWALLET_ZR_PARTERNERID))
+QUICKWALLET_OFFER_ASSIGN_TO_RETAILER_URL = os.getenv('QUICKWALLET_OFFER_ASSIGN_TO_RETAILER_URL',
+                                        'https://uat.quikwallet.com/api/partner/{0}/offers/addforoutlet'.format(QUICKWALLET_ZR_PARTERNERID))

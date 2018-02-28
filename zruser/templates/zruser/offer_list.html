@@ -10,6 +10,10 @@
         {% if api_error %}
             <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
         {% endif %}
+        {% if success %}
+            <div class="alert alert-success" id="success_msg" style="text-align:center">{{ success }}</div>
+        {% endif %}
+
         <div class="col-12" >
 
             <div class="row" style="padding-right: 50px;">
@@ -49,7 +53,7 @@
                                 <td>{{ offer.cashback }}</td>
                                 <td>{{ offer.type }}</td>
                                 <td>{{ offer.availability }}</td>
-                                <td> <button data-toggle="modal" data-target="#get_assigned">Assign</button></td>
+                                <td> <button class="open-get_assign" data-toggle="modal" data-id = "{{ offer.id }}" data-target="#get_assigned" >Assign</button></td>
                             </tr>
                         {% endfor %}
 
@@ -74,7 +78,7 @@
 <!-- Modal to get Email -->
     <div id="get_assigned" class="modal fade">
         <div class="modal-dialog" role="document">
-            <div class="modal-content" style="width: 700px;">
+            <div class="modal-content" style="width: 500px;">
                 <div class="modal-header" style="background-color: #e2e2e2;">
                     <h1 class="modal-title" style="font-size: 1.5rem; font-size: 1.5rem;font-weight: bold;line-height: 2rem;padding-left: 12px;">Assign Offer To Retailer</h1>
                 </div>
@@ -82,21 +86,30 @@
 
                     <form class="form-horizontal" method="POST" id="retailer_assign_form" enctype="multipart/form-data">
                         {% csrf_token %}
-                        <input type="text" name="offer_id" value="{{ request.GET.offer.id }}" readonly>
                         <div class="row" style="padding-left: 3rem;padding-top: 25px;">
                             <div class="form-group col-sm-12">
-                                <label class="control-label"><b>Retailer</b></label>
+                                <label class="control-label"><b>Offer Id</b></label>
                                 <div>
-                                    <input type="text" class="form-control" name="retailer" id="retailer" style="box-shadow: 0px 0px;border-style: solid;" required>
+                                    <input type="text"  style="border: 2px solid; border-color: #aaa;"  name="offer_id" id="offer_id" value="" readonly>
                                 </div>
+                            </div>
+
+                            <div class="form-group col-sm-2">
+                                <label class="control-label"><b>Retailer</b></label>
+                                 <select style="border: 2px solid; border-color: #aaa;" name="retailer" id="retailer" required>
+                                     <option value="-1">ALL</option>
+                                        {% for retailer in retailer_list %}
+                                            <option value="{{ retailer.id }}" {% if  retailer.id == retailer_id %}selected{% endif %}>{{ retailer.first_name }} {{ retailer.last_name|default_if_none:""}}</option>
+                                         {% endfor %}
+                                 </select>
                             </div>
                         </div>
                         <div class="row container" style="padding-left: 3rem;">
                             <div class="form-group col-sm-3">
                             </div>
                             <div class="form-group col-sm-6">
-                                <button type="submit" id="mail_report" class="pull-right submit_request button red downloadcsv mr-5" style="background-color: red">
-                                    Mail a report
+                                <button type="submit" id="assign_retailer" style="background-color: #ff2000f2;">
+                                    Assign Retailer
                                 </button>
                             </div>
                             <div class="form-group col-sm-3" style=" position: relative;left: 13%;">
@@ -154,8 +167,22 @@
 
 <script>
 
+     $(".open-get_assign").on("click", function ()
+    {
+         var get_offer_id = $(this).data('id');
+         $("#offer_id").val(get_offer_id);
+    });
+
     $(document).ready(function()
     {
+       $("#retailer").select2();
+        window.setTimeout(function() {
+            $(".alert").fadeTo(1000, 0).slideUp(1000, function(){
+                $(this).remove();
+            });
+        }, 5000);
+
+
         $('#terminal-id').select2();
         $('#search-btn').click(function(){
         startDate = $('#start-date').val();
