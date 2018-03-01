@@ -52,9 +52,8 @@ from zrcms.env_vars import QUICKWALLET_ZR_PARTERNERID, QUICKWALLET_SECRET, QUICK
     QUICKWALLET_API_ACTIVATE_CARD_URL, QUICKWALLET_API_RECHARGE_CARD_URL, QUICKWALLET_API_PAY_URL, QUICKWALLET_API_DEACTIVATE_CARD_URL,\
     QUICKWALLET_PAYMENT_HISTORY_URL, QUICKWALLET_CREATE_OFFER_URL, QUICKWALLET_OFFER_LIST_URL, QUICKWALLET_OFFER_ASSIGN_TO_RETAILER_URL, \
     QUICKWALLET_OFFER_ASSIGN_TO_OUTLETS_URL, QUICKWALLET_API_LISTCARD_ACTIVATED_URL
-from common_utils.transaction_utils import get_sub_distributor_merchant_id_list_from_distributor, \
-    get_merchant_id_list_from_distributor, \
-    get_sub_distributor_merchant_id_list_from_sub_distributor
+
+from common_utils.transaction_utils import get_merchant_id_list_from_distributor
 
 MERCHANT = 'MERCHANT'
 DISTRIBUTOR = 'DISTRIBUTOR'
@@ -3479,3 +3478,136 @@ class OfferListView(View):
                 return self.get(request, api_error)
             return self.get(request)
 
+
+def get_wallets_qs(request):
+    user_id = request.GET.get('user-id')
+    user_list = []
+
+    if is_user_superuser(request):
+        user_list = zrwallet_models.Wallet.objects.all()
+
+    elif request.user.zr_admin_user.role.name == DISTRIBUTOR:
+        dist_subd = list(zrmappings_models.DistributorSubDistributor.objects.filter(
+            distributor=request.user.zr_admin_user.zr_user).values_list('sub_distributor_id', flat=True))
+        user_list = zrwallet_models.Wallet.objects.filter(
+            merchant_id__in=get_merchant_id_list_from_distributor(request.user.zr_admin_user.zr_user) +
+            dist_subd + list(zrmappings_models.SubDistributorMerchant.objects.filter(
+                sub_distributor__in=dist_subd).values_list('merchant_id', flat=True)))
+
+    elif request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
+        user_list = zrwallet_models.Wallet.objects.filter(
+            merchant_id__in=list(zrmappings_models.SubDistributorMerchant.objects.filter(
+                sub_distributor=request.user.zr_admin_user.zr_user).values_list(
+                'merchant_id', flat=True)))
+
+    if user_id is not None and int(user_id) > 0:
+        user_list = user_list.filter(merchant_id=user_id)
+
+    q = request.GET.get('q', "")
+    q_obj = Q(
+        merchant__first_name__icontains=q
+    ) | Q(
+        merchant__last_name__icontains=q
+    ) | Q(
+        merchant__mobile_no__icontains=q
+    )
+
+    user_list = user_list.filter(q_obj).order_by('-at_created')
+
+    return user_list
+
+
+def download_wallet_list_csv(request):
+    wallet_qs = get_wallets_qs(request)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="wallets.csv"'
+    writer = csv.writer(response)
+    writer.writerow([
+        'User Id', 'User Name', 'DOJ', 'Mobile', 'Role', 'DMT Bal', 'Non-DMT Bal'
+    ])
+    for wallet in wallet_qs:
+        writer.writerow([
+            wallet.merchant.id,
+            wallet.merchant.first_name,
+            wallet.merchant.at_created,
+            wallet.merchant.mobile_no,
+            wallet.merchant.role,
+            wallet.dmt_balance,
+            wallet.non_dmt_balance,
+        ])
+
+    return response
+
+
+class WalletListView(ListView):
+    template_name = 'zruser/wallet_list.html'
+    # queryset = ZrUser.objects.filter(role__name=SUBDISTRIBUTOR)
+    context_object_name = 'wallet_list'
+    paginate_by = 10
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(WalletListView, self).get_context_data()
+        queryset = self.get_queryset()
+        q = self.request.GET.get('q')
+        filter = self.request.GET.get('filter')
+        pg_no = self.request.GET.get('page_no', 1)
+        user_id = self.request.GET.get('user-id')
+        user_list = []
+
+        if is_user_superuser(self.request):
+            user_list = zrwallet_models.Wallet.objects.all()
+
+        elif self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
+            dist_subd = list(zrmappings_models.DistributorSubDistributor.objects.filter(
+                    distributor=self.request.user.zr_admin_user.zr_user).values_list('sub_distributor_id', flat=True))
+            user_list = zrwallet_models.Wallet.objects.filter(
+                merchant_id__in=get_merchant_id_list_from_distributor(self.request.user.zr_admin_user.zr_user) +
+                dist_subd + list(zrmappings_models.SubDistributorMerchant.objects.filter(
+                    sub_distributor__in=dist_subd).values_list('merchant_id', flat=True)))
+
+        elif self.request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
+            user_list = zrwallet_models.Wallet.objects.filter(
+                merchant_id__in=list(zrmappings_models.SubDistributorMerchant.objects.filter(
+                    sub_distributor=self.request.user.zr_admin_user.zr_user).values_list(
+                    'merchant_id', flat=True)))
+        if q:
+            context['q'] = q
+
+        if filter:
+            context['filter_by'] = filter
+
+        if user_id:
+            context['user_id'] = int(user_id)
+
+        if user_list:
+            context['user_list'] = user_list
+
+        p = Paginator(queryset, self.paginate_by)
+        try:
+            page = p.page(pg_no)
+        except EmptyPage:
+            raise Http404
+
+        context['queryset'] = page.object_list
+        context['url_name']= "wallet-list"
+
+        query_string = {}
+        if q:
+            query_string['q'] = q
+
+        if filter:
+            query_string['filter'] = filter
+
+        if page.has_next():
+            query_string['page_no'] = page.next_page_number()
+            context['next_page_qs'] = urlencode(query_string)
+            context['has_next_page'] = page.has_next()
+        if page.has_previous():
+            query_string['page_no'] = page.previous_page_number()
+            context['prev_page_qs'] = urlencode(query_string)
+            context['has_prev_page'] = page.has_previous()
+
+        return context
+
+    def get_queryset(self):
+        return get_wallets_qs(self.request)

@@ -104,7 +104,6 @@ for index, df in exl.iterrows():
         print 'Vendor not found'
         continue
 
-
     print index + 1, transaction_type_object, vendor_object
 
     if transaction_type_object and vendor_object:
@@ -180,6 +179,7 @@ for index, df in exl.iterrows():
                         is_default=False,
                         is_enabled=True
                     )
+
     else:
         if transaction_type_object is None:
             print 'Transaction type', transaction_type, ' not found'
