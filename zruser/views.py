@@ -2045,7 +2045,7 @@ class TerminalCreateView(CreateView):
         if error == False:
             retailer_id = request.user.zr_admin_user.zr_user_id
             retailer_api_id = transaction_models.VendorZrRetailer.objects.get(zr_user=retailer_id)
-            id = request.POST.get('mobile_no','')
+            id = request.POST.get('mobile_no', '')
             response = requests.post(QUICKWALLET_API_CRUD_URL, json={
                 "secret": QUICKWALLET_SECRET,
                 "action": "create",
@@ -2985,9 +2985,21 @@ class OfferListView(View):
                 json_data = json.loads(response.text)
                 offers = json_data['data']['offers']
                 retailer_list = ZrUser.objects.filter(role__name=RETAILER)
+                # terminal_list = ZrTerminal.objects.filter(role__name=TERMINAL)
+                # print(request.user.zr_admin_user.zr_user.id)
+
+                # for terminal in terminal_list:
+                #     print(terminal.terminal.mobile_no)
+                if request.user.zr_admin_user.role.name == "RETAILER":
+                    terminal_list = zrmappings_models.RetailerTerminal.objects.filter(retailer=request.user.zr_admin_user.zr_user.id)
+                    zr_user_id = request.user.zr_admin_user.zr_user.id
+                    vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_user_id)
+                else:
+                    vendor = None
+                    terminal_list = None
                 return render(
                     request, self.template_name,
-                    {"offers": offers, "retailer_list": retailer_list, "api_error": api_error, "success": success}
+                    {"offers": offers, "vendor": vendor, "retailer_list": retailer_list, "terminal_list": terminal_list, "api_error": api_error, "success": success}
                 )
             except:
                 pass
@@ -2998,45 +3010,92 @@ class OfferListView(View):
 
     def post(self, request, **kwargs):
 
-        retailer_id = request.POST.get('retailer','')
-        offer_id = request.POST.get('offer_id','')
-        order_id_list = []
-        order_id_list.append(str(offer_id))
+        if request.user.zr_admin_user.role.name != "RETAILER":
+            retailer_id = request.POST.get('retailer','')
+            offer_id = request.POST.get('offer_id','')
+            order_id_list = []
+            order_id_list.append(str(offer_id))
 
-        vendor = transaction_models.VendorZrRetailer.objects.get(zr_user = retailer_id)
+            vendor = transaction_models.VendorZrRetailer.objects.get(zr_user = retailer_id)
 
-        # validations
-        error = False
-        # if not retailer_id:
-        #         error = True
-        #
-        # if not offer_id:
-        #     error = True
-        #
-        # if error == False:
-        try:
-            response = requests.post(QUICKWALLET_OFFER_ASSIGN_TO_RETAILER_URL, json={
-                "secret": QUICKWALLET_SECRET,
-                "offerids": order_id_list,
-                "retailerid": vendor.vendor_user
-            })
-            if 300 > response.status_code >= 200:
-                try:
-                    json_data = json.loads(response.text)
-                except:
-                    pass
+            # validations
+            error = False
+            # if not retailer_id:
+            #         error = True
+            #
+            # if not offer_id:
+            #     error = True
+            #
+            # if error == False:
+            try:
+                response = requests.post(QUICKWALLET_OFFER_ASSIGN_TO_RETAILER_URL, json={
+                    "secret": QUICKWALLET_SECRET,
+                    "offerids": order_id_list,
+                    "retailerid": vendor.vendor_user
+                })
+                if 300 > response.status_code >= 200:
+                    try:
+                        json_data = json.loads(response.text)
+                    except:
+                        pass
 
-            if json_data:
-                if json_data['status']:
-                    status = json_data['status']
-                    if status == "failed":
-                        error = True
-                    else:
-                        success = "{0} assigned to {1}".format(offer_id, retailer_id)
-                        return self.get(request, success)
-        except:
-            pass
-        if error == True:
-            api_error = "something went wrong, please try again!"
-            return self.get(request, api_error)
-        return self.get(request)
+                if json_data:
+                    if json_data['status']:
+                        status = json_data['status']
+                        if status == "failed":
+                            error = True
+                        else:
+                            success = "Offer {0} assigned".format(offer_id)
+                            return self.get(request, success)
+            except:
+                pass
+            if error == True:
+                api_error = "something went wrong, please try again!"
+                return self.get(request, api_error)
+            return self.get(request)
+
+
+        elif request.user.zr_admin_user.role.name == "RETAILER":
+            terminal_id = request.POST.get('terminal', '')
+            offer_id = request.POST.get('offer_id_terminal', '')
+            order_id_list = []
+            order_id_list.append(str(offer_id))
+            terminal_id_list = []
+            terminal_id_list.append(str(terminal_id))
+
+            # validations
+            error = False
+            # if not retailer_id:
+            #         error = True
+            #
+            # if not offer_id:
+            #     error = True
+            #
+            # if error == False:
+            try:
+                # the url is same for assign retailer & terminal
+                response = requests.post(QUICKWALLET_OFFER_ASSIGN_TO_RETAILER_URL, json={
+                    "secret": QUICKWALLET_SECRET,
+                    "offerids": order_id_list,
+                    "udoutletids": terminal_id_list
+                })
+                if 300 > response.status_code >= 200:
+                    try:
+                        json_data = json.loads(response.text)
+                    except:
+                        pass
+
+                if json_data:
+                    if json_data['status']:
+                        status = json_data['status']
+                        if status == "failed":
+                            error = True
+                        else:
+                            success = "Offer {0} assigned".format(offer_id)
+                            return self.get(request, success)
+            except:
+                pass
+            if error == True:
+                api_error = "something went wrong, please try again!"
+                return self.get(request, api_error)
+            return self.get(request)

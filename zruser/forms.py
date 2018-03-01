@@ -117,6 +117,8 @@ class TerminalRetailerForm(forms.ModelForm):
 
         return mobile_no
 
+    pincode = forms.CharField(widget=forms.TextInput())
+
     def __init__(self, *args, **kwargs):
         # if kwargs.get('terminal'):
         #     self.Meta.fields.append('terminal')

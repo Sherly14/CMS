@@ -59,9 +59,6 @@
                 <li class="nav-item ">
                     <a class="nav-link text-right" href="{% url 'user:distributor-list' %}">Distributors</a>
                 </li>
-                <li class="nav-item ">
-                    <a class="nav-link text-right" href="{% url 'user:offer-list' %}">Offers</a>
-                </li>
                 {% endif %}
 
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "DISTRIBUTOR" %}
@@ -76,6 +73,18 @@
                 </li>
                 {% endif %}
 
+                <!--<ol class="sidebar-nav navbar-nav" id="chaps">-->
+                    <!--{% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}-->
+                    <!--<li class="nav-item ">-->
+                        <!--<a class="nav-link text-right" href="#">Loyalty Cards</a>-->
+                    <!--</li>-->
+                    <!--<ul class="assignments hide">-->
+                    <!--{% endif %}-->
+                        <!--&lt;!&ndash;add sublist elements&ndash;&gt;-->
+
+                    <!--</ul>-->
+                <!--</ol>-->
+
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
                 <li class="nav-item ">
                     <a class="nav-link text-right" href="{% url 'user:retailer-list' %}">Retailers</a>
@@ -85,6 +94,9 @@
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "RETAILER" and zr_user.role.name != "TERMINAL" %}
                 <li class="nav-item ">
                     <a class="nav-link text-right" href="{% url 'user:terminal-list' %}">Terminals</a>
+                </li>
+                <li class="nav-item ">
+                    <a class="nav-link text-right" href="{% url 'user:offer-list' %}">Offers</a>
                 </li>
                 <li class="nav-item ">
                     <a class="nav-link text-right" href="{% url 'user:payment-history' pk=0 %}">Payment History</a>

@@ -21,93 +21,91 @@
             <p class="heading-bg">OFFER DETAILS:</p>
         </div>
 
-            <div class="row">
                 <div class="row">
-                    <div class="col-md-2" style="margin-right:65px;">
+                    <div class="col-sm-3 col-md-3">
                         <div class="form-group">
                             <label for="id">Id</label>
-                                <input type="text" style="border: 2px solid; border-color: #aaa; padding-left: 0.5rem;" name="id" REQUIRED>
+                                <input type="text" class="fill" name="id" maxlength="125" REQUIRED>
                         </div>
                     </div>
 
-                    <div class="col-sm-2" style="margin-right:65px;">
+                    <div class="col-sm-3 col-md-3">
                         <div class="form-group">
                             <label for="type">Type</label>
-                                <input type="number" style="border: 2px solid; border-color: #aaa; padding-left: 0.5rem;" name="type" REQUIRED>
+                                <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" name="type" maxlength="125" REQUIRED>
                         </div>
                     </div>
 
-                    <div class="col-sm-2" style="margin-right:65px;">
+                    <div class="col-sm-3 col-md-3">
                         <div class="form-group">
                             <label for="availability">Availability</label>
-                            <input type="number" style="border: 2px solid; border-color: #aaa; padding-left: 0.5rem;" min="1" name="availability" REQUIRED>
+                            <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" min="1" name="availability" maxlength="125" REQUIRED>
                         </div>
                     </div>
 
-                    <div class="col-sm-2" style="margin-right:65px;">
+                    <div class="col-sm-3 col-md-3">
                        <div class="form-group">
                             <label for="redemptions">Redemptions</label>
-                            <input type="number" style="border: 2px solid; border-color: #aaa; padding-left: 0.5rem;" min="1" name="redemptions" REQUIRED>
+                            <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" min="1" name="redemptions" maxlength="125" REQUIRED>
                         </div>
                     </div>
 
                 </div>
 
                 <div class="row">
-                    <div class="col-md-6" style="margin-right:50px;">
+                    <div class="col-sm-4 col-md-4">
                         <div class="form-group">
                             <label for="short_desc">Short Description</label>
-                            <input type="text" style="border: 2px solid; border-color: #aaa; padding-left: 0.5rem;" name="short_desc" REQUIRED>
+                            <input type="text" class="fill" name="short_desc" maxlength="125" REQUIRED>
                         </div>
                     </div>
 
-                    <div class="col-md-6" >
+                    <div class="col-sm-8 col-md-8">
                        <div class="form-group">
                             <label for="long_desc">Long Description</label>
-                            <input type="longtext" style="border: 2px solid; border-color: #aaa; padding-left: 0.5rem; width: 30rem;" name="long_desc" REQUIRED>
+                            <input type="text" class="input-80" name="long_desc" maxlength="256" REQUIRED>
                         </div>
                     </div>
                 </div>
 
                 <div class="row">
-                    <div class="col-sm-2" style="margin-right:1px;">
+                    <div class="col-sm-3 col-md-3">
                        <div class="form-group">
                             <label for="cashback">Cashback</label>
                             <!--<input type="text" style="border: 2px solid; border-color: #aaa;" name="cashback" REQUIRED>-->
-                           <select style="border: 2px solid; border-color: #aaa; width: 6rem;" name="cashback" default="true" REQUIRED>
+                           <select class="fill" name="cashback" default="true" REQUIRED>
                                 <option value="true">True</option>
                                 <option value="false">False</option>
                            </select>
                         </div>
                     </div>
 
-                    <div class="col-sm-2" style="margin-left: 5px;">
+                    <div class="col-sm-3 col-md-3">
                        <div class="form-group">
                             <label for="isactive">Isactive</label>
                             <!--<input type="text" style="border: 2px solid; border-color: #aaa;" name="cashback" REQUIRED>-->
-                           <select style="border: 2px solid; border-color: #aaa; width: 6rem;" name="isactive" default="true" REQUIRED>
+                           <select class="fill" name="isactive" default="true" REQUIRED>
                                 <option value="true">True</option>
                                 <option value="false">False</option>
                            </select>
                         </div>
                     </div>
 
-                    <div class="col-sm-2" style="margin-right:40px;">
+                    <div class="col-sm-3 col-md-3">
                        <div class="form-group">
                             <label for="min">Min</label>
-                            <input type="number" style="border: 2px solid; border-color: #aaa; padding-left: 0.5rem;" min="1" name="min" REQUIRED>
+                            <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" min="1" name="min" REQUIRED>
                         </div>
                     </div>
 
-                    <div class="col-sm-2" style="margin-left:20px;">
+                    <div class="col-sm-3 col-md-3">
                        <div class="form-group">
                             <label for="dis">Dis</label>
-                            <input type="number" style="border: 2px solid; border-color: #aaa; padding-left: 0.5rem;" min="1" name="dis" REQUIRED>
+                            <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" min="1" name="dis" REQUIRED>
                         </div>
                     </div>
                 </div>
 
-            </div>
     </div>
         <div class="col-md-5 colAlignment" style="float:right;">
             <div class="fill margin-top" style="padding-left:6.5rem">

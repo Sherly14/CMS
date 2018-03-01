@@ -8,10 +8,10 @@
 <div class="content-wrapper py-2" style="padding-left: 0.5rem; padding-right: 4rem">
     <p class="heading-right">Generate OTP</p>
     {% if api_error %}
-      <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
+      <div class="alert alert-danger" id="alert_msg" style="text-align:center;">{{ api_error }}</div>
     {% endif %}
     {% if success %}
-      <div class="alert alert-success" id="success_msg" style="text-align:center">{{ success }}</div>
+      <div class="alert alert-success" id="success_msg" style="text-align:center;">{{ success }}</div>
     {% endif %}
     <div class="container-fluid" style="position: relative;">
         <div class="row">
@@ -19,23 +19,25 @@
         </div>
         <form id="add-merchant-form" method="POST">
             <div class="row">
-                <div class="col-sm-2" style="margin-right:20px;">
+                <div class="col-sm-3 col-md-3">
                     <div class="form-group">
                         <label for="cardnumber">Card Number</label>
-                            <input type="text" style="border: 2px solid; border-color: #aaa; padding-left: 0rem;" name="cardnumber" REQUIRED>
+                            <input type="text" class="fill" name="cardnumber" REQUIRED>
                     </div>
                 </div>
-                <div class="col-sm-2" style="margin-right:20px;">
+                <div class="col-sm-3 col-md-3">
                     <div class="form-group">
                         <label for="udoutletid">OutletId</label>
-                        <input type="number" style="border: 2px solid; border-color: #aaa;" name="udoutletid" value="{{zr_user.mobile_no}}" readonly>
+                        <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;
+" name="udoutletid" value="{{zr_user.mobile_no}}" readonly>
                     </div>
                 </div>
 
-                <div class="col-sm-2" style="margin-right:20px;">
+                <div class="col-sm-3 col-md-3">
                     <div class="form-group">
                         <label for="mobileno">Mobile Number</label>
-                        <input type="number" style="border: 2px solid; border-color: #aaa;" name="mobile" REQUIRED>
+                        <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;
+" name="mobile" REQUIRED>
                     </div>
                 </div>
             </div>
