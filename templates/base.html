@@ -98,9 +98,12 @@
                 </li>
                 {% endif %}
 
-                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
                 <li class="nav-item {% if url_name == 'passbook-list' %}active{% endif %}">
                     <a class="nav-link text-right" href="{% url 'wallet:passbook-list' %}">Passbook</a>
+                </li>
+                <li class="nav-item {% if url_name == 'wallet-list' %}active{% endif %}">
+                    <a class="nav-link text-right " href="{% url 'user:wallet-list' %}">Wallets</a>
                 </li>
                 {% endif %}
 
@@ -238,7 +241,11 @@
     </nav>
     <!-- Navigation /ends -->
 
-
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#{{request.resolver_match.url_name}}").addClass('active');
+});
+</script>
 
 {% else %}
     {% block logincontent %}
