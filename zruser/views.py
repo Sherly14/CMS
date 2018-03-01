@@ -52,6 +52,9 @@ from zrcms.env_vars import QUICKWALLET_ZR_PARTERNERID, QUICKWALLET_SECRET, QUICK
     QUICKWALLET_API_ACTIVATE_CARD_URL, QUICKWALLET_API_RECHARGE_CARD_URL, QUICKWALLET_API_PAY_URL, QUICKWALLET_API_DEACTIVATE_CARD_URL,\
     QUICKWALLET_PAYMENT_HISTORY_URL, QUICKWALLET_CREATE_OFFER_URL, QUICKWALLET_OFFER_LIST_URL, QUICKWALLET_OFFER_ASSIGN_TO_RETAILER_URL, \
     QUICKWALLET_OFFER_ASSIGN_TO_OUTLETS_URL, QUICKWALLET_API_LISTCARD_ACTIVATED_URL
+from common_utils.transaction_utils import get_sub_distributor_merchant_id_list_from_distributor, \
+    get_merchant_id_list_from_distributor, \
+    get_sub_distributor_merchant_id_list_from_sub_distributor
 
 MERCHANT = 'MERCHANT'
 DISTRIBUTOR = 'DISTRIBUTOR'
@@ -1982,7 +1985,6 @@ class RetailerListView(ListView):
                 })
             except:
                 pass
-
         if q:
             context['q'] = q
 
@@ -2001,6 +2003,7 @@ class RetailerListView(ListView):
         context['retailer_list'] = retailer_list
         context['queryset'] = queryset
         p = Paginator(context['queryset'], self.paginate_by)
+
         try:
             page = p.page(pg_no)
         except EmptyPage:

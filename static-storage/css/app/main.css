@@ -237,6 +237,10 @@ a.button.red{
   padding-right:20px;
 }
 
+.nav-link:focus {
+    color:red;
+}
+
 /* style for shadow for input*/
 .dflex.button.yellow{
     padding:0px;

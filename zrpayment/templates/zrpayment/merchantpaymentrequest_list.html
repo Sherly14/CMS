@@ -103,11 +103,11 @@
                                 </span>
                                 {% if page_obj.has_next %}
                                     {% if filter_by and q %}
-                                        <a href="/payment_request?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}" class="button red">next</a>
+                                        <a href="/payment_request?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}" class="button red">Next</a>
                                     {% elif q %}
-                                        <a href="/payment_request?page={{ page_obj.next_page_number }}&q={{ q }}" class="button red">next</a>
+                                        <a href="/payment_request?page={{ page_obj.next_page_number }}&q={{ q }}" class="button red">Next</a>
                                     {% elif filter_by %}
-                                        <a href="/payment_request?page={{ page_obj.next_page_number }}&filter={{ filter_by }}" class="button red">next</a>
+                                        <a href="/payment_request?page={{ page_obj.next_page_number }}&filter={{ filter_by }}" class="button red">Next</a>
                                     {% endif %}
                                 {% endif %}
                             </span>

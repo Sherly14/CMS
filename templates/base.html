@@ -84,6 +84,10 @@
                 <li class="nav-item {% if url_name == 'payment-request-sent-view' %}active{% endif %}">
                     <a class="nav-link text-right " href="{% url 'payment-requests:payment-request-sent-view' %}">Payment request sent</a>
                 </li>
+
+                <li class="nav-item" id="wallet-list">
+                    <a class="nav-link text-right " href="{% url 'user:wallet-list' %}">Wallets</a>
+                </li>
                 {% endif %}
 
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
@@ -238,7 +242,11 @@
     </nav>
     <!-- Navigation /ends -->
 
-
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#{{request.resolver_match.url_name}}").addClass('active');
+});
+</script>
 
 {% else %}
     {% block logincontent %}

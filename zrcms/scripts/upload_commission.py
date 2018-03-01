@@ -3,6 +3,7 @@ import sys
 import django
 import decimal
 import math
+import numbers
 import pandas as pd
 
 
@@ -15,11 +16,18 @@ django.setup()  # NOQA
 from zrcommission import models as comm_models
 from zrtransaction import models as transaction_models
 
+input_file = os.path.join(cur_dir, 'NON_DMT_COMMISSION_STRUCTURE.xls')
+
+if not os.path.exists(input_file):
+    print('No Input file found')
+    exit(0)
+
 exl = pd.read_excel(
-    os.path.join(cur_dir, 'NON_DMT_COMMISSION_STRUCTURE.xls'),
+    input_file,
     sheetname='Sheet1',
     skiprows=0
 )
+
 
 for index, df in exl.iterrows():
     distributor = df[0]
@@ -35,13 +43,61 @@ for index, df in exl.iterrows():
     sd_comm = df[10]
     m_comm = df[11]
 
-    transaction_type_object = transaction_models.TransactionType.objects.get(
-        name=transaction_type
-    )
+    if distributor and not isinstance(distributor, numbers.Number):
+        print('Distributor should be an Integer')
+        continue
 
-    vendor_object = transaction_models.Vendor.objects.get(
+    if vendor == '':
+        print('No Vendor Found')
+        continue
+
+    if pid and not isinstance(pid, numbers.Number):
+        print('pid should be an Integer')
+        continue
+
+    if service_provider == '':
+        print('No Service Provider Found')
+        continue
+
+    if is_chargeable or (isinstance(is_chargeable, basestring) and is_chargeable.lower() in ['t', 'true', 'y', 'yes']):
+        is_chargeable = True
+    elif is_chargeable or (isinstance(is_chargeable, basestring) and is_chargeable.lower() in ['f', 'false', 'n', 'no']):
+        is_chargeable = False
+    else:
+        print('Unknown Is-Chargeable value')
+        continue
+
+    if commission_type and (isinstance(commission_type, basestring) and commission_type.lower() in ['p']):
+        commission_type = 'P'
+    elif commission_type and (isinstance(commission_type, basestring) and commission_type.lower() in ['f']):
+        commission_type = 'F'
+    else:
+        print('Unknown Commission Type value')
+        continue
+
+    if margin == '':
+        print('No Margin Found')
+        continue
+
+    if transaction_models.TransactionType.objects.filter(
+        name=transaction_type
+    ).count() > 0:
+        transaction_type_object = transaction_models.TransactionType.objects.get(
+            name=transaction_type
+        )
+    else:
+        print 'Transaction Type not found'
+        continue
+
+    if transaction_models.Vendor.objects.filter(
         name=vendor
-    )
+    ).count():
+        vendor_object = transaction_models.Vendor.objects.get(
+            name=vendor
+        )
+    else:
+        print 'Vendor not found'
+        continue
 
     print index + 1, transaction_type_object, vendor_object
 
@@ -52,7 +108,7 @@ for index, df in exl.iterrows():
             transaction_type=transaction_type_object,
             vendor=vendor_object
         ).count() == 0:
-            print '...Service Provider Id not found'
+            print 'Service Provider Id not found'
         else:
             service_provider_object = transaction_models.ServiceProvider.objects.get(
                 name=service_provider,
@@ -79,13 +135,21 @@ for index, df in exl.iterrows():
                     commission_for_merchant=m_comm,
                     gst_value=decimal.Decimal(18.0000),
                     tds_value=decimal.Decimal(5.000),
-                    is_chargable=False,
+                    is_chargable=is_chargeable,
                     is_default=True,
                     is_enabled=True
                 )
             else:
+                if comm_models.BillPayCommissionStructure.objects.filter(
+                    service_provider=service_provider_object,
+                    is_default=False,
+                    distributor=distributor
+                ).count() == 0:
+                    print 'Commission structure not found for distributor -', distributor
+                    continue
+
                 comm_models.BillPayCommissionStructure.objects.filter(
-                    service_provider=service_provider_object['id'],
+                    service_provider=service_provider_object,
                     is_default=False,
                     distributor=distributor
                 ).update(
@@ -103,7 +167,7 @@ for index, df in exl.iterrows():
                     commission_for_merchant=m_comm,
                     gst_value=decimal.Decimal(18.0000),
                     tds_value=decimal.Decimal(5.000),
-                    is_chargable=False,
+                    is_chargable=is_chargeable,
                     is_default=False,
                     is_enabled=True
                 )

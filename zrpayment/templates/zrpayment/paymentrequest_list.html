@@ -159,26 +159,26 @@
                                     {% if page_obj.has_previous %}
                                         <div class="pagination-prev">
                                             {% if filter_by and q %}
-                                                <a href="/payment_request?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}" class="button red">prev</a>
+                                                <a href="/payment_request?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}" class="button red">Prev</a>
                                             {% elif q %}
-                                                <a href="/payment_request?page={{ page_obj.previous_page_number }}&q={{ q }}" class="button red">prev</a>
+                                                <a href="/payment_request?page={{ page_obj.previous_page_number }}&q={{ q }}" class="button red">Prev</a>
                                             {% elif filter_by %}
-                                                <a href="/payment_request?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}" class="button red">prev</a>
+                                                <a href="/payment_request?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}" class="button red">Prev</a>
                                             {% else %}
-                                                <a href="/payment_request?page={{ page_obj.previous_page_number }}" class="button red">prev</a>
+                                                <a href="/payment_request?page={{ page_obj.previous_page_number }}" class="button red">Prev</a>
                                             {% endif %}
                                         </div>
                                     {% endif %}
                                     {% if page_obj.has_next %}
                                         <div class="pagination-next">
                                                 {% if filter_by and q %}
-                                                    <a href="/payment_request?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}" class="button red">next</a>
+                                                    <a href="/payment_request?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}" class="button red">Next</a>
                                                 {% elif q %}
-                                                    <a href="/payment_request?page={{ page_obj.next_page_number }}&q={{ q }}" class="button red">next</a>
+                                                    <a href="/payment_request?page={{ page_obj.next_page_number }}&q={{ q }}" class="button red">Next</a>
                                                 {% elif filter_by %}
-                                                    <a href="/payment_request?page={{ page_obj.next_page_number }}&filter={{ filter_by }}" class="button red">next</a>
+                                                    <a href="/payment_request?page={{ page_obj.next_page_number }}&filter={{ filter_by }}" class="button red">Next</a>
                                                 {% else %}
-                                                    <a href="/payment_request?page={{ page_obj.next_page_number }}" class="button red">next</a>
+                                                    <a href="/payment_request?page={{ page_obj.next_page_number }}" class="button red">Next</a>
                                                 {% endif %}
                                         </div>
                                     {% endif %}
@@ -314,16 +314,16 @@ $(document).ready(function()
         window.location.assign(url)
     })
 
-    var startDate = $('#start-date').val();
+         var startDate = $('#start-date').val();
          var endDate = $('#end-date').val();
-         var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+         var today = new Date(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate());
         $('#start-date').datepicker({
             uiLibrary: 'bootstrap4',
             iconsLibrary: 'fontawesome',
             format: 'yyyy-mm-dd',
 
             maxDate: function () {
-            return $('#end-date').val();
+                return new Date($('#end-date').val()) == '' ? today: ( new Date($('#end-date').val()) < today ? $('#end-date').val() : today);
             }
         }).on('change', function (ev)
          {
@@ -350,6 +350,8 @@ $(document).ready(function()
 
             minDate: function () {
                 return $('#start-date').val();
+            },  maxDate: function () {
+                return today;
             }
         }).on('change', function (ev)
          {
