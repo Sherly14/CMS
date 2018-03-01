@@ -58,48 +58,52 @@
         <div class="collapse navbar-collapse" id="navbarExample">
             <ul class="sidebar-nav navbar-nav">
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF"%}
-                <li class="nav-item ">
+                <li class="nav-item" id="distributor-list">
                     <a class="nav-link text-right" href="{% url 'user:distributor-list' %}">Distributors</a>
                 </li>
                 {% endif %}
 
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "DISTRIBUTOR" %}
-                <li class="nav-item ">
+                <li class="nav-item" id="sub-distributor-list">
                     <a class="nav-link text-right" href="{% url 'user:sub-distributor-list' %}">Sub-Distributors</a>
                 </li>
                 {% endif %}
 
                 {% if request.user.zr_admin_user.role.name == "CHECKER" or request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
-                <li class="nav-item ">
+                <li class="nav-item" id="kyc-requests">
                     <a class="nav-link text-right" href="{% url 'user:kyc-requests' %}">KYC Requests</a>
                 </li>
                 {% endif %}
 
-                <li class="nav-item ">
+                <li class="nav-item" id="merchant-list">
                     <a class="nav-link text-right" href="{% url 'user:merchant-list' %}">Merchants</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" id="transaction-list">
                     <a class="nav-link text-right" href="{% url 'transaction:transaction-list' %}">Transactions</a>
                 </li>
-                <li class="nav-item" style="position: relative;">
+                <li class="nav-item"  style="position: relative;" id="payment-request-list">
                     <a class="nav-link text-right" href="{% url 'payment-requests:payment-request-list' %}">Payment Requests</a>
                     <span class="badge badge-pill badge-outline">{{ request|payment_req_cnt }}</span></a>
                 </li>
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
-                <li class="nav-item">
+                <li class="nav-item" id="display-commission">
                     <a class="nav-link text-right " href="{% url 'commission:display-commission' %}">Commissions</a>
+                </li>
+
+                <li class="nav-item" id="wallet-list">
+                    <a class="nav-link text-right " href="{% url 'user:wallet-list' %}">Wallets</a>
                 </li>
                 {% endif %}
 
-                <li class="nav-item">
+                <li class="nav-item" id="payment-request-sent-view">
                     <a class="nav-link text-right " href="{% url 'payment-requests:payment-request-sent-view' %}">Payment request sent</a>
                 </li>
 
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF"%}
-                <li class="nav-item" style="position: relative;">
+                <li class="nav-item" style="position: relative;" id="payment-list">
                     <a class="nav-link text-right" href="{% url 'payment-requests:payment-list' %}">Payments</a>
                 </li>
-                <li class="nav-item" style="position: relative;">
+                <li class="nav-item" style="position: relative;" id="passbook-list">
                     <a class="nav-link text-right" href="{% url 'wallet:passbook-list' %}">Passbook</a>
                 </li>
                 {% endif %}
@@ -151,7 +155,11 @@
     </nav>
     <!-- Navigation /ends -->
 
-
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#{{request.resolver_match.url_name}}").addClass('active');
+});
+</script>
 
 {% else %}
     {% block logincontent %}

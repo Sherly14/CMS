@@ -42,6 +42,9 @@ from django.contrib.auth.models import User
 from itertools import chain
 from zrpayment.forms import forms as zr_payment_forms
 
+from common_utils.transaction_utils import get_sub_distributor_merchant_id_list_from_distributor, \
+    get_merchant_id_list_from_distributor, \
+    get_sub_distributor_merchant_id_list_from_sub_distributor
 
 MERCHANT = 'MERCHANT'
 DISTRIBUTOR = 'DISTRIBUTOR'
@@ -1673,3 +1676,80 @@ class SubDistributorListView(ListView):
 
     def get_queryset(self):
         return get_sub_distributor_qs(self.request)
+
+
+class WalletListView(ListView):
+    template_name = 'zruser/wallet_list.html'
+    # queryset = ZrUser.objects.filter(role__name=SUBDISTRIBUTOR)
+    context_object_name = 'wallet_list'
+    paginate_by = 10
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(WalletListView, self).get_context_data()
+        queryset = self.get_queryset()
+        q = self.request.GET.get('q')
+        filter = self.request.GET.get('filter')
+        pg_no = self.request.GET.get('page_no', 1)
+        start_date = self.request.GET.get('startDate')
+        end_date = self.request.GET.get('endDate')
+        sub_distributor_id = self.request.GET.get('sub-distributor-id')
+        distributor_id = self.request.GET.get('distributor-id')
+        sub_distributor = {}
+        sub_distributor_list = []
+
+        if q:
+            context['q'] = q
+
+        if filter:
+            context['filter_by'] = filter
+
+        if start_date:
+            context['startDate'] = start_date
+
+        if end_date:
+            context['endDate'] = end_date
+
+
+        p = Paginator(queryset, self.paginate_by)
+        try:
+            page = p.page(pg_no)
+        except EmptyPage:
+            raise Http404
+
+        context['queryset'] = page.object_list
+        query_string = {}
+        if q:
+            query_string['q'] = q
+
+        if filter:
+            query_string['filter'] = filter
+
+        if page.has_next():
+            query_string['page_no'] = page.next_page_number()
+            context['next_page_qs'] = urlencode(query_string)
+            context['has_next_page'] = page.has_next()
+        if page.has_previous():
+            query_string['page_no'] = page.previous_page_number()
+            context['prev_page_qs'] = urlencode(query_string)
+            context['has_prev_page'] = page.has_previous()
+
+        return context
+
+    def get_queryset(self):
+        if is_user_superuser(self.request):
+            return zrwallet_models.Wallet.objects.all()
+
+        elif self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
+            dist_subd = list(zrmappings_models.DistributorSubDistributor.objects.filter(
+                    distributor=self.request.user.zr_admin_user.zr_user).values_list('sub_distributor_id', flat=True))
+            return zrwallet_models.Wallet.objects.filter(
+                merchant_id__in=get_merchant_id_list_from_distributor(self.request.user.zr_admin_user.zr_user) +
+                dist_subd + list(zrmappings_models.SubDistributorMerchant.objects.filter(
+                    sub_distributor__in=dist_subd).values_list('merchant_id', flat=True))
+)
+
+        elif self.request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
+            return zrwallet_models.Wallet.objects.filter(
+                merchant_id__in=list(zrmappings_models.SubDistributorMerchant.objects.filter(
+                    sub_distributor=self.request.user.zr_admin_user.zr_user).values_list(
+                    'merchant_id', flat=True)))

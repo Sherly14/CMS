@@ -68,6 +68,7 @@
                             <td>{{ kyc_req.at_created|date:"d/m/Y" }}</td>
                             <td>
                                 {% if kyc_req.in_process %}
+                                |
                                     {% for kyc in kyc_req.kyc_details.all %}
                                         {% if kyc.approval_status == 'I' %}
                                             <a href="{{ kyc.get_download_url }}">{{kyc.type}}</a> |
@@ -174,14 +175,14 @@
     })
      var startDate = $('#start-date').val();
          var endDate = $('#end-date').val();
-         var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+         var today = new Date(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate());
         $('#start-date').datepicker({
             uiLibrary: 'bootstrap4',
             iconsLibrary: 'fontawesome',
             format: 'yyyy-mm-dd',
 
             maxDate: function () {
-            return $('#end-date').val();
+                return new Date($('#end-date').val()) == '' ? today: ( new Date($('#end-date').val()) < today ? $('#end-date').val() : today);
             }
         }).on('change', function (ev)
          {
@@ -209,6 +210,8 @@
 
             minDate: function () {
                 return $('#start-date').val();
+            }, maxDate: function () {
+                return today;
             }
         }).on('change', function (ev)
          {
