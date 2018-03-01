@@ -9,6 +9,7 @@ from zruser.views import DistributorDetailView, DistributorListView, MerchantLis
                         TerminalUpdateView, TerminalView, GenerateOTPView, IssueMobileView, ActivateCardView,\
                         RechargeCardView, PayView, DeactivateCardView, PaymentHistoryView, OfferCreateView, OfferListView, \
                         TerminalActivatedCardListView, WalletListView
+
 from zruser.viewsets import MerchantLeadViewSet
 
 router = DefaultRouter()
