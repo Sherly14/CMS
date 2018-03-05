@@ -50,7 +50,8 @@ from itertools import chain
 from zrcms.env_vars import QUICKWALLET_ZR_PARTERNERID, QUICKWALLET_SECRET, QUICKWALLET_API_CRUD_URL,\
     QUICKWALLET_API_CARD_URL, QUICKWALLET_API_LISTCARD_URL, QUICKWALLET_API_GENERATEOTP_URL, QUICKWALLET_API_ISSUE_MOBILE_URL,\
     QUICKWALLET_API_ACTIVATE_CARD_URL, QUICKWALLET_API_RECHARGE_CARD_URL, QUICKWALLET_API_PAY_URL, QUICKWALLET_API_DEACTIVATE_CARD_URL,\
-    QUICKWALLET_PAYMENT_HISTORY_URL, QUICKWALLET_CREATE_OFFER_URL, QUICKWALLET_OFFER_LIST_URL, QUICKWALLET_OFFER_ASSIGN_TO_RETAILER_URL
+    QUICKWALLET_PAYMENT_HISTORY_URL, QUICKWALLET_CREATE_OFFER_URL, QUICKWALLET_OFFER_LIST_URL, QUICKWALLET_OFFER_ASSIGN_TO_RETAILER_URL, \
+    QUICKWALLET_API_LISTCARD_ACTIVATED_URL
 
 MERCHANT = 'MERCHANT'
 DISTRIBUTOR = 'DISTRIBUTOR'
@@ -2477,13 +2478,69 @@ class UserCardListView(View):
             )
 
 
+class TerminalActivatedCardListView(View):
+    template_name = 'zruser/activatedcard_list.html'
+    paginate_by = 10
+
+    def get(self, request, pk, **kwargs):
+        user = ZrTerminal.objects.get(id=pk)
+        response = requests.post(QUICKWALLET_API_LISTCARD_ACTIVATED_URL, json={
+            "secret": QUICKWALLET_SECRET,
+            "udoutletid": int(user.mobile_no)
+        })
+
+        if 300 > response.status_code >= 200:
+            try:
+                json_data = json.loads(response.text)
+                activated_cards = json_data['data']['activations']
+
+                return render(
+                    request, self.template_name, {"zr_user": user, "activated_cards": activated_cards}
+                )
+            except:
+                pass
+
+            return render(
+                request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
+            )
+
+
 class GenerateOTPView(View):
     template_name = 'zruser/generate_otp.html'
 
     def get(self, request, pk,  **kwargs):
-            user = ZrTerminal.objects.get(id=pk)
+        user = ZrTerminal.objects.get(id=pk)
+        zr_retailer_id = request.user.zr_admin_user.zr_user.id
+        vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
+        response = requests.post(QUICKWALLET_API_LISTCARD_URL, json={
+            "secret": QUICKWALLET_SECRET,
+            "retailerid": vendor.vendor_user
+        })
+
+        # response = requests.post(QUICKWALLET_API_LISTCARD_ACTIVATED_URL, json={
+        #     "secret": QUICKWALLET_SECRET,
+        #     "udoutletid": int(user.mobile_no)
+        # })
+        if 300 > response.status_code >= 200:
+            try:
+                json_data = json.loads(response.text)
+                loyalty_cards = json_data['data']['loyaltycards']
+                loyalty_cardslist = []
+                for card in loyalty_cards:
+                    loyalty_cardslist.append(card.cardnumber)
+                # activated_cards = json_data['data']['activations']
+                # activated_cardslist = []
+                # for card in activated_cards:
+                #     activated_cardslist.append(card.cardnumber)
+
+                return render(
+                    request, self.template_name, {"zr_user": user, "loyalty_cardslist": loyalty_cardslist}
+                )
+            except:
+                pass
+
             return render(
-                request, self.template_name, {"zr_user": user}
+                request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
             )
 
     @transaction.atomic

@@ -129,7 +129,10 @@
                 <li class="nav-item ">
                     <a class="nav-link text-right" href="{% url 'user:payment-history' pk=zr_user.id %}">Payment History</a>
                 </li>
-                <br><br><br><br><br><br><br><br>
+                <li class="nav-item ">
+                    <a class="nav-link text-right" href="{% url 'user:activatedcard-list' pk=zr_user.id %}">Activated Loyalty Cards</a>
+                </li>
+                <br><br><br><br><br><br>
                 <li class="nav-item ">
                     <a class="nav-link text-right" href="{% url 'user:dashboard' %}">Back to Retailer</a>
                 </li>
