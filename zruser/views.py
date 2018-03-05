@@ -608,36 +608,8 @@ class KYCRequestsView(ListView):
         context['q'] = q
         user_id = self.request.GET.get('user_id')
 
-        paginator = Paginator(queryset, self.paginate_by)
-        page = self.request.GET.get('page', 1)
-
-        try:
-            queryset = paginator.page(page)
-        except PageNotAnInteger:
-            queryset = paginator.page(1)
-
-        context['page_obj'] = queryset
-
-        if user_list:
-            context['user_list'] = user_list
-
-        if start_date:
-            context['startDate'] = start_date
-
-        if end_date:
-            context['endDate'] = end_date
-
-        if user_id:
-            context['user_id'] = int(user_id)
-
-        return context
-
-    def get_queryset(self):
         approve = self.request.GET.get('approve')
         reject = self.request.GET.get('reject')
-        filter_by = self.request.GET.get('filter', 'All')
-        q = self.request.GET.get('q')
-        user_id = self.request.GET.get('user_id')
         if approve or reject:
             if not ZrUser.objects.filter(id=approve or reject).last():
                 raise Http404
@@ -669,6 +641,35 @@ class KYCRequestsView(ListView):
 
                     zruser.send_welcome_email(password)
 
+        paginator = Paginator(queryset, self.paginate_by)
+        page = self.request.GET.get('page', 1)
+
+        try:
+            queryset = paginator.page(page)
+        except PageNotAnInteger:
+            queryset = paginator.page(1)
+
+        context['page_obj'] = queryset
+
+        if user_list:
+            context['user_list'] = user_list
+
+        if start_date:
+            context['startDate'] = start_date
+
+        if end_date:
+            context['endDate'] = end_date
+
+        if user_id:
+            context['user_id'] = int(user_id)
+
+        return context
+
+    def get_queryset(self):
+
+        filter_by = self.request.GET.get('filter', 'All')
+        q = self.request.GET.get('q')
+        user_id = self.request.GET.get('user_id')
         queryset = ZrUser.objects.filter(
             is_kyc_verified=False
         ).order_by('-at_created')
