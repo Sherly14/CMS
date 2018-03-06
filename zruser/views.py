@@ -3543,6 +3543,66 @@ def download_wallet_list_csv(request):
     return response
 
 
+def get_wallets_qs(request):
+    user_id = request.GET.get('user-id')
+    user_list = []
+
+    if is_user_superuser(request):
+        user_list = zrwallet_models.Wallet.objects.all()
+
+    elif request.user.zr_admin_user.role.name == DISTRIBUTOR:
+        dist_subd = list(zrmappings_models.DistributorSubDistributor.objects.filter(
+            distributor=request.user.zr_admin_user.zr_user).values_list('sub_distributor_id', flat=True))
+        user_list = zrwallet_models.Wallet.objects.filter(
+            merchant_id__in=get_merchant_id_list_from_distributor(request.user.zr_admin_user.zr_user) +
+            dist_subd + list(zrmappings_models.SubDistributorMerchant.objects.filter(
+                sub_distributor__in=dist_subd).values_list('merchant_id', flat=True)))
+
+    elif request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
+        user_list = zrwallet_models.Wallet.objects.filter(
+            merchant_id__in=list(zrmappings_models.SubDistributorMerchant.objects.filter(
+                sub_distributor=request.user.zr_admin_user.zr_user).values_list(
+                'merchant_id', flat=True)))
+
+    if user_id is not None and int(user_id) > 0:
+        user_list = user_list.filter(merchant_id=user_id)
+
+    q = request.GET.get('q', "")
+    q_obj = Q(
+        merchant__first_name__icontains=q
+    ) | Q(
+        merchant__last_name__icontains=q
+    ) | Q(
+        merchant__mobile_no__icontains=q
+    )
+
+    user_list = user_list.filter(q_obj).order_by('-at_created')
+
+    return user_list
+
+
+def download_wallet_list_csv(request):
+    wallet_qs = get_wallets_qs(request)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="distributors.csv"'
+    writer = csv.writer(response)
+    writer.writerow([
+        'User Id', 'User Name', 'DOJ', 'Mobile', 'Role', 'DMT Bal', 'Non-DMT Bal'
+    ])
+    for wallet in wallet_qs:
+        writer.writerow([
+            wallet.merchant.id,
+            wallet.merchant.first_name,
+            wallet.merchant.at_created,
+            wallet.merchant.mobile_no,
+            wallet.merchant.role,
+            wallet.dmt_balance,
+            wallet.non_dmt_balance,
+        ])
+
+    return response
+
+
 class WalletListView(ListView):
     template_name = 'zruser/wallet_list.html'
     # queryset = ZrUser.objects.filter(role__name=SUBDISTRIBUTOR)
