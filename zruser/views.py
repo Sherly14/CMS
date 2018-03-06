@@ -1719,7 +1719,7 @@ def get_wallets_qs(request):
 def download_wallet_list_csv(request):
     wallet_qs = get_wallets_qs(request)
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="distributors.csv"'
+    response['Content-Disposition'] = 'attachment; filename="wallets.csv"'
     writer = csv.writer(response)
     writer.writerow([
         'User Id', 'User Name', 'DOJ', 'Mobile', 'Role', 'DMT Bal', 'Non-DMT Bal'
