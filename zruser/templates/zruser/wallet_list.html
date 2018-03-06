@@ -7,33 +7,14 @@
 <div class="content-wrapper">
     <p class="head-right">Wallet Table</p>
     <div class="row rm-margin-side">
-        <div class="col-2">
-            <p class="head-left">START DATE</p>
+        <div class="col-4">
+            <select id="user-id" name="user-id">
+                <option value="-1">ALL</option>
+                {% for user in user_list %}
+                    <option value="{{ user.merchant.id }}" {% if user.merchant.id == user_id %}selected{% endif %}>{{ user.merchant.first_name }} {{ user.merchant.last_name|default_if_none:""}}</option>
+                {% endfor %}
+            </select>
         </div>
-        <div class="col-2">
-            <p class="head-left">END DATE</p>
-        </div>
-    </div>
-    <div class="row rm-margin-side">
-        <div class="col-2">
-            <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-        </div>
-        <div class="col-2">
-            <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-        </div>
-        <!--<div class="col-4">-->
-            <!--<select id="sub-distributor-id"  name="sub-distributor-id">-->
-                <!--<option value="-1">ALL</option>-->
-                    <!--{% for key,val in subDistributor.items %}-->
-                        <!--<optgroup label = "{{val.0.0}} ">-->
-                             <!--<option value="{{key}}"{% if key == distributor_id %}selected{% endif %}>ALL-{{val.0.0}}</option>-->
-                            <!--{% for subdrow in val %}-->
-                                <!--<option value="{{subdrow.1}}" {% if subdrow.1 == sub_distributor_id %}selected{% endif %}>{{ subdrow.2 }}</option>-->
-                            <!--{% endfor %}-->
-                        <!--</optgroup>-->
-                    <!--{% endfor %}-->
-            <!--</select>-->
-        <!--</div>-->
         <div class="div-width-100">
             <!--<p class="head-left">PERIOD</p>-->
             <br>
@@ -45,7 +26,7 @@
                     </div>
                     <input class="button red float-left mar_l_10" type="button" value="Search" id="search-btn">
                     <input class="button red float-right" type="button" value="DOWNLOAD CSV" id="csv-download">
-                    <a class="nav-link float-right" href="{% url 'user:sub-distributor-list' %}">Reset filters</a>
+                    <a class="nav-link float-right" href="{% url 'user:wallet-list' %}">Reset filters</a>
                 </div>
             </div>
             <br>
@@ -59,6 +40,7 @@
                 <div style="width: 100%;">
                     <table>
                         <tr>
+                            <th>Id</th>
                             <th>Name</th>
                             <th>DOJ</th>
                             <th>Mobile</th>
@@ -68,6 +50,7 @@
                         </tr>
                         {% for wallet in queryset %}
                             <tr>
+                                <td>{{ wallet.merchant.id }}</td>
                                 <td>{{ wallet.merchant.first_name }} {{ wallet.merchant.last_name }}</td>
                                 <td>{{ wallet.at_created }}</td>
                                 <td>{{ wallet.merchant.mobile_no }}</td>
@@ -103,12 +86,10 @@
 <script>
 
     $(document).ready(function(){
-    $('#sub-distributor-id').select2();
+    $('#user-id').select2();
 
     function q(){
-             subDistributorId = $("#sub-distributor-id").val();
-             startDate = $('#start-date').val();
-             endDate = $('#end-date').val();
+             userId = $("#user-id").val();
 
              if($('#search-txt').val() != "") {
                   url = window.location.pathname + "?q=" + $('#search-txt').val();
@@ -116,87 +97,23 @@
                   url = window.location.pathname + '?';
              }
 
-             if(subDistributorId !="")
+             if(userId !="")
              {
-                 url += '&sub-distributor-id=' + subDistributorId
-             }
-
-             if(startDate!="" && endDate!="" )
-             {
-                 url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
+                 url += '&user-id=' + userId
              }
 
              window.location.assign(url)
          }
 
-    $('#search-btn').click(q)
+    $('#search-btn').click(q);
 
-    $('#sub-distributor-id').change(q);
-
+    $('#user-id').change(q);
 
 
     $('#csv-download').click(function(){
-        url = "{% url "user:sub-distributor-csv" %}" + window.location.search
+        url = "{% url "user:wallet-csv" %}" + window.location.search
         window.location.assign(url)
     })
-
-         var startDate = $('#start-date').val();
-         var endDate = $('#end-date').val();
-         var today = new Date(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate());
-        $('#start-date').datepicker({
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            format: 'yyyy-mm-dd',
-
-            maxDate: function () {
-                return new Date($('#end-date').val()) == '' ? today: ( new Date($('#end-date').val()) < today ? $('#end-date').val() : today);
-            }
-        }).on('change', function (ev)
-         {
-
-            var start = $("#start-date").val();
-            var startD = new Date(start);
-            var end = $("#end-date").val();
-            var endD = new Date(end);
-            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
-
-            $("#days").val(diff);
-
-            if(diff>31)
-            {
-               alert("date difference is greater than 31");
-               $('#start-date').val("");
-            } else if ($("#start-date").val() != '' && $("#end-date").val() != ''){q();}
-         });
-
-
-        $('#end-date').datepicker({
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            format: 'yyyy-mm-dd',
-
-            minDate: function () {
-                return $('#start-date').val();
-            },  maxDate: function () {
-                return today;
-            }
-        }).on('change', function (ev)
-         {
-
-            var start = $("#start-date").val();
-            var startD = new Date(start);
-            var end = $("#end-date").val();
-            var endD = new Date(end);
-            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
-
-            $("#days").val(diff);
-
-            if(diff>31)
-            {
-               alert("date difference is greater than 31");
-               $('#end-date').val("");
-            } else if ($("#start-date").val() != '' && $("#end-date").val() != ''){q();}
-         });
-    });
+});
 </script>
 {% endblock %}

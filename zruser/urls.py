@@ -34,6 +34,7 @@ urlpatterns += [
     # url(r'^get_report_excel/$', zr_user_views.get_report_excel, name='get-report-excel'),
 
     url(r'^wallet_list/$', WalletListView.as_view(), name='wallet-list'),
+    url(r'^wallet_csv/$', zr_user_views.download_wallet_list_csv, name='wallet-csv'),
 
     url(r'^dashboard/$', DashBoardView.as_view(), name='dashboard'),
     url(r'^mail_report/$', zr_user_views.mail_report, name='user_mail_report'),
