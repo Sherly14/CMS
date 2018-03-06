@@ -28,7 +28,8 @@ def is_user_retailer(request):
 def is_zruser_djuser(zruser):
     if (zruser.role.name == "ADMINSTAFF" or
         zruser.role.name == "DISTRIBUTOR" or
-            zruser.role.name == "SUBDISTRIBUTOR"):
+        zruser.role.name == "SUBDISTRIBUTOR" or
+        zruser.role.name == "RETAILER"):
         return True
 
     return False
