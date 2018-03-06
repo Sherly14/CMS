@@ -16,7 +16,7 @@ django.setup()  # NOQA
 from zrcommission import models as comm_models
 from zrtransaction import models as transaction_models
 
-input_file = os.path.join(cur_dir, 'NON_DMT_COMMISSION_STRUCTURE.xls')
+input_file = os.path.join(cur_dir, 'NON-DMT DEFAULT COMMISSION STRUCTURE new.xls')
 
 if not os.path.exists(input_file):
     print('No Input file found')
@@ -24,7 +24,7 @@ if not os.path.exists(input_file):
 
 exl = pd.read_excel(
     input_file,
-    sheetname='Sheet1',
+    sheetname='NON DMT COMMISSION STRUCTURE',
     skiprows=0
 )
 
@@ -32,16 +32,16 @@ exl = pd.read_excel(
 for index, df in exl.iterrows():
     distributor = df[0]
     vendor = df[1]
-    pid = df[2]
-    service_provider = df[3]
-    transaction_type = df[4]
-    is_chargeable = df[5]
-    commission_type = df[6]
-    margin = df[7]
-    z_comm = df[8]
-    d_comm = df[9]
-    sd_comm = df[10]
-    m_comm = df[11]
+    # pid = df[2]
+    service_provider = df[2]
+    transaction_type = df[3]
+    is_chargeable = df[4]
+    commission_type = df[5]
+    margin = df[6]
+    z_comm = df[7]
+    d_comm = df[8]
+    sd_comm = df[9]
+    m_comm = df[10]
 
     if distributor and not isinstance(distributor, numbers.Number):
         print('Distributor should be an Integer')
@@ -51,17 +51,17 @@ for index, df in exl.iterrows():
         print('No Vendor Found')
         continue
 
-    if pid and not isinstance(pid, numbers.Number):
-        print('pid should be an Integer')
-        continue
+    # if pid and not isinstance(pid, numbers.Number):
+    #     print('pid should be an Integer')
+    #     continue
 
     if service_provider == '':
         print('No Service Provider Found')
         continue
 
-    if is_chargeable or (isinstance(is_chargeable, basestring) and is_chargeable.lower() in ['t', 'true', 'y', 'yes']):
+    if is_chargeable and (isinstance(is_chargeable, basestring) and is_chargeable.lower() in ['t', 'true', 'y', 'yes']):
         is_chargeable = True
-    elif is_chargeable or (isinstance(is_chargeable, basestring) and is_chargeable.lower() in ['f', 'false', 'n', 'no']):
+    elif is_chargeable and (isinstance(is_chargeable, basestring) and is_chargeable.lower() in ['f', 'false', 'n', 'no']):
         is_chargeable = False
     else:
         print('Unknown Is-Chargeable value')
@@ -86,7 +86,7 @@ for index, df in exl.iterrows():
             name=transaction_type
         )
     else:
-        print 'Transaction Type not found'
+        print 'Transaction Type not found in records'
         continue
 
     if transaction_models.Vendor.objects.filter(
@@ -96,7 +96,7 @@ for index, df in exl.iterrows():
             name=vendor
         )
     else:
-        print 'Vendor not found'
+        print 'Vendor not found in records'
         continue
 
     print index + 1, transaction_type_object, vendor_object
@@ -108,7 +108,7 @@ for index, df in exl.iterrows():
             transaction_type=transaction_type_object,
             vendor=vendor_object
         ).count() == 0:
-            print 'Service Provider Id not found'
+            print 'Service Provider Id not found in records'
         else:
             service_provider_object = transaction_models.ServiceProvider.objects.get(
                 name=service_provider,
@@ -145,7 +145,7 @@ for index, df in exl.iterrows():
                     is_default=False,
                     distributor=distributor
                 ).count() == 0:
-                    print 'Commission structure not found for distributor -', distributor
+                    print 'Commission structure not found in records for distributor -', distributor
                     continue
 
                 comm_models.BillPayCommissionStructure.objects.filter(
@@ -173,9 +173,9 @@ for index, df in exl.iterrows():
                 )
     else:
         if transaction_type_object is None:
-            print 'Transaction type', transaction_type, ' not found'
+            print 'Transaction type', transaction_type, ' not found in records'
         if vendor_object is None:
-            print 'Vendor', vendor_object, ' not found'
+            print 'Vendor', vendor_object, ' not found in records'
         continue
 
 
