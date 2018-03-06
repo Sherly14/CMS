@@ -16,7 +16,9 @@ django.setup()  # NOQA
 from zrcommission import models as comm_models
 from zrtransaction import models as transaction_models
 
-input_file = os.path.join(cur_dir, 'NON-DMT DEFAULT COMMISSION STRUCTURE new.xls')
+# input_file = os.path.join(cur_dir, 'NON-DMT DEFAULT COMMISSION STRUCTURE new.xls')
+input_file = os.path.join(cur_dir, 'Final System sheet_Sangeeta Mobile 5.xlsx')
+
 
 if not os.path.exists(input_file):
     print('No Input file found')
@@ -24,12 +26,13 @@ if not os.path.exists(input_file):
 
 exl = pd.read_excel(
     input_file,
-    sheetname='NON DMT COMMISSION STRUCTURE',
+    sheetname='Actual System Used Sheet',
     skiprows=0
 )
 
 
 for index, df in exl.iterrows():
+    print('-->' + str(index + 1))
     distributor = df[0]
     vendor = df[1]
     # pid = df[2]
@@ -86,7 +89,7 @@ for index, df in exl.iterrows():
             name=transaction_type
         )
     else:
-        print 'Transaction Type not found in records'
+        print 'Transaction Type not found in records', transaction_type
         continue
 
     if transaction_models.Vendor.objects.filter(
@@ -96,10 +99,10 @@ for index, df in exl.iterrows():
             name=vendor
         )
     else:
-        print 'Vendor not found in records'
+        print 'Vendor not found in records', vendor
         continue
 
-    print index + 1, transaction_type_object, vendor_object
+    print distributor, '|', vendor_object, '|', service_provider, '|', transaction_type_object
 
     if transaction_type_object and vendor_object:
 
