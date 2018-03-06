@@ -95,12 +95,6 @@
                 <li class="nav-item ">
                     <a class="nav-link text-right" href="{% url 'user:terminal-list' %}">Terminals</a>
                 </li>
-                <li class="nav-item ">
-                    <a class="nav-link text-right" href="{% url 'user:offer-list' %}">Offers</a>
-                </li>
-                <li class="nav-item ">
-                    <a class="nav-link text-right" href="{% url 'user:payment-history' pk=0 %}">Payment History</a>
-                </li>
                 {% endif %}
                 {% if request.user.zr_admin_user.role.name == "RETAILER" and zr_user.role.name != "TERMINAL"%}
                 <li class="nav-item ">
@@ -138,11 +132,7 @@
                 </li>
                 {% endif %}
 
-                {% if request.user.zr_admin_user.role.name == "CHECKER" or request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
-                <li class="nav-item ">
-                    <a class="nav-link text-right" href="{% url 'user:kyc-requests' %}">KYC Requests</a>
-                </li>
-                {% endif %}
+
 
                 {% if request.user.zr_admin_user.role.name != "RETAILER" %}
                 <li class="nav-item">
@@ -171,7 +161,19 @@
                     <a class="nav-link text-right" href="{% url 'wallet:passbook-list' %}">Passbook</a>
                 </li>
                 {% endif %}
-
+                {% if request.user.zr_admin_user.role.name == "CHECKER" or request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
+                    <li class="nav-item ">
+                        <a class="nav-link text-right" href="{% url 'user:kyc-requests' %}">KYC Requests</a>
+                    </li>
+                {% endif %}
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "RETAILER" and zr_user.role.name != "TERMINAL" %}
+                    <li class="nav-item ">
+                        <a class="nav-link text-right" href="{% url 'user:offer-list' %}">Offers</a>
+                    </li>
+                    <li class="nav-item ">
+                        <a class="nav-link text-right" href="{% url 'user:payment-history' pk=0 %}">Payment History</a>
+                    </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link text-right"></a>
                 </li>

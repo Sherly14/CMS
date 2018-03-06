@@ -2274,7 +2274,7 @@ def get_terminal_qs(request):
     filter = request.GET.get('filter')
 
     if q:
-        query_filter = Q(first_name__contains=q) | Q(last_name__contains=q) | Q(mobile_no__contains=q)
+        query_filter = Q(terminal__first_name__contains=q) | Q(terminal__last_name__contains=q) | Q(terminal__mobile_no__contains=q)
         queryset = queryset.filter(
             query_filter
         )

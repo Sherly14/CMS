@@ -11,44 +11,6 @@
             <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
         {% endif %}
         <div class="col-12" >
-
-            <div class="row rm-margin-side">
-                    <div class="col-2">
-                        <p class="head-left">START DATE</p>
-                    </div>
-                    <div class="col-2">
-                        <p class="head-left">END DATE</p>
-                    </div>
-            </div>
-            <div class="row rm-margin-side">
-                <div class="col-2">
-                    <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-                </div>
-                <div class="col-2">
-                    <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-                </div>
-                <div class="col-8">
-                    <select id="terminal-id"  name="terminal-id">
-                        <option value="-1">ALL</option>
-                        <!--{% for terminal in terminal_list %}-->
-                            <!--<option value="{{ terminal.id }}" {% if  terminal.id == terminal_id %}selected{% endif %}>{{ terminal.first_name }} {{ terminal.last_name|default_if_none:""}}</option>-->
-                         <!--{% endfor %}-->
-                    </select>
-                </div>
-            </div>
-            <br>
-            <div class="row rm-margin-side">
-                <div style="position: relative;">
-                    <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                    <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
-                </div>
-                &nbsp;&nbsp;
-                <input class="button red" type="button" value="Search" id="search-btn">
-                <a class="nav-link" href="{% url 'user:terminal-list' %}">Reset filters</a>
-                <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
-            </div>
-
-            <br>
             <div class="row" style="padding-right: 50px;">
                 <div class="fine">
                     <p class="head-bg">List of Cards</p>
