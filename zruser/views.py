@@ -2527,7 +2527,7 @@ class GenerateOTPView(View):
                 loyalty_cards = json_data['data']['loyaltycards']
                 loyalty_cardslist = []
                 for card in loyalty_cards:
-                    loyalty_cardslist.append(card.cardnumber)
+                    loyalty_cardslist.append(card['cardnumber'])
                 # activated_cards = json_data['data']['activations']
                 # activated_cardslist = []
                 # for card in activated_cards:
@@ -2547,7 +2547,7 @@ class GenerateOTPView(View):
     def post(self, request, pk):
         user = ZrTerminal.objects.get(id=pk)
         if "save" in request.POST:
-            cardnumber = request.POST.get('cardnumber', '')
+            cardnumber = request.POST.get('card_number', '')
             udoutletid = request.POST.get('udoutletid', '')
             mobile = request.POST.get('mobile', '')
             # validation
