@@ -16,6 +16,7 @@ django.setup()  # NOQA
 from zrcommission import models as comm_models
 from zrtransaction import models as transaction_models
 
+
 from zruser import models as user_models
 # input_file = os.path.join(cur_dir, 'NON-DMT DEFAULT COMMISSION STRUCTURE new.xls')
 input_file = os.path.join(cur_dir, 'Final System sheet_Sangeeta Mobile - Arpana.xls')
