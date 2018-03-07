@@ -15,9 +15,9 @@ django.setup()  # NOQA
 
 from zrcommission import models as comm_models
 from zrtransaction import models as transaction_models
-
+from zruser import models as user_models
 # input_file = os.path.join(cur_dir, 'NON-DMT DEFAULT COMMISSION STRUCTURE new.xls')
-input_file = os.path.join(cur_dir, 'Final System sheet_Sangeeta Mobile 5.xlsx')
+input_file = os.path.join(cur_dir, 'Final System sheet_Sangeeta Mobile - Arpana.xls')
 
 
 if not os.path.exists(input_file):
@@ -27,6 +27,7 @@ if not os.path.exists(input_file):
 exl = pd.read_excel(
     input_file,
     sheetname='Actual System Used Sheet',
+    #sheetname='NON DMT COMMISSION STRUCTURE',
     skiprows=0
 )
 
@@ -143,37 +144,39 @@ for index, df in exl.iterrows():
                     is_enabled=True
                 )
             else:
-                if comm_models.BillPayCommissionStructure.objects.filter(
-                    service_provider=service_provider_object,
-                    is_default=False,
-                    distributor=distributor
+                distributor_object = None
+
+                if user_models.ZrUser.objects.filter(
+                        id=distributor
                 ).count() == 0:
-                    print 'Commission structure not found in records for distributor -', distributor
+                    print('Distributor not found in records - ', distributor)
                     continue
+                else:
+                    distributor_object = user_models.ZrUser.objects.get(id=distributor)
 
-                comm_models.BillPayCommissionStructure.objects.filter(
-                    service_provider=service_provider_object,
-                    is_default=False,
-                    distributor=distributor
-                ).update(
-                    is_enabled=False
-                )
+                    comm_models.BillPayCommissionStructure.objects.filter(
+                        service_provider=service_provider_object,
+                        is_default=False,
+                        distributor=distributor_object
+                    ).update(
+                        is_enabled=False
+                    )
 
-                comm_models.BillPayCommissionStructure.objects.create(
-                    distributor=distributor,
-                    service_provider=service_provider,
-                    commission_type=commission_type,
-                    net_margin=margin,
-                    commission_for_zrupee=z_comm,
-                    commission_for_distributor=d_comm,
-                    commission_for_sub_distributor=sd_comm,
-                    commission_for_merchant=m_comm,
-                    gst_value=decimal.Decimal(18.0000),
-                    tds_value=decimal.Decimal(5.000),
-                    is_chargable=is_chargeable,
-                    is_default=False,
-                    is_enabled=True
-                )
+                    comm_models.BillPayCommissionStructure.objects.create(
+                        distributor=distributor_object,
+                        service_provider=service_provider_object,
+                        commission_type=commission_type,
+                        net_margin=margin,
+                        commission_for_zrupee=z_comm,
+                        commission_for_distributor=d_comm,
+                        commission_for_sub_distributor=sd_comm,
+                        commission_for_merchant=m_comm,
+                        gst_value=decimal.Decimal(18.0000),
+                        tds_value=decimal.Decimal(5.000),
+                        is_chargable=is_chargeable,
+                        is_default=False,
+                        is_enabled=True
+                    )
     else:
         if transaction_type_object is None:
             print 'Transaction type', transaction_type, ' not found in records'
