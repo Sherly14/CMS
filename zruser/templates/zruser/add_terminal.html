@@ -1,20 +1,21 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
 
-{% block title %}
-Update {{zr_user.role.name|title}}
-{% endblock %}
+{% block title %} Add Terminal {% endblock %}
 
 {% block content %}
 
-
 <div class="content-wrapper py-2" style="padding-left: 0.5rem; padding-right: 4rem">
-    <p class="heading-right">Update a {{zr_user.role.name|title}}</p>
+    <p class="heading-right">Add a Terminal</p>
+    {% if api_error %}
+      <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
+    {% endif %}
+
+    <form id="add-merchant-form" method="POST">
     <div class="container-fluid" style="position: relative;">
         <div class="row">
             <p class="heading-bg">PERSONAL DETAILS:</p>
         </div>
-        <form id="add-merchant-form" method="POST">
             <div class="row">
                 <div class="col-sm-2">
                     <div class="form-group">
@@ -28,72 +29,126 @@ Update {{zr_user.role.name|title}}
                 <div class="col-sm-2">
                     <div class="form-group">
                         <label for="lastname">Last Name</label>
-                        {{distributor.last_name}}
-                        {{ merchant_form.last_name|attr:"id:lastname"|attr:"class:fill"  }}
+                        {{ merchant_form.last_name|attr:"id:lastname"|attr:"class:fill" }}
                         {% if merchant_form.last_name.errors %}
                             {{ merchant_form.last_name.errors }}
                         {% endif %}
                     </div>
                 </div>
-
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <label for="phone">Phone No.</label>
+                        {{ merchant_form.mobile_no|attr:"id:phone"|attr:"name:phone"|attr:"class:fill" }}
+                        {% if merchant_form.mobile_no.errors %}
+                            {{ merchant_form.mobile_no.errors }}
+                        {% endif %}
+                    </div>
+                </div>
                 <div class="col-sm-4">
                     <div class="form-group">
                         <label for="email">E-mail ID</label>
-                        {{ merchant_form.email|attr:"id:email"|attr:"class:fill" }}
-                        {% if merchant_form.email.errors %}
-                            {{ merchant_form.email.errors }}
+                        {{ merchant_form.email|attr:"id:email" }}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="form-group">
+                        <label for="business">Terminal name</label>
+                        {{ merchant_form.business_name|attr:"id:business"|attr:"class:input-80" }}
+                        {% if merchant_form.business_name.errors %}
+                            {{ merchant_form.business_name.errors }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label for="pan">PAN No.</label>
+                        {{ merchant_form.pan_no|attr:"id:pan"|attr:"class:input-80" }}
+                        {% if merchant_form.pan_no.errors %}
+                            {{ merchant_form.pan_no.errors }}
+                        {% endif %}
+                    </div>
+                </div>
+                 <div class="col-sm-3">
+                    <div class="form-group">
+                        <label for="business_type">Terminal Type</label>
+                        {{ merchant_form.business_type|attr:"class:fill"|attr:"id:business_type" }}
+                        {% if merchant_form.business_type.errors %}
+                            {{ merchant_form.business_type.errors }}
                         {% endif %}
                     </div>
                 </div>
             </div>
-            <div class="container-fluid margin-bot">
-                <div class="col-md-7 colAlignment">
-                    <div class="row margin-top">
-                        <p class="heading-bg">KYC PROOFS:</p>
-                    </div>
-                    <div class="row margin-top">
-                        <label class="fill" for="doc_type">Select Document Type</label>
-                        <!-- <div class="btn-group">
-                        <button  id="doc_type" type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">select<span class="glyphicon glyphicon-chevron-down"></span></button>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">doc1</a></li>
-                            <li><a href="#">doc2</a></li>
-                        </ul>
-                    </div> -->
-                        <select id="doc_type">
-                            {% for doc_type in kyc_doc_types %}
-                                <option value="{{ doc_type }}">{{ doc_type }}</option>
-                            {% endfor %}
-                        </select>
-                        <!--<label class="fill">Not Manadatory for Terminals</label>-->
-                        <input type="file" id="kyc-file" style="display:none;">
-                        <input class="button yellow bg mr-5" type="button" value="upload" id="upload-kyc-btn" onclick="upload_kyc_doc()">
-                        <p id="file-err-msg" style="display:none;">
-                            {% if kyc_error %}
-                                <h6 style="color:red">{{ kyc_error }}</h6>
-                            {% endif %}
-                        </p>
-
-                    </div>
-                    <div class="row margin-top" id="kyc-docs">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="address">Address</label>
+                        {{ merchant_form.address_line_1|attr:"class:fill"|attr:"id:address" }}
+                        {% if merchant_form.address_line_1.errors %}
+                            {{ merchant_form.address_line_1.errors }}
+                        {% endif %}
                     </div>
                 </div>
             </div>
-            <div class="fill margin-top" style="padding-left:6.5rem">
-                <input class="button red" type="submit" name = "save" value="Save & Submit">
-            </div>
-            <input class="button yellow bg mr-5" type="submit" name="cancel" value="Cancel" />
 
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label for="residence_address">Residence Address</label>
+                        {{ merchant_form.residence_address|attr:"class:fill"|attr:"id:residence_address" }}
+                        {% if merchant_form.residence_address.errors %}
+                            {{ merchant_form.residence_address.errors }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label for="city">City</label>
+                        {{ merchant_form.city|attr:"class:fill"|attr:"id:city" }}
+                        {% if merchant_form.city.errors %}
+                            {{ merchant_form.city.errors }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label for="state">State</label>
+                        {{ merchant_form.state|attr:"class:fill"|attr:"id:state" }}
+                        {% if merchant_form.state.errors %}
+                            {{ merchant_form.state.errors }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label for="pincode">Pincode</label>
+                        {{ merchant_form.pincode|attr:"class:fill"|attr:"id:pincode" }}
+                        {% if merchant_form.pincode.errors %}
+                            {{ merchant_form.pincode.errors }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+    </div>
+        <div class="col-md-5 colAlignment" style="float:right;">
+            <div class="fill margin-top" style="padding-left:6.5rem">
+                <input class="button red" type="submit" value="Save & Submit">
+            </div>
+        </div>
         {% csrf_token %}
         </form>
-    </div>
+    <label class="fill"></label>
 </div>
 
 <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.12.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
 <script type="text/undercore-template" id="upload-kyc-doc">
     <div class="col-md-6" id="<%=div_id%>">
-        <h5 class="fill"><%=document_type%></span></h5>
+        <h5 class="fill"><%=document_type%></span>
         <h5><i><%=document_name%></i>
             <a class="kyc-href" href="<%=file_download_url%>" target="_blank">
                 <i class="fa fa-download kyc-href" style="margin-left:0.5rem;"></i>

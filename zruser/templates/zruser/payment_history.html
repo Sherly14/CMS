@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+<!--{% load widget_tweaks %}-->
+
+{% block title %}PaymentHistoryList{% endblock %}
+
+{% block content %}
+
+    <div class="content-wrapper">
+        <p class="head-right">Payment History</p>
+
+        {% if api_error %}
+            <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
+        {% endif %}
+        <div class="col-12" >
+            <div class="row" style="padding-right: 50px;">
+                <div class="fine">
+                    <p class="head-bg">Payments</p>
+                </div>
+            </div>
+            <div class="row scroll">
+
+                <div style="width: 100%;">
+                    <table>
+                        <tr>
+                            <th>Id</th>
+                            <th>Bill Number</th>
+                            <th>Amount</th>
+                            <th>Settled Amount</th>
+                            <th>Tip</th>
+                            <th>Discount</th>
+                            <th>State</th>
+                            <th>Create Date</th>
+                            <th>Update Date</th>
+                            <th>Name</th>
+
+                        </tr>
+
+                        {% for payment in payments %}
+                            <tr>
+                                <td>{{ payment.id }}</td>
+                                <td>{{ payment.billnumber }}</td>
+                                <td>{{ payment.amount }}</td>
+                                <td>{{ payment.settledamount }}</td>
+                                <td>{{ payment.tip }}</td>
+                                <td>{{ payment.discount }}</td>
+                                <td>{{ payment.state }}</td>
+                                <td>{{ payment.createdat }}</td>
+                                <td>{{ payment.updatedat }}</td>
+                                <td>{{ payment.name }}</td>
+                            </tr>
+                        {% endfor %}
+
+                    </table>
+                </div>
+                <!--<div class="pagination-prev">-->
+                <!--{% if has_prev_page %}-->
+                    <!--<a href="{% url "user:terminal-list" %}?{{prev_page_qs}}" class="button red" >Prev</a>-->
+                <!--{% endif %}-->
+                <!--</div>-->
+
+                <!--<div class="pagination-next">-->
+                    <!--{% if has_next_page %}-->
+                        <!--<a href="{% url "user:terminal-list" %}?{{next_page_qs}}" class="button red" >Next</a>-->
+                    <!--{% endif %}-->
+                <!--</div>-->
+            </div>
+            <br>
+        </div>
+    </div>
+
+<script>
+
+    $(document).ready(function()
+    {
+        $('#terminal-id').select2();
+        $('#search-btn').click(function(){
+        startDate = $('#start-date').val();
+        endDate = $('#end-date').val();
+
+            {% if filter_by %}
+                url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}";
+            {% else %}
+                url = window.location.pathname + "?q=" + $('#search-txt').val();
+            {% endif %}
+
+            if(startDate!="" && endDate!="" )
+            {
+                url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
+            }
+
+            window.location.assign(url)
+        });
+
+         $('#terminal-id').change(function(){
+         terminalId = $("#terminal-id").val();
+         all = "";
+
+         var selectedAll = $("#user-transaction-id :selected").text();
+             if (selectedAll.includes("ALL"))
+             {
+                all = terminalId;
+                terminalId = ""
+                 url = window.location.pathname +'?terminal-id=' + all
+             }
+              if(terminalId !="")
+                {
+                    url = window.location.pathname +'?terminal-id=' + terminalId
+                }
+          window.location.assign(url)
+        });
+
+        $('#period').change(function() {
+            period_val = $(this).val();
+            url = window.location.pathname + '?filter=' + period_val.replace(' ', '-');
+            {% if q %}
+                url += "&q={{ q }}";
+            {% endif %}
+            window.location.assign(url)
+        });
+
+        $('#csv-download').click(function()
+        {
+            url = "{% url "user:terminal-csv" %}" + window.location.search;
+            window.location.assign(url)
+        });
+         var startDate = $('#start-date').val();
+         var endDate = $('#end-date').val();
+         var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+        $('#start-date').datepicker({
+            uiLibrary: 'bootstrap4',
+            iconsLibrary: 'fontawesome',
+            format: 'yyyy-mm-dd',
+
+            maxDate: function () {
+            return $('#end-date').val();
+            }
+        }).on('change', function (ev)
+         {
+            var start = $("#start-date").val();
+            var startD = new Date(start);
+            var end = $("#end-date").val();
+            var endD = new Date(end);
+            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
+
+            $("#days").val(diff);
+
+            if(diff>31)
+            {
+               alert("date difference is greater than 31");
+               $('#start-date').val("");
+            }
+         });
+
+        $('#end-date').datepicker({
+            uiLibrary: 'bootstrap4',
+            iconsLibrary: 'fontawesome',
+            format: 'yyyy-mm-dd',
+
+            minDate: function () {
+                return $('#start-date').val();
+            }
+        }).on('change', function (ev)
+         {
+            var start = $("#start-date").val();
+            var startD = new Date(start);
+            var end = $("#end-date").val();
+            var endD = new Date(end);
+            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
+
+            $("#days").val(diff);
+
+            if(diff>31)
+            {
+               alert("date difference is greater than 31");
+               $('#end-date').val("");
+            }
+         });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+
+{% block title %} Terminals List {% endblock %}
+
+{% block content %}
+
+    <div class="content-wrapper">
+        <p class="head-right">Terminal Table</p>
+        <div class="col-12" >
+
+            <div class="row rm-margin-side">
+                    <div class="col-2">
+                        <p class="head-left">START DATE</p>
+                    </div>
+                    <div class="col-2">
+                        <p class="head-left">END DATE</p>
+                    </div>
+            </div>
+            <div class="row rm-margin-side">
+                <div class="col-2">
+                    <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
+                </div>
+                <div class="col-2">
+                    <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
+                </div>
+
+                <div class="col-4">
+                    <select id="terminal-id"  name="terminal-id">
+                        <option value="-1">ALL</option>
+                            {% for key,val in terminaldict.items %}
+                                <optgroup label = "{{val.0.0}} ">
+                                     <option value="{{key}}"{% if key == retailer_id %}selected{% endif %}>ALL-{{val.0.0}}</option>
+                                    {% for subdrow in val %}
+                                        <option value="{{subdrow.1}}" {% if subdrow.1 == terminal_id %}selected{% endif %}>{{ subdrow.2 }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                            {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <br>
+            <div class="row rm-margin-side">
+                <div style="position: relative;">
+                    <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                    <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                </div>
+                &nbsp;&nbsp;
+                <input class="button red" type="button" value="Search" id="search-btn">
+                <a class="nav-link" href="{% url 'user:terminal-list' %}">Reset filters</a>
+                <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
+            </div>
+
+            <br>
+            <div class="row" style="padding-right: 50px;">
+                <div class="fine">
+                    <p class="head-bg">List of Terminals</p>
+                </div>
+            </div>
+            <div class="row scroll">
+
+                <div style="width: 100%;">
+                    <table>
+                        <tr>
+                            <th>Terminal Id</th>
+                            <th>Terminal Name</th>
+                            <th>DOJ</th>
+                            <th>Mobile No</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                            <th>Update</th>
+                            {% if request.user.zr_admin_user.role.name == "RETAILER" %}
+                            <th>Manage</th>
+                            {% endif %}
+                        </tr>
+                        {% for terminal in queryset %}
+                            <tr>
+                                <td>{{ terminal.terminal.id }}</td>
+                                <td>{{ terminal.terminal.first_name }} {{ terminal.terminal.last_name|default_if_none:""}}</td>
+                                <td>{{ terminal.terminal.at_created }}</td>
+                                <td>{{ terminal.terminal.mobile_no }}</td>
+                                <td>{{ terminal.terminal.email }}</td>
+                                <td>{% if terminal.terminal.is_active %}Active{% else %}Inactive{% endif %}</td>
+                                <td>
+                                    {% if terminal.terminal.is_active %}
+                                        <a href='{% url "user:terminal-list" %}?disable={{ terminal.id }}'>Disable</a>
+                                    {% else %}
+                                        <a href='{% url "user:terminal-list" %}?activate={{ terminal.id }}'>Activate</a>
+                                    {% endif %}
+                                </td>
+                                 <td> <a href='{% url "user:terminal-update" pk=terminal.id%}'>Update</a></td>
+                                {% if request.user.zr_admin_user.role.name == "RETAILER" %}
+                                 <td> <a href='{% url "user:terminal-view" pk=terminal.id%}'>Access</a></td>
+                                {% endif %}
+                            </tr>
+
+                        {% endfor %}
+                    </table>
+                </div>
+                <div class="pagination-prev">
+                {% if has_prev_page %}
+                    <a href="{% url "user:terminal-list" %}?{{prev_page_qs}}" class="button red" >Prev</a>
+                {% endif %}
+                </div>
+
+                <div class="pagination-next">
+                    {% if has_next_page %}
+                        <a href="{% url "user:terminal-list" %}?{{next_page_qs}}" class="button red" >Next</a>
+                    {% endif %}
+                </div>
+            </div>
+            <br>
+        </div>
+    </div>
+
+<script>
+
+    $(document).ready(function()
+    {
+        $('#terminal-id').select2();
+        $('#search-btn').click(function(){
+        startDate = $('#start-date').val();
+        endDate = $('#end-date').val();
+
+            {% if filter_by %}
+                url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}";
+            {% else %}
+                url = window.location.pathname + "?q=" + $('#search-txt').val();
+            {% endif %}
+
+            if(startDate!="" && endDate!="" )
+            {
+                url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
+            }
+
+            window.location.assign(url)
+        });
+
+     $('#terminal-id').change(function(){
+             var terminalId = $("#terminal-id").val();
+             var retailerId = "";
+
+             var selectedAll = $("#terminal-id :selected").text();
+                 if (selectedAll.includes("ALL"))
+                 {
+                    retailerId = terminalId;
+                    terminalId = ""
+                    if(retailerId!="")
+                    {
+                     url =window.location.pathname +'?retailer-id='+ retailerId;
+                    }
+                 }
+
+                  if(terminalId!="")
+                    {
+                     url = window.location.pathname + '?terminal-id='+ terminalId;
+                    }
+              window.location.assign(url)
+        });
+
+        $('#period').change(function() {
+            period_val = $(this).val();
+            url = window.location.pathname + '?filter=' + period_val.replace(' ', '-');
+            {% if q %}
+                url += "&q={{ q }}";
+            {% endif %}
+            window.location.assign(url)
+        });
+
+        $('#csv-download').click(function()
+        {
+            url = "{% url "user:terminal-csv" %}" + window.location.search;
+            window.location.assign(url)
+        });
+         var startDate = $('#start-date').val();
+         var endDate = $('#end-date').val();
+         var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+        $('#start-date').datepicker({
+            uiLibrary: 'bootstrap4',
+            iconsLibrary: 'fontawesome',
+            format: 'yyyy-mm-dd',
+
+            maxDate: function () {
+            return $('#end-date').val();
+            }
+        }).on('change', function (ev)
+         {
+            var start = $("#start-date").val();
+            var startD = new Date(start);
+            var end = $("#end-date").val();
+            var endD = new Date(end);
+            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
+
+            $("#days").val(diff);
+
+            if(diff>31)
+            {
+               alert("date difference is greater than 31");
+               $('#start-date').val("");
+            }
+         });
+
+        $('#end-date').datepicker({
+            uiLibrary: 'bootstrap4',
+            iconsLibrary: 'fontawesome',
+            format: 'yyyy-mm-dd',
+
+            minDate: function () {
+                return $('#start-date').val();
+            }
+        }).on('change', function (ev)
+         {
+            var start = $("#start-date").val();
+            var startD = new Date(start);
+            var end = $("#end-date").val();
+            var endD = new Date(end);
+            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
+
+            $("#days").val(diff);
+
+            if(diff>31)
+            {
+               alert("date difference is greater than 31");
+               $('#end-date').val("");
+            }
+         });
+    });
+</script>
+{% endblock %}

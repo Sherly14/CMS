@@ -11,14 +11,13 @@ from zrcommission.models import Commission
 from zrmapping.models import SubDistributorMerchant, DistributorMerchant
 from zrtransaction.utils.constants import TRANSACTION_STATUS
 from zruser.mapping import SUBDISTRIBUTOR, DISTRIBUTOR, MERCHANT
-from zruser.models import ZrUser, Beneficiary
+from zruser.models import ZrUser, Beneficiary, ZrTerminal
 from zrutils.common.modelutils import RowInfo, get_slugify_value
 
 from common_utils import date_utils
 
-
-
 # Create your models here.
+
 
 class TransactionType(RowInfo):
     name = models.CharField(max_length=128)
@@ -274,3 +273,32 @@ class ServiceCircle(RowInfo):
 
     def __unicode__(self):
         return '%s - %s - %s' % (self.name, self.code, self.is_enabled)
+
+
+class VendorZrRetailer(RowInfo):
+    vendor = models.ForeignKey(to=Vendor, related_name='user_vendor_mappings')
+    zr_user = models.ForeignKey(to=ZrUser, related_name='vendor_user_mappings')
+    vendor_user = models.CharField(max_length=256, null=True)
+    company_id = models.CharField(max_length=256, null=True)
+    is_attached_to_admin = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name_plural = 'VendorZrRetailerMappings'
+
+    def __unicode__(self):
+        return '%s - %s - %s - %s' % (self.vendor, self.zr_user, self.vendor_user, self.company_id)
+
+
+class VendorZrTerminal(RowInfo):
+    vendor = models.ForeignKey(to=Vendor, related_name='terminal_vendor_mappings')
+    zr_terminal = models.ForeignKey(to=ZrTerminal, related_name='vendor_terminal_mappings')
+    vendor_user = models.CharField(max_length=256, null=True)
+    is_attached_to_admin = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name_plural = 'VendorZrTerminalMappings'
+
+    def __unicode__(self):
+        return '%s - %s - %s' % (self.vendor, self.zr_terminal, self.vendor_user)

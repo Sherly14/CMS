@@ -1,99 +1,127 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
 
-{% block title %}
-Update {{zr_user.role.name|title}}
-{% endblock %}
+{% block title %} Create Offer {% endblock %}
 
 {% block content %}
 
-
 <div class="content-wrapper py-2" style="padding-left: 0.5rem; padding-right: 4rem">
-    <p class="heading-right">Update a {{zr_user.role.name|title}}</p>
+    <p class="heading-right">Create Offer</p>
+    {% if api_error %}
+      <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
+    {% endif %}
+
+    {% if success %}
+      <div class="alert alert-success" id="success_msg" style="text-align:center">{{ success }}</div>
+    {% endif %}
+
+    <form id="add-card-form" method="POST">
     <div class="container-fluid" style="position: relative;">
         <div class="row">
-            <p class="heading-bg">PERSONAL DETAILS:</p>
+            <p class="heading-bg">OFFER DETAILS:</p>
         </div>
-        <form id="add-merchant-form" method="POST">
-            <div class="row">
-                <div class="col-sm-2">
-                    <div class="form-group">
-                        <label for="firstname">First Name</label>
-                        {{ merchant_form.first_name|attr:"id:firstname"|attr:"class:fill" }}
-                        {% if merchant_form.first_name.errors %}
-                            {{ merchant_form.first_name.errors }}
-                        {% endif %}
+
+                <div class="row">
+                    <div class="col-sm-3 col-md-3">
+                        <div class="form-group">
+                            <label for="id">Id</label>
+                                <input type="text" class="fill" name="id" maxlength="125" REQUIRED>
+                        </div>
                     </div>
+
+                    <div class="col-sm-3 col-md-3">
+                        <div class="form-group">
+                            <label for="type">Type</label>
+                                <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" name="type" maxlength="125" REQUIRED>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-3 col-md-3">
+                        <div class="form-group">
+                            <label for="availability">Availability</label>
+                            <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" min="1" name="availability" maxlength="125" REQUIRED>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-3 col-md-3">
+                       <div class="form-group">
+                            <label for="redemptions">Redemptions</label>
+                            <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" min="1" name="redemptions" maxlength="125" REQUIRED>
+                        </div>
+                    </div>
+
                 </div>
-                <div class="col-sm-2">
-                    <div class="form-group">
-                        <label for="lastname">Last Name</label>
-                        {{distributor.last_name}}
-                        {{ merchant_form.last_name|attr:"id:lastname"|attr:"class:fill"  }}
-                        {% if merchant_form.last_name.errors %}
-                            {{ merchant_form.last_name.errors }}
-                        {% endif %}
+
+                <div class="row">
+                    <div class="col-sm-4 col-md-4">
+                        <div class="form-group">
+                            <label for="short_desc">Short Description</label>
+                            <input type="text" class="fill" name="short_desc" maxlength="125" REQUIRED>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-8 col-md-8">
+                       <div class="form-group">
+                            <label for="long_desc">Long Description</label>
+                            <input type="text" class="input-80" name="long_desc" maxlength="256" REQUIRED>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-sm-4">
-                    <div class="form-group">
-                        <label for="email">E-mail ID</label>
-                        {{ merchant_form.email|attr:"id:email"|attr:"class:fill" }}
-                        {% if merchant_form.email.errors %}
-                            {{ merchant_form.email.errors }}
-                        {% endif %}
+                <div class="row">
+                    <div class="col-sm-3 col-md-3">
+                       <div class="form-group">
+                            <label for="cashback">Cashback</label>
+                            <!--<input type="text" style="border: 2px solid; border-color: #aaa;" name="cashback" REQUIRED>-->
+                           <select class="fill" name="cashback" default="true" REQUIRED>
+                                <option value="true">True</option>
+                                <option value="false">False</option>
+                           </select>
+                        </div>
                     </div>
-                </div>
-            </div>
-            <div class="container-fluid margin-bot">
-                <div class="col-md-7 colAlignment">
-                    <div class="row margin-top">
-                        <p class="heading-bg">KYC PROOFS:</p>
-                    </div>
-                    <div class="row margin-top">
-                        <label class="fill" for="doc_type">Select Document Type</label>
-                        <!-- <div class="btn-group">
-                        <button  id="doc_type" type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">select<span class="glyphicon glyphicon-chevron-down"></span></button>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">doc1</a></li>
-                            <li><a href="#">doc2</a></li>
-                        </ul>
-                    </div> -->
-                        <select id="doc_type">
-                            {% for doc_type in kyc_doc_types %}
-                                <option value="{{ doc_type }}">{{ doc_type }}</option>
-                            {% endfor %}
-                        </select>
-                        <!--<label class="fill">Not Manadatory for Terminals</label>-->
-                        <input type="file" id="kyc-file" style="display:none;">
-                        <input class="button yellow bg mr-5" type="button" value="upload" id="upload-kyc-btn" onclick="upload_kyc_doc()">
-                        <p id="file-err-msg" style="display:none;">
-                            {% if kyc_error %}
-                                <h6 style="color:red">{{ kyc_error }}</h6>
-                            {% endif %}
-                        </p>
 
+                    <div class="col-sm-3 col-md-3">
+                       <div class="form-group">
+                            <label for="isactive">Isactive</label>
+                            <!--<input type="text" style="border: 2px solid; border-color: #aaa;" name="cashback" REQUIRED>-->
+                           <select class="fill" name="isactive" default="true" REQUIRED>
+                                <option value="true">True</option>
+                                <option value="false">False</option>
+                           </select>
+                        </div>
                     </div>
-                    <div class="row margin-top" id="kyc-docs">
+
+                    <div class="col-sm-3 col-md-3">
+                       <div class="form-group">
+                            <label for="min">Min</label>
+                            <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" min="1" name="min" REQUIRED>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-3 col-md-3">
+                       <div class="form-group">
+                            <label for="dis">Dis</label>
+                            <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" min="1" name="dis" REQUIRED>
+                        </div>
                     </div>
                 </div>
-            </div>
+
+    </div>
+        <div class="col-md-5 colAlignment" style="float:right;">
             <div class="fill margin-top" style="padding-left:6.5rem">
-                <input class="button red" type="submit" name = "save" value="Save & Submit">
+                <input class="button red" type="submit" name = "save" value="Create Offer">
             </div>
-            <input class="button yellow bg mr-5" type="submit" name="cancel" value="Cancel" />
-
+        </div>
         {% csrf_token %}
         </form>
-    </div>
+    <label class="fill"></label>
 </div>
 
 <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.12.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
 <script type="text/undercore-template" id="upload-kyc-doc">
     <div class="col-md-6" id="<%=div_id%>">
-        <h5 class="fill"><%=document_type%></span></h5>
+        <h5 class="fill"><%=document_type%></span>
         <h5><i><%=document_name%></i>
             <a class="kyc-href" href="<%=file_download_url%>" target="_blank">
                 <i class="fa fa-download kyc-href" style="margin-left:0.5rem;"></i>
@@ -102,6 +130,16 @@ Update {{zr_user.role.name|title}}
             </span>
         <input class="button yellow small remove-kyc" doc_type="<%=document_type%>" type="button" value="Remove">
     </div>
+</script>
+
+<script>
+$(document).ready(function () {
+window.setTimeout(function() {
+    $(".alert").fadeTo(1000, 0).slideUp(1000, function(){
+        $(this).remove();
+    });
+}, 5000);
+});
 </script>
 
 <script type="text/undercore-template" id="form-hidden-input">
