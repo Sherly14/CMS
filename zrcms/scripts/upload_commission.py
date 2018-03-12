@@ -18,23 +18,27 @@ from zrtransaction import models as transaction_models
 
 
 from zruser import models as user_models
-# input_file = os.path.join(cur_dir, 'NON-DMT DEFAULT COMMISSION STRUCTURE new.xls')
-input_file = os.path.join(cur_dir, 'Final System sheet_Sangeeta Mobile - Arpana.xls')
+input_file = os.path.join(cur_dir, 'NON-DMT DEFAULT COMMISSION STRUCTURE update 2.xls')
+# input_file = os.path.join(cur_dir, 'Final System sheet_Sangeeta Mobile - Arpana.xls')
 
+print('Input File - ', input_file)
 
 if not os.path.exists(input_file):
     print('No Input file found')
     exit(0)
 
+#sheetname='Actual System Used Sheet',
+sheetname='NON DMT COMMISSION STRUCTURE',
+
 exl = pd.read_excel(
     input_file,
-    sheetname='Actual System Used Sheet',
-    #sheetname='NON DMT COMMISSION STRUCTURE',
+    sheetname=sheetname,
     skiprows=0
 )
 
 
 
+print('Sheet - ', sheetname)
 for index, df in exl.iterrows():
     distributor = df[0]
     vendor = df[1]
