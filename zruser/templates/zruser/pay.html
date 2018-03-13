@@ -22,7 +22,14 @@
                 <div class="col-sm-3 col-md-3">
                     <div class="form-group">
                         <label for="cardnumber">Card Number</label>
-                            <input type="text" class="fill" name="cardnumber" REQUIRED>
+                            <div class="col-3">
+                                <select id="card-number"  name="card_number">
+                                    <option value="-1">ALL</option>
+                                    {% for card in loyalty_cardslist %}
+                                        <option value="{{ card }}" >{{ card }} </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                     </div>
                 </div>
 
@@ -75,6 +82,7 @@
 
 <script>
 $(document).ready(function () {
+     $("#card-number").select2();
 window.setTimeout(function() {
     $(".alert").fadeTo(1000, 0).slideUp(1000, function(){
         $(this).remove();

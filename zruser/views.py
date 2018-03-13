@@ -1261,7 +1261,7 @@ class UserUpdateView(View):
                 if hasattr(user.zr_user,"id"):
                     dj_user = user.zr_user.id
                     dj_user.first_name = user.first_name
-                    dj_user.last_name = user.last_name
+                    #dj_user.last_name = user.last_name
                     dj_user.email = user.email
                     dj_user.save()
 
@@ -2667,8 +2667,24 @@ class ActivateCardView(View):
 
     def get(self, request, pk,  **kwargs):
             user = ZrTerminal.objects.get(id=pk)
+            zr_retailer_id = request.user.zr_admin_user.zr_user.id
+            vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
+            response = requests.post(QUICKWALLET_API_LISTCARD_URL, json={
+                "secret": QUICKWALLET_SECRET,
+                "retailerid": vendor.vendor_user
+            })
+
+            if 300 > response.status_code >= 200:
+                try:
+                    json_data = json.loads(response.text)
+                    loyalty_cards = json_data['data']['loyaltycards']
+                    loyalty_cardslist = []
+                    for card in loyalty_cards:
+                        loyalty_cardslist.append(card['cardnumber'])
+                except:
+                    pass
             return render(
-                request, self.template_name, {"zr_user": user}
+                request, self.template_name, {"zr_user": user,"loyalty_cardslist": loyalty_cardslist}
             )
 
     @transaction.atomic
@@ -2732,8 +2748,24 @@ class RechargeCardView(View):
 
     def get(self, request, pk,  **kwargs):
             user = ZrTerminal.objects.get(id=pk)
+            zr_retailer_id = request.user.zr_admin_user.zr_user.id
+            vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
+            response = requests.post(QUICKWALLET_API_LISTCARD_URL, json={
+                "secret": QUICKWALLET_SECRET,
+                "retailerid": vendor.vendor_user
+            })
+
+            if 300 > response.status_code >= 200:
+                try:
+                    json_data = json.loads(response.text)
+                    loyalty_cards = json_data['data']['loyaltycards']
+                    loyalty_cardslist = []
+                    for card in loyalty_cards:
+                        loyalty_cardslist.append(card['cardnumber'])
+                except:
+                    pass
             return render(
-                request, self.template_name, {"zr_user": user}
+                request, self.template_name, {"zr_user": user,"loyalty_cardslist": loyalty_cardslist}
             )
 
     @transaction.atomic
@@ -2795,8 +2827,24 @@ class PayView(View):
 
     def get(self, request, pk, **kwargs):
         user = ZrTerminal.objects.get(id=pk)
+        zr_retailer_id = request.user.zr_admin_user.zr_user.id
+        vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
+        response = requests.post(QUICKWALLET_API_LISTCARD_URL, json={
+            "secret": QUICKWALLET_SECRET,
+            "retailerid": vendor.vendor_user
+        })
+
+        if 300 > response.status_code >= 200:
+            try:
+                json_data = json.loads(response.text)
+                loyalty_cards = json_data['data']['loyaltycards']
+                loyalty_cardslist = []
+                for card in loyalty_cards:
+                    loyalty_cardslist.append(card['cardnumber'])
+            except:
+                pass
         return render(
-            request, self.template_name, {"zr_user": user}
+            request, self.template_name, {"zr_user": user,"loyalty_cardslist": loyalty_cardslist}
         )
 
     @transaction.atomic
@@ -2863,8 +2911,24 @@ class DeactivateCardView(View):
 
     def get(self, request, pk,  **kwargs):
             user = ZrTerminal.objects.get(id=pk)
+            zr_retailer_id = request.user.zr_admin_user.zr_user.id
+            vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
+            response = requests.post(QUICKWALLET_API_LISTCARD_URL, json={
+                "secret": QUICKWALLET_SECRET,
+                "retailerid": vendor.vendor_user
+            })
+
+            if 300 > response.status_code >= 200:
+                try:
+                    json_data = json.loads(response.text)
+                    loyalty_cards = json_data['data']['loyaltycards']
+                    loyalty_cardslist = []
+                    for card in loyalty_cards:
+                        loyalty_cardslist.append(card['cardnumber'])
+                except:
+                    pass
             return render(
-                request, self.template_name, {"zr_user": user}
+                request, self.template_name, {"zr_user": user,"loyalty_cardslist": loyalty_cardslist}
             )
 
     @transaction.atomic
