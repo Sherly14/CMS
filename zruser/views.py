@@ -2626,32 +2626,60 @@ class IssueMobileView(View):
                 error = True
 
             if error == False:
-                try:
-                    response = requests.post(QUICKWALLET_API_ISSUE_MOBILE_URL, json={
-                        "secret": QUICKWALLET_SECRET,
-                        "cardnumber": int(cardnumber),
-                        "udoutletid": int(udoutletid),
-                        "mobile": int(mobile),
-                        "otp": otp
-                    })
-                    if 300 > response.status_code >= 200:
-                        try:
-                            json_data = json.loads(response.text)
-                        except:
-                            pass
+                if otp != "":
+                    try:
+                        response = requests.post(QUICKWALLET_API_ISSUE_MOBILE_URL, json={
+                            "secret": QUICKWALLET_SECRET,
+                            "cardnumber": int(cardnumber),
+                            "udoutletid": int(udoutletid),
+                            "mobile": int(mobile),
+                            "otp": otp
+                        })
+                        if 300 > response.status_code >= 200:
+                            try:
+                                json_data = json.loads(response.text)
+                            except:
+                                pass
 
-                    if json_data:
-                        if json_data['status']:
-                            status = json_data['status']
-                            if status == "failed":
-                                error = True
-                            else:
-                                success = "{0} issued to {1}".format(cardnumber, mobile)
-                                return render(
-                                    request, self.template_name, {"zr_user": user, "success": success}
-                                )
-                except:
-                    pass
+                        if json_data:
+                            if json_data['status']:
+                                status = json_data['status']
+                                if status == "failed":
+                                    error = True
+                                else:
+                                    success = "{0} issued to {1}".format(cardnumber, mobile)
+                                    return render(
+                                        request, self.template_name, {"zr_user": user, "success": success}
+                                    )
+                    except:
+                        pass
+                else:
+                    try:
+                        response = requests.post(QUICKWALLET_API_GENERATEOTP_URL, json={
+                            "secret": QUICKWALLET_SECRET,
+                            "cardnumber": int(cardnumber),
+                            "udoutletid": int(udoutletid),
+                            "mobile": int(mobile)
+                        })
+                        if 300 > response.status_code >= 200:
+                            try:
+                                json_data = json.loads(response.text)
+                            except:
+                                pass
+
+                        if json_data:
+                            if json_data['status']:
+                                status = json_data['status']
+                                if status == "failed":
+                                    error = True
+                                else:
+                                    success = "OTP Send to {0}".format(mobile)
+                                    return render(
+                                        request, self.template_name, {"zr_user": user,"cardnumber": int(cardnumber),"mobile": int(mobile), "success": success}
+                                    )
+                    except:
+                        pass
+
             if error == True:
                 return render(
                     request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
