@@ -2539,6 +2539,7 @@ class GenerateOTPView(View):
             except:
                 pass
 
+
             return render(
                 request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
             )
@@ -2587,10 +2588,30 @@ class GenerateOTPView(View):
                                 )
                 except:
                     pass
+
             if error == True:
-                return render(
-                    request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
-                )
+                try:
+                    response = requests.post(QUICKWALLET_API_GENERATEOTP_URL, json={
+                        "secret": QUICKWALLET_SECRET,
+                        "cardnumber": int(cardnumber),
+                        "udoutletid": int(udoutletid),
+                        "mobile": int(mobile)
+                    })
+                    if 300 > response.status_code >= 200:
+                        try:
+                            json_data = json.loads(response.text)
+                        except:
+                            pass
+
+                    if json_data:
+                        message = json_data['err']
+
+                        return render(
+                            request, self.template_name,
+                            {"zr_user": user, "api_error": message}
+                        )
+                except:
+                    pass
 
         return render(
             request, self.template_name, {"zr_user": user}
@@ -2609,11 +2630,11 @@ class IssueMobileView(View):
     @transaction.atomic
     def post(self, request, pk):
         user = ZrTerminal.objects.get(id=pk)
-        if "save" in request.POST:
+        if "OTP" in request.POST:
             cardnumber = request.POST.get('cardnumber', '')
             udoutletid = request.POST.get('udoutletid', '')
             mobile = request.POST.get('mobile', '')
-            otp = request.POST.get('otp', '')
+            #otp = request.POST.get('otp', '')
             # validation
             error = False
             if not cardnumber:
@@ -2626,34 +2647,6 @@ class IssueMobileView(View):
                 error = True
 
             if error == False:
-                if otp != "":
-                    try:
-                        response = requests.post(QUICKWALLET_API_ISSUE_MOBILE_URL, json={
-                            "secret": QUICKWALLET_SECRET,
-                            "cardnumber": int(cardnumber),
-                            "udoutletid": int(udoutletid),
-                            "mobile": int(mobile),
-                            "otp": otp
-                        })
-                        if 300 > response.status_code >= 200:
-                            try:
-                                json_data = json.loads(response.text)
-                            except:
-                                pass
-
-                        if json_data:
-                            if json_data['status']:
-                                status = json_data['status']
-                                if status == "failed":
-                                    error = True
-                                else:
-                                    success = "{0} issued to {1}".format(cardnumber, mobile)
-                                    return render(
-                                        request, self.template_name, {"zr_user": user, "success": success}
-                                    )
-                    except:
-                        pass
-                else:
                     try:
                         response = requests.post(QUICKWALLET_API_GENERATEOTP_URL, json={
                             "secret": QUICKWALLET_SECRET,
@@ -2679,11 +2672,103 @@ class IssueMobileView(View):
                                     )
                     except:
                         pass
+            if error == True:
+                try:
+                    response = requests.post(QUICKWALLET_API_GENERATEOTP_URL, json={
+                        "secret": QUICKWALLET_SECRET,
+                        "cardnumber": int(cardnumber),
+                        "udoutletid": int(udoutletid),
+                        "mobile": int(mobile)
+                    })
+                    if 300 > response.status_code >= 200:
+                        try:
+                            json_data = json.loads(response.text)
+                        except:
+                            pass
+
+                    if json_data:
+                        message = json_data['err']
+
+                        return render(
+                            request, self.template_name,
+                            {"zr_user": user, "api_error": message}
+                        )
+                except:
+                    pass
+
+        if "Issue_Card" in request.POST:
+            cardnumber = request.POST.get('cardnumber', '')
+            udoutletid = request.POST.get('udoutletid', '')
+            mobile = request.POST.get('mobile', '')
+            otp = request.POST.get('otp', '')
+            # validation
+            error = False
+            if not cardnumber:
+                error = True
+            if mobile:
+                if not mobile.isdigit() and (len(mobile) < 10):
+                    error = True
+
+            if int(udoutletid) != int(user.mobile_no):
+                error = True
+
+            if not otp:
+                error = True
+
+            if error == False:
+                try:
+                    response = requests.post(QUICKWALLET_API_GENERATEOTP_URL, json={
+                        "secret": QUICKWALLET_SECRET,
+                        "cardnumber": int(cardnumber),
+                        "udoutletid": int(udoutletid),
+                        "mobile": int(mobile),
+                        "otp":int(otp)
+                    })
+                    if 300 > response.status_code >= 200:
+                        try:
+                            json_data = json.loads(response.text)
+                        except:
+                            pass
+
+                    if json_data:
+                        if json_data['status']:
+                            status = json_data['status']
+                            if status == "failed":
+                                error = True
+                            else:
+                                success = "OTP Send to {0}".format(mobile)
+                                return render(
+                                    request, self.template_name,
+                                    {"zr_user": user, "cardnumber": int(cardnumber), "mobile": int(mobile),
+                                     "success": success}
+                                )
+                except:
+                    pass
 
             if error == True:
-                return render(
-                    request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
-                )
+                try:
+                    response = requests.post(QUICKWALLET_API_ISSUE_MOBILE_URL, json={
+                        "secret": QUICKWALLET_SECRET,
+                        "cardnumber": int(cardnumber),
+                        "udoutletid": int(udoutletid),
+                        "mobile": int(mobile)
+                    })
+                    if 300 > response.status_code >= 200:
+                        try:
+                            json_data = json.loads(response.text)
+                        except:
+                            pass
+
+                    if json_data:
+                        message = json_data['message']
+
+                        return render(
+                            request, self.template_name,
+                            {"zr_user": user, "api_error": message}
+                        )
+                except:
+                    pass
+
 
         return render(
             request, self.template_name, {"zr_user": user}
@@ -2719,7 +2804,7 @@ class ActivateCardView(View):
     def post(self, request, pk):
         user = ZrTerminal.objects.get(id=pk)
         if "save" in request.POST:
-            cardnumber = request.POST.get('cardnumber', '')
+            cardnumber = request.POST.get('card_number', '')
             udoutletid = request.POST.get('udoutletid', '')
             mobile = request.POST.get('mobile', '')
             otp = request.POST.get('otp', '')
@@ -2762,9 +2847,29 @@ class ActivateCardView(View):
                 except:
                     pass
             if error == True:
-                return render(
-                    request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
-                )
+                try:
+                    response = requests.post(QUICKWALLET_API_ACTIVATE_CARD_URL, json={
+                        "secret": QUICKWALLET_SECRET,
+                        "cardnumber": int(cardnumber),
+                        "udoutletid": int(udoutletid),
+                        "mobile": int(mobile),
+                        "otp": otp
+                    })
+                    if 300 > response.status_code >= 200:
+                        try:
+                            json_data = json.loads(response.text)
+                        except:
+                            pass
+
+                    if json_data:
+                        message = json_data['message']
+                        return render(
+                            request, self.template_name,
+                            {"zr_user": user, "api_error": message}
+                        )
+                except:
+                    pass
+
 
         return render(
             request, self.template_name, {"zr_user": user}
@@ -2841,9 +2946,27 @@ class RechargeCardView(View):
                 except:
                     pass
             if error == True:
-                return render(
-                    request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
-                )
+                try:
+                    response = requests.post(QUICKWALLET_API_ACTIVATE_CARD_URL, json={
+                        "secret": QUICKWALLET_SECRET,
+                        "cardnumber": int(cardnumber),
+                        "udoutletid": int(udoutletid),
+                        "amount": int(amount)
+                    })
+                    if 300 > response.status_code >= 200:
+                        try:
+                            json_data = json.loads(response.text)
+                        except:
+                            pass
+
+                    if json_data:
+                        message = json_data['message']
+                        return render(
+                            request, self.template_name,
+                            {"zr_user": user, "api_error": message}
+                        )
+                except:
+                    pass
 
         return render(
             request, self.template_name, {"zr_user": user}
@@ -2879,7 +3002,7 @@ class PayView(View):
     def post(self, request, pk):
         user = ZrTerminal.objects.get(id=pk)
         if "save" in request.POST:
-            cardnumber = request.POST.get('cardnumber', '')
+            cardnumber = request.POST.get('card_number', '')
             udoutletid = request.POST.get('udoutletid', '')
             mobile = request.POST.get('mobile', '')
             otp = request.POST.get('otp', '')
@@ -2923,11 +3046,33 @@ class PayView(View):
                                 )
                 except:
                     pass
+
             if error == True:
-                return render(
-                    request, self.template_name,
-                    {"zr_user": user, "api_error": "something went wrong, please try again!"}
-                )
+                try:
+                    response = requests.post(QUICKWALLET_API_PAY_URL, json={
+                        "secret": QUICKWALLET_SECRET,
+                        "cardnumber": int(cardnumber),
+                        "udoutletid": int(udoutletid),
+                        "mobile": int(mobile),
+                        "otp": otp,
+                        "amount": int(amount)
+                    })
+                    if 300 > response.status_code >= 200:
+                        try:
+                            json_data = json.loads(response.text)
+                            print(json_data)
+                        except:
+                            pass
+
+                    if json_data:
+                        message = json_data['message']
+                        return render(
+                            request, self.template_name,
+                            {"zr_user": user, "api_error": message}
+                        )
+                except:
+                    pass
+
 
         return render(
             request, self.template_name, {"zr_user": user}
