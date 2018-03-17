@@ -24,7 +24,7 @@
                         <label for="cardnumber">Card Number</label>
                         <div class="col-3">
                             <select id="card-number"  name="card_number">
-                                <option value="-1">ALL</option>
+                                <option value="-1">Select one Cardnumber</option>
                                 {% for card in loyalty_cardslist %}
                                     <option value="{{ card }}" >{{ card }} </option>
                                 {% endfor %}
