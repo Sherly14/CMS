@@ -130,7 +130,7 @@ def calculate_commission():
 
         if not transaction.type.name == TRANSACTION_TYPE_DMT:
             sp = transaction.service_provider
-            if not sp
+            if not sp:
                 continue
             bill_pay_comm = zr_commission_models.BillPayCommissionStructure.objects.filter(
                 distributor=distributor,
