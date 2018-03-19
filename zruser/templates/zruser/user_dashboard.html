@@ -6,6 +6,14 @@
 {% block content %}
 
     <div class="content-wrapper">
+{% if request.user.zr_admin_user.role.name == "RETAILER" %}
+        <div style="text-align:center;padding-top:30px;">
+            <h2>Welcome to </h2>
+            <h3>Zrupee Prepaid Loyalty Program</h3>
+        </div>
+        {% endif %}
+
+{% if request.user.zr_admin_user.role.name != "RETAILER" %}
         <p class="head-right">Dashboard</p>
 
         <div class="row rm-margin-side">
@@ -467,6 +475,7 @@
     </div>
     <!-- /.modal -->
 
+        {% endif %}
 
 
     <script>
