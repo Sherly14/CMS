@@ -1267,7 +1267,7 @@ class UserUpdateView(View):
                 if hasattr(user.zr_user,"id"):
                     dj_user = user.zr_user.id
                     dj_user.first_name = user.first_name
-                    dj_user.last_name = user.last_name
+                    #dj_user.last_name = user.last_name
                     dj_user.email = user.email
                     dj_user.save()
 
@@ -2545,6 +2545,7 @@ class GenerateOTPView(View):
             except:
                 pass
 
+
             return render(
                 request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
             )
@@ -2553,7 +2554,7 @@ class GenerateOTPView(View):
     def post(self, request, pk):
         user = ZrTerminal.objects.get(id=pk)
         if "save" in request.POST:
-            cardnumber = request.POST.get('card_number', '')
+            cardnumber = request.POST.get('cardnumber', '')
             udoutletid = request.POST.get('udoutletid', '')
             mobile = request.POST.get('mobile', '')
             # validation
@@ -2561,7 +2562,7 @@ class GenerateOTPView(View):
             if not cardnumber:
                 error = True
             if mobile:
-                if not mobile.isdigit() and (len(mobile)<10):
+                if not mobile.isdigit() or (len(mobile)<10):
                     error = True
 
             if int(udoutletid) != int(user.mobile_no):
@@ -2593,10 +2594,30 @@ class GenerateOTPView(View):
                                 )
                 except:
                     pass
+
             if error == True:
-                return render(
-                    request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
-                )
+                try:
+                    response = requests.post(QUICKWALLET_API_GENERATEOTP_URL, json={
+                        "secret": QUICKWALLET_SECRET,
+                        "cardnumber": int(cardnumber),
+                        "udoutletid": int(udoutletid),
+                        "mobile": int(mobile)
+                    })
+                    if 300 > response.status_code >= 200:
+                        try:
+                            json_data = json.loads(response.text)
+                        except:
+                            pass
+
+                    if json_data:
+                        message = json_data['err']
+
+                        return render(
+                            request, self.template_name,
+                            {"zr_user": user, "api_error": message}
+                        )
+                except:
+                    pass
 
         return render(
             request, self.template_name, {"zr_user": user}
@@ -2606,30 +2627,78 @@ class GenerateOTPView(View):
 class IssueMobileView(View):
     template_name = 'zruser/issue_to_mobile.html'
 
-    def get(self, request, pk,  **kwargs):
-            user = ZrTerminal.objects.get(id=pk)
-            return render(
-                request, self.template_name, {"zr_user": user}
-            )
+    def get(self, request, pk, **kwargs):
+        user = ZrTerminal.objects.get(id=pk)
+        zr_retailer_id = request.user.zr_admin_user.zr_user.id
+        vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
+        response = requests.post(QUICKWALLET_API_LISTCARD_URL, json={
+            "secret": QUICKWALLET_SECRET,
+            "retailerid": vendor.vendor_user
+        })
+
+        if 300 > response.status_code >= 200:
+            try:
+                json_data = json.loads(response.text)
+                loyalty_cards = json_data['data']['loyaltycards']
+                loyalty_cardslist = []
+                for card in loyalty_cards:
+                    loyalty_cardslist.append(card['cardnumber'])
+            except:
+                pass
+        return render(
+            request, self.template_name, {"zr_user": user, "loyalty_cardslist": loyalty_cardslist}
+        )
 
     @transaction.atomic
     def post(self, request, pk):
         user = ZrTerminal.objects.get(id=pk)
-        if "save" in request.POST:
+        if "OTP" in request.POST:
+            cardnumber = request.POST.get('cardnumber', '')
+            udoutletid = request.POST.get('udoutletid', '')
+            mobile = request.POST.get('mobile', '')
+            error = False
+            # validation
+
+            if error == False:
+                    try:
+                        response = requests.post(QUICKWALLET_API_GENERATEOTP_URL, json={
+                            "secret": QUICKWALLET_SECRET,
+                            "cardnumber": int(cardnumber),
+                            "udoutletid": int(udoutletid),
+                            "mobile": int(mobile)
+                        })
+                        if 300 > response.status_code >= 200:
+                            try:
+                                json_data = json.loads(response.text)
+                            except:
+                                pass
+
+                        if json_data:
+                            if json_data['status']:
+                                status = json_data['status']
+                                if status == "failed":
+                                    message = json_data['err']
+                                    error = True
+                                    return render(
+                                        request, self.template_name,
+                                        {"zr_user": user, "api_error": message}
+                                    )
+                                else:
+                                    success = "OTP Send to {0}".format(mobile)
+                                    return render(
+                                        request, self.template_name, {"zr_user": user,"cardnumber": int(cardnumber),"mobile": int(mobile), "success": success}
+                                    )
+                    except:
+                        pass
+
+
+        if "Issue_Card" in request.POST:
             cardnumber = request.POST.get('cardnumber', '')
             udoutletid = request.POST.get('udoutletid', '')
             mobile = request.POST.get('mobile', '')
             otp = request.POST.get('otp', '')
             # validation
             error = False
-            if not cardnumber:
-                error = True
-            if mobile:
-                if not mobile.isdigit() and (len(mobile)<10):
-                    error = True
-
-            if int(udoutletid) != int(user.mobile_no):
-                error = True
 
             if error == False:
                 try:
@@ -2638,7 +2707,7 @@ class IssueMobileView(View):
                         "cardnumber": int(cardnumber),
                         "udoutletid": int(udoutletid),
                         "mobile": int(mobile),
-                        "otp": otp
+                        "otp":otp
                     })
                     if 300 > response.status_code >= 200:
                         try:
@@ -2650,18 +2719,14 @@ class IssueMobileView(View):
                         if json_data['status']:
                             status = json_data['status']
                             if status == "failed":
+                                message = json_data['message']
                                 error = True
+                                return render(request, self.template_name,{"zr_user": user, "api_error": message})
                             else:
                                 success = "{0} issued to {1}".format(cardnumber, mobile)
-                                return render(
-                                    request, self.template_name, {"zr_user": user, "success": success}
-                                )
+                                return render(request, self.template_name,{"zr_user": user, "cardnumber": int(cardnumber), "mobile": int(mobile),"success": success})
                 except:
                     pass
-            if error == True:
-                return render(
-                    request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
-                )
 
         return render(
             request, self.template_name, {"zr_user": user}
@@ -2673,29 +2738,36 @@ class ActivateCardView(View):
 
     def get(self, request, pk,  **kwargs):
             user = ZrTerminal.objects.get(id=pk)
+            zr_retailer_id = request.user.zr_admin_user.zr_user.id
+            vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
+            response = requests.post(QUICKWALLET_API_LISTCARD_URL, json={
+                "secret": QUICKWALLET_SECRET,
+                "retailerid": vendor.vendor_user
+            })
+
+            if 300 > response.status_code >= 200:
+                try:
+                    json_data = json.loads(response.text)
+                    loyalty_cards = json_data['data']['loyaltycards']
+                    loyalty_cardslist = []
+                    for card in loyalty_cards:
+                        loyalty_cardslist.append(card['cardnumber'])
+                except:
+                    pass
             return render(
-                request, self.template_name, {"zr_user": user}
+                request, self.template_name, {"zr_user": user,"loyalty_cardslist": loyalty_cardslist}
             )
 
     @transaction.atomic
     def post(self, request, pk):
         user = ZrTerminal.objects.get(id=pk)
         if "save" in request.POST:
-            cardnumber = request.POST.get('cardnumber', '')
+            cardnumber = request.POST.get('card_number', '')
             udoutletid = request.POST.get('udoutletid', '')
             mobile = request.POST.get('mobile', '')
             otp = request.POST.get('otp', '')
             # validation
             error = False
-            if not cardnumber:
-                error = True
-            if mobile:
-                if not mobile.isdigit() and (len(mobile)<10):
-                    error = True
-
-            if int(udoutletid) != int(user.mobile_no):
-                error = True
-
             if error == False:
                 try:
                     response = requests.post(QUICKWALLET_API_ACTIVATE_CARD_URL, json={
@@ -2715,7 +2787,9 @@ class ActivateCardView(View):
                         if json_data['status']:
                             status = json_data['status']
                             if status == "failed":
+                                message = json_data['message']
                                 error = True
+                                return render(request, self.template_name,{"zr_user": user, "api_error": message})
                             else:
                                 success = "{0} Activated".format(cardnumber)
                                 return render(
@@ -2723,10 +2797,6 @@ class ActivateCardView(View):
                                 )
                 except:
                     pass
-            if error == True:
-                return render(
-                    request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
-                )
 
         return render(
             request, self.template_name, {"zr_user": user}
@@ -2738,8 +2808,24 @@ class RechargeCardView(View):
 
     def get(self, request, pk,  **kwargs):
             user = ZrTerminal.objects.get(id=pk)
+            zr_retailer_id = request.user.zr_admin_user.zr_user.id
+            vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
+            response = requests.post(QUICKWALLET_API_LISTCARD_URL, json={
+                "secret": QUICKWALLET_SECRET,
+                "retailerid": vendor.vendor_user
+            })
+
+            if 300 > response.status_code >= 200:
+                try:
+                    json_data = json.loads(response.text)
+                    loyalty_cards = json_data['data']['loyaltycards']
+                    loyalty_cardslist = []
+                    for card in loyalty_cards:
+                        loyalty_cardslist.append(card['cardnumber'])
+                except:
+                    pass
             return render(
-                request, self.template_name, {"zr_user": user}
+                request, self.template_name, {"zr_user": user,"loyalty_cardslist": loyalty_cardslist}
             )
 
     @transaction.atomic
@@ -2751,15 +2837,6 @@ class RechargeCardView(View):
             amount = request.POST.get('amount', '')
             # validation
             error = False
-            if not cardnumber:
-                error = True
-            if amount:
-                if not amount.isdigit() and amount <= 0:
-                    error = True
-
-            if int(udoutletid) != int(user.mobile_no):
-                error = True
-
             if error == False:
                 try:
                     response = requests.post(QUICKWALLET_API_RECHARGE_CARD_URL, json={
@@ -2778,7 +2855,9 @@ class RechargeCardView(View):
                         if json_data['status']:
                             status = json_data['status']
                             if status == "failed":
+                                message = json_data['message']
                                 error = True
+                                return render(request, self.template_name, {"zr_user": user, "api_error": message})
                             else:
                                 success = "Rs. {0} added to {1}".format(amount, cardnumber)
                                 return render(
@@ -2786,10 +2865,6 @@ class RechargeCardView(View):
                                 )
                 except:
                     pass
-            if error == True:
-                return render(
-                    request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
-                )
 
         return render(
             request, self.template_name, {"zr_user": user}
@@ -2801,8 +2876,24 @@ class PayView(View):
 
     def get(self, request, pk, **kwargs):
         user = ZrTerminal.objects.get(id=pk)
+        zr_retailer_id = request.user.zr_admin_user.zr_user.id
+        vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
+        response = requests.post(QUICKWALLET_API_LISTCARD_URL, json={
+            "secret": QUICKWALLET_SECRET,
+            "retailerid": vendor.vendor_user
+        })
+
+        if 300 > response.status_code >= 200:
+            try:
+                json_data = json.loads(response.text)
+                loyalty_cards = json_data['data']['loyaltycards']
+                loyalty_cardslist = []
+                for card in loyalty_cards:
+                    loyalty_cardslist.append(card['cardnumber'])
+            except:
+                pass
         return render(
-            request, self.template_name, {"zr_user": user}
+            request, self.template_name, {"zr_user": user,"loyalty_cardslist": loyalty_cardslist}
         )
 
     @transaction.atomic
@@ -2816,14 +2907,6 @@ class PayView(View):
             amount = request.POST.get('amount', '')
             # validation
             error = False
-            if not cardnumber:
-                error = True
-            if mobile:
-                if not mobile.isdigit() and (len(mobile)) < 10:
-                    error = True
-
-            if int(udoutletid) != int(user.mobile_no):
-                error = True
 
             if error == False:
                 try:
@@ -2845,7 +2928,9 @@ class PayView(View):
                         if json_data['status']:
                             status = json_data['status']
                             if status == "failed":
+                                message = json_data['message']
                                 error = True
+                                return render(request, self.template_name,{"zr_user": user, "api_error": message})
                             else:
                                 success = "Rs. {0} paid".format(amount)
                                 return render(
@@ -2853,11 +2938,6 @@ class PayView(View):
                                 )
                 except:
                     pass
-            if error == True:
-                return render(
-                    request, self.template_name,
-                    {"zr_user": user, "api_error": "something went wrong, please try again!"}
-                )
 
         return render(
             request, self.template_name, {"zr_user": user}
@@ -2869,8 +2949,24 @@ class DeactivateCardView(View):
 
     def get(self, request, pk,  **kwargs):
             user = ZrTerminal.objects.get(id=pk)
+            zr_retailer_id = request.user.zr_admin_user.zr_user.id
+            vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
+            response = requests.post(QUICKWALLET_API_LISTCARD_URL, json={
+                "secret": QUICKWALLET_SECRET,
+                "retailerid": vendor.vendor_user
+            })
+
+            if 300 > response.status_code >= 200:
+                try:
+                    json_data = json.loads(response.text)
+                    loyalty_cards = json_data['data']['loyaltycards']
+                    loyalty_cardslist = []
+                    for card in loyalty_cards:
+                        loyalty_cardslist.append(card['cardnumber'])
+                except:
+                    pass
             return render(
-                request, self.template_name, {"zr_user": user}
+                request, self.template_name, {"zr_user": user,"loyalty_cardslist": loyalty_cardslist}
             )
 
     @transaction.atomic
@@ -2883,15 +2979,6 @@ class DeactivateCardView(View):
             otp = request.POST.get('otp', '')
             # validation
             error = False
-            if not cardnumber:
-                error = True
-            if mobile:
-                if not mobile.isdigit() and (len(mobile)<10):
-                    error=True
-
-            if int(udoutletid) != int(user.mobile_no):
-                error = True
-
             if error == False:
                 try:
                     response = requests.post(QUICKWALLET_API_DEACTIVATE_CARD_URL, json={
@@ -2911,18 +2998,15 @@ class DeactivateCardView(View):
                         if json_data['status']:
                             status = json_data['status']
                             if status == "failed":
+                                message = json_data['message']
                                 error = True
+                                return render(request, self.template_name,{"zr_user": user, "api_error": message})
                             else:
                                 success = "{0} Deactivated".format(cardnumber)
-                                return render(
-                                    request, self.template_name, {"zr_user": user, "success": success}
-                                )
+                                return render(request, self.template_name, {"zr_user": user, "success": success})
                 except:
                     pass
-            if error == True:
-                return render(
-                    request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
-                )
+
 
         return render(
             request, self.template_name, {"zr_user": user}

@@ -69,12 +69,12 @@
                                     <td>{{ offer.availability }}</td>
                                     {% if request.user.zr_admin_user.role.name != "RETAILER" %}
                                     {% if not offer.r %}
-                                        <td> <button class="get_assign_retailer" data-toggle="modal" data-id = "{{ offer.id }}" data-target="#get_assign_retailer" >Assign</button></td>
+                                        <td> <button class=" button red get_assign_retailer" data-toggle="modal" data-id = "{{ offer.id }}" data-target="#get_assign_retailer" >Assign</button></td>
                                     {% endif %}
                                     {% endif %}
                                     {% if request.user.zr_admin_user.role.name == "RETAILER" %}
                                     {% if not offer.o %}
-                                        <td> <button class="get_assign_terminal" data-toggle="modal" data-id = "{{ offer.id }}" data-target="#get_assign_terminal" >Assign</button></td>
+                                        <td> <button class=" button red get_assign_terminal" data-toggle="modal" data-id = "{{ offer.id }}" data-target="#get_assign_terminal" >Assign</button></td>
                                     {% endif %}
                                     {% endif %}
                                 </tr>
@@ -102,11 +102,11 @@
                                         <td>{{ offer.availability }}</td>
                                         {% if request.user.zr_admin_user.role.name != "RETAILER" %}
                                         {% if not offer.r %}
-                                            <td> <button class="get_assign_retailer" data-toggle="modal" data-id = "{{ offer.id }}" data-target="#get_assign_retailer" >Assign</button></td>
+                                            <td> <button class="button red get_assign_retailer " data-toggle="modal" data-id = "{{ offer.id }}" data-target="#get_assign_retailer" >Assign</button></td>
                                         {% endif %}
                                         {% endif %}
                                         {% if request.user.zr_admin_user.role.name == "RETAILER" %}
-                                            <td> <button class="get_assign_terminal" data-toggle="modal" data-id = "{{ offer.id }}" data-target="#get_assign_terminal" >Assign</button></td>
+                                            <td> <button class="button red get_assign_terminal " data-toggle="modal" data-id = "{{ offer.id }}" data-target="#get_assign_terminal" >Assign</button></td>
                                         {% endif %}
                                     {% endif %}
                                 </tr>
@@ -152,22 +152,18 @@
                             <div class="form-group col-sm-2">
                                 <label class="control-label"><b>Retailer</b></label>
                                  <select style="border: 2px solid; border-color: #aaa;" name="retailer" id="retailer" required>
-                                     <option value="-1">ALL</option>
+                                     <option value="-1">Select Retailer</option>
                                         {% for retailer in retailer_list %}
                                             <option value="{{ retailer.id }}" {% if  retailer.id == retailer_id %}selected{% endif %}>{{ retailer.first_name }} {{ retailer.last_name|default_if_none:""}}</option>
                                          {% endfor %}
                                  </select>
                             </div>
                         </div>
-                        <div class="row container" style="padding-left: 3rem;">
-                            <div class="form-group col-sm-3">
-                            </div>
-                            <div class="form-group col-sm-6">
-                                <button type="submit" id="assign_retailer" style="background-color: #ff2000f2;">
+                        <div class="row">
+                            <div class="form-group col-10">
+                                <button type="submit"  id="assign_retailer" class="button red ">
                                     Assign Retailer
                                 </button>
-                            </div>
-                            <div class="form-group col-sm-3" style=" position: relative;left: 13%;">
                             </div>
                         </div>
                     </form>
