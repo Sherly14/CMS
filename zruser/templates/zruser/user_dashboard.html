@@ -3,8 +3,9 @@
 
 {% block title %} Dashboard {% endblock %}
 
-{% block content %}
 
+{% block content %}
+    {% if request.user.zr_admin_user.role.name != "RETAILER" %}
     <div class="content-wrapper">
 {% if request.user.zr_admin_user.role.name == "RETAILER" %}
         <div style="text-align:center;padding-top:30px;">
@@ -227,8 +228,61 @@
 
                 </div>
             </div>
-
     </div>
+    {% endif %}
+    {% if request.user.zr_admin_user.role.name == "RETAILER" %}
+        <div class="content-wrapper">
+            <p class="head-right">Transaction History</p>
+
+            {% if no_payments %}
+                <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ no_payments }}</div>
+            {% endif %}
+            <div class="col-md-12" >
+                <div class="row" style="padding-right: 50px;">
+                    <div class="fine">
+                        <p class="head-bg">Transaction</p>
+                    </div>
+                </div>
+                <div class="row scroll">
+
+                    <div style="width: 100%;">
+                        <table>
+                            <tr>
+                                <th>Id</th>
+                                <th>Bill Number</th>
+                                <th>Amount</th>
+                                <th>Settled Amount</th>
+                                <th>Tip</th>
+                                <th>Discount</th>
+                                <th>State</th>
+                                <th>Create Date</th>
+                                <th>Update Date</th>
+                                <th>Name</th>
+
+                            </tr>
+
+                            {% for payment in payments %}
+                                <tr>
+                                    <td>{{ payment.id }}</td>
+                                    <td>{{ payment.billnumber }}</td>
+                                    <td>{{ payment.amount }}</td>
+                                    <td>{{ payment.settledamount }}</td>
+                                    <td>{{ payment.tip }}</td>
+                                    <td>{{ payment.discount }}</td>
+                                    <td>{{ payment.state }}</td>
+                                    <td>{{ payment.createdat }}</td>
+                                    <td>{{ payment.updatedat }}</td>
+                                    <td>{{ payment.name }}</td>
+                                </tr>
+                            {% endfor %}
+
+                        </table>
+                    </div>
+                </div>
+                <br>
+            </div>
+        </div>
+    {% endif %}
 
     <!-- Modal HTML Markup -->
     <div id="modal" class="modal fade">

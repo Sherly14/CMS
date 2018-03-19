@@ -918,216 +918,245 @@ class DashBoardView(ListView):
     context_object_name = 'distributor_list'
 
     def get_context_data(self, *args, **kwargs):
-        period = self.request.GET.get('period')
-        start_date = self.request.GET.get('startDate')
-        end_date = self.request.GET.get('endDate')
-        dt_filter = {}
-        if period == 'today':
-          dt_filter['at_created'] = datetime.datetime.now().date()
-        elif period == 'last-week':
-           dt_filter['at_created__range'] = date_utils.last_week_range()
-        elif period == 'last-month':
-           dt_filter['at_created__range'] = date_utils.last_month()
+        if self.request.user.zr_admin_user.role.name == "RETAILER":
+            context = super(DashBoardView, self).get_context_data(*args, **kwargs)
+            zr_retailer_id = self.request.user.zr_admin_user.zr_user.id
+            vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
+            response = requests.post(QUICKWALLET_PAYMENT_HISTORY_URL, json={"secret": QUICKWALLET_SECRET,
+                                                                            "retailerid": vendor.vendor_user})
 
-        if start_date != None and end_date != None:
-            dt_filter['at_created__range']=(start_date, end_date)
-
-        context = super(DashBoardView, self).get_context_data(*args, **kwargs)
-        if is_user_superuser(self.request):
-            total_commission = commission_models.Commission.objects.filter(
-                commission_user=None,
-                **dt_filter
-            ).aggregate(commission=Sum(
-                F('net_commission') + (F('user_tds') * F('net_commission')) / 100
-            ))['commission']
-        else:
-            req_usr = self.request.user.zr_admin_user
-            total_commission = commission_models.Commission.objects.filter(
-                commission_user=req_usr.zr_user,
-                **dt_filter
-            ).aggregate(commission=Sum(
-                F('net_commission') + (F('user_tds') * F('net_commission')) / 100
-            ))['commission']
-
-        total_commission = total_commission if total_commission else 0
-        context['total_commission'] = "%.4f" % total_commission
-
-        if is_user_superuser(self.request):
-            '''
-            Total commission value
-            '''
-            context["dmt_commission_value"] = commission_models.Commission.objects.filter(
-                transaction__type__name='DMT',
-                commission_user=None
-            ).aggregate(
-                value=Sum('user_commission')
-            )['value'] or 0
-
-            context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
-                transaction__type__name__in=BILLS_TYPE,
-                commission_user=None,
-                **dt_filter
-            ).aggregate(
-                value=Sum('user_commission')
-            )['value'] or 0
-
-            context["total_recharge_commission_value"] = commission_models.Commission.objects.filter(
-                transaction__type__name__in=RECHARGES_TYPE,
-                commission_user=None,
-                **dt_filter
-            ).aggregate(
-                value=Sum('user_commission')
-            )['value'] or 0
+            if 300 > response.status_code >= 200:
+                try:
+                    json_data = json.loads(response.text)
+                    payments = json_data['data']['payments']
+                    transaction = []
+                    count = 0
+                    for payment in payments:
+                        if(count<10):
+                            transaction.append(payment)
+                            count = count + 1
+                    context['payments'] = transaction
+                    return context
+                except:
+                    pass
+            context['no_payments'] = "No Transactions to Show!!!"
+            return context
 
         else:
-            merchants = transaction_utils.get_merchants_from_distributor(
-                self.request.user.zr_admin_user.zr_user
-            )
-            context["dmt_commission_value"] = commission_models.Commission.objects.filter(
-                transaction__type__name='DMT',
-                commission_user=self.request.user.zr_admin_user.zr_user
-            ).aggregate(
-                value=Sum('user_commission')
-            )['value'] or 0
+            period = self.request.GET.get('period')
+            start_date = self.request.GET.get('startDate')
+            end_date = self.request.GET.get('endDate')
+            dt_filter = {}
+            if period == 'today':
+              dt_filter['at_created'] = datetime.datetime.now().date()
+            elif period == 'last-week':
+               dt_filter['at_created__range'] = date_utils.last_week_range()
+            elif period == 'last-month':
+               dt_filter['at_created__range'] = date_utils.last_month()
 
-            context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
-                transaction__type__name__in=BILLS_TYPE,
-                commission_user=self.request.user.zr_admin_user.zr_user,
+            if start_date != None and end_date != None:
+                dt_filter['at_created__range']=(start_date, end_date)
+
+            context = super(DashBoardView, self).get_context_data(*args, **kwargs)
+            if is_user_superuser(self.request):
+                total_commission = commission_models.Commission.objects.filter(
+                    commission_user=None,
+                    **dt_filter
+                ).aggregate(commission=Sum(
+                    F('net_commission') + (F('user_tds') * F('net_commission')) / 100
+                ))['commission']
+            else:
+                req_usr = self.request.user.zr_admin_user
+                total_commission = commission_models.Commission.objects.filter(
+                    commission_user=req_usr.zr_user,
+                    **dt_filter
+                ).aggregate(commission=Sum(
+                    F('net_commission') + (F('user_tds') * F('net_commission')) / 100
+                ))['commission']
+
+            total_commission = total_commission if total_commission else 0
+            context['total_commission'] = "%.4f" % total_commission
+
+            if is_user_superuser(self.request):
+                '''
+                Total commission value
+                '''
+                context["dmt_commission_value"] = commission_models.Commission.objects.filter(
+                    transaction__type__name='DMT',
+                    commission_user=None
+                ).aggregate(
+                    value=Sum('user_commission')
+                )['value'] or 0
+
+                context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
+                    transaction__type__name__in=BILLS_TYPE,
+                    commission_user=None,
+                    **dt_filter
+                ).aggregate(
+                    value=Sum('user_commission')
+                )['value'] or 0
+
+                context["total_recharge_commission_value"] = commission_models.Commission.objects.filter(
+                    transaction__type__name__in=RECHARGES_TYPE,
+                    commission_user=None,
+                    **dt_filter
+                ).aggregate(
+                    value=Sum('user_commission')
+                )['value'] or 0
+
+            else:
+                merchants = transaction_utils.get_merchants_from_distributor(
+                    self.request.user.zr_admin_user.zr_user
+                )
+                context["dmt_commission_value"] = commission_models.Commission.objects.filter(
+                    transaction__type__name='DMT',
+                    commission_user=self.request.user.zr_admin_user.zr_user
+                ).aggregate(
+                    value=Sum('user_commission')
+                )['value'] or 0
+
+                context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
+                    transaction__type__name__in=BILLS_TYPE,
+                    commission_user=self.request.user.zr_admin_user.zr_user,
+                    **dt_filter
+                ).aggregate(
+                    value=Sum('user_commission')
+                )['value'] or 0
+
+                context["total_recharge_commission_value"] = commission_models.Commission.objects.filter(
+                    transaction__type__name__in=RECHARGES_TYPE,
+                    commission_user=self.request.user.zr_admin_user.zr_user,
+                    **dt_filter
+                ).aggregate(
+                    value=Sum('user_commission')
+                )['value'] or 0
+
+                dt_filter['user__id__in'] = merchants
+
+            '''
+            Total transactions
+            '''
+            context["successful_dmt_transactions"] = transaction_models.Transaction.objects.filter(
+                type__name='DMT',
+                status=TRANSACTION_STATUS_SUCCESS,
+                **dt_filter
+            ).count()
+            context["successful_bill_pay_transactions"] = transaction_models.Transaction.objects.filter(
+                type__name__in=RECHARGES_TYPE,
+                status=TRANSACTION_STATUS_SUCCESS,
+                **dt_filter
+            ).count()
+            context["successful_recharge_transactions"] = transaction_models.Transaction.objects.filter(
+                type__name__in=RECHARGES_TYPE,
+                status=TRANSACTION_STATUS_SUCCESS,
+                **dt_filter
+            ).count()
+
+            context["pending_failure_dmt_transactions"] = transaction_models.Transaction.objects.filter(
+                type__name='DMT',
+                status__in=[TRANSACTION_STATUS_PENDING, TRANSACTION_STATUS_FAILURE],
+                **dt_filter
+            ).count()
+            context["pending_failure_bill_pay_transactions"] = transaction_models.Transaction.objects.filter(
+                type__name__in=BILLS_TYPE,
+                status__in=[TRANSACTION_STATUS_PENDING, TRANSACTION_STATUS_FAILURE],
+                **dt_filter
+            ).count()
+            context["pending_failure_recharge_transactions"] = transaction_models.Transaction.objects.filter(
+                type__name__in=RECHARGES_TYPE,
+                status__in=[TRANSACTION_STATUS_PENDING, TRANSACTION_STATUS_FAILURE],
+                **dt_filter
+            ).count()
+
+            '''
+            Total transaction value
+            '''
+            context["dmt_transaction_value"] = transaction_models.Transaction.objects.filter(
+                type__name='DMT',
+                status=TRANSACTION_STATUS_SUCCESS,
                 **dt_filter
             ).aggregate(
-                value=Sum('user_commission')
+                value=Sum('amount')
             )['value'] or 0
 
-            context["total_recharge_commission_value"] = commission_models.Commission.objects.filter(
-                transaction__type__name__in=RECHARGES_TYPE,
-                commission_user=self.request.user.zr_admin_user.zr_user,
+            context["bill_pay_transaction_value"] = transaction_models.Transaction.objects.filter(
+                type__name__in=BILLS_TYPE,
+                status=TRANSACTION_STATUS_SUCCESS,
                 **dt_filter
             ).aggregate(
-                value=Sum('user_commission')
+                value=Sum('amount')
             )['value'] or 0
 
-            dt_filter['user__id__in'] = merchants
+            context["recharge_transaction_value"] = transaction_models.Transaction.objects.filter(
+                type__name__in=RECHARGES_TYPE,
+                status=TRANSACTION_STATUS_SUCCESS,
+                **dt_filter
+            ).aggregate(
+                value=Sum('amount')
+            )['value'] or 0
 
-        '''
-        Total transactions
-        '''
-        context["successful_dmt_transactions"] = transaction_models.Transaction.objects.filter(
-            type__name='DMT',
-            status=TRANSACTION_STATUS_SUCCESS,
-            **dt_filter
-        ).count()
-        context["successful_bill_pay_transactions"] = transaction_models.Transaction.objects.filter(
-            type__name__in=RECHARGES_TYPE,
-            status=TRANSACTION_STATUS_SUCCESS,
-            **dt_filter
-        ).count()
-        context["successful_recharge_transactions"] = transaction_models.Transaction.objects.filter(
-            type__name__in=RECHARGES_TYPE,
-            status=TRANSACTION_STATUS_SUCCESS,
-            **dt_filter
-        ).count()
+            zr_admin_user = self.request.user.zr_admin_user
+            if self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
+                context["total_merchants"] = zrmappings_models.DistributorMerchant.objects.filter(
+                    distributor=zr_admin_user.zr_user,
+                ).count()
+                if zr_admin_user.zr_user:
+                    context['total_payment_request'] = zr_admin_user.zr_user.distributor_payment_requests.all().count()
+            elif self.request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
+                context["total_merchants"] = zrmappings_models.DistributorMerchant.objects.filter(
+                    distributor=zr_admin_user.zr_user,
+                ).count()
+                if zr_admin_user.zr_user:
+                    context['total_payment_request'] = zr_admin_user.zr_user.distributor_payment_requests.all().count()
+            elif self.request.user.zr_admin_user.role.name == MERCHANT:
+                if zr_admin_user.zr_user:
+                    context['total_payment_request'] = zr_admin_user.zr_user.merchant_payment_requests.all().count()
 
-        context["pending_failure_dmt_transactions"] = transaction_models.Transaction.objects.filter(
-            type__name='DMT',
-            status__in=[TRANSACTION_STATUS_PENDING, TRANSACTION_STATUS_FAILURE],
-            **dt_filter
-        ).count()
-        context["pending_failure_bill_pay_transactions"] = transaction_models.Transaction.objects.filter(
-            type__name__in=BILLS_TYPE,
-            status__in=[TRANSACTION_STATUS_PENDING, TRANSACTION_STATUS_FAILURE],
-            **dt_filter
-        ).count()
-        context["pending_failure_recharge_transactions"] = transaction_models.Transaction.objects.filter(
-            type__name__in=RECHARGES_TYPE,
-            status__in=[TRANSACTION_STATUS_PENDING, TRANSACTION_STATUS_FAILURE],
-            **dt_filter
-        ).count()
+            try:
+                context['user_wallet'] = self.request.user.zr_admin_user.zr_user.wallet
+            except:
+                context['user_wallet'] = None
 
-        '''
-        Total transaction value
-        '''
-        context["dmt_transaction_value"] = transaction_models.Transaction.objects.filter(
-            type__name='DMT',
-            status=TRANSACTION_STATUS_SUCCESS,
-            **dt_filter
-        ).aggregate(
-            value=Sum('amount')
-        )['value'] or 0
+            context['payment_mods'] = PaymentMode.objects.all()
+            context['is_user_superuser'] = is_user_superuser(request=self.request)
+            context['bank'] = Bank.objects.all()
 
-        context["bill_pay_transaction_value"] = transaction_models.Transaction.objects.filter(
-            type__name__in=BILLS_TYPE,
-            status=TRANSACTION_STATUS_SUCCESS,
-            **dt_filter
-        ).aggregate(
-            value=Sum('amount')
-        )['value'] or 0
+            if start_date:
+                context['startDate'] = start_date
 
-        context["recharge_transaction_value"] = transaction_models.Transaction.objects.filter(
-            type__name__in=RECHARGES_TYPE,
-            status=TRANSACTION_STATUS_SUCCESS,
-            **dt_filter
-        ).aggregate(
-            value=Sum('amount')
-        )['value'] or 0
+            if end_date:
+                context['endDate'] = end_date
 
-        zr_admin_user = self.request.user.zr_admin_user
-        if self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
-            context["total_merchants"] = zrmappings_models.DistributorMerchant.objects.filter(
-                distributor=zr_admin_user.zr_user,
-            ).count()
-            if zr_admin_user.zr_user:
-                context['total_payment_request'] = zr_admin_user.zr_user.distributor_payment_requests.all().count()
-        elif self.request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
-            context["total_merchants"] = zrmappings_models.DistributorMerchant.objects.filter(
-                distributor=zr_admin_user.zr_user,
-            ).count()
-            if zr_admin_user.zr_user:
-                context['total_payment_request'] = zr_admin_user.zr_user.distributor_payment_requests.all().count()
-        elif self.request.user.zr_admin_user.role.name == MERCHANT:
-            if zr_admin_user.zr_user:
-                context['total_payment_request'] = zr_admin_user.zr_user.merchant_payment_requests.all().count()
-
-        try:
-            context['user_wallet'] = self.request.user.zr_admin_user.zr_user.wallet
-        except:
-            context['user_wallet'] = None
-
-        context['payment_mods'] = PaymentMode.objects.all()
-        context['is_user_superuser'] = is_user_superuser(request=self.request)
-        context['bank'] = Bank.objects.all()
-
-        if start_date:
-            context['startDate'] = start_date
-
-        if end_date:
-            context['endDate'] = end_date
-
-        to_list=[]
-        distributor_merchant = zrmappings_models.DistributorMerchant.objects.filter(
-            distributor_id= self.request.user.zr_admin_user.zr_user)
-        if distributor_merchant:
-            for distributor_merchant_map in distributor_merchant:
-                to_list.append(distributor_merchant_map.merchant)
+            to_list=[]
+            distributor_merchant = zrmappings_models.DistributorMerchant.objects.filter(
+                distributor_id= self.request.user.zr_admin_user.zr_user)
+            if distributor_merchant:
+                for distributor_merchant_map in distributor_merchant:
+                    to_list.append(distributor_merchant_map.merchant)
 
 
-        distributor_subdistributor = zrmappings_models.DistributorSubDistributor.objects.filter(
-            distributor_id=self.request.user.zr_admin_user.zr_user)
-        if distributor_subdistributor:
-            for distributor_subdistributor_map in distributor_subdistributor:
-                to_list.append(distributor_subdistributor_map.sub_distributor)
+            distributor_subdistributor = zrmappings_models.DistributorSubDistributor.objects.filter(
+                distributor_id=self.request.user.zr_admin_user.zr_user)
+            if distributor_subdistributor:
+                for distributor_subdistributor_map in distributor_subdistributor:
+                    to_list.append(distributor_subdistributor_map.sub_distributor)
 
-        subdistributor_merchant = zrmappings_models.SubDistributorMerchant.objects.filter(
-            sub_distributor=self.request.user.zr_admin_user.zr_user)
-        if subdistributor_merchant:
-            for subdistributor_merchant_map in subdistributor_merchant:
-                to_list.append(subdistributor_merchant_map.merchant)
+            subdistributor_merchant = zrmappings_models.SubDistributorMerchant.objects.filter(
+                sub_distributor=self.request.user.zr_admin_user.zr_user)
+            if subdistributor_merchant:
+                for subdistributor_merchant_map in subdistributor_merchant:
+                    to_list.append(subdistributor_merchant_map.merchant)
 
-        context['to_list']=to_list
-        topup_form = zr_payment_form.TopupForm()
-        # topup_form = zr_payment_form.TopupForm(initial={'to_user': request.user.zr_admin_user.zr_user.id, 'payment_type' : 2 , 'payment_mode' : 3})
-        context['topup_form']=topup_form
+            context['to_list']=to_list
+            topup_form = zr_payment_form.TopupForm()
+            # topup_form = zr_payment_form.TopupForm(initial={'to_user': request.user.zr_admin_user.zr_user.id, 'payment_type' : 2 , 'payment_mode' : 3})
+            context['topup_form']=topup_form
+            context['to_list']=to_list
+            topup_form = zr_payment_form.TopupForm()
+            # topup_form = zr_payment_form.TopupForm(initial={'to_user': request.user.zr_admin_user.zr_user.id, 'payment_type' : 2 , 'payment_mode' : 3})
+            context['topup_form']=topup_form
 
-        return context
+            return context
 
 
 class DistributorCreateView(CreateView):
@@ -3028,6 +3057,20 @@ class PaymentHistoryView(View):
             vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
             response = requests.post(QUICKWALLET_PAYMENT_HISTORY_URL, json={"secret": QUICKWALLET_SECRET,
                                                                      "retailerid": vendor.vendor_user})
+
+            # if 300 > response.status_code >= 200:
+            #     try:
+            #         json_data = json.loads(response.text)
+            #         payments = json_data['data']['payments']
+            #         for payment in payments:
+            #             print(payment.amount)
+            #
+            #         return render(
+            #             request, self.template_name, {"payments": payments, "zr_user": user}
+            #         )
+            #     except:
+            #         pass
+
         elif is_user_superuser(request):
             user = None
             response = requests.post(QUICKWALLET_PAYMENT_HISTORY_URL, json={"secret": QUICKWALLET_SECRET})
