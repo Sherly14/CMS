@@ -924,6 +924,9 @@ class DashBoardView(ListView):
             vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
             response = requests.post(QUICKWALLET_PAYMENT_HISTORY_URL, json={"secret": QUICKWALLET_SECRET,
                                                                             "retailerid": vendor.vendor_user})
+            if response.status_code >= 500:
+                context['no_payments'] = "Api Gateway Server Error"
+                return context
 
             if 300 > response.status_code >= 200:
                 try:
@@ -1798,7 +1801,16 @@ class RetailerCreateView(CreateView):
                         "name": merchant_form.data['first_name']
                     }
                 })
-
+                if response.status_code >= 500:
+                    return render(
+                        request, self.template_name,
+                        {
+                            'merchant_form': merchant_form,
+                            'bank_detail_form': bank_detail_form,
+                            'kyc_doc_types': self.kyc_doc_types,
+                            'api_error': "Api Gateway Server Error"
+                        }
+                    )
                 if 300 > response.status_code >= 200:
                     try:
                         json_data = json.loads(response.text)
@@ -2087,6 +2099,14 @@ class TerminalCreateView(CreateView):
                     "udoutletid": int(id)
                 }
             })
+            if response.status_code >= 500:
+                return render(
+                    request, self.template_name,
+                    {
+                        'merchant_form': merchant_form,
+                        'api_error': "Api Gateway Server Error"
+                    }
+                )
             if 300 > response.status_code >= 200:
                 try:
                     json_data = json.loads(response.text)
@@ -2137,7 +2157,7 @@ class TerminalCreateView(CreateView):
             request, self.template_name,
             {
                 'merchant_form': merchant_form,
-                'api_error' : api_error
+                'api_error': api_error
             }
         )
 
@@ -2454,6 +2474,10 @@ class UserCardCreateView(CreateView):
         response = requests.post(QUICKWALLET_API_CARD_URL, json={"secret": QUICKWALLET_SECRET,
                                                                  "retailerid": vendor.vendor_user,
                                                                  "qty": int(quantity)})
+        if response.status_code >= 500:
+            return render(
+                request, self.template_name, {"api_error": "Api Gateway Server Error"}
+            )
         if 300 > response.status_code >= 200:
             try:
                 json_data = json.loads(response.text)
@@ -2471,12 +2495,12 @@ class UserCardCreateView(CreateView):
                             return HttpResponseRedirect(reverse("user:dashboard"))
             except:
                 pass
-            return render(
-                request, self.template_name,
-                {
-                    "api_error": "something went wrong, please try again!"
-                }
-            )
+        return render(
+            request, self.template_name,
+            {
+                "api_error": "something went wrong, please try again!"
+            }
+        )
 
 
 class UserCardListView(View):
@@ -2491,6 +2515,10 @@ class UserCardListView(View):
             "secret": QUICKWALLET_SECRET,
             "retailerid": vendor.vendor_user
         })
+        if response.status_code >= 500:
+            return render(
+                request, self.template_name, {"api_error": "Api Gateway Server Error"}
+            )
         if 300 > response.status_code >= 200:
             try:
                 json_data = json.loads(response.text)
@@ -2502,9 +2530,9 @@ class UserCardListView(View):
             except:
                 pass
 
-            return render(
-                request, self.template_name, {"api_error": "something went wrong, please try again!"}
-            )
+        return render(
+            request, self.template_name, {"api_error": "something went wrong, please try again!"}
+        )
 
 
 class TerminalActivatedCardListView(View):
@@ -2517,7 +2545,10 @@ class TerminalActivatedCardListView(View):
             "secret": QUICKWALLET_SECRET,
             "udoutletid": int(user.mobile_no)
         })
-
+        if response.status_code >= 500:
+            return render(
+                request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+            )
         if 300 > response.status_code >= 200:
             try:
                 json_data = json.loads(response.text)
@@ -2529,9 +2560,9 @@ class TerminalActivatedCardListView(View):
             except:
                 pass
 
-            return render(
-                request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
-            )
+        return render(
+            request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
+        )
 
 
 class GenerateOTPView(View):
@@ -2550,6 +2581,10 @@ class GenerateOTPView(View):
         #     "secret": QUICKWALLET_SECRET,
         #     "udoutletid": int(user.mobile_no)
         # })
+        if response.status_code >= 500:
+            return render(
+                request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+            )
         if 300 > response.status_code >= 200:
             try:
                 json_data = json.loads(response.text)
@@ -2568,10 +2603,9 @@ class GenerateOTPView(View):
             except:
                 pass
 
-
-            return render(
-                request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
-            )
+        return render(
+            request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
+        )
 
     @transaction.atomic
     def post(self, request, pk):
@@ -2599,6 +2633,10 @@ class GenerateOTPView(View):
                         "udoutletid": int(udoutletid),
                         "mobile": int(mobile)
                     })
+                    if response.status_code >= 500:
+                        return render(
+                            request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                        )
                     if 300 > response.status_code >= 200:
                         try:
                             json_data = json.loads(response.text)
@@ -2626,6 +2664,10 @@ class GenerateOTPView(View):
                         "udoutletid": int(udoutletid),
                         "mobile": int(mobile)
                     })
+                    if response.status_code >= 500:
+                        return render(
+                            request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                        )
                     if 300 > response.status_code >= 200:
                         try:
                             json_data = json.loads(response.text)
@@ -2658,7 +2700,10 @@ class IssueMobileView(View):
             "secret": QUICKWALLET_SECRET,
             "retailerid": vendor.vendor_user
         })
-
+        if response.status_code >= 500:
+            return render(
+                request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+            )
         if 300 > response.status_code >= 200:
             try:
                 json_data = json.loads(response.text)
@@ -2690,6 +2735,10 @@ class IssueMobileView(View):
                             "udoutletid": int(udoutletid),
                             "mobile": int(mobile)
                         })
+                        if response.status_code >= 500:
+                            return render(
+                                request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                            )
                         if 300 > response.status_code >= 200:
                             try:
                                 json_data = json.loads(response.text)
@@ -2714,7 +2763,6 @@ class IssueMobileView(View):
                     except:
                         pass
 
-
         if "Issue_Card" in request.POST:
             cardnumber = request.POST.get('cardnumber', '')
             udoutletid = request.POST.get('udoutletid', '')
@@ -2732,6 +2780,10 @@ class IssueMobileView(View):
                         "mobile": int(mobile),
                         "otp":otp
                     })
+                    if response.status_code >= 500:
+                        return render(
+                            request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                        )
                     if 300 > response.status_code >= 200:
                         try:
                             json_data = json.loads(response.text)
@@ -2767,7 +2819,10 @@ class ActivateCardView(View):
                 "secret": QUICKWALLET_SECRET,
                 "retailerid": vendor.vendor_user
             })
-
+            if response.status_code >= 500:
+                return render(
+                    request, self.template_name,{"zr_user": user, "api_error": "Api Gateway Server Error"}
+                )
             if 300 > response.status_code >= 200:
                 try:
                     json_data = json.loads(response.text)
@@ -2800,6 +2855,10 @@ class ActivateCardView(View):
                         "mobile": int(mobile),
                         "otp": otp
                     })
+                    if response.status_code >= 500:
+                        return render(
+                            request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                        )
                     if 300 > response.status_code >= 200:
                         try:
                             json_data = json.loads(response.text)
@@ -2837,7 +2896,10 @@ class RechargeCardView(View):
                 "secret": QUICKWALLET_SECRET,
                 "retailerid": vendor.vendor_user
             })
-
+            if response.status_code >= 500:
+                return render(
+                    request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                )
             if 300 > response.status_code >= 200:
                 try:
                     json_data = json.loads(response.text)
@@ -2868,6 +2930,10 @@ class RechargeCardView(View):
                         "udoutletid": int(udoutletid),
                         "amount": int(amount)
                     })
+                    if response.status_code >= 500:
+                        return render(
+                            request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                        )
                     if 300 > response.status_code >= 200:
                         try:
                             json_data = json.loads(response.text)
@@ -2905,7 +2971,10 @@ class PayView(View):
             "secret": QUICKWALLET_SECRET,
             "retailerid": vendor.vendor_user
         })
-
+        if response.status_code >= 500:
+            return render(
+                request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+            )
         if 300 > response.status_code >= 200:
             try:
                 json_data = json.loads(response.text)
@@ -2941,6 +3010,10 @@ class PayView(View):
                         "otp": otp,
                         "amount": int(amount)
                     })
+                    if response.status_code >= 500:
+                        return render(
+                            request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                        )
                     if 300 > response.status_code >= 200:
                         try:
                             json_data = json.loads(response.text)
@@ -2978,7 +3051,10 @@ class DeactivateCardView(View):
                 "secret": QUICKWALLET_SECRET,
                 "retailerid": vendor.vendor_user
             })
-
+            if response.status_code >= 500:
+                return render(
+                    request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                )
             if 300 > response.status_code >= 200:
                 try:
                     json_data = json.loads(response.text)
@@ -3011,6 +3087,10 @@ class DeactivateCardView(View):
                         "mobile": int(mobile),
                         "otp": otp
                     })
+                    if response.status_code >= 500:
+                        return render(
+                            request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                        )
                     if 300 > response.status_code >= 200:
                         try:
                             json_data = json.loads(response.text)
@@ -3068,7 +3148,10 @@ class PaymentHistoryView(View):
         elif is_user_superuser(request):
             user = None
             response = requests.post(QUICKWALLET_PAYMENT_HISTORY_URL, json={"secret": QUICKWALLET_SECRET})
-
+        if response.status_code >= 500:
+            return render(
+                request, self.template_name, { "zr_user": user, "api_error": "Api Gateway Server Error"}
+            )
         if 300 > response.status_code >= 200:
             try:
                 json_data = json.loads(response.text)
@@ -3134,6 +3217,10 @@ class OfferCreateView(CreateView):
                                                         "dis": dis
                                                          }
                                                     })
+                    if response.status_code >= 500:
+                        return render(
+                            request, self.template_name, {"api_error": "Api Gateway Server Error"}
+                        )
                     if 300 > response.status_code >= 200:
                         try:
                             json_data = json.loads(response.text)
@@ -3153,7 +3240,8 @@ class OfferCreateView(CreateView):
                 except:
                     pass
         return render(
-            request, self.template_name)
+            request, self.template_name, {"api_error": "something went wrong, please try again!"}
+        )
 
 
 class OfferListView(View):
@@ -3165,6 +3253,10 @@ class OfferListView(View):
         response = requests.post(QUICKWALLET_OFFER_LIST_URL, json={
             "secret": QUICKWALLET_SECRET
         })
+        if response.status_code >= 500:
+            return render(
+                request, self.template_name, {"api_error": "Api Gateway Server Error"}
+            )
         if 300 > response.status_code >= 200:
             try:
                 json_data = json.loads(response.text)
@@ -3189,9 +3281,9 @@ class OfferListView(View):
             except:
                 pass
 
-            return render(
-                request, self.template_name, {"api_error": "something went wrong, please try again!"}
-            )
+        return render(
+            request, self.template_name, {"api_error": "something went wrong, please try again!"}
+        )
 
     def post(self, request, **kwargs):
 
@@ -3218,6 +3310,10 @@ class OfferListView(View):
                     "offerids": order_id_list,
                     "retailerid": vendor.vendor_user
                 })
+                if response.status_code >= 500:
+                    return render(
+                        request, self.template_name, {"api_error": "Api Gateway Server Error"}
+                    )
                 if 300 > response.status_code >= 200:
                     try:
                         json_data = json.loads(response.text)
@@ -3264,6 +3360,10 @@ class OfferListView(View):
                     "offerids": order_id_list,
                     "udoutletids": terminal_id_list
                 })
+                if response.status_code >= 500:
+                    return render(
+                        request, self.template_name, {"api_error": "Api Gateway Server Error"}
+                    )
                 if 300 > response.status_code >= 200:
                     try:
                         json_data = json.loads(response.text)
