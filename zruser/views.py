@@ -1153,6 +1153,17 @@ class DashBoardView(ListView):
             # topup_form = zr_payment_form.TopupForm(initial={'to_user': request.user.zr_admin_user.zr_user.id, 'payment_type' : 2 , 'payment_mode' : 3})
             context['topup_form']=topup_form
 
+            subdistributor_merchant = zrmappings_models.SubDistributorMerchant.objects.filter(
+                sub_distributor=self.request.user.zr_admin_user.zr_user)
+            if subdistributor_merchant:
+                for subdistributor_merchant_map in subdistributor_merchant:
+                    to_list.append(subdistributor_merchant_map.merchant)
+
+            context['to_list']=to_list
+            topup_form = zr_payment_form.TopupForm()
+            # topup_form = zr_payment_form.TopupForm(initial={'to_user': request.user.zr_admin_user.zr_user.id, 'payment_type' : 2 , 'payment_mode' : 3})
+            context['topup_form']=topup_form
+
             return context
 
 
