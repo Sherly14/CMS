@@ -918,216 +918,253 @@ class DashBoardView(ListView):
     context_object_name = 'distributor_list'
 
     def get_context_data(self, *args, **kwargs):
-        period = self.request.GET.get('period')
-        start_date = self.request.GET.get('startDate')
-        end_date = self.request.GET.get('endDate')
-        dt_filter = {}
-        if period == 'today':
-          dt_filter['at_created'] = datetime.datetime.now().date()
-        elif period == 'last-week':
-           dt_filter['at_created__range'] = date_utils.last_week_range()
-        elif period == 'last-month':
-           dt_filter['at_created__range'] = date_utils.last_month()
+        if self.request.user.zr_admin_user.role.name == "RETAILER":
+            context = super(DashBoardView, self).get_context_data(*args, **kwargs)
+            zr_retailer_id = self.request.user.zr_admin_user.zr_user.id
+            vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
+            response = requests.post(QUICKWALLET_PAYMENT_HISTORY_URL, json={"secret": QUICKWALLET_SECRET,
+                                                                            "retailerid": vendor.vendor_user})
+            if response.status_code >= 500:
+                context['no_payments'] = "Api Gateway Server Error"
+                return context
 
-        if start_date != None and end_date != None:
-            dt_filter['at_created__range']=(start_date, end_date)
-
-        context = super(DashBoardView, self).get_context_data(*args, **kwargs)
-        if is_user_superuser(self.request):
-            total_commission = commission_models.Commission.objects.filter(
-                commission_user=None,
-                **dt_filter
-            ).aggregate(commission=Sum(
-                F('net_commission') + (F('user_tds') * F('net_commission')) / 100
-            ))['commission']
-        else:
-            req_usr = self.request.user.zr_admin_user
-            total_commission = commission_models.Commission.objects.filter(
-                commission_user=req_usr.zr_user,
-                **dt_filter
-            ).aggregate(commission=Sum(
-                F('net_commission') + (F('user_tds') * F('net_commission')) / 100
-            ))['commission']
-
-        total_commission = total_commission if total_commission else 0
-        context['total_commission'] = "%.4f" % total_commission
-
-        if is_user_superuser(self.request):
-            '''
-            Total commission value
-            '''
-            context["dmt_commission_value"] = commission_models.Commission.objects.filter(
-                transaction__type__name='DMT',
-                commission_user=None
-            ).aggregate(
-                value=Sum('user_commission')
-            )['value'] or 0
-
-            context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
-                transaction__type__name__in=BILLS_TYPE,
-                commission_user=None,
-                **dt_filter
-            ).aggregate(
-                value=Sum('user_commission')
-            )['value'] or 0
-
-            context["total_recharge_commission_value"] = commission_models.Commission.objects.filter(
-                transaction__type__name__in=RECHARGES_TYPE,
-                commission_user=None,
-                **dt_filter
-            ).aggregate(
-                value=Sum('user_commission')
-            )['value'] or 0
+            if 300 > response.status_code >= 200:
+                try:
+                    json_data = json.loads(response.text)
+                    payments = json_data['data']['payments']
+                    transaction = []
+                    count = 0
+                    for payment in payments:
+                        if(count<10):
+                            transaction.append(payment)
+                            count = count + 1
+                    context['payments'] = transaction
+                    return context
+                except:
+                    pass
+            context['no_payments'] = "No Transactions to Show!!!"
+            return context
 
         else:
-            merchants = transaction_utils.get_merchants_from_distributor(
-                self.request.user.zr_admin_user.zr_user
-            )
-            context["dmt_commission_value"] = commission_models.Commission.objects.filter(
-                transaction__type__name='DMT',
-                commission_user=self.request.user.zr_admin_user.zr_user
-            ).aggregate(
-                value=Sum('user_commission')
-            )['value'] or 0
+            period = self.request.GET.get('period')
+            start_date = self.request.GET.get('startDate')
+            end_date = self.request.GET.get('endDate')
+            dt_filter = {}
+            if period == 'today':
+              dt_filter['at_created'] = datetime.datetime.now().date()
+            elif period == 'last-week':
+               dt_filter['at_created__range'] = date_utils.last_week_range()
+            elif period == 'last-month':
+               dt_filter['at_created__range'] = date_utils.last_month()
 
-            context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
-                transaction__type__name__in=BILLS_TYPE,
-                commission_user=self.request.user.zr_admin_user.zr_user,
+            if start_date != None and end_date != None:
+                dt_filter['at_created__range']=(start_date, end_date)
+
+            context = super(DashBoardView, self).get_context_data(*args, **kwargs)
+            if is_user_superuser(self.request):
+                total_commission = commission_models.Commission.objects.filter(
+                    commission_user=None,
+                    **dt_filter
+                ).aggregate(commission=Sum(
+                    F('net_commission') + (F('user_tds') * F('net_commission')) / 100
+                ))['commission']
+            else:
+                req_usr = self.request.user.zr_admin_user
+                total_commission = commission_models.Commission.objects.filter(
+                    commission_user=req_usr.zr_user,
+                    **dt_filter
+                ).aggregate(commission=Sum(
+                    F('net_commission') + (F('user_tds') * F('net_commission')) / 100
+                ))['commission']
+
+            total_commission = total_commission if total_commission else 0
+            context['total_commission'] = "%.4f" % total_commission
+
+            if is_user_superuser(self.request):
+                '''
+                Total commission value
+                '''
+                context["dmt_commission_value"] = commission_models.Commission.objects.filter(
+                    transaction__type__name='DMT',
+                    commission_user=None
+                ).aggregate(
+                    value=Sum('user_commission')
+                )['value'] or 0
+
+                context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
+                    transaction__type__name__in=BILLS_TYPE,
+                    commission_user=None,
+                    **dt_filter
+                ).aggregate(
+                    value=Sum('user_commission')
+                )['value'] or 0
+
+                context["total_recharge_commission_value"] = commission_models.Commission.objects.filter(
+                    transaction__type__name__in=RECHARGES_TYPE,
+                    commission_user=None,
+                    **dt_filter
+                ).aggregate(
+                    value=Sum('user_commission')
+                )['value'] or 0
+
+            else:
+                merchants = transaction_utils.get_merchants_from_distributor(
+                    self.request.user.zr_admin_user.zr_user
+                )
+                context["dmt_commission_value"] = commission_models.Commission.objects.filter(
+                    transaction__type__name='DMT',
+                    commission_user=self.request.user.zr_admin_user.zr_user
+                ).aggregate(
+                    value=Sum('user_commission')
+                )['value'] or 0
+
+                context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
+                    transaction__type__name__in=BILLS_TYPE,
+                    commission_user=self.request.user.zr_admin_user.zr_user,
+                    **dt_filter
+                ).aggregate(
+                    value=Sum('user_commission')
+                )['value'] or 0
+
+                context["total_recharge_commission_value"] = commission_models.Commission.objects.filter(
+                    transaction__type__name__in=RECHARGES_TYPE,
+                    commission_user=self.request.user.zr_admin_user.zr_user,
+                    **dt_filter
+                ).aggregate(
+                    value=Sum('user_commission')
+                )['value'] or 0
+
+                dt_filter['user__id__in'] = merchants
+
+            '''
+            Total transactions
+            '''
+            context["successful_dmt_transactions"] = transaction_models.Transaction.objects.filter(
+                type__name='DMT',
+                status=TRANSACTION_STATUS_SUCCESS,
+                **dt_filter
+            ).count()
+            context["successful_bill_pay_transactions"] = transaction_models.Transaction.objects.filter(
+                type__name__in=RECHARGES_TYPE,
+                status=TRANSACTION_STATUS_SUCCESS,
+                **dt_filter
+            ).count()
+            context["successful_recharge_transactions"] = transaction_models.Transaction.objects.filter(
+                type__name__in=RECHARGES_TYPE,
+                status=TRANSACTION_STATUS_SUCCESS,
+                **dt_filter
+            ).count()
+
+            context["pending_failure_dmt_transactions"] = transaction_models.Transaction.objects.filter(
+                type__name='DMT',
+                status__in=[TRANSACTION_STATUS_PENDING, TRANSACTION_STATUS_FAILURE],
+                **dt_filter
+            ).count()
+            context["pending_failure_bill_pay_transactions"] = transaction_models.Transaction.objects.filter(
+                type__name__in=BILLS_TYPE,
+                status__in=[TRANSACTION_STATUS_PENDING, TRANSACTION_STATUS_FAILURE],
+                **dt_filter
+            ).count()
+            context["pending_failure_recharge_transactions"] = transaction_models.Transaction.objects.filter(
+                type__name__in=RECHARGES_TYPE,
+                status__in=[TRANSACTION_STATUS_PENDING, TRANSACTION_STATUS_FAILURE],
+                **dt_filter
+            ).count()
+
+            '''
+            Total transaction value
+            '''
+            context["dmt_transaction_value"] = transaction_models.Transaction.objects.filter(
+                type__name='DMT',
+                status=TRANSACTION_STATUS_SUCCESS,
                 **dt_filter
             ).aggregate(
-                value=Sum('user_commission')
+                value=Sum('amount')
             )['value'] or 0
 
-            context["total_recharge_commission_value"] = commission_models.Commission.objects.filter(
-                transaction__type__name__in=RECHARGES_TYPE,
-                commission_user=self.request.user.zr_admin_user.zr_user,
+            context["bill_pay_transaction_value"] = transaction_models.Transaction.objects.filter(
+                type__name__in=BILLS_TYPE,
+                status=TRANSACTION_STATUS_SUCCESS,
                 **dt_filter
             ).aggregate(
-                value=Sum('user_commission')
+                value=Sum('amount')
             )['value'] or 0
 
-            dt_filter['user__id__in'] = merchants
+            context["recharge_transaction_value"] = transaction_models.Transaction.objects.filter(
+                type__name__in=RECHARGES_TYPE,
+                status=TRANSACTION_STATUS_SUCCESS,
+                **dt_filter
+            ).aggregate(
+                value=Sum('amount')
+            )['value'] or 0
 
-        '''
-        Total transactions
-        '''
-        context["successful_dmt_transactions"] = transaction_models.Transaction.objects.filter(
-            type__name='DMT',
-            status=TRANSACTION_STATUS_SUCCESS,
-            **dt_filter
-        ).count()
-        context["successful_bill_pay_transactions"] = transaction_models.Transaction.objects.filter(
-            type__name__in=RECHARGES_TYPE,
-            status=TRANSACTION_STATUS_SUCCESS,
-            **dt_filter
-        ).count()
-        context["successful_recharge_transactions"] = transaction_models.Transaction.objects.filter(
-            type__name__in=RECHARGES_TYPE,
-            status=TRANSACTION_STATUS_SUCCESS,
-            **dt_filter
-        ).count()
+            zr_admin_user = self.request.user.zr_admin_user
+            if self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
+                context["total_merchants"] = zrmappings_models.DistributorMerchant.objects.filter(
+                    distributor=zr_admin_user.zr_user,
+                ).count()
+                if zr_admin_user.zr_user:
+                    context['total_payment_request'] = zr_admin_user.zr_user.distributor_payment_requests.all().count()
+            elif self.request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
+                context["total_merchants"] = zrmappings_models.DistributorMerchant.objects.filter(
+                    distributor=zr_admin_user.zr_user,
+                ).count()
+                if zr_admin_user.zr_user:
+                    context['total_payment_request'] = zr_admin_user.zr_user.distributor_payment_requests.all().count()
+            elif self.request.user.zr_admin_user.role.name == MERCHANT:
+                if zr_admin_user.zr_user:
+                    context['total_payment_request'] = zr_admin_user.zr_user.merchant_payment_requests.all().count()
 
-        context["pending_failure_dmt_transactions"] = transaction_models.Transaction.objects.filter(
-            type__name='DMT',
-            status__in=[TRANSACTION_STATUS_PENDING, TRANSACTION_STATUS_FAILURE],
-            **dt_filter
-        ).count()
-        context["pending_failure_bill_pay_transactions"] = transaction_models.Transaction.objects.filter(
-            type__name__in=BILLS_TYPE,
-            status__in=[TRANSACTION_STATUS_PENDING, TRANSACTION_STATUS_FAILURE],
-            **dt_filter
-        ).count()
-        context["pending_failure_recharge_transactions"] = transaction_models.Transaction.objects.filter(
-            type__name__in=RECHARGES_TYPE,
-            status__in=[TRANSACTION_STATUS_PENDING, TRANSACTION_STATUS_FAILURE],
-            **dt_filter
-        ).count()
+            try:
+                context['user_wallet'] = self.request.user.zr_admin_user.zr_user.wallet
+            except:
+                context['user_wallet'] = None
 
-        '''
-        Total transaction value
-        '''
-        context["dmt_transaction_value"] = transaction_models.Transaction.objects.filter(
-            type__name='DMT',
-            status=TRANSACTION_STATUS_SUCCESS,
-            **dt_filter
-        ).aggregate(
-            value=Sum('amount')
-        )['value'] or 0
+            context['payment_mods'] = PaymentMode.objects.all()
+            context['is_user_superuser'] = is_user_superuser(request=self.request)
+            context['bank'] = Bank.objects.all()
 
-        context["bill_pay_transaction_value"] = transaction_models.Transaction.objects.filter(
-            type__name__in=BILLS_TYPE,
-            status=TRANSACTION_STATUS_SUCCESS,
-            **dt_filter
-        ).aggregate(
-            value=Sum('amount')
-        )['value'] or 0
+            if start_date:
+                context['startDate'] = start_date
 
-        context["recharge_transaction_value"] = transaction_models.Transaction.objects.filter(
-            type__name__in=RECHARGES_TYPE,
-            status=TRANSACTION_STATUS_SUCCESS,
-            **dt_filter
-        ).aggregate(
-            value=Sum('amount')
-        )['value'] or 0
+            if end_date:
+                context['endDate'] = end_date
 
-        zr_admin_user = self.request.user.zr_admin_user
-        if self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
-            context["total_merchants"] = zrmappings_models.DistributorMerchant.objects.filter(
-                distributor=zr_admin_user.zr_user,
-            ).count()
-            if zr_admin_user.zr_user:
-                context['total_payment_request'] = zr_admin_user.zr_user.distributor_payment_requests.all().count()
-        elif self.request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
-            context["total_merchants"] = zrmappings_models.DistributorMerchant.objects.filter(
-                distributor=zr_admin_user.zr_user,
-            ).count()
-            if zr_admin_user.zr_user:
-                context['total_payment_request'] = zr_admin_user.zr_user.distributor_payment_requests.all().count()
-        elif self.request.user.zr_admin_user.role.name == MERCHANT:
-            if zr_admin_user.zr_user:
-                context['total_payment_request'] = zr_admin_user.zr_user.merchant_payment_requests.all().count()
-
-        try:
-            context['user_wallet'] = self.request.user.zr_admin_user.zr_user.wallet
-        except:
-            context['user_wallet'] = None
-
-        context['payment_mods'] = PaymentMode.objects.all()
-        context['is_user_superuser'] = is_user_superuser(request=self.request)
-        context['bank'] = Bank.objects.all()
-
-        if start_date:
-            context['startDate'] = start_date
-
-        if end_date:
-            context['endDate'] = end_date
-
-        to_list=[]
-        distributor_merchant = zrmappings_models.DistributorMerchant.objects.filter(
-            distributor_id= self.request.user.zr_admin_user.zr_user)
-        if distributor_merchant:
-            for distributor_merchant_map in distributor_merchant:
-                to_list.append(distributor_merchant_map.merchant)
+            to_list=[]
+            distributor_merchant = zrmappings_models.DistributorMerchant.objects.filter(
+                distributor_id= self.request.user.zr_admin_user.zr_user)
+            if distributor_merchant:
+                for distributor_merchant_map in distributor_merchant:
+                    to_list.append(distributor_merchant_map.merchant)
 
 
-        distributor_subdistributor = zrmappings_models.DistributorSubDistributor.objects.filter(
-            distributor_id=self.request.user.zr_admin_user.zr_user)
-        if distributor_subdistributor:
-            for distributor_subdistributor_map in distributor_subdistributor:
-                to_list.append(distributor_subdistributor_map.sub_distributor)
+            distributor_subdistributor = zrmappings_models.DistributorSubDistributor.objects.filter(
+                distributor_id=self.request.user.zr_admin_user.zr_user)
+            if distributor_subdistributor:
+                for distributor_subdistributor_map in distributor_subdistributor:
+                    to_list.append(distributor_subdistributor_map.sub_distributor)
 
-        subdistributor_merchant = zrmappings_models.SubDistributorMerchant.objects.filter(
-            sub_distributor=self.request.user.zr_admin_user.zr_user)
-        if subdistributor_merchant:
-            for subdistributor_merchant_map in subdistributor_merchant:
-                to_list.append(subdistributor_merchant_map.merchant)
+            context['to_list']=to_list
+            topup_form = zr_payment_form.TopupForm()
+            # topup_form = zr_payment_form.TopupForm(initial={'to_user': request.user.zr_admin_user.zr_user.id, 'payment_type' : 2 , 'payment_mode' : 3})
+            context['topup_form']=topup_form
+            context['to_list']=to_list
+            topup_form = zr_payment_form.TopupForm()
+            # topup_form = zr_payment_form.TopupForm(initial={'to_user': request.user.zr_admin_user.zr_user.id, 'payment_type' : 2 , 'payment_mode' : 3})
+            context['topup_form']=topup_form
 
-        context['to_list']=to_list
-        topup_form = zr_payment_form.TopupForm()
-        # topup_form = zr_payment_form.TopupForm(initial={'to_user': request.user.zr_admin_user.zr_user.id, 'payment_type' : 2 , 'payment_mode' : 3})
-        context['topup_form']=topup_form
+            subdistributor_merchant = zrmappings_models.SubDistributorMerchant.objects.filter(
+                sub_distributor=self.request.user.zr_admin_user.zr_user)
+            if subdistributor_merchant:
+                for subdistributor_merchant_map in subdistributor_merchant:
+                    to_list.append(subdistributor_merchant_map.merchant)
 
-        return context
+            context['to_list']=to_list
+            topup_form = zr_payment_form.TopupForm()
+            # topup_form = zr_payment_form.TopupForm(initial={'to_user': request.user.zr_admin_user.zr_user.id, 'payment_type' : 2 , 'payment_mode' : 3})
+            context['topup_form']=topup_form
+
+            return context
 
 
 class DistributorCreateView(CreateView):
@@ -1267,7 +1304,7 @@ class UserUpdateView(View):
                 if hasattr(user.zr_user,"id"):
                     dj_user = user.zr_user.id
                     dj_user.first_name = user.first_name
-                    dj_user.last_name = user.last_name
+                    #dj_user.last_name = user.last_name
                     dj_user.email = user.email
                     dj_user.save()
 
@@ -1775,7 +1812,16 @@ class RetailerCreateView(CreateView):
                         "name": merchant_form.data['first_name']
                     }
                 })
-
+                if response.status_code >= 500:
+                    return render(
+                        request, self.template_name,
+                        {
+                            'merchant_form': merchant_form,
+                            'bank_detail_form': bank_detail_form,
+                            'kyc_doc_types': self.kyc_doc_types,
+                            'api_error': "Api Gateway Server Error"
+                        }
+                    )
                 if 300 > response.status_code >= 200:
                     try:
                         json_data = json.loads(response.text)
@@ -1842,7 +1888,7 @@ class RetailerCreateView(CreateView):
 
                             zrwallet_models.Wallet.objects.create(merchant=merchant_zr_user)
                             return HttpResponseRedirect(reverse("user:retailer-list"))
-            if error == False:
+            if error is True:
                 api_error = "Something went wrong, please try again!"
 
             return render(
@@ -2064,6 +2110,14 @@ class TerminalCreateView(CreateView):
                     "udoutletid": int(id)
                 }
             })
+            if response.status_code >= 500:
+                return render(
+                    request, self.template_name,
+                    {
+                        'merchant_form': merchant_form,
+                        'api_error': "Api Gateway Server Error"
+                    }
+                )
             if 300 > response.status_code >= 200:
                 try:
                     json_data = json.loads(response.text)
@@ -2114,7 +2168,7 @@ class TerminalCreateView(CreateView):
             request, self.template_name,
             {
                 'merchant_form': merchant_form,
-                'api_error' : api_error
+                'api_error': api_error
             }
         )
 
@@ -2431,6 +2485,10 @@ class UserCardCreateView(CreateView):
         response = requests.post(QUICKWALLET_API_CARD_URL, json={"secret": QUICKWALLET_SECRET,
                                                                  "retailerid": vendor.vendor_user,
                                                                  "qty": int(quantity)})
+        if response.status_code >= 500:
+            return render(
+                request, self.template_name, {"api_error": "Api Gateway Server Error"}
+            )
         if 300 > response.status_code >= 200:
             try:
                 json_data = json.loads(response.text)
@@ -2448,12 +2506,12 @@ class UserCardCreateView(CreateView):
                             return HttpResponseRedirect(reverse("user:dashboard"))
             except:
                 pass
-            return render(
-                request, self.template_name,
-                {
-                    "api_error": "something went wrong, please try again!"
-                }
-            )
+        return render(
+            request, self.template_name,
+            {
+                "api_error": "something went wrong, please try again!"
+            }
+        )
 
 
 class UserCardListView(View):
@@ -2468,6 +2526,10 @@ class UserCardListView(View):
             "secret": QUICKWALLET_SECRET,
             "retailerid": vendor.vendor_user
         })
+        if response.status_code >= 500:
+            return render(
+                request, self.template_name, {"api_error": "Api Gateway Server Error"}
+            )
         if 300 > response.status_code >= 200:
             try:
                 json_data = json.loads(response.text)
@@ -2479,9 +2541,9 @@ class UserCardListView(View):
             except:
                 pass
 
-            return render(
-                request, self.template_name, {"api_error": "something went wrong, please try again!"}
-            )
+        return render(
+            request, self.template_name, {"api_error": "something went wrong, please try again!"}
+        )
 
 
 class TerminalActivatedCardListView(View):
@@ -2494,7 +2556,10 @@ class TerminalActivatedCardListView(View):
             "secret": QUICKWALLET_SECRET,
             "udoutletid": int(user.mobile_no)
         })
-
+        if response.status_code >= 500:
+            return render(
+                request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+            )
         if 300 > response.status_code >= 200:
             try:
                 json_data = json.loads(response.text)
@@ -2506,9 +2571,9 @@ class TerminalActivatedCardListView(View):
             except:
                 pass
 
-            return render(
-                request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
-            )
+        return render(
+            request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
+        )
 
 
 class GenerateOTPView(View):
@@ -2527,6 +2592,10 @@ class GenerateOTPView(View):
         #     "secret": QUICKWALLET_SECRET,
         #     "udoutletid": int(user.mobile_no)
         # })
+        if response.status_code >= 500:
+            return render(
+                request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+            )
         if 300 > response.status_code >= 200:
             try:
                 json_data = json.loads(response.text)
@@ -2545,15 +2614,15 @@ class GenerateOTPView(View):
             except:
                 pass
 
-            return render(
-                request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
-            )
+        return render(
+            request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
+        )
 
     @transaction.atomic
     def post(self, request, pk):
         user = ZrTerminal.objects.get(id=pk)
         if "save" in request.POST:
-            cardnumber = request.POST.get('card_number', '')
+            cardnumber = request.POST.get('cardnumber', '')
             udoutletid = request.POST.get('udoutletid', '')
             mobile = request.POST.get('mobile', '')
             # validation
@@ -2561,7 +2630,7 @@ class GenerateOTPView(View):
             if not cardnumber:
                 error = True
             if mobile:
-                if not mobile.isdigit() and (len(mobile)<10):
+                if not mobile.isdigit() or (len(mobile)<10):
                     error = True
 
             if int(udoutletid) != int(user.mobile_no):
@@ -2575,6 +2644,10 @@ class GenerateOTPView(View):
                         "udoutletid": int(udoutletid),
                         "mobile": int(mobile)
                     })
+                    if response.status_code >= 500:
+                        return render(
+                            request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                        )
                     if 300 > response.status_code >= 200:
                         try:
                             json_data = json.loads(response.text)
@@ -2593,10 +2666,34 @@ class GenerateOTPView(View):
                                 )
                 except:
                     pass
+
             if error == True:
-                return render(
-                    request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
-                )
+                try:
+                    response = requests.post(QUICKWALLET_API_GENERATEOTP_URL, json={
+                        "secret": QUICKWALLET_SECRET,
+                        "cardnumber": int(cardnumber),
+                        "udoutletid": int(udoutletid),
+                        "mobile": int(mobile)
+                    })
+                    if response.status_code >= 500:
+                        return render(
+                            request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                        )
+                    if 300 > response.status_code >= 200:
+                        try:
+                            json_data = json.loads(response.text)
+                        except:
+                            pass
+
+                    if json_data:
+                        message = json_data['err']
+
+                        return render(
+                            request, self.template_name,
+                            {"zr_user": user, "api_error": message}
+                        )
+                except:
+                    pass
 
         return render(
             request, self.template_name, {"zr_user": user}
@@ -2606,30 +2703,84 @@ class GenerateOTPView(View):
 class IssueMobileView(View):
     template_name = 'zruser/issue_to_mobile.html'
 
-    def get(self, request, pk,  **kwargs):
-            user = ZrTerminal.objects.get(id=pk)
+    def get(self, request, pk, **kwargs):
+        user = ZrTerminal.objects.get(id=pk)
+        zr_retailer_id = request.user.zr_admin_user.zr_user.id
+        vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
+        response = requests.post(QUICKWALLET_API_LISTCARD_URL, json={
+            "secret": QUICKWALLET_SECRET,
+            "retailerid": vendor.vendor_user
+        })
+        if response.status_code >= 500:
             return render(
-                request, self.template_name, {"zr_user": user}
+                request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
             )
+        if 300 > response.status_code >= 200:
+            try:
+                json_data = json.loads(response.text)
+                loyalty_cards = json_data['data']['loyaltycards']
+                loyalty_cardslist = []
+                for card in loyalty_cards:
+                    loyalty_cardslist.append(card['cardnumber'])
+            except:
+                pass
+        return render(
+            request, self.template_name, {"zr_user": user, "loyalty_cardslist": loyalty_cardslist}
+        )
 
     @transaction.atomic
     def post(self, request, pk):
         user = ZrTerminal.objects.get(id=pk)
-        if "save" in request.POST:
+        if "OTP" in request.POST:
+            cardnumber = request.POST.get('cardnumber', '')
+            udoutletid = request.POST.get('udoutletid', '')
+            mobile = request.POST.get('mobile', '')
+            error = False
+            # validation
+
+            if error == False:
+                    try:
+                        response = requests.post(QUICKWALLET_API_GENERATEOTP_URL, json={
+                            "secret": QUICKWALLET_SECRET,
+                            "cardnumber": int(cardnumber),
+                            "udoutletid": int(udoutletid),
+                            "mobile": int(mobile)
+                        })
+                        if response.status_code >= 500:
+                            return render(
+                                request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                            )
+                        if 300 > response.status_code >= 200:
+                            try:
+                                json_data = json.loads(response.text)
+                            except:
+                                pass
+
+                        if json_data:
+                            if json_data['status']:
+                                status = json_data['status']
+                                if status == "failed":
+                                    message = json_data['err']
+                                    error = True
+                                    return render(
+                                        request, self.template_name,
+                                        {"zr_user": user, "api_error": message}
+                                    )
+                                else:
+                                    success = "OTP Send to {0}".format(mobile)
+                                    return render(
+                                        request, self.template_name, {"zr_user": user,"cardnumber": int(cardnumber),"mobile": int(mobile), "success": success}
+                                    )
+                    except:
+                        pass
+
+        if "Issue_Card" in request.POST:
             cardnumber = request.POST.get('cardnumber', '')
             udoutletid = request.POST.get('udoutletid', '')
             mobile = request.POST.get('mobile', '')
             otp = request.POST.get('otp', '')
             # validation
             error = False
-            if not cardnumber:
-                error = True
-            if mobile:
-                if not mobile.isdigit() and (len(mobile)<10):
-                    error = True
-
-            if int(udoutletid) != int(user.mobile_no):
-                error = True
 
             if error == False:
                 try:
@@ -2638,8 +2789,12 @@ class IssueMobileView(View):
                         "cardnumber": int(cardnumber),
                         "udoutletid": int(udoutletid),
                         "mobile": int(mobile),
-                        "otp": otp
+                        "otp":otp
                     })
+                    if response.status_code >= 500:
+                        return render(
+                            request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                        )
                     if 300 > response.status_code >= 200:
                         try:
                             json_data = json.loads(response.text)
@@ -2650,18 +2805,14 @@ class IssueMobileView(View):
                         if json_data['status']:
                             status = json_data['status']
                             if status == "failed":
+                                message = json_data['message']
                                 error = True
+                                return render(request, self.template_name,{"zr_user": user, "api_error": message})
                             else:
                                 success = "{0} issued to {1}".format(cardnumber, mobile)
-                                return render(
-                                    request, self.template_name, {"zr_user": user, "success": success}
-                                )
+                                return render(request, self.template_name,{"zr_user": user, "cardnumber": int(cardnumber), "mobile": int(mobile),"success": success})
                 except:
                     pass
-            if error == True:
-                return render(
-                    request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
-                )
 
         return render(
             request, self.template_name, {"zr_user": user}
@@ -2673,29 +2824,39 @@ class ActivateCardView(View):
 
     def get(self, request, pk,  **kwargs):
             user = ZrTerminal.objects.get(id=pk)
+            zr_retailer_id = request.user.zr_admin_user.zr_user.id
+            vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
+            response = requests.post(QUICKWALLET_API_LISTCARD_URL, json={
+                "secret": QUICKWALLET_SECRET,
+                "retailerid": vendor.vendor_user
+            })
+            if response.status_code >= 500:
+                return render(
+                    request, self.template_name,{"zr_user": user, "api_error": "Api Gateway Server Error"}
+                )
+            if 300 > response.status_code >= 200:
+                try:
+                    json_data = json.loads(response.text)
+                    loyalty_cards = json_data['data']['loyaltycards']
+                    loyalty_cardslist = []
+                    for card in loyalty_cards:
+                        loyalty_cardslist.append(card['cardnumber'])
+                except:
+                    pass
             return render(
-                request, self.template_name, {"zr_user": user}
+                request, self.template_name, {"zr_user": user,"loyalty_cardslist": loyalty_cardslist}
             )
 
     @transaction.atomic
     def post(self, request, pk):
         user = ZrTerminal.objects.get(id=pk)
         if "save" in request.POST:
-            cardnumber = request.POST.get('cardnumber', '')
+            cardnumber = request.POST.get('card_number', '')
             udoutletid = request.POST.get('udoutletid', '')
             mobile = request.POST.get('mobile', '')
             otp = request.POST.get('otp', '')
             # validation
             error = False
-            if not cardnumber:
-                error = True
-            if mobile:
-                if not mobile.isdigit() and (len(mobile)<10):
-                    error = True
-
-            if int(udoutletid) != int(user.mobile_no):
-                error = True
-
             if error == False:
                 try:
                     response = requests.post(QUICKWALLET_API_ACTIVATE_CARD_URL, json={
@@ -2705,6 +2866,10 @@ class ActivateCardView(View):
                         "mobile": int(mobile),
                         "otp": otp
                     })
+                    if response.status_code >= 500:
+                        return render(
+                            request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                        )
                     if 300 > response.status_code >= 200:
                         try:
                             json_data = json.loads(response.text)
@@ -2715,7 +2880,9 @@ class ActivateCardView(View):
                         if json_data['status']:
                             status = json_data['status']
                             if status == "failed":
+                                message = json_data['message']
                                 error = True
+                                return render(request, self.template_name,{"zr_user": user, "api_error": message})
                             else:
                                 success = "{0} Activated".format(cardnumber)
                                 return render(
@@ -2723,10 +2890,6 @@ class ActivateCardView(View):
                                 )
                 except:
                     pass
-            if error == True:
-                return render(
-                    request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
-                )
 
         return render(
             request, self.template_name, {"zr_user": user}
@@ -2738,8 +2901,27 @@ class RechargeCardView(View):
 
     def get(self, request, pk,  **kwargs):
             user = ZrTerminal.objects.get(id=pk)
+            zr_retailer_id = request.user.zr_admin_user.zr_user.id
+            vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
+            response = requests.post(QUICKWALLET_API_LISTCARD_URL, json={
+                "secret": QUICKWALLET_SECRET,
+                "retailerid": vendor.vendor_user
+            })
+            if response.status_code >= 500:
+                return render(
+                    request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                )
+            if 300 > response.status_code >= 200:
+                try:
+                    json_data = json.loads(response.text)
+                    loyalty_cards = json_data['data']['loyaltycards']
+                    loyalty_cardslist = []
+                    for card in loyalty_cards:
+                        loyalty_cardslist.append(card['cardnumber'])
+                except:
+                    pass
             return render(
-                request, self.template_name, {"zr_user": user}
+                request, self.template_name, {"zr_user": user,"loyalty_cardslist": loyalty_cardslist}
             )
 
     @transaction.atomic
@@ -2751,15 +2933,6 @@ class RechargeCardView(View):
             amount = request.POST.get('amount', '')
             # validation
             error = False
-            if not cardnumber:
-                error = True
-            if amount:
-                if not amount.isdigit() and amount <= 0:
-                    error = True
-
-            if int(udoutletid) != int(user.mobile_no):
-                error = True
-
             if error == False:
                 try:
                     response = requests.post(QUICKWALLET_API_RECHARGE_CARD_URL, json={
@@ -2768,6 +2941,10 @@ class RechargeCardView(View):
                         "udoutletid": int(udoutletid),
                         "amount": int(amount)
                     })
+                    if response.status_code >= 500:
+                        return render(
+                            request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                        )
                     if 300 > response.status_code >= 200:
                         try:
                             json_data = json.loads(response.text)
@@ -2778,7 +2955,9 @@ class RechargeCardView(View):
                         if json_data['status']:
                             status = json_data['status']
                             if status == "failed":
+                                message = json_data['message']
                                 error = True
+                                return render(request, self.template_name, {"zr_user": user, "api_error": message})
                             else:
                                 success = "Rs. {0} added to {1}".format(amount, cardnumber)
                                 return render(
@@ -2786,10 +2965,6 @@ class RechargeCardView(View):
                                 )
                 except:
                     pass
-            if error == True:
-                return render(
-                    request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
-                )
 
         return render(
             request, self.template_name, {"zr_user": user}
@@ -2801,8 +2976,27 @@ class PayView(View):
 
     def get(self, request, pk, **kwargs):
         user = ZrTerminal.objects.get(id=pk)
+        zr_retailer_id = request.user.zr_admin_user.zr_user.id
+        vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
+        response = requests.post(QUICKWALLET_API_LISTCARD_URL, json={
+            "secret": QUICKWALLET_SECRET,
+            "retailerid": vendor.vendor_user
+        })
+        if response.status_code >= 500:
+            return render(
+                request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+            )
+        if 300 > response.status_code >= 200:
+            try:
+                json_data = json.loads(response.text)
+                loyalty_cards = json_data['data']['loyaltycards']
+                loyalty_cardslist = []
+                for card in loyalty_cards:
+                    loyalty_cardslist.append(card['cardnumber'])
+            except:
+                pass
         return render(
-            request, self.template_name, {"zr_user": user}
+            request, self.template_name, {"zr_user": user,"loyalty_cardslist": loyalty_cardslist}
         )
 
     @transaction.atomic
@@ -2816,14 +3010,6 @@ class PayView(View):
             amount = request.POST.get('amount', '')
             # validation
             error = False
-            if not cardnumber:
-                error = True
-            if mobile:
-                if not mobile.isdigit() and (len(mobile)) < 10:
-                    error = True
-
-            if int(udoutletid) != int(user.mobile_no):
-                error = True
 
             if error == False:
                 try:
@@ -2835,6 +3021,10 @@ class PayView(View):
                         "otp": otp,
                         "amount": int(amount)
                     })
+                    if response.status_code >= 500:
+                        return render(
+                            request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                        )
                     if 300 > response.status_code >= 200:
                         try:
                             json_data = json.loads(response.text)
@@ -2845,7 +3035,9 @@ class PayView(View):
                         if json_data['status']:
                             status = json_data['status']
                             if status == "failed":
+                                message = json_data['message']
                                 error = True
+                                return render(request, self.template_name,{"zr_user": user, "api_error": message})
                             else:
                                 success = "Rs. {0} paid".format(amount)
                                 return render(
@@ -2853,11 +3045,6 @@ class PayView(View):
                                 )
                 except:
                     pass
-            if error == True:
-                return render(
-                    request, self.template_name,
-                    {"zr_user": user, "api_error": "something went wrong, please try again!"}
-                )
 
         return render(
             request, self.template_name, {"zr_user": user}
@@ -2869,8 +3056,27 @@ class DeactivateCardView(View):
 
     def get(self, request, pk,  **kwargs):
             user = ZrTerminal.objects.get(id=pk)
+            zr_retailer_id = request.user.zr_admin_user.zr_user.id
+            vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
+            response = requests.post(QUICKWALLET_API_LISTCARD_URL, json={
+                "secret": QUICKWALLET_SECRET,
+                "retailerid": vendor.vendor_user
+            })
+            if response.status_code >= 500:
+                return render(
+                    request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                )
+            if 300 > response.status_code >= 200:
+                try:
+                    json_data = json.loads(response.text)
+                    loyalty_cards = json_data['data']['loyaltycards']
+                    loyalty_cardslist = []
+                    for card in loyalty_cards:
+                        loyalty_cardslist.append(card['cardnumber'])
+                except:
+                    pass
             return render(
-                request, self.template_name, {"zr_user": user}
+                request, self.template_name, {"zr_user": user,"loyalty_cardslist": loyalty_cardslist}
             )
 
     @transaction.atomic
@@ -2883,15 +3089,6 @@ class DeactivateCardView(View):
             otp = request.POST.get('otp', '')
             # validation
             error = False
-            if not cardnumber:
-                error = True
-            if mobile:
-                if not mobile.isdigit() and (len(mobile)<10):
-                    error=True
-
-            if int(udoutletid) != int(user.mobile_no):
-                error = True
-
             if error == False:
                 try:
                     response = requests.post(QUICKWALLET_API_DEACTIVATE_CARD_URL, json={
@@ -2901,6 +3098,10 @@ class DeactivateCardView(View):
                         "mobile": int(mobile),
                         "otp": otp
                     })
+                    if response.status_code >= 500:
+                        return render(
+                            request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                        )
                     if 300 > response.status_code >= 200:
                         try:
                             json_data = json.loads(response.text)
@@ -2911,18 +3112,15 @@ class DeactivateCardView(View):
                         if json_data['status']:
                             status = json_data['status']
                             if status == "failed":
+                                message = json_data['message']
                                 error = True
+                                return render(request, self.template_name,{"zr_user": user, "api_error": message})
                             else:
                                 success = "{0} Deactivated".format(cardnumber)
-                                return render(
-                                    request, self.template_name, {"zr_user": user, "success": success}
-                                )
+                                return render(request, self.template_name, {"zr_user": user, "success": success})
                 except:
                     pass
-            if error == True:
-                return render(
-                    request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
-                )
+
 
         return render(
             request, self.template_name, {"zr_user": user}
@@ -2944,10 +3142,27 @@ class PaymentHistoryView(View):
             vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
             response = requests.post(QUICKWALLET_PAYMENT_HISTORY_URL, json={"secret": QUICKWALLET_SECRET,
                                                                      "retailerid": vendor.vendor_user})
+
+            # if 300 > response.status_code >= 200:
+            #     try:
+            #         json_data = json.loads(response.text)
+            #         payments = json_data['data']['payments']
+            #         for payment in payments:
+            #             print(payment.amount)
+            #
+            #         return render(
+            #             request, self.template_name, {"payments": payments, "zr_user": user}
+            #         )
+            #     except:
+            #         pass
+
         elif is_user_superuser(request):
             user = None
             response = requests.post(QUICKWALLET_PAYMENT_HISTORY_URL, json={"secret": QUICKWALLET_SECRET})
-
+        if response.status_code >= 500:
+            return render(
+                request, self.template_name, { "zr_user": user, "api_error": "Api Gateway Server Error"}
+            )
         if 300 > response.status_code >= 200:
             try:
                 json_data = json.loads(response.text)
@@ -3013,6 +3228,10 @@ class OfferCreateView(CreateView):
                                                         "dis": dis
                                                          }
                                                     })
+                    if response.status_code >= 500:
+                        return render(
+                            request, self.template_name, {"api_error": "Api Gateway Server Error"}
+                        )
                     if 300 > response.status_code >= 200:
                         try:
                             json_data = json.loads(response.text)
@@ -3032,7 +3251,8 @@ class OfferCreateView(CreateView):
                 except:
                     pass
         return render(
-            request, self.template_name)
+            request, self.template_name, {"api_error": "something went wrong, please try again!"}
+        )
 
 
 class OfferListView(View):
@@ -3044,6 +3264,10 @@ class OfferListView(View):
         response = requests.post(QUICKWALLET_OFFER_LIST_URL, json={
             "secret": QUICKWALLET_SECRET
         })
+        if response.status_code >= 500:
+            return render(
+                request, self.template_name, {"api_error": "Api Gateway Server Error"}
+            )
         if 300 > response.status_code >= 200:
             try:
                 json_data = json.loads(response.text)
@@ -3068,9 +3292,9 @@ class OfferListView(View):
             except:
                 pass
 
-            return render(
-                request, self.template_name, {"api_error": "something went wrong, please try again!"}
-            )
+        return render(
+            request, self.template_name, {"api_error": "something went wrong, please try again!"}
+        )
 
     def post(self, request, **kwargs):
 
@@ -3097,6 +3321,10 @@ class OfferListView(View):
                     "offerids": order_id_list,
                     "retailerid": vendor.vendor_user
                 })
+                if response.status_code >= 500:
+                    return render(
+                        request, self.template_name, {"api_error": "Api Gateway Server Error"}
+                    )
                 if 300 > response.status_code >= 200:
                     try:
                         json_data = json.loads(response.text)
@@ -3143,6 +3371,10 @@ class OfferListView(View):
                     "offerids": order_id_list,
                     "udoutletids": terminal_id_list
                 })
+                if response.status_code >= 500:
+                    return render(
+                        request, self.template_name, {"api_error": "Api Gateway Server Error"}
+                    )
                 if 300 > response.status_code >= 200:
                     try:
                         json_data = json.loads(response.text)

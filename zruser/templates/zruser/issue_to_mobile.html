@@ -22,7 +22,14 @@
                 <div class="col-sm-3 col-md-3">
                     <div class="form-group">
                         <label for="cardnumber">Card Number</label>
-                            <input type="text" class="fill" name="cardnumber" REQUIRED>
+                           <div class="">
+                            <select id="cardnumber"  name="cardnumber" required>
+                                <option value="">Select one Cardnumber</option>
+                                {% for card in loyalty_cardslist %}
+                                    <option value="{{ card }}" >{{ card }} </option>
+                                {% endfor %}
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -36,22 +43,29 @@
                 <div class="col-sm-3 col-md-3">
                    <div class="form-group">
                         <label for="mobileno">Mobile Number</label>
-                        <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" name="mobile" REQUIRED>
+                        <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" name="mobile" value="{{mobile}}" required>
                     </div>
                 </div>
 
                 <div class="col-sm-3 col-md-3">
                    <div class="form-group">
                         <label for="otp">OTP</label>
-                        <input type="text" class="fill" name="otp" REQUIRED>
+                        <input type="text" class="fill" name="otp" value="{{otp}}">
                     </div>
                 </div>
             </div>
-
+            <br>
             <div class="row">
-            <div class="fill margin-top" style="padding-left:6.5rem">
-                <input class="button red" type="submit" name = "save" value="Issue Card To Mobile No">
-            </div>
+                {#<div class="margin-top" style="padding-left:6.5rem">#}
+                    <div class="col-9">
+                        <input class="button red" type="submit" name = "OTP" value="Generate OTP">
+                    </div>
+                    <div class="col-3">
+                      <input class="button red" type="submit" name = "Issue_Card" value="Issue Card To Mobile No">
+                    </div>
+
+
+               {# </div>#}
             </div>
 
         {% csrf_token %}
@@ -68,16 +82,20 @@
 
 <script>
 $(document).ready(function () {
+$("#cardnumber").select2();
 window.setTimeout(function() {
+
     $(".alert").fadeTo(1000, 0).slideUp(1000, function(){
         $(this).remove();
     });
 }, 5000);
+
 });
 </script>
 
 
 <script>
+
 function generate_kyc_file_name(doc_type, ext) {
     var milliseconds = (new Date).getTime();
     return doc_type.replace(' ', '-') + '-' + milliseconds + '-' + Math.floor((Math.random() * 10000) + 1) + '.' + ext
