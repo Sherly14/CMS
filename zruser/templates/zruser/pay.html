@@ -63,9 +63,12 @@
             </div>
 
             <div class="row">
-            <div class="fill margin-top" style="padding-left:6.5rem">
-                <input class="button red" type="submit" name = "save" value="Pay">
-            </div>
+                <div class="col-10">
+                        <input class="button red" type="submit" name = "OTP" value="Generate OTP">
+                </div>
+                <div class="col-2">
+                    <input class="button red" type="submit" name = "save" value="Pay">
+                </div>
             </div>
 
         {% csrf_token %}

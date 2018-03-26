@@ -152,7 +152,7 @@
                             <div class="form-group col-sm-2">
                                 <label class="control-label"><b>Retailer</b></label>
                                  <select style="border: 2px solid; border-color: #aaa;" name="retailer" id="retailer" required>
-                                     <option value="-1">Select Retailer</option>
+                                     <option value="">Select Retailer</option>
                                         {% for retailer in retailer_list %}
                                             <option value="{{ retailer.id }}" {% if  retailer.id == retailer_id %}selected{% endif %}>{{ retailer.first_name }} {{ retailer.last_name|default_if_none:""}}</option>
                                          {% endfor %}
