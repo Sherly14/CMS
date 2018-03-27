@@ -142,6 +142,7 @@ class CommissionDisplay(ListView):
         qs = urllib.urlencode(qs_data)
         context['commissions'] = pg
         context['qs'] = qs
+        context['url_name'] = "display-commission"
         return context
 
     def get_queryset(self):

@@ -542,6 +542,8 @@ class MerchantListView(ListView):
                 raise Http404
 
             context['queryset'] = page.object_list
+            context['url_name'] = "merchant-list"
+
             query_string = {}
             if q:
                 query_string['q'] = q
@@ -651,6 +653,7 @@ class KYCRequestsView(ListView):
             queryset = paginator.page(1)
 
         context['page_obj'] = queryset
+        context['url_name'] = "kyc-requests"
 
         if user_list:
             context['user_list'] = user_list
@@ -890,6 +893,7 @@ class DistributorListView(ListView):
             raise Http404
 
         context['queryset'] = page.object_list
+        context['url_name']= "distributor-list"
         query_string = {}
         if q:
             query_string['q'] = q
@@ -1718,6 +1722,7 @@ class SubDistributorListView(ListView):
             raise Http404
 
         context['queryset'] = page.object_list
+        context['url_name']= "sub-distributor-list"
         query_string = {}
         if q:
             query_string['q'] = q
@@ -1994,6 +1999,8 @@ class RetailerListView(ListView):
             raise Http404
 
         context['queryset'] = page.object_list
+        context['url_name']= "retailer-list"
+
         query_string = {}
         if q:
             query_string['q'] = q
@@ -2297,6 +2304,7 @@ class TerminalListView(ListView):
             raise Http404
 
         context['queryset'] = page.object_list
+        context['url_name']= "terminal-list"
         query_string = {}
         if q:
             query_string['q'] = q
@@ -2528,7 +2536,7 @@ class UserCardListView(View):
         })
         if response.status_code >= 500:
             return render(
-                request, self.template_name, {"api_error": "Api Gateway Server Error"}
+                request, self.template_name, {"api_error": "Api Gateway Server Error", "url_name": "loyaltycard-list"}
             )
         if 300 > response.status_code >= 200:
             try:
@@ -2536,13 +2544,13 @@ class UserCardListView(View):
                 loyalty_cards = json_data['data']['loyaltycards']
 
                 return render(
-                    request, self.template_name, {"loyalty_cards": loyalty_cards}
+                    request, self.template_name, {"loyalty_cards": loyalty_cards, "url_name": "loyaltycard-list"}
                 )
             except:
                 pass
 
         return render(
-            request, self.template_name, {"api_error": "something went wrong, please try again!"}
+            request, self.template_name, {"api_error": "something went wrong, please try again!", "url_name": "loyaltycard-list"}
         )
 
 
@@ -2558,7 +2566,7 @@ class TerminalActivatedCardListView(View):
         })
         if response.status_code >= 500:
             return render(
-                request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error", "url_name": "activatedcard-list"}
             )
         if 300 > response.status_code >= 200:
             try:
@@ -2566,20 +2574,20 @@ class TerminalActivatedCardListView(View):
                 activated_cards = json_data['data']['activations']
 
                 return render(
-                    request, self.template_name, {"zr_user": user, "activated_cards": activated_cards}
+                    request, self.template_name, {"zr_user": user, "activated_cards": activated_cards, "url_name": "activatedcard-list"}
                 )
             except:
                 pass
 
         return render(
-            request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
+            request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!", "url_name": "activatedcard-list"}
         )
 
 
 class GenerateOTPView(View):
     template_name = 'zruser/generate_otp.html'
 
-    def get(self, request, pk,  **kwargs):
+    def get(self, request, pk, api_error=None, success=None,  **kwargs):
         user = ZrTerminal.objects.get(id=pk)
         zr_retailer_id = request.user.zr_admin_user.zr_user.id
         vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
@@ -2609,13 +2617,13 @@ class GenerateOTPView(View):
                 #     activated_cardslist.append(card.cardnumber)
 
                 return render(
-                    request, self.template_name, {"zr_user": user, "loyalty_cardslist": loyalty_cardslist}
+                    request, self.template_name, {"zr_user": user, "loyalty_cardslist": loyalty_cardslist, "url_name": "generate-otp", "api_error":api_error, "success":success}
                 )
             except:
                 pass
 
         return render(
-            request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!"}
+            request, self.template_name, {"zr_user": user, "api_error": "something went wrong, please try again!", "url_name": "generate-otp"}
         )
 
     @transaction.atomic
@@ -2645,9 +2653,8 @@ class GenerateOTPView(View):
                         "mobile": int(mobile)
                     })
                     if response.status_code >= 500:
-                        return render(
-                            request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
-                        )
+                        api_error = "Api Gateway Server Error"
+                        return self.get(request, pk, api_error)
                     if 300 > response.status_code >= 200:
                         try:
                             json_data = json.loads(response.text)
@@ -2659,51 +2666,21 @@ class GenerateOTPView(View):
                             status = json_data['status']
                             if status == "failed":
                                 error = True
+                                api_error = json_data['err']
+                                return self.get(request, pk, api_error)
                             else:
                                 success = "OTP Send to {0}".format(mobile)
-                                return render(
-                                    request, self.template_name, {"zr_user": user, "success": success}
-                                )
+                                return self.get(request, pk, None, success)
                 except:
                     pass
 
-            if error == True:
-                try:
-                    response = requests.post(QUICKWALLET_API_GENERATEOTP_URL, json={
-                        "secret": QUICKWALLET_SECRET,
-                        "cardnumber": int(cardnumber),
-                        "udoutletid": int(udoutletid),
-                        "mobile": int(mobile)
-                    })
-                    if response.status_code >= 500:
-                        return render(
-                            request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
-                        )
-                    if 300 > response.status_code >= 200:
-                        try:
-                            json_data = json.loads(response.text)
-                        except:
-                            pass
-
-                    if json_data:
-                        message = json_data['err']
-
-                        return render(
-                            request, self.template_name,
-                            {"zr_user": user, "api_error": message}
-                        )
-                except:
-                    pass
-
-        return render(
-            request, self.template_name, {"zr_user": user}
-        )
+        return self.get(request, pk)
 
 
 class IssueMobileView(View):
     template_name = 'zruser/issue_to_mobile.html'
 
-    def get(self, request, pk, api_error = None, success = None, **kwargs):
+    def get(self, request, pk, api_error = None, success = None, mobile = 0, cardnumber = 0, **kwargs):
         user = ZrTerminal.objects.get(id=pk)
         zr_retailer_id = request.user.zr_admin_user.zr_user.id
         vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
@@ -2713,7 +2690,7 @@ class IssueMobileView(View):
         })
         if response.status_code >= 500:
             return render(
-                request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error", "url_name": "issue-mobile"}
             )
         if 300 > response.status_code >= 200:
             try:
@@ -2725,7 +2702,7 @@ class IssueMobileView(View):
             except:
                 pass
         return render(
-            request, self.template_name, {"zr_user": user, "loyalty_cardslist": loyalty_cardslist, "success":success, "api_error": api_error}
+            request, self.template_name, {"zr_user": user, "loyalty_cardslist": loyalty_cardslist, "url_name": "issue-mobile", "success":success, "api_error": api_error, "card":cardnumber, "mobile":mobile}
         )
 
     @transaction.atomic
@@ -2765,7 +2742,7 @@ class IssueMobileView(View):
                                 return self.get(request, pk, api_error)
                             else:
                                 success = "OTP Send to {0} for card {1}".format(mobile, cardnumber)
-                                return self.get(request, pk, success)
+                                return self.get(request, pk, None, success, mobile, cardnumber)
                 except:
                     pass
 
@@ -2804,7 +2781,7 @@ class IssueMobileView(View):
                                 return self.get(request, pk, api_error)
                             else:
                                 success = "{0} issued to {1}".format(cardnumber, mobile)
-                                return self.get(request, pk, success)
+                                return self.get(request, pk, None, success)
                 except:
                     pass
 
@@ -2824,7 +2801,7 @@ class ActivateCardView(View):
             })
             if response.status_code >= 500:
                 return render(
-                    request, self.template_name,{"zr_user": user, "api_error": "Api Gateway Server Error"}
+                    request, self.template_name,{"zr_user": user, "api_error": "Api Gateway Server Error", "url_name": "activate-card"}
                 )
             if 300 > response.status_code >= 200:
                 try:
@@ -2836,7 +2813,7 @@ class ActivateCardView(View):
                 except:
                     pass
             return render(
-                request, self.template_name, {"zr_user": user,"loyalty_cardslist": loyalty_cardslist, "api_error":api_error, "success":success}
+                request, self.template_name, {"zr_user": user,"loyalty_cardslist": loyalty_cardslist, "url_name": "activate-card", "api_error":api_error, "success":success}
             )
 
     @transaction.atomic
@@ -2860,7 +2837,7 @@ class ActivateCardView(View):
                     })
                     if response.status_code >= 500:
                         api_error = "Api Gateway Server Error"
-                        return self.get(request, pk, api_error)
+                        return self.get(request, pk, None, api_error)
 
                     if 300 > response.status_code >= 200:
                         try:
@@ -2874,7 +2851,7 @@ class ActivateCardView(View):
                             if status == "failed":
                                 api_error = json_data['err']
                                 error = True
-                                return self.get(request, pk, api_error)
+                                return self.get(request, pk, None, api_error)
                             else:
                                 success = "OTP Send to {0} for card {1}".format(mobile, cardnumber)
                                 return self.get(request, pk, success)
@@ -2899,7 +2876,7 @@ class ActivateCardView(View):
                     })
                     if response.status_code >= 500:
                         api_error = "Api Gateway Server Error"
-                        return self.get(request, pk, api_error)
+                        return self.get(request, pk, None, api_error)
                     if 300 > response.status_code >= 200:
                         try:
                             json_data = json.loads(response.text)
@@ -2912,7 +2889,7 @@ class ActivateCardView(View):
                             if status == "failed":
                                 api_error = json_data['message']
                                 error = True
-                                return self.get(request, pk, api_error)
+                                return self.get(request, pk, None, api_error)
                             else:
                                 success = "{0} Activated".format(cardnumber)
                                 return self.get(request, pk, success)
@@ -2925,30 +2902,30 @@ class ActivateCardView(View):
 class RechargeCardView(View):
     template_name = 'zruser/recharge_card.html'
 
-    def get(self, request, pk,  **kwargs):
-            user = ZrTerminal.objects.get(id=pk)
-            zr_retailer_id = request.user.zr_admin_user.zr_user.id
-            vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
-            response = requests.post(QUICKWALLET_API_LISTCARD_URL, json={
-                "secret": QUICKWALLET_SECRET,
-                "retailerid": vendor.vendor_user
-            })
-            if response.status_code >= 500:
-                return render(
-                    request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
-                )
-            if 300 > response.status_code >= 200:
-                try:
-                    json_data = json.loads(response.text)
-                    loyalty_cards = json_data['data']['loyaltycards']
-                    loyalty_cardslist = []
-                    for card in loyalty_cards:
-                        loyalty_cardslist.append(card['cardnumber'])
-                except:
-                    pass
+    def get(self, request, pk, api_error=None, success=None, **kwargs):
+        user = ZrTerminal.objects.get(id=pk)
+        zr_retailer_id = request.user.zr_admin_user.zr_user.id
+        vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
+        response = requests.post(QUICKWALLET_API_LISTCARD_URL, json={
+            "secret": QUICKWALLET_SECRET,
+            "retailerid": vendor.vendor_user
+        })
+        if response.status_code >= 500:
             return render(
-                request, self.template_name, {"zr_user": user,"loyalty_cardslist": loyalty_cardslist}
+                request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error", "url_name": "recharge-card"}
             )
+        if 300 > response.status_code >= 200:
+            try:
+                json_data = json.loads(response.text)
+                loyalty_cards = json_data['data']['loyaltycards']
+                loyalty_cardslist = []
+                for card in loyalty_cards:
+                    loyalty_cardslist.append(card['cardnumber'])
+            except:
+                pass
+        return render(
+            request, self.template_name, {"zr_user": user,"loyalty_cardslist": loyalty_cardslist, "url_name": "recharge-card", "api_error":api_error, "success":success}
+        )
 
     @transaction.atomic
     def post(self, request, pk):
@@ -2968,9 +2945,8 @@ class RechargeCardView(View):
                         "amount": int(amount)
                     })
                     if response.status_code >= 500:
-                        return render(
-                            request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
-                        )
+                        api_error = "Api Gateway Server Error"
+                        return self.get(request, pk, api_error)
                     if 300 > response.status_code >= 200:
                         try:
                             json_data = json.loads(response.text)
@@ -2981,20 +2957,16 @@ class RechargeCardView(View):
                         if json_data['status']:
                             status = json_data['status']
                             if status == "failed":
-                                message = json_data['message']
+                                api_error = json_data['message']
                                 error = True
-                                return render(request, self.template_name, {"zr_user": user, "api_error": message})
+                                return self.get(request, pk, api_error)
                             else:
                                 success = "Rs. {0} added to {1}".format(amount, cardnumber)
-                                return render(
-                                    request, self.template_name, {"zr_user": user, "success": success}
-                                )
+                                return self.get(request, pk, None, success)
                 except:
                     pass
 
-        return render(
-            request, self.template_name, {"zr_user": user}
-        )
+        return self.get(request, pk)
 
 
 class PayView(View):
@@ -3010,7 +2982,7 @@ class PayView(View):
         })
         if response.status_code >= 500:
             return render(
-                request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error", "url_name": "pay"}
             )
         if 300 > response.status_code >= 200:
             try:
@@ -3022,7 +2994,7 @@ class PayView(View):
             except:
                 pass
         return render(
-            request, self.template_name, {"zr_user": user,"loyalty_cardslist": loyalty_cardslist, "api_error":api_error, "success":success}
+            request, self.template_name, {"zr_user": user,"loyalty_cardslist": loyalty_cardslist, "url_name": "pay", "api_error":api_error, "success":success}
         )
 
     @transaction.atomic
@@ -3062,7 +3034,7 @@ class PayView(View):
                                 return self.get(request, pk, api_error)
                             else:
                                 success = "OTP Send to {0} for card {1}".format(mobile, cardnumber)
-                                return self.get(request, pk, success)
+                                return self.get(request, pk, None, success)
                 except:
                     pass
 
@@ -3103,7 +3075,7 @@ class PayView(View):
                                 return self.get(request, pk, api_error)
                             else:
                                 success = "Rs. {0} paid".format(amount)
-                                return self.get(request, pk, success)
+                                return self.get(request, pk, None, success)
                 except:
                     pass
 
@@ -3123,7 +3095,7 @@ class DeactivateCardView(View):
             })
             if response.status_code >= 500:
                 return render(
-                    request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error"}
+                    request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error", "url_name": "deactivate-card"}
                 )
             if 300 > response.status_code >= 200:
                 try:
@@ -3135,7 +3107,7 @@ class DeactivateCardView(View):
                 except:
                     pass
             return render(
-                request, self.template_name, {"zr_user": user,"loyalty_cardslist": loyalty_cardslist, "api_error":api_error, "success":success}
+                request, self.template_name, {"zr_user": user,"loyalty_cardslist": loyalty_cardslist, "url_name": "deactivate-card", "api_error":api_error, "success":success}
             )
 
     @transaction.atomic
@@ -3175,7 +3147,7 @@ class DeactivateCardView(View):
                                 return self.get(request, pk, api_error)
                             else:
                                 success = "OTP Send to {0} for card {1}".format(mobile, cardnumber)
-                                return self.get(request, pk, success)
+                                return self.get(request, pk, None, success)
                 except:
                     pass
 
@@ -3213,11 +3185,12 @@ class DeactivateCardView(View):
                                 return self.get(request, pk, api_error)
                             else:
                                 success = "{0} Deactivated".format(cardnumber)
-                                return self.get(request, pk, success)
+                                return self.get(request, pk, None, success)
                 except:
                     pass
 
         return self.get(request, pk)
+
 
 class PaymentHistoryView(View):
     template_name = 'zruser/payment_history.html'
@@ -3253,20 +3226,20 @@ class PaymentHistoryView(View):
             response = requests.post(QUICKWALLET_PAYMENT_HISTORY_URL, json={"secret": QUICKWALLET_SECRET})
         if response.status_code >= 500:
             return render(
-                request, self.template_name, { "zr_user": user, "api_error": "Api Gateway Server Error"}
+                request, self.template_name, { "zr_user": user, "api_error": "Api Gateway Server Error", "url_name": "payment-history"}
             )
         if 300 > response.status_code >= 200:
             try:
                 json_data = json.loads(response.text)
                 payments = json_data['data']['payments']
                 return render(
-                    request, self.template_name, {"payments": payments, "zr_user": user}
+                    request, self.template_name, {"payments": payments, "zr_user": user, "url_name": "payment-history"}
                 )
             except:
                 pass
 
             return render(
-                request, self.template_name, {"api_error": "something went wrong, please try again!"}
+                request, self.template_name, {"api_error": "something went wrong, please try again!", "url_name": "payment-history"}
             )
 
 
@@ -3358,7 +3331,7 @@ class OfferListView(View):
         })
         if response.status_code >= 500:
             return render(
-                request, self.template_name, {"api_error": "Api Gateway Server Error"}
+                request, self.template_name, {"api_error": "Api Gateway Server Error", "url_name": "offer-list"}
             )
         if 300 > response.status_code >= 200:
             try:
@@ -3379,13 +3352,13 @@ class OfferListView(View):
                     terminal_list = None
                 return render(
                     request, self.template_name,
-                    {"offers": offers, "vendor": vendor, "retailer_list": retailer_list, "terminal_list": terminal_list, "api_error": api_error, "success": success}
+                    {"offers": offers, "vendor": vendor, "retailer_list": retailer_list, "url_name": "offer-list", "terminal_list": terminal_list, "api_error": api_error, "success": success}
                 )
             except:
                 pass
 
         return render(
-            request, self.template_name, {"api_error": "something went wrong, please try again!"}
+            request, self.template_name, {"api_error": "something went wrong, please try again!", "url_name": "offer-list"}
         )
 
     def post(self, request, **kwargs):
@@ -3414,9 +3387,8 @@ class OfferListView(View):
                     "retailerid": vendor.vendor_user
                 })
                 if response.status_code >= 500:
-                    return render(
-                        request, self.template_name, {"api_error": "Api Gateway Server Error"}
-                    )
+                    api_error = "Api Gateway Server Error"
+                    return self.get(request, api_error)
                 if 300 > response.status_code >= 200:
                     try:
                         json_data = json.loads(response.text)
@@ -3430,14 +3402,13 @@ class OfferListView(View):
                             error = True
                         else:
                             success = "Offer {0} assigned".format(offer_id)
-                            return self.get(request, success)
+                            return self.get(request, None, success)
             except:
                 pass
             if error == True:
                 api_error = "something went wrong, please try again!"
                 return self.get(request, api_error)
             return self.get(request)
-
 
         elif request.user.zr_admin_user.role.name == "RETAILER":
             terminal_id = request.POST.get('terminal', '')
@@ -3450,7 +3421,6 @@ class OfferListView(View):
                     retailer=request.user.zr_admin_user.zr_user.id)
                 for terminal in terminal_list:
                     terminal_id_list.append(str(terminal.terminal.mobile_no))
-                print(terminal_id_list)
             else:
                 terminal_id_list.append(str(terminal_id))
 
@@ -3487,10 +3457,11 @@ class OfferListView(View):
                             error = True
                         else:
                             success = "Offer {0} assigned".format(offer_id)
-                            return self.get(request, success)
+                            return self.get(request, None, success)
             except:
                 pass
             if error == True:
                 api_error = "something went wrong, please try again!"
                 return self.get(request, api_error)
             return self.get(request)
+

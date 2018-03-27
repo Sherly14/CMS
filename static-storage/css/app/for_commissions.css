@@ -158,7 +158,7 @@ p.head-bg{
 	background-clip:content-box;
 	background-color: #F4F3F3;
 	min-height:150px;
-    padding-right: 50px;
+    /*padding-right: 50px;*/
 }
 
 .scroll table{

@@ -142,6 +142,9 @@ body.fixed-nav {
       #mainNav .navbar-collapse .navbar-nav.sidebar-nav > .nav-item {
         width: 230px;
         padding: 0; }
+    .nav-item a .active {
+    color: yellow !important;
+}
       #mainNav .navbar-collapse .navbar-nav.sidebar-nav > .nav-item > .nav-link {
         font-weight: 100;
         font-size: 0.8rem;
@@ -168,7 +171,10 @@ body.fixed-nav {
           padding-left: 3em; }
       #mainNav .navbar-collapse .navbar-nav.sidebar-nav li.active a {
         /*color: white;
-        background-color: #464a4c;*/ }
+        background-color: #464a4c;*/
+            color: #ffffff !important;
+        }
+
         #mainNav .navbar-collapse .navbar-nav.sidebar-nav li.active a:hover, #mainNav .navbar-collapse .navbar-nav.sidebar-nav li.active a:focus {
           color: white; }
     #mainNav .navbar-collapse .navbar-nav > .nav-item.dropdown > .nav-link {
