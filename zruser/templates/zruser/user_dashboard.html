@@ -291,7 +291,7 @@
                     <div id="modal_message" tabindex='1'></div>
                     <form class="form-horizontal" method="POST" id="challan_request_form" enctype="multipart/form-data">
                         {% csrf_token %}
-                        <div class="row" style="padding-left: 3rem;padding-top: 25px;">
+                        <div class="row" style="padding-left: 3rem;padding-top: 25px;" hidden>
                             <div class="form-group col-sm-6">
                                 <label class="control-label"><b>From bank</b></label>
                                 <div>
@@ -378,13 +378,13 @@
                                     </select>
                                 </div>
                             </div>
-
-                            <div class="form-group col-sm-6">
-                                <label class="control-label"><b>Upload Challan</b></label>
-                                <div>
-                                    <input type="file" class="form-control" name="document" id="document">
-                                </div>
-                            </div>
+                            <input type="text" id="document" name="document" value="" hidden>
+                            <!--<div class="form-group col-sm-6">-->
+                                <!--<label class="control-label"><b>Upload Challan</b></label>-->
+                                <!--<div>-->
+                                    <!--<input type="file" class="form-control" name="document" id="document">-->
+                                <!--</div>-->
+                            <!--</div>-->
 
                         </div>
 
@@ -731,6 +731,8 @@
                 $('#modal_message').html("");
 
                 // Create an FormData object
+                $('#from_bank').val('1');
+                $('#from_account_no').val('0');
                 var data = new FormData($('#challan_request_form')[0]);
                 {# console.log(data);#}
                 $('#submit_request').prop('disabled', true);

@@ -78,7 +78,8 @@ class GeneratePaymentRequestView(APIView):
         for detail, value in request.data.items():
             if detail == 'document' and value:
                 # Upload file to S3 and set link
-                data[detail] = file_save_s3(value)
+                #data[detail] = file_save_s3(value)
+                pass
             else:
                 data[detail] = value if value else ""
 
@@ -378,7 +379,7 @@ def merchant_payment_req_csv_download(request):
     else:
         qs = get_payment_request_qs(request, to_user=True)
 
-    if request.user.zr_admin_user.zr_user.role.name == 'ADMINSTAFF':
+    if request.user.zr_admin_user.role.name == 'ADMINSTAFF':
         qs = get_payment_request_qs(request, all_user=True)
 
     response = HttpResponse(content_type='text/csv')
