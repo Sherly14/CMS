@@ -138,7 +138,7 @@
                 <li class="nav-item {% if url_name == 'transaction-list' %}active{% endif %}">
                     <a class="nav-link text-right" href="{% url 'transaction:transaction-list' %}">Transactions</a>
                 </li>
-                <li class="nav-item {% if url_name == 'payment-request-list' %}active{% endif %}">
+                <li class="nav-item {% if url_name == 'payment-request-list' %}active{% endif %}" style="position:relative;">
                     <a class="nav-link text-right" href="{% url 'payment-requests:payment-request-list' %}">Payment Requests</a>
                     <span class="badge badge-pill badge-outline">{{ request|payment_req_cnt }}</span></a>
                 </li>
