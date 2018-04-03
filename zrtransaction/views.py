@@ -317,6 +317,7 @@ class TransactionsListView(ListView):
 
 
         context['queryset'] = page.object_list
+        context['url_name'] = "transaction-list"
         if page.has_next():
             query_string['page_no'] = page.next_page_number()
             context['next_page_qs'] = urlencode(query_string)

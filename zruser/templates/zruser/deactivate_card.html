@@ -26,7 +26,7 @@
                                 <select id="cardnumber"  name="cardnumber" required>
                                     <option value="">Select one Cardnumber</option>
                                     {% for card in loyalty_cardslist %}
-                                        <option value="{{ card }}" >{{ card }} </option>
+                                        <option value="{{ card }}" {% if card == oldcardnumber %}selected{% endif %} >{{ card }} </option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -43,22 +43,25 @@
                 <div class="col-sm-3 col-md-3">
                    <div class="form-group">
                         <label for="mobileno">Mobile Number</label>
-                        <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" name="mobile" REQUIRED>
+                        <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" value="{{mobile}}" name="mobile" REQUIRED>
                     </div>
                 </div>
 
                 <div class="col-sm-3 col-md-3">
                    <div class="form-group">
                         <label for="otp">OTP</label>
-                        <input type="text" class="fill" name="otp" REQUIRED>
+                        <input type="text" class="fill" name="otp">
                     </div>
                 </div>
             </div>
 
             <div class="row">
-            <div class="fill margin-top" style="padding-left:6.5rem">
-                <input class="button red" type="submit" name = "save" value="Deactivate Card">
-            </div>
+                <div class="col-9">
+                        <input class="button red" type="submit" name = "OTP" value="Generate OTP">
+                </div>
+                <div class="col-3">
+                    <input class="button red" type="submit" name = "save" value="Deactivate Card">
+                </div>
             </div>
 
         {% csrf_token %}

@@ -16,7 +16,7 @@
 
         <div class="col-12" >
 
-            <div class="row" style="padding-right: 50px;">
+            <div class="row">
                 <div class="fine">
                     <p class="head-bg">List of Offers</p>
                 </div>
@@ -126,6 +126,7 @@
                     <!--{% endif %}-->
                 <!--</div>-->
             </div>
+
             <br>
         </div>
     </div>
@@ -152,7 +153,7 @@
                             <div class="form-group col-sm-2">
                                 <label class="control-label"><b>Retailer</b></label>
                                  <select style="border: 2px solid; border-color: #aaa;" name="retailer" id="retailer" required>
-                                     <option value="-1">Select Retailer</option>
+                                     <option value="">Select Retailer</option>
                                         {% for retailer in retailer_list %}
                                             <option value="{{ retailer.id }}" {% if  retailer.id == retailer_id %}selected{% endif %}>{{ retailer.first_name }} {{ retailer.last_name|default_if_none:""}}</option>
                                          {% endfor %}
@@ -168,8 +169,6 @@
                         </div>
                     </form>
 
-                    <div class="alert alert-danger" id="alert_msg" style="display:none;">
-                    </div>
                 </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
@@ -224,43 +223,7 @@
     <!-- /.modal -->
 
 
-<script>
-    var data = new FormData($('#challan_request_form')[0]);
-                {# console.log(data);#}
-                $('#submit_request').prop('disabled', true);
-                $('#submit_request').addClass('disabled');
-                $.ajax({
-                    type: "POST",
-                    enctype: 'multipart/form-data',
-                    processData: false,
-                    contentType: false,
-                    url: '/payment_request/generate_payment_request/',
-                    data: data,
-                    success: function (data) {
-                        $('#modal_message').html(data.message);
-                        if(data.success) {
-                            setTimeout(function () {
-                                window.location.reload();
-                            }, 1000);
-                        }
-                        else {
-                            setTimeout(function () {
-                                $('#modal_message').html("");
-                            }, 2000);
-                            $('#submit_request').prop('disabled', false);
-                            $('#submit_request').removeClass('disabled');
-                        }
-                    },
-                    error: function (data) {
-                        $('#modal_message').html(data.message);
-                        $('#submit_request').prop('disabled', false);
-                    }
-                });
-                <!-- AJAX Call -->
-            }
-        });
 
-</script>
 
 
 <script>
