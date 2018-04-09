@@ -144,6 +144,7 @@ body.fixed-nav {
           padding-left: 0;
           list-style: none;
           background: #292b2c; }
+
           #mainNav .navbar-collapse .navbar-nav.sidebar-nav > .nav-item .sidebar-second-level > li,
           #mainNav .navbar-collapse .navbar-nav.sidebar-nav > .nav-item .sidebar-third-level > li {
             width: 250px; }

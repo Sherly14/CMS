@@ -44,6 +44,7 @@ def send_email_multiple(subject, to_email_list, template_name, context, is_html=
     if not os.path.isfile(tmpl_path):
         raise Exception("Invalid email template (%s)" % template_name)
 
+    rendered_context = None
     text_content = ''
     html_content = ''
     with open(tmpl_path) as f:

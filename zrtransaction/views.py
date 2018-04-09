@@ -22,6 +22,7 @@ from zruser.mapping import DISTRIBUTOR, SUBDISTRIBUTOR
 from zruser.models import ZrUser
 from zrmapping import models as zrmappings_models
 
+
 class TransactionsDetailView(DetailView):
     queryset = Transaction.objects.all()
     context_object_name = 'transaction'
@@ -261,7 +262,6 @@ class TransactionsListView(ListView):
         except EmptyPage:
             raise Http404
 
-
         if sub_distributor:
             for subdist in sub_distributor:
                 sub_distributor_list.append(subdist.sub_distributor_id)
@@ -317,6 +317,7 @@ class TransactionsListView(ListView):
 
 
         context['queryset'] = page.object_list
+        context['url_name'] = "transaction-list"
         if page.has_next():
             query_string['page_no'] = page.next_page_number()
             context['next_page_qs'] = urlencode(query_string)

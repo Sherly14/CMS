@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block title %}Card Activation{% endblock %}
+
+{% block content %}
+
+<div class="content-wrapper py-2" style="padding-left: 0.5rem; padding-right: 4rem">
+    <p class="heading-right">Activate Card</p>
+    {% if api_error %}
+      <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
+    {% endif %}
+    {% if success %}
+      <div class="alert alert-success" id="success_msg" style="text-align:center">{{ success }}</div>
+    {% endif %}
+    <div class="container-fluid" style="position: relative;">
+        <div class="row">
+            <p class="heading-bg">DETAILS:</p>
+        </div>
+        <form id="add-merchant-form" method="POST">
+            <div class="row">
+                <div class="col-sm-3 col-md-3">
+                    <div class="form-group">
+                        <label for="cardnumber">Card Number</label>
+                        <div class="">
+                            <select id="card-number"  name="cardnumber" required>
+                                <option value="">Select one Cardnumber</option>
+                                {% for card in loyalty_cardslist %}
+                                    <option value="{{ card }}" {% if card == oldcardnumber %}selected{% endif %} >{{ card }} </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="col-sm-3 col-md-3">
+                    <div class="form-group">
+                        <label for="udoutletid">OutletId</label>
+                        <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" name="udoutletid" value="{{zr_user.mobile_no}}" readonly>
+                    </div>
+                </div>
+
+                <div class="col-sm-3 col-md-3">
+                   <div class="form-group">
+                        <label for="mobileno">Mobile Number</label>
+                        <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" value="{{mobile}}" name="mobile" REQUIRED>
+                    </div>
+                </div>
+
+                <div class="col-sm-3 col-md-3">
+                   <div class="form-group">
+                        <label for="otp">OTP</label>
+                        <input type="text" class="fill" name="otp">
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-9">
+                    <input class="button red" type="submit" name = "OTP" value="Generate OTP">
+                </div>
+                <div class="col-3">
+                    <input class="button red" type="submit" name = "save" value="Activate Card">
+                </div>
+            </div>
+
+        {% csrf_token %}
+        </form>
+    </div>
+</div>
+
+<script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.12.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
+
+<script type="text/undercore-template" id="form-hidden-input">
+    <input type="hidden" id="<%=id%>" name="<%=id%>" value="<%=value%>" >
+</script>
+
+<script>
+$(document).ready(function () {
+    $("#card-number").select2();
+window.setTimeout(function() {
+    $(".alert").fadeTo(1000, 0).slideUp(1000, function(){
+        $(this).remove();
+    });
+}, 5000);
+});
+</script>
+
+
+<script>
+function generate_kyc_file_name(doc_type, ext) {
+    var milliseconds = (new Date).getTime();
+    return doc_type.replace(' ', '-') + '-' + milliseconds + '-' + Math.floor((Math.random() * 10000) + 1) + '.' + ext
+}
+
+function sendFile() {
+    console.log("Uploading file");
+    // get the reference to the actual file in the input
+    var theFormFile = $('#kyc-file')[0].files[0];
+
+    ext = $('#kyc-file').val().split('.').pop().toLowerCase()
+    file_name = generate_kyc_file_name($('#doc_type').val(), ext)
+    var s3 = new AWS.S3({
+      accessKeyId: 'AKIAI4Y5NO3K36LXYYVQ',
+      secretAccessKey: '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',
+      endpoint: 'https://s3.ap-south-1.amazonaws.com',
+      signatureVersion: 'v4',
+      region: 'ap-south-1'
+    });
+
+    var uploadPreSignedUrl = s3.getSignedUrl('putObject', {
+        Bucket: 'zrupee-kyc-documents',
+        Key: file_name,
+        ACL: 'authenticated-read',
+        // This must match with your ajax contentType parameter
+        ContentType: 'binary/octet-stream'
+
+        /* then add all the rest of your parameters to AWS puttObect here */
+    });
+
+    var downloadPreSignedUrl = s3.getSignedUrl('getObject', {
+        Bucket: 'zrupee-kyc-documents',
+        Key: file_name,
+        /* set a fixed type, or calculate your mime type from the file extension */
+        /* and all the rest of your parameters to AWS getObect here */
+    });
+
+    $.ajax({
+      type: 'PUT',
+      url: uploadPreSignedUrl,
+      // Content type must much with the parameter you signed your URL with
+      contentType: 'binary/octet-stream',
+      // this flag is important, if not set, it will try to send data as a form
+      processData: false,
+      // the actual file is sent raw
+      data: theFormFile,
+    }).done(function() {
+        $('#kyc-docs').append(
+            _.template($('#upload-kyc-doc').html())(
+                {
+                    document_type: $('#doc_type').val(),
+                    document_name: $('#kyc-file').val().split('\\').pop(),
+                    file_download_url: downloadPreSignedUrl,
+                    div_id: $('#doc_type').val().replace(' ', '')
+                }
+            )
+        )
+        window.uploaded_kycs.push($('#doc_type').val())
+
+        hidden_content = $('#form-hidden-input').html()
+        content = _.template(hidden_content)({
+            id: $('#doc_type').val().replace(' ', '-'),
+            value: downloadPreSignedUrl
+        });
+        $('#add-merchant-form').prepend(content)
+
+        document_id_content = _.template(hidden_content)({
+            id: 'doc_id' + '-' + $('#doc_type').val().replace(' ', '-'),
+            value: file_name
+        });
+        $('#add-merchant-form').prepend(document_id_content)
+        console.log(content)
+    }).fail(function() {
+      alert('File NOT uploaded');
+      console.log( arguments);
+    });
+
+    return downloadPreSignedUrl;
+}
+
+function submit_merchant_form() {
+    document.getElementById("add-merchant-form").submit();
+}
+
+</script>
+{% endblock %}

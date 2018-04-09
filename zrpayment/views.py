@@ -527,6 +527,7 @@ class PaymentRequestListView(ListView):
             except:
                 pass
         context['wallet'] = wallet
+        context['url_name'] = "payment-request-list"
         context['is_superuser'] = is_user_superuser(self.request)
         if start_date:
             context['startDate'] = start_date
@@ -542,8 +543,6 @@ class PaymentRequestListView(ListView):
 
         if fromuser_list:
             context['fromuser_list'] = fromuser_list
-
-
 
         return context
 
@@ -666,6 +665,7 @@ class PaymentListView(ListView):
         context['page_obj'] = queryset
         context['filter_by'] = filter_by
         context['q'] = q
+        context['url_name'] = "payment-list"
 
         context['is_superuser'] = is_user_superuser(self.request)
         return context
@@ -733,6 +733,7 @@ class PaymentRequestSentListView(ListView):
                pass
 
         context['wallet'] = wallet
+        context['url_name'] = "payment-request-sent-view"
         context['is_superuser'] = is_user_superuser(self.request)
         return context
 

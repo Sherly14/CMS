@@ -176,6 +176,7 @@ class PaymentListView(ListView):
         context['page_obj'] = queryset
         context['filter_by'] = filter_by
         context['q'] = q
+        context['url_name'] = "passbook-list"
 
         if subDistMerchant:
             context['subDistMerchant'] = subDistMerchant

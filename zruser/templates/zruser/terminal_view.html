@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %} Terminal {% endblock %}
+
+{% block content %}
+
+    <div class="content-wrapper">
+        <header style="background: black; box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24)">
+            <h3 style="text-align: center;background: black">
+                <div style="height:100px; background: black">
+                    <a class="" href="/">
+                        <img src="{% static 'images/logo.png' %}" style="width: 20%; background: black; padding-top: 30px">
+                    </a>
+                </div>
+
+            </h3>
+            <hr class="hr-black">
+        </header>
+        <div class="col-12" >
+             <h1 class="text-center">Welcome to Zrupee Prepaid Loyalty Program</h1>
+         </div>
+    </div>
+
+<script>
+
+    $(document).ready(function()
+    {
+        $('#terminal-id').select2();
+        $('#search-btn').click(function(){
+        startDate = $('#start-date').val();
+        endDate = $('#end-date').val();
+
+            {% if filter_by %}
+                url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}";
+            {% else %}
+                url = window.location.pathname + "?q=" + $('#search-txt').val();
+            {% endif %}
+
+            if(startDate!="" && endDate!="" )
+            {
+                url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
+            }
+
+            window.location.assign(url)
+        });
+
+     $('#terminal-id').change(function(){
+             var terminalId = $("#terminal-id").val();
+             var retailerId = "";
+
+             var selectedAll = $("#terminal-id :selected").text();
+                 if (selectedAll.includes("ALL"))
+                 {
+                    retailerId = terminalId;
+                    terminalId = ""
+                    if(retailerId!="")
+                    {
+                     url =window.location.pathname +'?retailer-id='+ retailerId;
+                    }
+                 }
+
+                  if(terminalId!="")
+                    {
+                     url = window.location.pathname + '?terminal-id='+ terminalId;
+                    }
+              window.location.assign(url)
+        });
+
+        $('#period').change(function() {
+            period_val = $(this).val();
+            url = window.location.pathname + '?filter=' + period_val.replace(' ', '-');
+            {% if q %}
+                url += "&q={{ q }}";
+            {% endif %}
+            window.location.assign(url)
+        });
+
+        $('#csv-download').click(function()
+        {
+            url = "{% url "user:terminal-csv" %}" + window.location.search;
+            window.location.assign(url)
+        });
+         var startDate = $('#start-date').val();
+         var endDate = $('#end-date').val();
+         var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+        $('#start-date').datepicker({
+            uiLibrary: 'bootstrap4',
+            iconsLibrary: 'fontawesome',
+            format: 'yyyy-mm-dd',
+
+            maxDate: function () {
+            return $('#end-date').val();
+            }
+        }).on('change', function (ev)
+         {
+            var start = $("#start-date").val();
+            var startD = new Date(start);
+            var end = $("#end-date").val();
+            var endD = new Date(end);
+            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
+
+            $("#days").val(diff);
+
+            if(diff>31)
+            {
+               alert("date difference is greater than 31");
+               $('#start-date').val("");
+            }
+         });
+
+        $('#end-date').datepicker({
+            uiLibrary: 'bootstrap4',
+            iconsLibrary: 'fontawesome',
+            format: 'yyyy-mm-dd',
+
+            minDate: function () {
+                return $('#start-date').val();
+            }
+        }).on('change', function (ev)
+         {
+            var start = $("#start-date").val();
+            var startD = new Date(start);
+            var end = $("#end-date").val();
+            var endD = new Date(end);
+            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
+
+            $("#days").val(diff);
+
+            if(diff>31)
+            {
+               alert("date difference is greater than 31");
+               $('#end-date').val("");
+            }
+         });
+    });
+</script>
+{% endblock %}
