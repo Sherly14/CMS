@@ -269,3 +269,4 @@ try:
 except ImportError:
     pass
 
+TO_BANK = ['UTIB', 'ICIC', 'INDB']
