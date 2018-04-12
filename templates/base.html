@@ -166,7 +166,6 @@
                 </li>
                 {% endif %}
 
-
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "RETAILER" and zr_user.role.name != "TERMINAL" %}
                 <li class="nav-item {% if url_name == 'offer-list' %}active{% endif %}">
                     <a class="nav-link text-right" href="{% url 'user:offer-list' %}">Offers</a>

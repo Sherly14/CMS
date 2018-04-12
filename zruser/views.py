@@ -1139,7 +1139,9 @@ class DashBoardView(ListView):
 
             context['payment_mods'] = PaymentMode.objects.all()
             context['is_user_superuser'] = is_user_superuser(request=self.request)
-            context['bank'] = Bank.objects.all()
+            context['bank'] = Bank.objects.filter(
+                bank_code__in=settings.TO_BANK
+            )
 
             if start_date:
                 context['startDate'] = start_date
