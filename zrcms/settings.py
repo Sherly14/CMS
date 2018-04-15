@@ -259,7 +259,7 @@ else:
 import djcelery
 djcelery.setup_loader()
 
-REPORTS_PATH = BASE_DIR + '/media/report'
+REPORTS_PATH = os.path.join(BASE_DIR, 'media', 'report')
 if not os.path.exists(REPORTS_PATH):
     os.makedirs(REPORTS_PATH)
 

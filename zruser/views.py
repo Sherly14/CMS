@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import os
 import csv
 import datetime
 import requests
@@ -323,8 +324,10 @@ def get_report_excel(report_params):
     DOC_HEADERS = (
         ('Transaction Type', 'type.name'),
         ('Transaction ID', 'pk'),
+        ('Vendor Transaction ID', 'vendor_txn_id'),
         ('Distributor Name', 'distributor_name'),
-        # ('Merchant Name', 'merchant_name'),
+        #('Merchant Name', 'merchant_name'),
+        ('Customer', 'customer'),
 
         ('Agent Email ID', 'user.email'),
         ('Agent Name', 'user.full_name'),
@@ -337,8 +340,9 @@ def get_report_excel(report_params):
         ('Beneficiary account number', 'beneficiary_user.bank.eko_bank_id'),
 
         ('Transaction Amount', 'amount'),
-        ('Commission Fee', 'commission_fee'),
-        ('Commission Value', 'commission_value'),
+        #('Commission Fee', 'commission_fee'),
+        #('Commission Value', 'commission_value'),
+        ('Additional Charge', 'additional_charges'),
         ('Status', 'formatted_status'),
         ('Created date', 'created_date'),
         ('Created time', 'created_time'),
@@ -378,9 +382,9 @@ def get_report_excel(report_params):
     transactions_qs = get_transactions_qs_with_dict(report_params)
     paginator = Paginator(transactions_qs, 1)
     import string, random
-    unique_name = datetime.datetime.now().strftime("%d-%m-%YT%H:%M:%S-") + ''.join(
+    unique_name = datetime.datetime.now().strftime("%d-%m-%YT%H-%M-%S-") + ''.join(
         random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
-    report_file_path = settings.REPORTS_PATH + "/" + unique_name + ".xlsx"
+    report_file_path = os.path.join(settings.REPORTS_PATH, unique_name + ".xlsx")
     for x in paginator.page_range:
         page_data = paginator.page(x)
         if x == 1:
@@ -415,6 +419,7 @@ def mail_report(request):
     }
     from zruser import tasks as zu_celery_tasks
     zu_celery_tasks.send_dashboard_report.apply_async(args=[report_params])
+    #zu_celery_tasks.send_dashboard_report(report_params)
     return JsonResponse({"success": True})
 
 

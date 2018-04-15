@@ -8,8 +8,9 @@ from common_utils import email_utils
 @task
 def send_dashboard_report(report_params):
     report_file_path = get_report_excel(report_params)
-    file_name = report_file_path.split('/')[-1]
-    report_link = push_file_to_s3(report_file_path, file_name, "zrupee-reports", timeout=86400)
+    import ntpath
+    file_name = ntpath.basename(report_file_path)
+    report_link = push_file_to_s3(report_file_path, file_name, "zrupee-reports", timeout=3600)
 
     email_utils.send_email_multiple(
         'Your dashboard Report is ready',
