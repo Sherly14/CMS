@@ -291,25 +291,8 @@
                     <div id="modal_message" tabindex='1'></div>
                     <form class="form-horizontal" method="POST" id="challan_request_form" enctype="multipart/form-data">
                         {% csrf_token %}
-                        <div class="row" style="padding-left: 3rem;padding-top: 25px;" hidden>
-                            <div class="form-group col-sm-6">
-                                <label class="control-label"><b>From bank</b></label>
-                                <div>
-                                    <select id="from_bank" name="from_bank">
-                                        {% for b in bank %}
-                                            <option value="{{ b.pk }}">{{ b.bank_name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="form-group col-sm-6">
-                                <label class="control-label"><b>From Account Number/Branch Name</b></label>
-                                <div>
-                                    <input type="text" class="form-control" name="from_account_no" id="from_account_no" style="box-shadow: 0px 0px;border-style: solid;" required>
-                                </div>
-                            </div>
-                        </div>
+                        <input id="from_bank" name="from_bank" value="100" hidden>
+                        <input id="from_account_no" name="from_account_no" value="0" hidden>
                         <div class="row" style="padding-left: 3rem;">
                              <div class="form-group col-sm-6">
                                 <label class="control-label"><b>To bank</b></label>
@@ -731,8 +714,7 @@
                 $('#modal_message').html("");
 
                 // Create an FormData object
-                $('#from_bank').val('1');
-                $('#from_account_no').val('0');
+
                 var data = new FormData($('#challan_request_form')[0]);
                 {# console.log(data);#}
                 $('#submit_request').prop('disabled', true);
