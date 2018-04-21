@@ -68,70 +68,33 @@
                     <div style="width: 100%;     overflow: scroll;">
                         <table>
                             <tr style="border-bottom-style: solid;">
-                                <th>Log ID</th>
                                 <th>Date</th>
                                 <th>User name</th>
                                 <th>Mobile No</th>
                                 <th>Wallet ID</th>
                                 <th>Transaction ID</th>
+                                <th>Transaction type</th>
                                 <th>Payment ID</th>
-                                <th>DMT opening wallet balance</th>
-                                <th>DMT wallet credit</th>
-                                <th>DMT wallet debit</th>
-                                <!--<th>DMT closing balance</th>-->
-                                <th>DMT closing wallet balance</th>
-                                <!--<th>Non DMT opening balance</th>-->
-                                <th>Non DMT opening wallet balance</th>
-                                <th>Non DMT wallet credit</th>
-                                <th>Non DMT wallet debit</th>
-                                <!--<th>Non DMT closing balance</th>-->
-                                <th>Non DMT closing wallet balance</th>
+                                <th>Transaction Value</th>
+                                <th>DMT Balance</th>
+                                <th>Non DMT Balance</th>
                             </tr>
                             {% for passbook in passbook_list %}
                                 <tr>
-                                    <td>{{ passbook.id}}</td>
                                     <td>{{ passbook.at_created }}</td>
                                     <td>{{ passbook.wallet.merchant.full_name }}</td>
                                     <td>{{ passbook.wallet.merchant.mobile_no }}</td>
-                                    <!--<td>{{ passbook.dmt_opening_balance }}</td>-->
                                     <td>{{ passbook.wallet_id}}</td>
                                     <td>{{ passbook.transaction_id}}</td>
+                                    <td>{{ passbook.transaction.type }}</td>
                                     <td>{{ passbook.payment_request_id}}</td>
-                                    <td>{{ passbook.dmt_opening_balance }}</td>
-                                    {% if passbook.dmt_balance > 0 %}
+                                    {% if passbook.dmt_balance != 0 %}
                                         <td>{{ passbook.dmt_balance }}</td>
-                                    {% else %}
-                                        <td> 0 </td>
-                                    {% endif %}
-                                    {% if passbook.dmt_balance < 0 %}
-                                        <td>{{ passbook.dmtnegate }}</td>
-                                    {% else %}
-                                        <td> 0 </td>
-                                    {% endif %}
-                                    <!--<td>{{ passbook.dmt_closing_balance }}</td>-->
-                                    {% if passbook.dmt_balance < 0 %}
-                                        <td>{{ passbook.dmt_closing_balance }}</td>
-                                    {% else %}
-                                        <td> 0 </td>
-                                    {% endif %}
-                                    <!--<td>{{ passbook.non_dmt_opening_balance }}</td>-->
-                                    <td>{{ passbook.non_dmt_opening_balance }}</td>
-                                    {% if passbook.non_dmt_balance > 0 %}
+                                    {% elif passbook.non_dmt_balance != 0 %}
                                         <td>{{ passbook.non_dmt_balance }}</td>
-                                    {% else %}
-                                        <td> 0 </td>
                                     {% endif %}
-                                    {% if passbook.non_dmt_balance < 0 %}
-                                        <td>{{ passbook.nondmtnegate }}</td>
-                                    {% else %}
-                                        <td> 0 </td>
-                                    {% endif %}
-                                    <!--<td>{{ passbook.non_dmt_closing_balance }}</td>-->
-                                    {% if passbook.dmt_balance < 0 %}
-                                        <td>{{ passbook.dmt_closing_balance }}</td>
-                                    {% else %}
-                                        <td> 0 </td>
-                                    {% endif %}
+                                    <td>{{ passbook.dmt_closing_balance }}</td>
+                                    <td>{{ passbook.non_dmt_closing_balance }}</td>
                                 </tr>
                             {% endfor %}
                         </table>
@@ -142,26 +105,26 @@
                             <div class="pagination-prev">
                                 {% if page_obj.has_previous %}
                                     {% if filter_by and q %}
-                                        <a class="button red" href="{{ main_url }}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}">previous</a>
+                                        <a class="button red" href="{{ main_url }}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}">Prev</a>
                                     {% elif q %}
-                                        <a class="button red" href="{{ main_url }}?page={{ page_obj.previous_page_number }}&q={{ q }}">previous</a>
+                                        <a class="button red" href="{{ main_url }}?page={{ page_obj.previous_page_number }}&q={{ q }}">Prev</a>
                                     {% elif filter_by %}
-                                        <a class="button red" href="{{ main_url }}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}">previous</a>
+                                        <a class="button red" href="{{ main_url }}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}">Prev</a>
                                     {% else %}
-                                        <a href="{{ main_url }}?page={{ page_obj.previous_page_number }}" class="button red">previous</a>
+                                        <a href="{{ main_url }}?page={{ page_obj.previous_page_number }}" class="button red">Prev</a>
                                     {% endif %}
                                 {% endif %}
                             </div>
                             <div class="pagination-next">
                                 {% if page_obj.has_next %}
                                     {% if filter_by and q %}
-                                        <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}" class="button red">next</a>
+                                        <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}" class="button red">Next</a>
                                     {% elif q %}
-                                        <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&q={{ q }}" class="button red">next</a>
+                                        <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&q={{ q }}" class="button red">Next</a>
                                     {% elif filter_by %}
-                                        <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}" class="button red">next</a>
+                                        <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}" class="button red">Next</a>
                                     {% else %}
-                                        <a class="button red" href="{{ main_url }}?page={{ page_obj.next_page_number }}">next</a>
+                                        <a class="button red" href="{{ main_url }}?page={{ page_obj.next_page_number }}">Next</a>
                                     {% endif %}
                                 {% endif %}
                             </div>

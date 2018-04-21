@@ -82,26 +82,3 @@ class WalletTransactions(RowInfo):
 
     def nondmtnegate(self):
         return -self.non_dmt_balance
-
-
-class Passbook(RowInfo):
-    user = models.ForeignKey(ZrUser)
-
-    dmt_opening_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
-    dmt_opening_wallet_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
-    dmt_wallet_credit = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
-    dmt_wallet_debit = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
-    dmt_closing_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
-    dmt_closing_wallet_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
-
-    non_dmt_opening_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
-    non_dmt_opening_wallet_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
-    non_dmt_wallet_credit = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
-    non_dmt_wallet_debit = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
-    non_dmt_closing_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
-    non_dmt_closing_wallet_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
-
-    def __unicode__(self):
-        return '%s Passbook' % (
-            self.user.full_name
-        )

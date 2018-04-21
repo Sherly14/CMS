@@ -8,7 +8,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('zrwallet', '0011_passbook'),
+        ('zrwallet', '0010_merge_20171007_1346'),
     ]
 
     operations = [
