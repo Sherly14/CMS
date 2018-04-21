@@ -35,7 +35,7 @@ def get_commission_display_qs(request):
     search = request.GET.get('q')
 
     req_usr = request.user.zr_admin_user
-    queryset = Commission.objects.filter(commission_user=None).order_by('-at_created')
+    queryset = Commission.objects.filter(commission_user=None, is_settled=False).order_by('-at_created')
     query_filter = Q(
         commission_user__mobile_no__contains=search
     ) | Q(
@@ -52,11 +52,13 @@ def get_commission_display_qs(request):
         if search:
             queryset = Commission.objects.filter(
                 query_filter,
-                commission_user=req_usr.zr_user
+                commission_user=req_usr.zr_user,
+                is_settled=False
             )
         else:
             queryset = Commission.objects.filter(
-                commission_user=req_usr.zr_user
+                commission_user=req_usr.zr_user,
+                is_settled=False
             )
 
     if period == 'today':
@@ -91,7 +93,8 @@ class CommissionDisplay(ListView):
         if user_utils.is_user_superuser(self.request):
             context['commissions'] = self.get_queryset()
             total_commission = Commission.objects.filter(
-                commission_user=None
+                commission_user=None,
+                is_settled=False
             ).aggregate(commission=Sum(
                 F('net_commission') + (F('user_tds') * F('net_commission')) / 100
             ))['commission']
@@ -102,7 +105,8 @@ class CommissionDisplay(ListView):
         else:
             req_usr = self.request.user.zr_admin_user
             total_commission = Commission.objects.filter(
-                commission_user=req_usr.zr_user
+                commission_user=req_usr.zr_user,
+                is_settled=False
             ).aggregate(commission=Sum(
                 F('net_commission') + (F('user_tds') * F('net_commission')) / 100
             ))['commission']

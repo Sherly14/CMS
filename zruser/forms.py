@@ -70,6 +70,9 @@ class MerchantDistributorForm(forms.ModelForm):
 
         return residence_addr
 
+    def clean_email(self):
+        return self.cleaned_data['email'].lower()
+
     def __init__(self, *args, **kwargs):
         if kwargs.get('merchant'):
             self.Meta.fields.append('upi_id')
@@ -99,6 +102,8 @@ class UpdateMerchantDistributorForm(forms.ModelForm):
 
         return first_name
 
+    def clean_email(self):
+        return self.cleaned_data['email'].lower()
 
     def __init__(self, *args, **kwargs):
         if kwargs.get('merchant'):
