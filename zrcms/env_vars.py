@@ -12,6 +12,7 @@ EKO_DEVELOPER_KEY = os.getenv('EKO_DEVELOPER_KEY', 'becbbce45f79c6f5109f848acd54
 EKO_TRANSACTION_ENQUIRY_URL = os.getenv('EKO_TRANSACTION_ENQUIRY_URL',
                                         'https://staging.eko.co.in:25004/ekoapi/v1/transactions/')
 
+
 QUICKWALLET_ZR_PARTERNERID = os.getenv('QUICKWALLET_ZR_PARTERNERID', '293')
 QUICKWALLET_SECRET = os.getenv('QUICKWALLET_SECRET', '2z9WyZ823Q78kER')
 # SET URL IF NEEDED
