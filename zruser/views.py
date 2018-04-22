@@ -51,7 +51,7 @@ from zrcms.env_vars import QUICKWALLET_ZR_PARTERNERID, QUICKWALLET_SECRET, QUICK
     QUICKWALLET_API_CARD_URL, QUICKWALLET_API_LISTCARD_URL, QUICKWALLET_API_GENERATEOTP_URL, QUICKWALLET_API_ISSUE_MOBILE_URL,\
     QUICKWALLET_API_ACTIVATE_CARD_URL, QUICKWALLET_API_RECHARGE_CARD_URL, QUICKWALLET_API_PAY_URL, QUICKWALLET_API_DEACTIVATE_CARD_URL,\
     QUICKWALLET_PAYMENT_HISTORY_URL, QUICKWALLET_CREATE_OFFER_URL, QUICKWALLET_OFFER_LIST_URL, QUICKWALLET_OFFER_ASSIGN_TO_RETAILER_URL, \
-    QUICKWALLET_API_LISTCARD_ACTIVATED_URL
+    QUICKWALLET_OFFER_ASSIGN_TO_OUTLETS_URL, QUICKWALLET_API_LISTCARD_ACTIVATED_URL
 
 MERCHANT = 'MERCHANT'
 DISTRIBUTOR = 'DISTRIBUTOR'
@@ -968,6 +968,7 @@ class DashBoardView(ListView):
             if is_user_superuser(self.request):
                 total_commission = commission_models.Commission.objects.filter(
                     commission_user=None,
+                    is_settled=False,
                     **dt_filter
                 ).aggregate(commission=Sum(
                     F('net_commission') + (F('user_tds') * F('net_commission')) / 100
@@ -976,6 +977,7 @@ class DashBoardView(ListView):
                 req_usr = self.request.user.zr_admin_user
                 total_commission = commission_models.Commission.objects.filter(
                     commission_user=req_usr.zr_user,
+                    is_settled=False,
                     **dt_filter
                 ).aggregate(commission=Sum(
                     F('net_commission') + (F('user_tds') * F('net_commission')) / 100
@@ -990,7 +992,8 @@ class DashBoardView(ListView):
                 '''
                 context["dmt_commission_value"] = commission_models.Commission.objects.filter(
                     transaction__type__name='DMT',
-                    commission_user=None
+                    commission_user=None,
+                    is_settled=False,
                 ).aggregate(
                     value=Sum('user_commission')
                 )['value'] or 0
@@ -998,6 +1001,7 @@ class DashBoardView(ListView):
                 context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
                     transaction__type__name__in=BILLS_TYPE,
                     commission_user=None,
+                    is_settled=False,
                     **dt_filter
                 ).aggregate(
                     value=Sum('user_commission')
@@ -1006,6 +1010,7 @@ class DashBoardView(ListView):
                 context["total_recharge_commission_value"] = commission_models.Commission.objects.filter(
                     transaction__type__name__in=RECHARGES_TYPE,
                     commission_user=None,
+                    is_settled=False,
                     **dt_filter
                 ).aggregate(
                     value=Sum('user_commission')
@@ -1017,7 +1022,8 @@ class DashBoardView(ListView):
                 )
                 context["dmt_commission_value"] = commission_models.Commission.objects.filter(
                     transaction__type__name='DMT',
-                    commission_user=self.request.user.zr_admin_user.zr_user
+                    commission_user=self.request.user.zr_admin_user.zr_user,
+                    is_settled=False,
                 ).aggregate(
                     value=Sum('user_commission')
                 )['value'] or 0
@@ -1025,6 +1031,7 @@ class DashBoardView(ListView):
                 context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
                     transaction__type__name__in=BILLS_TYPE,
                     commission_user=self.request.user.zr_admin_user.zr_user,
+                    is_settled=False,
                     **dt_filter
                 ).aggregate(
                     value=Sum('user_commission')
@@ -1033,6 +1040,7 @@ class DashBoardView(ListView):
                 context["total_recharge_commission_value"] = commission_models.Commission.objects.filter(
                     transaction__type__name__in=RECHARGES_TYPE,
                     commission_user=self.request.user.zr_admin_user.zr_user,
+                    is_settled=False,
                     **dt_filter
                 ).aggregate(
                     value=Sum('user_commission')
@@ -2751,6 +2759,7 @@ class IssueMobileView(View):
             udoutletid = request.POST.get('udoutletid', '')
             mobile = request.POST.get('mobile', '')
             otp = request.POST.get('otp', '')
+            name = request.POST.get('name', '')
             # validation
             error = False
 
@@ -2761,7 +2770,9 @@ class IssueMobileView(View):
                         "cardnumber": int(cardnumber),
                         "udoutletid": int(udoutletid),
                         "mobile": int(mobile),
-                        "otp":otp
+                        "otp":otp,
+                        "name": name.strip()
+
                     })
                     if response.status_code >= 500:
                         api_error = "Api Gateway Server Error"
@@ -3258,12 +3269,12 @@ class OfferCreateView(CreateView):
             id = request.POST.get('id', '')
             type = request.POST.get('type', '')
             availability = request.POST.get('availability', '')
-            redemptions = request.POST.get('redemptions', '')
+            #redemptions = request.POST.get('redemptions', '')
             short_desc = request.POST.get('short_desc', '')
             long_desc = request.POST.get('long_desc', '')
             cashback = request.POST.get('cashback', '')
             isactive = request.POST.get('isactive', '')
-            min = request.POST.get('min', '')
+            minamount = request.POST.get('minamount', '')
             dis = request.POST.get('dis', '')
 
             # validation
@@ -3284,10 +3295,10 @@ class OfferCreateView(CreateView):
                                                         "id": int(id),
                                                         "sdesc": short_desc,
                                                         "ldesc": long_desc,
-                                                        "min": min,
+                                                        "minamount": int(minamount),
                                                         "type": type,
-                                                        "availability": availability,
-                                                        "redemptions": redemptions,
+                                                        "availability": int(availability),
+                                                        #"redemptions": redemptions,
                                                         "cashback": cashback,
                                                         "isactive": isactive,
                                                         "dis": dis
@@ -3435,7 +3446,7 @@ class OfferListView(View):
             # if error == False:
             try:
                 # the url is same for assign retailer & terminal
-                response = requests.post(QUICKWALLET_OFFER_ASSIGN_TO_RETAILER_URL, json={
+                response = requests.post(QUICKWALLET_OFFER_ASSIGN_TO_OUTLETS_URL, json={
                     "secret": QUICKWALLET_SECRET,
                     "offerids": order_id_list,
                     "udoutletids": terminal_id_list
