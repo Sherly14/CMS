@@ -930,6 +930,7 @@ class DashBoardView(ListView):
         if is_user_superuser(self.request):
             total_commission = commission_models.Commission.objects.filter(
                 commission_user=None,
+                is_settled=False,
                 **dt_filter
             ).aggregate(commission=Sum(
                 F('net_commission') + (F('user_tds') * F('net_commission')) / 100
@@ -938,6 +939,7 @@ class DashBoardView(ListView):
             req_usr = self.request.user.zr_admin_user
             total_commission = commission_models.Commission.objects.filter(
                 commission_user=req_usr.zr_user,
+                is_settled=False,
                 **dt_filter
             ).aggregate(commission=Sum(
                 F('net_commission') + (F('user_tds') * F('net_commission')) / 100
@@ -952,7 +954,8 @@ class DashBoardView(ListView):
             '''
             context["dmt_commission_value"] = commission_models.Commission.objects.filter(
                 transaction__type__name='DMT',
-                commission_user=None
+                commission_user=None,
+                is_settled=False
             ).aggregate(
                 value=Sum('user_commission')
             )['value'] or 0
@@ -960,6 +963,7 @@ class DashBoardView(ListView):
             context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
                 transaction__type__name__in=BILLS_TYPE,
                 commission_user=None,
+                is_settled=False,
                 **dt_filter
             ).aggregate(
                 value=Sum('user_commission')
@@ -968,6 +972,7 @@ class DashBoardView(ListView):
             context["total_recharge_commission_value"] = commission_models.Commission.objects.filter(
                 transaction__type__name__in=RECHARGES_TYPE,
                 commission_user=None,
+                is_settled=False,
                 **dt_filter
             ).aggregate(
                 value=Sum('user_commission')
@@ -979,7 +984,8 @@ class DashBoardView(ListView):
             )
             context["dmt_commission_value"] = commission_models.Commission.objects.filter(
                 transaction__type__name='DMT',
-                commission_user=self.request.user.zr_admin_user.zr_user
+                commission_user=self.request.user.zr_admin_user.zr_user,
+                is_settled=False
             ).aggregate(
                 value=Sum('user_commission')
             )['value'] or 0
@@ -987,6 +993,7 @@ class DashBoardView(ListView):
             context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
                 transaction__type__name__in=BILLS_TYPE,
                 commission_user=self.request.user.zr_admin_user.zr_user,
+                is_settled=False,
                 **dt_filter
             ).aggregate(
                 value=Sum('user_commission')
@@ -995,6 +1002,7 @@ class DashBoardView(ListView):
             context["total_recharge_commission_value"] = commission_models.Commission.objects.filter(
                 transaction__type__name__in=RECHARGES_TYPE,
                 commission_user=self.request.user.zr_admin_user.zr_user,
+                is_settled=False,
                 **dt_filter
             ).aggregate(
                 value=Sum('user_commission')
