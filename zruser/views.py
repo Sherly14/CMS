@@ -642,7 +642,7 @@ class KYCRequestsView(ListView):
                         dj_user.set_password(password)
                         dj_user.save()
 
-                        zruser.send_welcome_email(password)
+                    zruser.send_welcome_email(password)
 
         paginator = Paginator(queryset, self.paginate_by)
         page = self.request.GET.get('page', 1)
