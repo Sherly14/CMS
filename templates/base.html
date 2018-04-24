@@ -157,10 +157,14 @@
                 <li class="nav-item {% if url_name == 'payment-list' %}active{% endif %}">
                     <a class="nav-link text-right" href="{% url 'payment-requests:payment-list' %}">Payments</a>
                 </li>
+                {% endif %}
+
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
                 <li class="nav-item {% if url_name == 'passbook-list' %}active{% endif %}">
                     <a class="nav-link text-right" href="{% url 'wallet:passbook-list' %}">Passbook</a>
                 </li>
                 {% endif %}
+
                 {% if request.user.zr_admin_user.role.name == "CHECKER" or request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
                 <li class="nav-item {% if url_name == 'kyc-requests' %}active{% endif %}">
                     <a class="nav-link text-right" href="{% url 'user:kyc-requests' %}">KYC Requests</a>

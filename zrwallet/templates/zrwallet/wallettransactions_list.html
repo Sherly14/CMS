@@ -12,66 +12,64 @@
 
     <div class="content-wrapper">
         <p class="head-right">Passbook Table</p>
-        <div class="col-12" >
-             <div class="row rm-margin-side">
-                <div class="col-2">
-                    <p class="head-left">START DATE</p>
-                </div>
-                <div class="col-2">
-                    <p class="head-left">END DATE</p>
-                </div>
+        <div class="row rm-margin-side">
+            <div class="col-2">
+                <p class="head-left">START DATE</p>
             </div>
-            <div class="row rm-margin-side">
-                <div class="col-2">
-                    <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-                </div>
-                <div class="col-2">
-                    <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-                </div>
-                <div class="col-2">
-                    <select id="distributor-id"  name="distributor-id">
-                        <option value="-1">ALL</option>
-                        {% for user in user_list %}
-                            <option value="{{ user.wallet_id }}"{% if  user.wallet_id == distributor_id %}selected{% endif %}>{{ user.wallet.merchant.full_name}}</option>
-                         {% endfor %}
-                    </select>
-                </div>
+            <div class="col-2">
+                <p class="head-left">END DATE</p>
+            </div>
+        </div>
+        <div class="row rm-margin-side">
+            <div class="col-2">
+                <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
+            </div>
+            <div class="col-2">
+                <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
+            </div>
+            <div class="col-4">
+                <select id="user_id" name="user_id">
+                    <option value="-1">ALL</option>
+                    {% for user in user_list %}
+                        <option value="{{ user.wallet_id }}"{% if  user.wallet_id == user_id %}selected{% endif %}>{{ user.wallet.merchant.full_name}}</option>
+                     {% endfor %}
+                </select>
+            </div>
 
-            </div>
-            <br>
-            <div class="row">
-                    <div style="position: relative;">
-                        <input class="search" id="search-txt" type="search" name="search" value="{% if q %}{{ q }}{% endif %}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                        <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+            <div class="div-width-100">
+                <br>
+                <div class="row">
+                        <div style="position: relative;">
+                            <input class="search" id="search-txt" type="search" name="search" value="{% if q %}{{ q }}{% endif %}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
+                            <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
+                        </div>
+                    &nbsp;&nbsp;&nbsp;
+                        <input type="button" id="search-btn" class="button red" value="Search">
+                    &nbsp;&nbsp;&nbsp;
+                        <a href="{% url 'wallet:passbook-list' %}" >Reset filters</a>
+                    &nbsp;&nbsp;&nbsp;
+                        <!--<button data-toggle="modal" data-target="#get_email_modal" class="button red">-->
+                            <!--DOWNLOAD CSV-->
+                        <!--</button>-->
+                        <input class="button red float-right" type="button" value="DOWNLOAD CSV" id="csv-download">
+
+                        {% csrf_token %}
+                        <input type="hidden" id="request_id" value="">
                     </div>
-                &nbsp;&nbsp;&nbsp;
-                    <input type="button" id="search-btn" class="button red" value="Search">
-                &nbsp;&nbsp;&nbsp;
-                    <a href="{{ main_url }}" >Reset filters</a>
-                &nbsp;&nbsp;&nbsp;
-                    <button data-toggle="modal" data-target="#get_email_modal" class="button red">
-                        DOWNLOAD CSV
-                    </button>
-                    {% csrf_token %}
-                    <input type="hidden" id="request_id" value="">
-                </div>
-            </div>
-            <br>
-            <div>
-                <div class="row" style="padding-right: 50px;">
+                <br>
+                <div class="row">
                     <div class="fine">
                         <p class="head-bg">New Requests</p>
                     </div>
                 </div>
                 <div class="row scroll">
-
-                    <div style="width: 100%;     overflow: scroll;">
+                    <div class="div-width-100">
                         <table>
                             <tr style="border-bottom-style: solid;">
                                 <th>Date</th>
                                 <th>User name</th>
                                 <th>Mobile No</th>
-                                <th>Wallet ID</th>
+                                <th>Role</th>
                                 <th>Transaction ID</th>
                                 <th>Transaction type</th>
                                 <th>Payment ID</th>
@@ -79,12 +77,12 @@
                                 <th>DMT Balance</th>
                                 <th>Non DMT Balance</th>
                             </tr>
-                            {% for passbook in passbook_list %}
+                            {% for passbook in queryset %}
                                 <tr>
                                     <td>{{ passbook.at_created }}</td>
                                     <td>{{ passbook.wallet.merchant.full_name }}</td>
                                     <td>{{ passbook.wallet.merchant.mobile_no }}</td>
-                                    <td>{{ passbook.wallet_id}}</td>
+                                    <td>{{ passbook.wallet.merchant.role.name }}</td>
                                     <td>{{ passbook.transaction_id}}</td>
                                     <td>{{ passbook.transaction.type }}</td>
                                     <td>{{ passbook.payment_request_id}}</td>
@@ -98,41 +96,25 @@
                                 </tr>
                             {% endfor %}
                         </table>
-
                         <br />
                     </div>
                         {% if is_paginated %}
-                            <div class="pagination-prev">
-                                {% if page_obj.has_previous %}
-                                    {% if filter_by and q %}
-                                        <a class="button red" href="{{ main_url }}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}">Prev</a>
-                                    {% elif q %}
-                                        <a class="button red" href="{{ main_url }}?page={{ page_obj.previous_page_number }}&q={{ q }}">Prev</a>
-                                    {% elif filter_by %}
-                                        <a class="button red" href="{{ main_url }}?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}">Prev</a>
-                                    {% else %}
-                                        <a href="{{ main_url }}?page={{ page_obj.previous_page_number }}" class="button red">Prev</a>
-                                    {% endif %}
-                                {% endif %}
-                            </div>
-                            <div class="pagination-next">
-                                {% if page_obj.has_next %}
-                                    {% if filter_by and q %}
-                                        <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}" class="button red">Next</a>
-                                    {% elif q %}
-                                        <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&q={{ q }}" class="button red">Next</a>
-                                    {% elif filter_by %}
-                                        <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}" class="button red">Next</a>
-                                    {% else %}
-                                        <a class="button red" href="{{ main_url }}?page={{ page_obj.next_page_number }}">Next</a>
-                                    {% endif %}
-                                {% endif %}
-                            </div>
+                            {% if has_prev_page %}
+                                <div class="pagination-prev">
+                                    <a href="{% url 'wallet:passbook-list' %}?{{prev_page_qs}}" class="button red" >Prev</a>
+                                </div>
+                            {% endif %}
+                            {% if has_next_page %}
+                                <div class="pagination-next">
+                                   <a href="{% url 'wallet:passbook-list' %}?{{next_page_qs}}" class="button red" >Next</a>
+                                </div>
+                            {% endif %}
                         {% endif %}
-                </div>
-
-            </div>
+                    </div>
                 <br>
+            </div>
+        </div>
+
 
     <!-- Modal to get Email -->
     <div id="get_email_modal" class="modal fade">
@@ -148,7 +130,6 @@
                         <input hidden name="period" value="{{ request.GET.period }}">
                         <div class="row" style="padding-left: 3rem;padding-top: 25px;">
                             <input name="q" hidden value="{{ q }}">
-                            <input name="filter_by" hidden value="{{ filter_by }}">
                             <div class="form-group col-sm-12">
                                 <label class="control-label"><b>Email list</b></label>
                                 <div>
@@ -179,114 +160,64 @@
 
 <script>
     window.current_payment_request = null
-     $('#distributor-id').select2();
-     $('#sub-distributor-id').select2();
+    $('#user_id').select2();
 
-
-     $("#distributor-id").change(function()
-     {
-        var id = $(this).val();
-
-        url = window.location.pathname
-        if (id!="")
-        {
-            url += '?distributor-id='+id
-
-        }
-        window.location.assign(url)
-     });
-
-       $("#sub-distributor-id").change(function(){
-            subdistributorId = $("#sub-distributor-id").val();
-            merchantId ="";
-            distributor_id = $("#distributor-id").val()
-             var selectedAll = $("#sub-distributor-id :selected").text();
-             var subdistributorAll ="";
-             if (selectedAll.includes("ALL"))
-             {
-                if(subdistributorId == -1)
-                {
-                    merchantId = subdistributorId;
-                    subdistributorId = "";
-                }
-             }
-             else
-             {
-                  merchantId = subdistributorId;
-                  subdistributorId = "";
-
-             }
-
-             url = window.location.pathname
-             if( distributor_id > 0)
-             {
-                url += '?merchant-id='+merchantId + '&distributor-id='+distributor_id ;
-             }
-             else
-             {
-                 url += '?merchant-id='+merchantId
-             }
-
-             if(subdistributorId != "")
-             {
-                url = window.location.pathname+ "?";
-                 if (distributor_id)
-                    url += "distributor-id="+distributor_id
-                url += "&sub-distributor-id="+subdistributorId
-             }
-
-
-             window.location.assign(url)
-
-
-         });
-
-    $('#search-btn').click(function(){
-        search = $('#search-txt').val();
-        {% if filter_by %}
-            url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}"
-        {% else %}
-            url = window.location.pathname + "?q=" + $('#search-txt').val()
-        {% endif %}
+    function q(){
+        userId = $("#user_id").val();
         startDate = $('#start-date').val();
         endDate = $('#end-date').val();
-         if(startDate!="" && endDate!="" )
-            {
 
-                url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
-            }
+        if($('#search-txt').val() != "") {
+            url = window.location.pathname + "?q=" + $('#search-txt').val();
+        } else {
+            url = window.location.pathname + '?';
+        }
+
+        if(userId !="") {
+            url += '&user_id=' + userId
+        }
+
+        if(startDate!="" && endDate!="" ) {
+            url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
+        }
 
         window.location.assign(url)
+    }
+    $("#user_id").change(q);
+
+    $('#search-btn').click(q);
+
+    $('#csv-download').click(function()
+    {
+        url = "{% url "wallet:passbook-csv" %}" + window.location.search;
+        window.location.assign(url)
     });
+    var startDate = $('#start-date').val();
+    var endDate = $('#end-date').val();
+    var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+    $('#start-date').datepicker({
+        uiLibrary: 'bootstrap4',
+        iconsLibrary: 'fontawesome',
+        format: 'yyyy-mm-dd',
 
-     var startDate = $('#start-date').val();
-         var endDate = $('#end-date').val();
-         var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
-        $('#start-date').datepicker({
-            uiLibrary: 'bootstrap4',
-            iconsLibrary: 'fontawesome',
-            format: 'yyyy-mm-dd',
-
-            maxDate: function () {
+        maxDate: function () {
             return $('#end-date').val();
-            }
-        }).on('change', function (ev)
-         {
+        }
+    }).on('change', function (ev) {
 
-            var start = $("#start-date").val();
-            var startD = new Date(start);
-            var end = $("#end-date").val();
-            var endD = new Date(end);
-            var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
+        var start = $("#start-date").val();
+        var startD = new Date(start);
+        var end = $("#end-date").val();
+        var endD = new Date(end);
+        var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
 
-            $("#days").val(diff);
+        $("#days").val(diff);
 
-            if(diff>31)
-            {
-               alert("date difference is greater than 31");
-               $('#start-date').val("");
-            }
-         });
+        if(diff>31) {
+            alert("date difference is greater than 31");
+            $('#start-date').val("");
+        } else if ($("#start-date").val() != '' && $("#end-date").val() != ''){q();}
+    });
 
 
         $('#end-date').datepicker({
@@ -312,7 +243,7 @@
             {
                alert("date difference is greater than 31");
                $('#end-date').val("");
-            }
+            } else if ($("#start-date").val() != '' && $("#end-date").val() != ''){q();}
          });
 
 
