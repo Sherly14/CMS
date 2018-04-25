@@ -44,12 +44,11 @@ def get_transactions_qs_with_dict(report_params):
     if p_filter == 'All':
         p_filter = report_params.get('period', "All")
 
-    p_filter =report_params.get('start_date')
-    p_filter = report_params.get('end_date')
+    start_date = report_params.get('start_date')
+    end_date = report_params.get('end_date')
 
-
-    if any (date in p_filter for date in('start_date','end_date')):
-        q_obj.add(Q(at_created__range=('start_date', 'end_date')),q_obj.connector)
+    if start_date is not None and end_date is not None:
+        q_obj.add(Q(at_created__range=(start_date, end_date)), q_obj.connector)
 
     if p_filter in ['Today', 'today']:
         q_obj.add(Q(at_created__gte=datetime.datetime.now().date()), q_obj.connector)
