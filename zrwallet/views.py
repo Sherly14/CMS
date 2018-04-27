@@ -125,8 +125,6 @@ class PassbookListView(ListView):
         if end_date:
             query_string['endDate'] = end_date
 
-        print urlencode(query_string)
-
         if page.has_next():
             query_string['page_no'] = page.next_page_number()
             context['next_page_qs'] = urlencode(query_string)

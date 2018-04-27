@@ -39,23 +39,18 @@
             <div class="div-width-100">
                 <br>
                 <div class="row">
-                        <div style="position: relative;">
+                    <div class="align-items-center div-width-100">
+                        <div class="float-left">
                             <input class="search" id="search-txt" type="search" name="search" value="{% if q %}{{ q }}{% endif %}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
                             <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
                         </div>
-                    &nbsp;&nbsp;&nbsp;
-                        <input type="button" id="search-btn" class="button red" value="Search">
-                    &nbsp;&nbsp;&nbsp;
-                        <a href="{% url 'wallet:passbook-list' %}" >Reset filters</a>
-                    &nbsp;&nbsp;&nbsp;
-                        <!--<button data-toggle="modal" data-target="#get_email_modal" class="button red">-->
-                            <!--DOWNLOAD CSV-->
-                        <!--</button>-->
-                        <input class="button red float-right" type="button" value="DOWNLOAD CSV" id="csv-download">
-
+                        <input type="button" id="search-btn" class="button red float-left mar_l_10" value="Search">
+                        <input class="button red float-right mar_l_10" type="button" value="DOWNLOAD CSV" id="csv-download">
+                        <a class="float-right" href="{% url 'wallet:passbook-list' %}" >Reset filters</a>
                         {% csrf_token %}
                         <input type="hidden" id="request_id" value="">
                     </div>
+                </div>
                 <br>
                 <div class="row">
                     <div class="fine">
