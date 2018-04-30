@@ -26,7 +26,7 @@ def get_transaction_qs(request):
     # queryset = WalletTransactions.objects.all().order_by('id')
     queryset = None
     if is_user_superuser(request):
-        queryset = WalletTransactions.objects.all()
+        queryset = WalletTransactions.objects.all().order_by('-id')
 
     elif request.user.zr_admin_user.role.name == DISTRIBUTOR:
         dist_subd = list(zrmappings_models.DistributorSubDistributor.objects.filter(
@@ -34,13 +34,13 @@ def get_transaction_qs(request):
         queryset = WalletTransactions.objects.filter(
             wallet_id__in=get_merchant_id_list_from_distributor(request.user.zr_admin_user.zr_user) +
             dist_subd + list(zrmappings_models.SubDistributorMerchant.objects.filter(
-                sub_distributor__in=dist_subd).values_list('merchant_id', flat=True)))
+                sub_distributor__in=dist_subd).values_list('merchant_id', flat=True))).order_by('-id')
 
     elif request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
         queryset = WalletTransactions.objects.filter(
             wallet_id__in=list(zrmappings_models.SubDistributorMerchant.objects.filter(
                 sub_distributor=request.user.zr_admin_user.zr_user).values_list(
-                'merchant_id', flat=True)))
+                'merchant_id', flat=True))).order_by('-id')
 
     q = request.GET.get('q')
     if q:

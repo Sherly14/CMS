@@ -5,8 +5,7 @@
 {% block content %}
     <style>
         td {
-            min-width : 100px;
-            padding-left: 25px;
+            min-width : 70px;
         }
     </style>
 
@@ -68,24 +67,34 @@
                                 <th>Transaction ID</th>
                                 <th>Transaction type</th>
                                 <th>Payment ID</th>
-                                <th>Transaction Value</th>
+                                <th>DMT Transaction</th>
+                                <th>Non DMT Transaction</th>
                                 <th>DMT Balance</th>
                                 <th>Non DMT Balance</th>
                             </tr>
                             {% for passbook in queryset %}
                                 <tr>
-                                    <td>{{ passbook.at_created }}</td>
+                                    <td style="width: 140px;">{{ passbook.at_created }}</td>
                                     <td>{{ passbook.wallet.merchant.full_name }}</td>
                                     <td>{{ passbook.wallet.merchant.mobile_no }}</td>
                                     <td>{{ passbook.wallet.merchant.role.name }}</td>
-                                    <td>{{ passbook.transaction_id}}</td>
-                                    <td>{{ passbook.transaction.type }}</td>
-                                    <td>{{ passbook.payment_request_id}}</td>
-                                    {% if passbook.dmt_balance != 0 %}
-                                        <td>{{ passbook.dmt_balance }}</td>
-                                    {% elif passbook.non_dmt_balance != 0 %}
-                                        <td>{{ passbook.non_dmt_balance }}</td>
+                                    {% if passbook.transaction_id == None %}
+                                        <td>NA</td>
+                                    {% else %}
+                                        <td>{{ passbook.transaction_id}}</td>
                                     {% endif %}
+                                    {% if passbook.transaction.type == None %}
+                                        <td>NA</td>
+                                    {% else %}
+                                        <td>{{ passbook.transaction.type}}</td>
+                                    {% endif %}
+                                    {% if passbook.payment_request_id == None %}
+                                        <td>NA</td>
+                                    {% else %}
+                                        <td>{{ passbook.payment_request_id}}</td>
+                                    {% endif %}
+                                    <td>{{ passbook.dmt_balance }}</td>
+                                    <td>{{ passbook.non_dmt_balance }}</td>
                                     <td>{{ passbook.dmt_closing_balance }}</td>
                                     <td>{{ passbook.non_dmt_closing_balance }}</td>
                                 </tr>
