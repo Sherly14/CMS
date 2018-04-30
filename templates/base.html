@@ -110,7 +110,7 @@
                 </li>
                 {% endif %}
 
-                {% if request.user.zr_admin_user.role.name != "RETAILER" and zr_user.role.name != "TERMINAL"%}
+                {% if request.user.zr_admin_user.role.name != "RETAILER" and zr_user.role.name != "TERMINAL" and request.user.zr_admin_user.role.name != "DISTRIBUTOR" and request.user.zr_admin_user.role.name != "SUBDISTRIBUTOR"%}
                 <li class="nav-item">
                     <a class="nav-link text-right" style="font-size:20px; margin-right:0px;" href="#">Loyalty - </a>
                 </li>
