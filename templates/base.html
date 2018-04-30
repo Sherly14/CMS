@@ -73,17 +73,48 @@
                 </li>
                 {% endif %}
 
-                <!--<ol class="sidebar-nav navbar-nav" id="chaps">-->
-                    <!--{% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}-->
-                    <!--<li class="nav-item ">-->
-                        <!--<a class="nav-link text-right" href="#">Loyalty Cards</a>-->
-                    <!--</li>-->
-                    <!--<ul class="assignments hide">-->
-                    <!--{% endif %}-->
-                        <!--&lt;!&ndash;add sublist elements&ndash;&gt;-->
+                {% if request.user.zr_admin_user.role.name != "RETAILER" %}
+                <li class="nav-item {% if url_name == 'transaction-list' %}active{% endif %}">
+                    <a class="nav-link text-right" href="{% url 'transaction:transaction-list' %}">Transactions</a>
+                </li>
+                <li class="nav-item {% if url_name == 'payment-request-list' %}active{% endif %}" style="position:relative;">
+                    <a class="nav-link text-right" href="{% url 'payment-requests:payment-request-list' %}">Payment Requests</a>
+                    <span class="badge badge-pill badge-outline">{{ request|payment_req_cnt }}</span></a>
+                </li>
+                <li class="nav-item {% if url_name == 'payment-request-sent-view' %}active{% endif %}">
+                    <a class="nav-link text-right " href="{% url 'payment-requests:payment-request-sent-view' %}">Payment request sent</a>
+                </li>
+                {% endif %}
 
-                    <!--</ul>-->
-                <!--</ol>-->
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
+                <li class="nav-item {% if url_name == 'display-commission' %}active{% endif %}">
+                    <a class="nav-link text-right " href="{% url 'commission:display-commission' %}">Commissions</a>
+                </li>
+                {% endif %}
+
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF"%}
+                <li class="nav-item {% if url_name == 'payment-list' %}active{% endif %}">
+                    <a class="nav-link text-right" href="{% url 'payment-requests:payment-list' %}">Payments</a>
+                </li>
+                {% endif %}
+
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
+                <li class="nav-item {% if url_name == 'passbook-list' %}active{% endif %}">
+                    <a class="nav-link text-right" href="{% url 'wallet:passbook-list' %}">Passbook</a>
+                </li>
+                {% endif %}
+
+                {% if request.user.zr_admin_user.role.name == "CHECKER" or request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
+                <li class="nav-item {% if url_name == 'kyc-requests' %}active{% endif %}">
+                    <a class="nav-link text-right" href="{% url 'user:kyc-requests' %}">KYC Requests</a>
+                </li>
+                {% endif %}
+
+                {% if request.user.zr_admin_user.role.name != "RETAILER" and zr_user.role.name != "TERMINAL"%}
+                <li class="nav-item">
+                    <a class="nav-link text-right" style="font-size:20px; margin-right:0px;" href="#">Loyalty - </a>
+                </li>
+                {% endif %}
 
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
                 <li class="nav-item {% if url_name == 'retailer-list' %}active{% endif %}">
@@ -133,43 +164,6 @@
                 {% endif %}
 
 
-
-                {% if request.user.zr_admin_user.role.name != "RETAILER" %}
-                <li class="nav-item {% if url_name == 'transaction-list' %}active{% endif %}">
-                    <a class="nav-link text-right" href="{% url 'transaction:transaction-list' %}">Transactions</a>
-                </li>
-                <li class="nav-item {% if url_name == 'payment-request-list' %}active{% endif %}" style="position:relative;">
-                    <a class="nav-link text-right" href="{% url 'payment-requests:payment-request-list' %}">Payment Requests</a>
-                    <span class="badge badge-pill badge-outline">{{ request|payment_req_cnt }}</span></a>
-                </li>
-                <li class="nav-item {% if url_name == 'payment-request-sent-view' %}active{% endif %}">
-                    <a class="nav-link text-right " href="{% url 'payment-requests:payment-request-sent-view' %}">Payment request sent</a>
-                </li>
-                {% endif %}
-
-                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
-                <li class="nav-item {% if url_name == 'display-commission' %}active{% endif %}">
-                    <a class="nav-link text-right " href="{% url 'commission:display-commission' %}">Commissions</a>
-                </li>
-                {% endif %}
-
-                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF"%}
-                <li class="nav-item {% if url_name == 'payment-list' %}active{% endif %}">
-                    <a class="nav-link text-right" href="{% url 'payment-requests:payment-list' %}">Payments</a>
-                </li>
-                {% endif %}
-
-                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
-                <li class="nav-item {% if url_name == 'passbook-list' %}active{% endif %}">
-                    <a class="nav-link text-right" href="{% url 'wallet:passbook-list' %}">Passbook</a>
-                </li>
-                {% endif %}
-
-                {% if request.user.zr_admin_user.role.name == "CHECKER" or request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
-                <li class="nav-item {% if url_name == 'kyc-requests' %}active{% endif %}">
-                    <a class="nav-link text-right" href="{% url 'user:kyc-requests' %}">KYC Requests</a>
-                </li>
-                {% endif %}
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "RETAILER" and zr_user.role.name != "TERMINAL" %}
                 <li class="nav-item {% if url_name == 'offer-list' %}active{% endif %}">
                     <a class="nav-link text-right" href="{% url 'user:offer-list' %}">Offers</a>

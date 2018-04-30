@@ -75,7 +75,7 @@
                             {% for passbook in queryset %}
                                 <tr>
                                     <td style="width: 140px;">{{ passbook.at_created }}</td>
-                                    <td>{{ passbook.wallet.merchant.full_name }}</td>
+                                    <td style="width: 140px;">{{ passbook.wallet.merchant.full_name }}</td>
                                     <td>{{ passbook.wallet.merchant.mobile_no }}</td>
                                     <td>{{ passbook.wallet.merchant.role.name }}</td>
                                     {% if passbook.transaction_id == None %}
