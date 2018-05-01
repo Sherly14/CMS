@@ -7,7 +7,7 @@ from django.utils import timezone
 from zrtransaction.utils import constants
 from zruser.models import ZrUser
 from zrwallet import models as zw_models
-from zrwallet.models import Passbook, Wallet
+from zrwallet.models import Wallet
 
 logger = logging.getLogger(__name__)
 
