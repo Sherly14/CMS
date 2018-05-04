@@ -319,6 +319,3 @@ a.button.red{
     width:42px;
     padding:5px;
 }
-.button.green.payment.change_request_id, .button.red.payment.change_request_id{
-font-size: 90%; margin: 1px;display:inline-block;width:42px;padding:5px;
-}
