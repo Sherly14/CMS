@@ -248,7 +248,7 @@ elif SETUP == 'prod':
 else:
     # CELERY_BROKER_URL = 'amqp://localhost'
     BROKER_HOST = 'localhost'
-    BROKER_PORT = 6379
+    BROKER_PORT = 5672
 
     UPI_URL = 'http://114.143.22.139/'
     UPI_API_PASSWORD = "EE560B75E235E2180107D0160"
