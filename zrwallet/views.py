@@ -2,254 +2,174 @@
 from __future__ import unicode_literals
 
 import csv
-import datetime
-import random
-import string
+from urllib import urlencode
 
 from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger
 from django.db.models import Q
-from django.http import JsonResponse, HttpResponse
+from django.db import transaction
+from django.http import JsonResponse, HttpResponse, Http404
 from django.views.generic.list import ListView
+from django.core.paginator import EmptyPage, Paginator, PageNotAnInteger
+
 
 from common_utils.date_utils import last_week_range, last_month
 from common_utils.user_utils import is_user_superuser
-from zrwallet.models import Passbook
+from zrwallet.models import Wallet, WalletTransactions
 from zruser.models import ZrUser
 from zrmapping import models as zrmappings_models
+from zruser.mapping import SUBDISTRIBUTOR, DISTRIBUTOR, MERCHANT
+from common_utils.transaction_utils import get_merchant_id_list_from_distributor
 
 
-def get_passbook_qs(request, is_request_dict=False):
-    if is_request_dict:
-        filter_by = request.get('filter')
-        q = request.get('q')
-    else:
-        filter_by = request.GET.get('filter')
-        q = request.GET.get('q')
+def get_transaction_qs(request):
+    queryset = None
+    if is_user_superuser(request):
+        queryset = WalletTransactions.objects.exclude(wallet_id=None).order_by('-id')
 
-    queryset = Passbook.objects.all()
+    elif request.user.zr_admin_user.role.name == DISTRIBUTOR:
+        dist_subd = list(zrmappings_models.DistributorSubDistributor.objects.filter(
+            distributor=request.user.zr_admin_user.zr_user).values_list('sub_distributor_id', flat=True))
+        queryset = WalletTransactions.objects.filter(
+            wallet_id__in=get_merchant_id_list_from_distributor(request.user.zr_admin_user.zr_user) +
+            dist_subd + list(zrmappings_models.SubDistributorMerchant.objects.filter(
+                sub_distributor__in=dist_subd).values_list('merchant_id', flat=True))
+            + list(ZrUser.objects.filter(id=request.user.zr_admin_user.zr_user.id).values_list(
+                'id', flat=True))).order_by('-id')
+
+    elif request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
+        queryset = WalletTransactions.objects.filter(
+            wallet_id__in=list(zrmappings_models.SubDistributorMerchant.objects.filter(
+                sub_distributor=request.user.zr_admin_user.zr_user).values_list(
+                'merchant_id', flat=True))
+            + list(ZrUser.objects.filter(id=request.user.zr_admin_user.zr_user.id).values_list(
+                'id', flat=True))).order_by('-id')
+
+    q = request.GET.get('q')
     if q:
-        query = Q(
-            user__mobile_no__contains=q
-        ) | Q(
-            user__first_name__icontains=q
-        ) | Q(
-            user__last_name__icontains=q
-        )
-        queryset = queryset.filter(query)
+        query_filter = Q(wallet__merchant__first_name__icontains=q) | Q(wallet__merchant__last_name__icontains=q) | \
+                       Q(wallet__merchant__mobile_no__contains=q)
 
-    if filter_by == 'last_week':
-        queryset = queryset.filter(at_created__range=last_week_range())
-    elif filter_by == 'last_month':
-        queryset = queryset.filter(at_created__range=last_month())
-    elif filter_by == 'today':
-        queryset = queryset.filter(at_created__date__gte=datetime.date.today())
+        queryset = queryset.filter(
+            query_filter
+        )
 
     start_date = request.GET.get('startDate')
     end_date = request.GET.get('endDate')
-    distributor_id = request.GET.get('distributor-id')
-    merchant_id = request.GET.get('merchant-id')
-    sub_distributor_id = request.GET.get('sub-distributor-id')
-
-    if merchant_id != None and int(merchant_id) > 0:
-        queryset = Passbook.objects.filter(user_id=merchant_id)
-
-    elif distributor_id != None and int(distributor_id) > 0:
-        distributorMerchantList = []
-        distributorSubdistributorList = []
-        SubDistributorMerchantList = []
-        subDsitributorMerchnat = []
-        distributorMerchant = zrmappings_models.DistributorMerchant.objects.filter(distributor_id=distributor_id)
-
-        if distributorMerchant:
-            for merchantData in distributorMerchant:
-                distributorMerchantList.append(merchantData.merchant_id)
-
-        distributorSubdistributor = zrmappings_models.DistributorSubDistributor.objects.filter(distributor_id=distributor_id)
-
-        if distributorSubdistributor:
-            for subDsitributor in distributorSubdistributor:
-                distributorSubdistributorList.append(subDsitributor.sub_distributor_id)
-
-        if distributorSubdistributorList:
-            subDsitributorMerchnat = zrmappings_models.SubDistributorMerchant.objects.filter(sub_distributor_id__in=distributorSubdistributorList)
-
-        if subDsitributorMerchnat:
-             for subMerchant in subDsitributorMerchnat:
-                 SubDistributorMerchantList.append(subMerchant.merchant_id)
-
-        userDsitributorMerchant =Passbook.objects.filter(user_id__in=distributorMerchantList)
-        userSubDistributorMerchant =Passbook.objects.filter(user_id__in=SubDistributorMerchantList)
-
-        merchantDataList = userDsitributorMerchant| userSubDistributorMerchant
-
-        queryset = merchantDataList
-
-    if distributor_id != None and  merchant_id == "-1":
-        distmerchantlist = []
-        DistM = zrmappings_models.DistributorMerchant.objects.filter(distributor_id=distributor_id)
-
-        if DistM:
-            for dist in DistM:
-                distmerchantlist.append(dist.merchant_id)
-
-        if distmerchantlist:
-            queryset = Passbook.objects.filter(user_id__in=distmerchantlist)
-
-    if start_date != None and end_date != None:
+    user_id = request.GET.get('user_id')
+    if start_date is not None and end_date is not None:
         queryset = queryset.filter(at_created__range=(start_date, end_date))
 
-    return queryset.order_by('-at_created')
+    if user_id is not None and int(user_id) > 0:
+        queryset = queryset.filter(wallet_id=user_id)
+
+    return queryset
 
 
-class PaymentListView(ListView):
+class PassbookListView(ListView):
+    template_name = 'zwallet/passbook_list.html'
     context_object_name = 'passbook_list'
     paginate_by = 10
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, *args, **kwargs):
+        context = super(PassbookListView, self).get_context_data()
+        user_list = None
         filter_by = self.request.GET.get('filter', 'all')
         q = self.request.GET.get('q')
+        queryset = self.get_queryset()
+        pg_no = self.request.GET.get('page_no', 1)
         start_date = self.request.GET.get('startDate')
         end_date = self.request.GET.get('endDate')
-        distributor_list = ZrUser.objects.filter(role_id=2)
-        merchant_id = self.request.GET.get('merchant-id')
-        distributor_id = self.request.GET.get('distributor-id')
-        sub_distributor = []
-        sub_distributor_list = []
-        sub_dist_merchant = []
-        merchant = []
-        subDistMerchant = {}
-        sub_distributor_id = self.request.GET.get('sub-distributor-id')
+        user_id = self.request.GET.get('user_id')
 
-        context = super(PaymentListView, self).get_context_data(**kwargs)
+        if is_user_superuser(self.request):
+            user_list = WalletTransactions.objects.all().distinct('wallet_id')
 
-        queryset = self.get_queryset()
-       # if not queryset:
-        #    context['filter_by'] = filter_by
-         #   context['q'] = q
-          #  return context
+        elif self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
+            dist_subd = list(zrmappings_models.DistributorSubDistributor.objects.filter(
+                distributor=self.request.user.zr_admin_user.zr_user).values_list('sub_distributor_id', flat=True))
+            print 'dist_subd', dist_subd
+            user_list = WalletTransactions.objects.filter(
+                wallet_id__in=get_merchant_id_list_from_distributor(self.request.user.zr_admin_user.zr_user) +
+                dist_subd + list(zrmappings_models.SubDistributorMerchant.objects.filter(
+                    sub_distributor__in=dist_subd).values_list('merchant_id', flat=True))
+                + list(ZrUser.objects.filter(id=self.request.user.zr_admin_user.zr_user.id).values_list(
+                    'id', flat=True))).distinct('wallet_id')
 
-        paginator = Paginator(queryset, self.paginate_by)
-        page = self.request.GET.get('page', 1)
-
-        try:
-            queryset = paginator.page(page)
-        except PageNotAnInteger:
-            queryset = paginator.page(1)
-        from django.core.urlresolvers import reverse
-
-        sub_distributor = zrmappings_models.DistributorSubDistributor.objects.filter(distributor=distributor_id)
-        merchant = zrmappings_models.DistributorMerchant.objects.filter(distributor=distributor_id)
-
+        elif self.request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
+            user_list = WalletTransactions.objects.filter(
+                wallet_id__in=list(zrmappings_models.SubDistributorMerchant.objects.filter(
+                    sub_distributor=self.request.user.zr_admin_user.zr_user).values_list(
+                    'merchant_id', flat=True))
+                + list(ZrUser.objects.filter(id=self.request.user.zr_admin_user.zr_user.id).values_list(
+                    'id', flat=True))).distinct('wallet_id')
+        if q:
+            context['q'] = q
         if start_date:
             context['startDate'] = start_date
-
         if end_date:
             context['endDate'] = end_date
+        if user_id:
+            context['user_id'] = int(user_id)
+        if user_list:
+            context['user_list'] = user_list
 
+        p = Paginator(queryset, self.paginate_by)
+        try:
+            page = p.page(pg_no)
+        except EmptyPage:
+            raise Http404
 
-        if sub_distributor:
-            for subdist in sub_distributor:
-                sub_distributor_list.append(subdist.sub_distributor_id)
-
-        if sub_distributor_list:
-            sub_dist_merchant = zrmappings_models.SubDistributorMerchant.objects.filter(sub_distributor_id__in=sub_distributor_list)
-
-        if sub_dist_merchant:
-            for sub_merchant in sub_dist_merchant:
-                if sub_merchant.sub_distributor.id in subDistMerchant:
-                    subDistMerchant[sub_merchant.sub_distributor.id].append([sub_merchant.sub_distributor.first_name, sub_merchant.merchant.id,sub_merchant.merchant.first_name])
-                else:
-                    subDistMerchant[sub_merchant.sub_distributor.id] = [[sub_merchant.sub_distributor.first_name, sub_merchant.merchant.id,sub_merchant.merchant.first_name]]
-
-        if merchant:
-            for distmerchant in merchant:
-                if -1 in subDistMerchant:
-                    subDistMerchant[-1].append(["MERCHANTS", distmerchant.merchant.id, distmerchant.merchant.first_name])
-                else:
-                    subDistMerchant[-1] = [["MERCHANTS", distmerchant.merchant.id, distmerchant.merchant.first_name]]
-
-        if distributor_list:
-            context['distributor_list'] = distributor_list
-
-        context['main_url'] = reverse('wallet:passbook-list')
-        context['page_obj'] = queryset
-        context['filter_by'] = filter_by
-        context['q'] = q
+        context['queryset'] = page.object_list
         context['url_name'] = "passbook-list"
 
-        if subDistMerchant:
-            context['subDistMerchant'] = subDistMerchant
+        query_string = {}
+        if q:
+            query_string['q'] = q
+        if user_id:
+            query_string['user_id'] = int(user_id)
+        if start_date:
+            query_string['startDate'] = start_date
+        if end_date:
+            query_string['endDate'] = end_date
 
-        if merchant_id:
-            context['merchant_id'] = int(merchant_id)
+        if page.has_next():
+            query_string['page_no'] = page.next_page_number()
+            context['next_page_qs'] = urlencode(query_string)
+            context['has_next_page'] = page.has_next()
+        if page.has_previous():
+            query_string['page_no'] = page.previous_page_number()
+            context['prev_page_qs'] = urlencode(query_string)
+            context['has_prev_page'] = page.has_previous()
 
-        if distributor_id:
-            context['distributor_id'] = int(distributor_id)
-
-        if sub_distributor_id:
-            context['sub_distributor_id'] = int(sub_distributor_id)
-
-        if merchant_id:
-            context['sub_distributor_id'] = int(merchant_id)
-
-        context['is_superuser'] = is_user_superuser(self.request)
         return context
 
     def get_queryset(self):
-        return get_passbook_qs(self.request)
+        return get_transaction_qs(self.request)
 
 
-def get_passbook_report_csv(params):
-    qs = get_passbook_qs(params, is_request_dict=True)
+def get_passbook_report_csv(request):
+    passbook_qs = get_transaction_qs(request)
     response = HttpResponse(content_type='text/csv')
-    unique_name = 'passbook-' + datetime.datetime.now().strftime("%d-%m-%YT%H:%M:%S-") + ''.join(
-        random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
-    report_file_path = settings.REPORTS_PATH + "/" + unique_name + ".csv"
-    response['Content-Disposition'] = 'attachment; filename="{}"'.format(report_file_path)
-
-    with open(report_file_path, 'w') as csvfile:
-        writer = csv.writer(csvfile)
-
+    response['Content-Disposition'] = 'attachment; filename="passbook.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['Date', 'User name', 'Mobile No', 'Role', 'Transaction ID', 'Transaction type',
+                     'Payment ID', 'Transaction Value', 'DMT Balance', 'Non DMT Balance'])
+    for passbook in passbook_qs:
         writer.writerow([
-            "User name",
-            "Mobile No",
-            "DMT opening_balance",
-            "DMT opening_wallet_balance",
-            "DMT wallet_credit",
-            "DMT wallet_debit",
-            "DMT closing balance",
-            "DMT closing wallet balance",
-            "Non DMT opening balance",
-            "Non DMT opening wallet balance",
-            "Non DMT wallet credit",
-            "Non DMT wallet debit",
-            "Non DMT closing balance",
-            "Non DMT closing wallet balance",
+            passbook.at_created,
+            passbook.wallet.merchant.full_name,
+            passbook.wallet.merchant.mobile_no,
+            passbook.wallet.merchant.role.name,
+            passbook.transaction_id,
+            passbook.transaction.type if passbook.transaction is not None else '',
+            passbook.payment_request_id,
+            passbook.dmt_balance if passbook.dmt_balance != 0 else passbook.non_dmt_balance,
+            passbook.dmt_closing_balance,
+            passbook.non_dmt_closing_balance
         ])
-        paginator = Paginator(qs, 1)
-        for x in paginator.page_range:
-            page_data = paginator.page(x)
-            for passbook in page_data:
-                writer.writerow(
-                    [
-                        passbook.user.full_name,
-                        passbook.user.mobile_no,
-                        passbook.dmt_opening_balance,
-                        passbook.dmt_opening_wallet_balance,
-                        passbook.dmt_wallet_credit,
-                        passbook.dmt_wallet_debit,
-                        passbook.dmt_closing_balance,
-                        passbook.dmt_closing_wallet_balance,
-                        passbook.non_dmt_opening_balance,
-                        passbook.non_dmt_opening_wallet_balance,
-                        passbook.non_dmt_wallet_credit,
-                        passbook.non_dmt_wallet_debit,
-                        passbook.non_dmt_closing_balance,
-                        passbook.non_dmt_closing_wallet_balance,
-                    ]
-                )
-    return report_file_path
+
+    return response
 
 
 def payments_csv_download(request):
@@ -266,4 +186,31 @@ def payments_csv_download(request):
     from zrwallet import tasks as passbook_celery_tasks
     # passbook_celery_tasks.send_passbook_report(report_params)
     passbook_celery_tasks.send_passbook_report.apply_async(args=[report_params])
+    return JsonResponse({"success": True})
+
+
+@transaction.atomic
+def set_closing_balance(request):
+    zr_wallet = Wallet.objects.all()
+    for row in zr_wallet:
+        mid = row.merchant_id
+
+        dmt_closing_balance = row.dmt_balance
+        non_dmt_closing_balance = row.non_dmt_balance
+
+        dmt = 0
+        non_dmt = 0
+
+        mid_transactions = WalletTransactions.objects.all().filter(wallet=mid).order_by('-id')
+        if mid_transactions:
+
+            for r in mid_transactions:
+                r.dmt_closing_balance = dmt_closing_balance + (-1 * dmt)
+                r.non_dmt_closing_balance = non_dmt_closing_balance + (-1 * non_dmt)
+                dmt = r.dmt_balance
+                non_dmt = r.non_dmt_balance
+                dmt_closing_balance = r.dmt_closing_balance
+                non_dmt_closing_balance = r.non_dmt_closing_balance
+                r.save()
+
     return JsonResponse({"success": True})
