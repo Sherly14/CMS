@@ -972,8 +972,9 @@ class DashBoardView(ListView):
             elif period == 'last-month':
                dt_filter['at_created__range'] = date_utils.last_month()
 
-            if start_date != None and end_date != None:
-                dt_filter['at_created__range']=(start_date, end_date)
+            if start_date is not None and end_date is not None:
+                dt_filter['at_created__date__gte'] = start_date
+                dt_filter['at_created__date__lte'] = end_date
 
             context = super(DashBoardView, self).get_context_data(*args, **kwargs)
             if is_user_superuser(self.request):
