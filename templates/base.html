@@ -67,7 +67,7 @@
                  </li>
                 {% endif %}
 
-                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "DISTRIBUTOR" %}
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR"%}
                 <li class="nav-item {% if url_name == 'merchant-list' %}active{% endif %}">
                      <a class="nav-link text-right" href="{% url 'user:merchant-list' %}">Merchants</a>
                 </li>
@@ -86,7 +86,7 @@
                 </li>
                 {% endif %}
 
-                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
                 <li class="nav-item {% if url_name == 'display-commission' %}active{% endif %}">
                     <a class="nav-link text-right " href="{% url 'commission:display-commission' %}">Commissions</a>
                 </li>
