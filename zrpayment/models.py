@@ -77,7 +77,8 @@ class MerchantPaymentRequest(RowInfo):
         return '%s - %s - %s' % (self.merchant, self.supervisor, self.amount)
 
 
-class PaymentRequest(RowInfo):
+class \
+        PaymentRequest(RowInfo):
     """
     For payment request from merchant or distributor
     """

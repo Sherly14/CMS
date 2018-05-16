@@ -135,13 +135,13 @@
                                     {% endif %}
                                     {% if page_obj.has_next %}
                                         {% if filter_by and q %}
-                                            <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}">next</a>
+                                            <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}">Next</a>
                                         {% elif q %}
-                                            <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&q={{ q }}">next</a>
+                                            <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&q={{ q }}">Next</a>
                                         {% elif filter_by %}
-                                            <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}">next</a>
+                                            <a href="{{ main_url }}?page={{ page_obj.next_page_number }}&filter={{ filter_by }}">Next</a>
                                         {% else %}
-                                            <a href="{{ main_url }}?page={{ page_obj.next_page_number }}">next</a>
+                                            <a href="{{ main_url }}?page={{ page_obj.next_page_number }}">Next</a>
                                         {% endif %}
                                     {% endif %}
                                 </span>
