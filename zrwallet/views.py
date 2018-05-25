@@ -154,7 +154,7 @@ def get_passbook_report_csv(request):
     writer = csv.writer(response)
     writer.writerow(['Date', 'User name', 'Mobile No', 'Role', 'Transaction ID', 'Transaction type',
                      'Payment ID', 'Transaction Value', 'DMT Balance', 'Non DMT Balance',
-                     'Bank UTR', 'Sender Mobile', 'Beneficiary Mobile', 'Beneficiary Account No', 'Payment Status'
+                     'Bank UTR', 'Sender Mobile', 'Beneficiary Mobile', 'Beneficiary Account No', 'Transaction Status'
                      ])
     for passbook in passbook_qs:
         try:
