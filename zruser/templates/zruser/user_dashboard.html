@@ -293,6 +293,7 @@
                         {% csrf_token %}
                         <input id="from_bank" name="from_bank" value="100" hidden>
                         <input id="from_account_no" name="from_account_no" value="0" hidden>
+
                         <div class="row" style="padding-left: 3rem;">
                              <div class="form-group col-sm-6">
                                 <label class="control-label"><b>To bank</b></label>
@@ -736,6 +737,8 @@
                 $('#modal_message').html("");
 
                 // Create an FormData object
+                $('#from_bank').val('1');
+                $('#from_account_no').val('0');
                 var data = new FormData($('#challan_request_form')[0]);
                 if ( $('#to_bank_other').val() != '' ) {
                     data.set('to_bank', $('#to_bank_other').val())
