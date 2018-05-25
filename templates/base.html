@@ -107,7 +107,7 @@
                 </li>
                 {% endif %}
 
-                {% if request.user.zr_admin_user.role.name == "CHECKER" or request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
+                {% if request.user.zr_admin_user.role.name == "CHECKER" or request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" and request.user.zr_admin_user.role.name != "OPERATIONS" %}
                 <li class="nav-item {% if url_name == 'kyc-requests' %}active{% endif %}">
                     <a class="nav-link text-right" href="{% url 'user:kyc-requests' %}">KYC Requests</a>
                 </li>

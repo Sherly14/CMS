@@ -983,7 +983,7 @@ class DashBoardView(ListView):
                     is_settled=False,
                     **dt_filter
                 ).aggregate(commission=Sum(
-                    F('net_commission') + (F('user_tds') * F('net_commission')) / 100
+                    F('user_commission') - F('user_tds')
                 ))['commission']
             else:
                 req_usr = self.request.user.zr_admin_user
@@ -992,7 +992,7 @@ class DashBoardView(ListView):
                     is_settled=False,
                     **dt_filter
                 ).aggregate(commission=Sum(
-                    F('net_commission') + (F('user_tds') * F('net_commission')) / 100
+                    F('user_commission') - F('user_tds')
                 ))['commission']
 
             total_commission = total_commission if total_commission else 0
@@ -1007,7 +1007,7 @@ class DashBoardView(ListView):
                     commission_user=None,
                     is_settled=False,
                 ).aggregate(
-                    value=Sum('user_commission')
+                    value=Sum(F('user_commission') - F('user_tds'))
                 )['value'] or 0
 
                 context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
@@ -1016,7 +1016,7 @@ class DashBoardView(ListView):
                     is_settled=False,
                     **dt_filter
                 ).aggregate(
-                    value=Sum('user_commission')
+                    value=Sum(F('user_commission') - F('user_tds'))
                 )['value'] or 0
 
                 context["total_recharge_commission_value"] = commission_models.Commission.objects.filter(
@@ -1025,7 +1025,7 @@ class DashBoardView(ListView):
                     is_settled=False,
                     **dt_filter
                 ).aggregate(
-                    value=Sum('user_commission')
+                    value=Sum(F('user_commission') - F('user_tds'))
                 )['value'] or 0
 
             else:
@@ -1037,7 +1037,7 @@ class DashBoardView(ListView):
                     commission_user=self.request.user.zr_admin_user.zr_user,
                     is_settled=False,
                 ).aggregate(
-                    value=Sum('user_commission')
+                    value=Sum(F('user_commission') - F('user_tds'))
                 )['value'] or 0
 
                 context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
@@ -1046,7 +1046,7 @@ class DashBoardView(ListView):
                     is_settled=False,
                     **dt_filter
                 ).aggregate(
-                    value=Sum('user_commission')
+                    value=Sum(F('user_commission') - F('user_tds'))
                 )['value'] or 0
 
                 context["total_recharge_commission_value"] = commission_models.Commission.objects.filter(
@@ -1055,7 +1055,7 @@ class DashBoardView(ListView):
                     is_settled=False,
                     **dt_filter
                 ).aggregate(
-                    value=Sum('user_commission')
+                    value=Sum(F('user_commission') - F('user_tds'))
                 )['value'] or 0
 
                 dt_filter['user__id__in'] = merchants
@@ -1147,8 +1147,9 @@ class DashBoardView(ListView):
             context['payment_mods'] = PaymentMode.objects.all()
             context['is_user_superuser'] = is_user_superuser(request=self.request)
             context['bank'] = Bank.objects.filter(
-                bank_code__in=settings.TO_BANK
+                bank_code__in=[bank for bank, account in settings.TO_BANK.items()]
             )
+            context['bank_account'] = json.dumps(settings.TO_BANK)
 
             if start_date:
                 context['startDate'] = start_date

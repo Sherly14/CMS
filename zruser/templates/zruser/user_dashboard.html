@@ -87,10 +87,10 @@
                                     Non-DMT Balance : {{ user_wallet.non_dmt_balance }}
                                 </span>
                         </div>
-                        <button data-toggle="modal" data-target="#modal" class="title m-b-md button red downloadcsv mr-5" style="margin-bottom: 1em;">
+                        <button data-toggle="modal" data-target="#modal" class="title m-b-md button red downloadcsv" style="margin: 0.8em auto;">
                             Request Balance
                         </button>
-                        <button data-toggle="modal" data-target="#top_up_modal" class="title m-b-md button red downloadcsv mr-5" style="margin-bottom: 1em;">
+                        <button data-toggle="modal" data-target="#top_up_modal" class="title m-b-md button red downloadcsv" style="margin: 0em auto 0.8em auto;">
                             Top-Up
                         </button>
                     </div>
@@ -301,7 +301,15 @@
                                         {% for b in bank %}
                                             <option value="{{ b.pk }}">{{ b.bank_name }}</option>
                                         {% endfor %}
+                                        <option value="Other">Other</option>
                                     </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group col-sm-6" id="to_account_no_form" style="display:none">
+                                <label class="control-label"><b>Provide your Bank Name</b></label>
+                                <div>
+                                    <input type="text" class="form-control" name="to_bank_other" id="to_bank_other" style="box-shadow: 0px 0px;border-style: solid;">
                                 </div>
                             </div>
 
@@ -364,10 +372,10 @@
                             <input type="text" id="document" name="document" value="" hidden>
                         </div>
 
-                        <div class="row container" style="padding-left: 3rem;">
-                            <div class="form-group col-sm-9"></div>
-                            <div class="form-group col-sm-3" style="    position: relative;left: 13%;">
-                                <button type="submit" id="submit_request" class="pull-right submit_request button red downloadcsv mr-5" style="background-color: red" type="submit">
+                        <div class="row" style="padding-left: 3rem;">
+                            <div class="form-group col-sm-6"></div>
+                            <div class="form-group col-sm-6">
+                                <button type="submit" id="submit_request" class="pull-right submit_request button red downloadcsv" type="submit">
                                     Request
                                 </button>
                             </div>
@@ -600,7 +608,29 @@
             }
         });
 
-        jQuery.validator.addMethod("dmt_non_dmt_sum_valid", function(value, element, param) {
+        function bank_account() {
+            var bank_account = JSON.parse('{{bank_account | escapejs }}');
+            var bankVal = $('#to_bank').val();
+            var code;
+            {% for b in bank %}
+               if ( bankVal == "{{ b.pk }}") {
+                   code = '{{ b.bank_code }}'
+                   $('#to_account_no_form').hide();
+               }
+            {% endfor %}
+            $('#to_account_no').val(bank_account[code]);
+            if($('#to_bank').val() == 'Other') {
+                $('#to_account_no_form').show();
+            } else {
+                $('#to_account_no_form').hide();
+            }
+        }
+
+        $(document).ready(bank_account);
+
+        $('body').on('change', '#to_bank', bank_account);
+
+        var amount_validator = function () {
             non_dmt_val = parseInt($('#non_dmt_amount').val())
             dmt_val = parseInt($('#dmt_amount').val())
             amount_val = parseInt($('#amount').val())
@@ -614,10 +644,10 @@
                 $('#alert_msg').show()
                 return false
             }
-
-        }, function(data, data2, data3) {
-
-        });
+        }
+        $('body').on('keyup', '#amount', amount_validator);
+        $('body').on('keyup', '#non_dmt_amount', amount_validator);
+        $('body').on('keyup', '#dmt_amount', amount_validator);
 
         var challan_request_form = $('#challan_request_form');
         var sign_in_error = $('.alert-danger', challan_request_form);
@@ -708,6 +738,10 @@
 
                 // Create an FormData object
                 var data = new FormData($('#challan_request_form')[0]);
+                if ( $('#to_bank_other').val() != '' ) {
+                    data.set('to_bank', $('#to_bank_other').val())
+                }
+                data.delete('to_bank_other');
                 {# console.log(data);#}
                 $('#submit_request').prop('disabled', true);
                 $('#submit_request').addClass('disabled');

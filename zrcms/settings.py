@@ -269,4 +269,4 @@ try:
 except ImportError:
     pass
 
-TO_BANK = ['UTIB', 'ICIC', 'INDB']
+TO_BANK = {'UTIB': '918020030276406', 'ICIC': '001105026711', 'INDB': '201001458436'}

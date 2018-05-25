@@ -5,7 +5,7 @@
 {% block content %}
     <style>
         td {
-            min-width : 70px;
+            min-width : 80px;
         }
     </style>
 
@@ -71,6 +71,11 @@
                                 <th>Non DMT Transaction</th>
                                 <th>DMT Balance</th>
                                 <th>Non DMT Balance</th>
+                                <th>Bank UTR</th>
+                                <th>Sender Mobile</th>
+                                <th>Beneficiary Mobile</th>
+                                <th>Beneficiary Account No</th>
+                                <th>Payment Status</th>
                             </tr>
                             {% for passbook in queryset %}
                                 <tr>
@@ -78,17 +83,17 @@
                                     <td style="width: 140px;">{{ passbook.wallet.merchant.full_name }}</td>
                                     <td>{{ passbook.wallet.merchant.mobile_no }}</td>
                                     <td>{{ passbook.wallet.merchant.role.name }}</td>
-                                    {% if passbook.transaction_id == None %}
+                                    {% if passbook.transaction_id is None %}
                                         <td>NA</td>
                                     {% else %}
                                         <td>{{ passbook.transaction_id}}</td>
                                     {% endif %}
-                                    {% if passbook.transaction.type == None %}
+                                    {% if passbook.transaction.type is None %}
                                         <td>NA</td>
                                     {% else %}
                                         <td>{{ passbook.transaction.type}}</td>
                                     {% endif %}
-                                    {% if passbook.payment_request_id == None %}
+                                    {% if passbook.payment_request_id is None %}
                                         <td>NA</td>
                                     {% else %}
                                         <td>{{ passbook.payment_request_id}}</td>
@@ -97,6 +102,31 @@
                                     <td>{{ passbook.non_dmt_balance }}</td>
                                     <td>{{ passbook.dmt_closing_balance }}</td>
                                     <td>{{ passbook.non_dmt_closing_balance }}</td>
+                                    {% if passbook.transaction.transaction_response_json.data.bank_ref_num is None %}
+                                        <td>NA</td>
+                                    {% else %}
+                                        <td>{{ passbook.transaction.transaction_response_json.data.bank_ref_num }}</td>
+                                    {% endif %}
+                                    {% if passbook.transaction.customer is None %}
+                                        <td>NA</td>
+                                    {% else %}
+                                        <td>{{ passbook.transaction.customer}}</td>
+                                    {% endif %}
+                                    {% if passbook.transaction.beneficiary is None %}
+                                        <td>NA</td>
+                                    {% else %}
+                                        <td>{{ passbook.transaction.beneficiary}}</td>
+                                    {% endif %}
+                                    {% if passbook.transaction.beneficiary_user.account_no is None %}
+                                        <td>NA</td>
+                                    {% else %}
+                                        <td>{{ passbook.transaction.beneficiary_user.account_no}}</td>
+                                    {% endif %}
+                                    {% if passbook.transaction.status is None %}
+                                        <td>NA</td>
+                                    {% else %}
+                                        <td>{{ passbook.transaction.status}}</td>
+                                    {% endif %}
                                 </tr>
                             {% endfor %}
                         </table>
