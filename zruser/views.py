@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import os
 import csv
 import datetime
 import requests
@@ -46,12 +47,20 @@ from zruser.utils.constants import DEFAULT_DISTRIBUTOR_MOBILE_NUMBER
 from zrwallet import models as zrwallet_models
 from django.contrib.auth.models import User
 from itertools import chain
+from zrpayment.forms import forms as zr_payment_forms
 
+from common_utils.transaction_utils import get_sub_distributor_merchant_id_list_from_distributor, \
+    get_merchant_id_list_from_distributor, \
+    get_sub_distributor_merchant_id_list_from_sub_distributor
 from zrcms.env_vars import QUICKWALLET_ZR_PARTERNERID, QUICKWALLET_SECRET, QUICKWALLET_API_CRUD_URL,\
     QUICKWALLET_API_CARD_URL, QUICKWALLET_API_LISTCARD_URL, QUICKWALLET_API_GENERATEOTP_URL, QUICKWALLET_API_ISSUE_MOBILE_URL,\
     QUICKWALLET_API_ACTIVATE_CARD_URL, QUICKWALLET_API_RECHARGE_CARD_URL, QUICKWALLET_API_PAY_URL, QUICKWALLET_API_DEACTIVATE_CARD_URL,\
     QUICKWALLET_PAYMENT_HISTORY_URL, QUICKWALLET_CREATE_OFFER_URL, QUICKWALLET_OFFER_LIST_URL, QUICKWALLET_OFFER_ASSIGN_TO_RETAILER_URL, \
     QUICKWALLET_OFFER_ASSIGN_TO_OUTLETS_URL, QUICKWALLET_API_LISTCARD_ACTIVATED_URL
+from common_utils.transaction_utils import get_merchant_id_list_from_distributor
+
+
+from common_utils.transaction_utils import get_merchant_id_list_from_distributor
 
 MERCHANT = 'MERCHANT'
 DISTRIBUTOR = 'DISTRIBUTOR'
@@ -317,8 +326,10 @@ def get_report_excel(report_params):
     DOC_HEADERS = (
         ('Transaction Type', 'type.name'),
         ('Transaction ID', 'pk'),
+        ('Vendor Transaction ID', 'vendor_txn_id'),
         ('Distributor Name', 'distributor_name'),
-        # ('Merchant Name', 'merchant_name'),
+        #('Merchant Name', 'merchant_name'),
+        ('Customer', 'customer'),
 
         ('Agent Email ID', 'user.email'),
         ('Agent Name', 'user.full_name'),
@@ -331,8 +342,9 @@ def get_report_excel(report_params):
         ('Beneficiary account number', 'beneficiary_user.bank.eko_bank_id'),
 
         ('Transaction Amount', 'amount'),
-        ('Commission Fee', 'commission_fee'),
-        ('Commission Value', 'commission_value'),
+        #('Commission Fee', 'commission_fee'),
+        #('Commission Value', 'commission_value'),
+        ('Additional Charge', 'additional_charges'),
         ('Status', 'formatted_status'),
         ('Created date', 'created_date'),
         ('Created time', 'created_time'),
@@ -372,9 +384,9 @@ def get_report_excel(report_params):
     transactions_qs = get_transactions_qs_with_dict(report_params)
     paginator = Paginator(transactions_qs, 1)
     import string, random
-    unique_name = datetime.datetime.now().strftime("%d-%m-%YT%H:%M:%S-") + ''.join(
+    unique_name = datetime.datetime.now().strftime("%d-%m-%YT%H-%M-%S-") + ''.join(
         random.choice(string.ascii_uppercase + string.digits) for _ in range(6))
-    report_file_path = settings.REPORTS_PATH + "/" + unique_name + ".xlsx"
+    report_file_path = os.path.join(settings.REPORTS_PATH, unique_name + ".xlsx")
     for x in paginator.page_range:
         page_data = paginator.page(x)
         if x == 1:
@@ -409,6 +421,7 @@ def mail_report(request):
     }
     from zruser import tasks as zu_celery_tasks
     zu_celery_tasks.send_dashboard_report.apply_async(args=[report_params])
+    #zu_celery_tasks.send_dashboard_report(report_params)
     return JsonResponse({"success": True})
 
 
@@ -961,8 +974,9 @@ class DashBoardView(ListView):
             elif period == 'last-month':
                dt_filter['at_created__range'] = date_utils.last_month()
 
-            if start_date != None and end_date != None:
-                dt_filter['at_created__range']=(start_date, end_date)
+            if start_date is not None and end_date is not None:
+                dt_filter['at_created__date__gte'] = start_date
+                dt_filter['at_created__date__lte'] = end_date
 
             context = super(DashBoardView, self).get_context_data(*args, **kwargs)
             if is_user_superuser(self.request):
@@ -971,7 +985,7 @@ class DashBoardView(ListView):
                     is_settled=False,
                     **dt_filter
                 ).aggregate(commission=Sum(
-                    F('net_commission') + (F('user_tds') * F('net_commission')) / 100
+                    F('user_commission') - F('user_tds')
                 ))['commission']
             else:
                 req_usr = self.request.user.zr_admin_user
@@ -980,7 +994,7 @@ class DashBoardView(ListView):
                     is_settled=False,
                     **dt_filter
                 ).aggregate(commission=Sum(
-                    F('net_commission') + (F('user_tds') * F('net_commission')) / 100
+                    F('user_commission') - F('user_tds')
                 ))['commission']
 
             total_commission = total_commission if total_commission else 0
@@ -995,7 +1009,7 @@ class DashBoardView(ListView):
                     commission_user=None,
                     is_settled=False,
                 ).aggregate(
-                    value=Sum('user_commission')
+                    value=Sum(F('user_commission') - F('user_tds'))
                 )['value'] or 0
 
                 context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
@@ -1004,7 +1018,7 @@ class DashBoardView(ListView):
                     is_settled=False,
                     **dt_filter
                 ).aggregate(
-                    value=Sum('user_commission')
+                    value=Sum(F('user_commission') - F('user_tds'))
                 )['value'] or 0
 
                 context["total_recharge_commission_value"] = commission_models.Commission.objects.filter(
@@ -1013,7 +1027,7 @@ class DashBoardView(ListView):
                     is_settled=False,
                     **dt_filter
                 ).aggregate(
-                    value=Sum('user_commission')
+                    value=Sum(F('user_commission') - F('user_tds'))
                 )['value'] or 0
 
             else:
@@ -1025,7 +1039,7 @@ class DashBoardView(ListView):
                     commission_user=self.request.user.zr_admin_user.zr_user,
                     is_settled=False,
                 ).aggregate(
-                    value=Sum('user_commission')
+                    value=Sum(F('user_commission') - F('user_tds'))
                 )['value'] or 0
 
                 context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
@@ -1034,7 +1048,7 @@ class DashBoardView(ListView):
                     is_settled=False,
                     **dt_filter
                 ).aggregate(
-                    value=Sum('user_commission')
+                    value=Sum(F('user_commission') - F('user_tds'))
                 )['value'] or 0
 
                 context["total_recharge_commission_value"] = commission_models.Commission.objects.filter(
@@ -1043,7 +1057,7 @@ class DashBoardView(ListView):
                     is_settled=False,
                     **dt_filter
                 ).aggregate(
-                    value=Sum('user_commission')
+                    value=Sum(F('user_commission') - F('user_tds'))
                 )['value'] or 0
 
                 dt_filter['user__id__in'] = merchants
@@ -1134,7 +1148,11 @@ class DashBoardView(ListView):
 
             context['payment_mods'] = PaymentMode.objects.all()
             context['is_user_superuser'] = is_user_superuser(request=self.request)
-            context['bank'] = Bank.objects.all()
+            context['bank'] = Bank.objects.filter(
+                bank_code__in=[bank for bank, account in settings.TO_BANK.items()]
+            )
+            context['bank_all'] = Bank.objects.all()
+            context['bank_account'] = json.dumps(settings.TO_BANK)
 
             if start_date:
                 context['startDate'] = start_date
@@ -1982,7 +2000,6 @@ class RetailerListView(ListView):
                 })
             except:
                 pass
-
         if q:
             context['q'] = q
 
@@ -2001,6 +2018,7 @@ class RetailerListView(ListView):
         context['retailer_list'] = retailer_list
         context['queryset'] = queryset
         p = Paginator(context['queryset'], self.paginate_by)
+
         try:
             page = p.page(pg_no)
         except EmptyPage:
@@ -3254,13 +3272,13 @@ class PaymentHistoryView(View):
             )
 
 
-class OfferCreateView(CreateView):
+class   OfferCreateView(CreateView):
     template_name = 'zruser/offer_create.html'
 
     def get(self, request):
 
         return render(
-            request, self.template_name
+            request, self.template_name, {"url_name": "offer-create"}
         )
 
     @transaction.atomic
@@ -3476,3 +3494,136 @@ class OfferListView(View):
                 return self.get(request, api_error)
             return self.get(request)
 
+
+def get_wallets_qs(request):
+    user_id = request.GET.get('user-id')
+    user_list = []
+
+    if is_user_superuser(request):
+        user_list = zrwallet_models.Wallet.objects.all()
+
+    elif request.user.zr_admin_user.role.name == DISTRIBUTOR:
+        dist_subd = list(zrmappings_models.DistributorSubDistributor.objects.filter(
+            distributor=request.user.zr_admin_user.zr_user).values_list('sub_distributor_id', flat=True))
+        user_list = zrwallet_models.Wallet.objects.filter(
+            merchant_id__in=get_merchant_id_list_from_distributor(request.user.zr_admin_user.zr_user) +
+            dist_subd + list(zrmappings_models.SubDistributorMerchant.objects.filter(
+                sub_distributor__in=dist_subd).values_list('merchant_id', flat=True)))
+
+    elif request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
+        user_list = zrwallet_models.Wallet.objects.filter(
+            merchant_id__in=list(zrmappings_models.SubDistributorMerchant.objects.filter(
+                sub_distributor=request.user.zr_admin_user.zr_user).values_list(
+                'merchant_id', flat=True)))
+
+    if user_id is not None and int(user_id) > 0:
+        user_list = user_list.filter(merchant_id=user_id)
+
+    q = request.GET.get('q', "")
+    q_obj = Q(
+        merchant__first_name__icontains=q
+    ) | Q(
+        merchant__last_name__icontains=q
+    ) | Q(
+        merchant__mobile_no__icontains=q
+    )
+
+    user_list = user_list.filter(q_obj).order_by('-at_created')
+
+    return user_list
+
+
+def download_wallet_list_csv(request):
+    wallet_qs = get_wallets_qs(request)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="wallets.csv"'
+    writer = csv.writer(response)
+    writer.writerow([
+        'User Id', 'User Name', 'DOJ', 'Mobile', 'Role', 'DMT Bal', 'Non-DMT Bal'
+    ])
+    for wallet in wallet_qs:
+        writer.writerow([
+            wallet.merchant.id,
+            wallet.merchant.first_name,
+            wallet.merchant.at_created,
+            wallet.merchant.mobile_no,
+            wallet.merchant.role,
+            wallet.dmt_balance,
+            wallet.non_dmt_balance,
+        ])
+
+    return response
+
+
+class WalletListView(ListView):
+    template_name = 'zruser/wallet_list.html'
+    # queryset = ZrUser.objects.filter(role__name=SUBDISTRIBUTOR)
+    context_object_name = 'wallet_list'
+    paginate_by = 10
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(WalletListView, self).get_context_data()
+        queryset = self.get_queryset()
+        q = self.request.GET.get('q')
+        filter = self.request.GET.get('filter')
+        pg_no = self.request.GET.get('page_no', 1)
+        user_id = self.request.GET.get('user-id')
+        user_list = []
+
+        if is_user_superuser(self.request):
+            user_list = zrwallet_models.Wallet.objects.all()
+
+        elif self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
+            dist_subd = list(zrmappings_models.DistributorSubDistributor.objects.filter(
+                    distributor=self.request.user.zr_admin_user.zr_user).values_list('sub_distributor_id', flat=True))
+            user_list = zrwallet_models.Wallet.objects.filter(
+                merchant_id__in=get_merchant_id_list_from_distributor(self.request.user.zr_admin_user.zr_user) +
+                dist_subd + list(zrmappings_models.SubDistributorMerchant.objects.filter(
+                    sub_distributor__in=dist_subd).values_list('merchant_id', flat=True)))
+
+        elif self.request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
+            user_list = zrwallet_models.Wallet.objects.filter(
+                merchant_id__in=list(zrmappings_models.SubDistributorMerchant.objects.filter(
+                    sub_distributor=self.request.user.zr_admin_user.zr_user).values_list(
+                    'merchant_id', flat=True)))
+        if q:
+            context['q'] = q
+
+        if filter:
+            context['filter_by'] = filter
+
+        if user_id:
+            context['user_id'] = int(user_id)
+
+        if user_list:
+            context['user_list'] = user_list
+
+        p = Paginator(queryset, self.paginate_by)
+        try:
+            page = p.page(pg_no)
+        except EmptyPage:
+            raise Http404
+
+        context['queryset'] = page.object_list
+        context['url_name']= "wallet-list"
+
+        query_string = {}
+        if q:
+            query_string['q'] = q
+
+        if filter:
+            query_string['filter'] = filter
+
+        if page.has_next():
+            query_string['page_no'] = page.next_page_number()
+            context['next_page_qs'] = urlencode(query_string)
+            context['has_next_page'] = page.has_next()
+        if page.has_previous():
+            query_string['page_no'] = page.previous_page_number()
+            context['prev_page_qs'] = urlencode(query_string)
+            context['has_prev_page'] = page.has_previous()
+
+        return context
+
+    def get_queryset(self):
+        return get_wallets_qs(self.request)

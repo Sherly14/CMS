@@ -248,7 +248,7 @@ elif SETUP == 'prod':
 else:
     # CELERY_BROKER_URL = 'amqp://localhost'
     BROKER_HOST = 'localhost'
-    BROKER_PORT = 5672
+    BROKER_PORT = 6379
 
     UPI_URL = 'http://114.143.22.139/'
     UPI_API_PASSWORD = "EE560B75E235E2180107D0160"
@@ -259,7 +259,7 @@ else:
 import djcelery
 djcelery.setup_loader()
 
-REPORTS_PATH = BASE_DIR + '/media/report'
+REPORTS_PATH = os.path.join(BASE_DIR, 'media', 'report')
 if not os.path.exists(REPORTS_PATH):
     os.makedirs(REPORTS_PATH)
 
@@ -268,4 +268,6 @@ try:
     from local_settings import *
 except ImportError:
     pass
+
+TO_BANK = {'UTIB': '918020030276406', 'ICIC': '001105026711', 'INDB': '201001458436'}
 

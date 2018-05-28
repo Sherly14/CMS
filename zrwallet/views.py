@@ -88,7 +88,6 @@ class PassbookListView(ListView):
         elif self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
             dist_subd = list(zrmappings_models.DistributorSubDistributor.objects.filter(
                 distributor=self.request.user.zr_admin_user.zr_user).values_list('sub_distributor_id', flat=True))
-            print 'dist_subd', dist_subd
             user_list = WalletTransactions.objects.filter(
                 wallet_id__in=get_merchant_id_list_from_distributor(self.request.user.zr_admin_user.zr_user) +
                 dist_subd + list(zrmappings_models.SubDistributorMerchant.objects.filter(
@@ -154,8 +153,30 @@ def get_passbook_report_csv(request):
     response['Content-Disposition'] = 'attachment; filename="passbook.csv"'
     writer = csv.writer(response)
     writer.writerow(['Date', 'User name', 'Mobile No', 'Role', 'Transaction ID', 'Transaction type',
-                     'Payment ID', 'Transaction Value', 'DMT Balance', 'Non DMT Balance'])
+                     'Payment ID', 'Transaction Value', 'DMT Balance', 'Non DMT Balance',
+                     'Bank UTR', 'Sender Mobile', 'Beneficiary Mobile', 'Beneficiary Account No', 'Transaction Status'
+                     ])
     for passbook in passbook_qs:
+        try:
+            utr = passbook.transaction.transaction_response_json.data.bank_ref_num
+        except:
+            utr = 'NA'
+        try:
+            customer = passbook.transaction.customer
+        except:
+            customer = 'NA'
+        try:
+            beneficiary = passbook.transaction.beneficiary
+        except:
+            beneficiary = 'NA'
+        try:
+            acc = passbook.transaction.beneficiary_user.account_no
+        except:
+            acc = 'NA'
+        try:
+            status = passbook.transaction.status
+        except:
+            status = 'NA'
         writer.writerow([
             passbook.at_created,
             passbook.wallet.merchant.full_name,
@@ -166,7 +187,12 @@ def get_passbook_report_csv(request):
             passbook.payment_request_id,
             passbook.dmt_balance if passbook.dmt_balance != 0 else passbook.non_dmt_balance,
             passbook.dmt_closing_balance,
-            passbook.non_dmt_closing_balance
+            passbook.non_dmt_closing_balance,
+            utr,
+            customer,
+            beneficiary,
+            acc,
+            status
         ])
 
     return response
