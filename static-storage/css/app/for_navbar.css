@@ -31,7 +31,7 @@ body.fixed-nav {
 /*wrapper for the column */
 .content-wrapper {
   background: white;
-    min-height: 95vh;
+    min-height: 800px;
   }
   @media (min-width: 992px) {
     .content-wrapper {

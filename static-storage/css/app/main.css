@@ -237,6 +237,10 @@ a.button.red{
   padding-right:20px;
 }
 
+.nav-link:focus {
+    color:red;
+}
+
 /* style for shadow for input*/
 .dflex.button.yellow{
     padding:0px;
@@ -309,5 +313,9 @@ a.button.red{
 }
 
 .button.green.payment.change_request_id, .button.red.payment.change_request_id{
-font-size: 90%; margin: 1px;display:inline-block;width:42px;padding:5px;
+    font-size: 90%;
+    margin: 1px;
+    display:inline-block;
+    width:42px;
+    padding:5px;
 }

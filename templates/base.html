@@ -67,7 +67,7 @@
                  </li>
                 {% endif %}
 
-                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "DISTRIBUTOR" %}
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR"%}
                 <li class="nav-item {% if url_name == 'merchant-list' %}active{% endif %}">
                      <a class="nav-link text-right" href="{% url 'user:merchant-list' %}">Merchants</a>
                 </li>
@@ -86,7 +86,7 @@
                 </li>
                 {% endif %}
 
-                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
                 <li class="nav-item {% if url_name == 'display-commission' %}active{% endif %}">
                     <a class="nav-link text-right " href="{% url 'commission:display-commission' %}">Commissions</a>
                 </li>
@@ -98,13 +98,16 @@
                 </li>
                 {% endif %}
 
-                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
                 <li class="nav-item {% if url_name == 'passbook-list' %}active{% endif %}">
                     <a class="nav-link text-right" href="{% url 'wallet:passbook-list' %}">Passbook</a>
                 </li>
+                <li class="nav-item {% if url_name == 'wallet-list' %}active{% endif %}">
+                    <a class="nav-link text-right " href="{% url 'user:wallet-list' %}">Wallets</a>
+                </li>
                 {% endif %}
 
-                {% if request.user.zr_admin_user.role.name == "CHECKER" or request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
+                {% if request.user.zr_admin_user.role.name == "CHECKER" or request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" and request.user.zr_admin_user.role.name != "OPERATIONS" %}
                 <li class="nav-item {% if url_name == 'kyc-requests' %}active{% endif %}">
                     <a class="nav-link text-right" href="{% url 'user:kyc-requests' %}">KYC Requests</a>
                 </li>
@@ -163,22 +166,19 @@
                 </li>
                 {% endif %}
 
-
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "RETAILER" and zr_user.role.name != "TERMINAL" %}
                 <li class="nav-item {% if url_name == 'offer-list' %}active{% endif %}">
                     <a class="nav-link text-right" href="{% url 'user:offer-list' %}">Offers</a>
                 </li>
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
+                <li class="nav-item {% if url_name == 'offer-create' %}active{% endif %}">
+                    <a class="nav-link text-right" href="{% url 'user:offer-create' %}">Create Offers</a>
+                </li>
+                {% endif %}
                 <li class="nav-item {% if url_name == 'payment-history' %}active{% endif %}">
                     <a class="nav-link text-right" href="{% url 'user:payment-history' pk=0 %}">Payment History</a>
                 </li>
                 {% endif %}
-                <li class="nav-item">
-                    <a class="nav-link text-right"></a>
-                </li>
-{#                <li class="nav-item">#}
-{#                    <a class="nav-link text-right" href="#">Settings</a>#}
-{#                </li>#}
-
             </ul>
             <ul class="navbar-nav">
                 {% if zr_user.role.name != "TERMINAL" %}
@@ -221,9 +221,6 @@
 
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
                 <li class="nav-item leftMargin headerText">
-                    <a class="nav-link wheatTextColor" href="{% url 'user:offer-create' %}">Create Offers</a>
-                </li>
-                <li class="nav-item leftMargin headerText">
                     <a class="nav-link wheatTextColor" href="{% url 'user:distributor-create' %}">Add Distributor</a>
                 </li>
                 <li class="nav-item leftMargin headerText">
@@ -238,7 +235,11 @@
     </nav>
     <!-- Navigation /ends -->
 
-
+<script type="text/javascript">
+$(document).ready(function(){
+    $("#{{request.resolver_match.url_name}}").addClass('active');
+});
+</script>
 
 {% else %}
     {% block logincontent %}

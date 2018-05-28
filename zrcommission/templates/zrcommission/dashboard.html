@@ -12,9 +12,17 @@
                 <p class="head-bg">My Commission Balance:</p>
             </div>
         </div>
-        <div class="row rm-margin-side">
-            <p class="inr">Net Commission INR {% if total_commission %} {{ total_commission }} {% else %} 0 {% endif %}</p>
+       <div class="row rm-margin-side align-items-center">
+            <div>
+                <p class="inr">Net Commission INR {% if total_commission %} {{ total_commission }} {% else %} 0 {% endif %}</p>
+            </div>
+            <div>
+                {% if not request.user.is_superuser and request.user.zr_admin_user.role.name != "ADMINSTAFF"%}
+                    <input class="button red float-right" type="button" value="Settle Commission" id="settle-comm" data-toggle="modal" data-target="#confirm_settlement">
+                {% endif %}
+            </div>
         </div>
+        &nbsp;&nbsp;
 
         <div class="row rm-margin-side">
             <div class="col-2">
@@ -44,6 +52,7 @@
                     <input class="button red float-left mar_l_10" type="button" value="Search" id="search">
                     <input class="button red float-right mar_l_10" type="button" value="DOWNLOAD CSV" id="download-csv">
                     <a href='{% url "commission:display-commission" %}' class="float-right mar_l_10">Reset filters</a>
+                    {% csrf_token %}
                 </div>
             </div>
 
@@ -87,20 +96,12 @@
                             <div class="pagination">
                                 {% if commissions.has_previous %}
                                     <div class="pagination-prev">
-                                        {% if qs %}
-                                            <a href='{% url "commission:display-commission" %}?{{ qs }}&pg-no={{ commissions.previous_page_number }}' class="button red">Prev</a>
-                                        {% else %}
-                                            <a href='{% url "commission:display-commission" %}?pg-no={{ commissions.previous_page_number }}' class="button red">Prev</a>
-                                        {% endif %}
+                                        <a href='{% url "commission:display-commission" %}?{{ prev_page_qs }}' class="button red">Prev</a>
                                     </div>
                                 {% endif %}
                                 {% if commissions.has_next %}
                                     <div class="pagination-next">
-                                        {% if qs %}
-                                        <a href='{% url "commission:display-commission" %}?{{ qs }}&pg-no={{ commissions.next_page_number }}' class="button red">Prev</a>
-                                        {% else %}
-                                        <a href='{% url "commission:display-commission" %}?pg-no={{ commissions.next_page_number }}' class="button red">Next</a>
-                                        {% endif %}
+                                        <a href='{% url "commission:display-commission" %}?{{ next_page_qs }}' class="button red">Next</a>
                                     </div>
                                 {% endif %}
                             </div>
@@ -110,51 +111,61 @@
         </div>
     </div>
 
+    <!-- Modal HTML Markup -->
+    <div id="confirm_settlement" class="modal fade" data-backdrop="static">
+        <div class="modal-dialog" role="document">
+        <form class="modal-content">
+            <div class="modal-header text-center">
+                <h3 class="modal-title">
+                    Settle Commission
+                </h3>
+            </div>
+            <div class="modal-body text-dark text-center">
+                Are you sure you want to Settle Commission ?
+            </div>
+            <div class="modal-footer btn-block-group" style="align-self: center;">
+                <div class="modal-footer" style="text-align:center">
+                    <button type="button" class="btn btn-primary btn-small max-225 settle_commission_confirm">Yes
+                    </button>
+                    <button type="button" class="btn btn-default btn-small max-225" data-dismiss="modal">No</button>
+                </div>
+            </div>
+        </form>
+        </div>
+    </div>
+
     <br>
 
     <script>
     $(document).ready(function(){
-        $('#search').click(function(){
-            startDate = $('#start-date').val();
-            endDate = $('#end-date').val();
-            qs = "{{ qs }}"
-            {% if qs %}
-                url = "{% url "commission:display-commission" %}?{{ qs }}"
-            {% else %}
-               url = "{% url "commission:display-commission" %}"
-            {% endif %}
+        var startDate = $('#start-date').val();
+        var endDate = $('#end-date').val();
 
-             if(startDate!="" && endDate!="" )
-            {
-                url = window.location.pathname +'?startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
-            }
-
-
-            if(qs != '') {
-                url += '&q=' + $('#search-txt').val()
-                window.location.assign(url)
+        function q(){
+            if($('#search-txt').val() != "") {
+                url = window.location.pathname + "?q=" + $('#search-txt').val();
             } else {
-                url
-                window.location.assign(url)
+                url = window.location.pathname + '?';
             }
-            console.log(qs)
 
-
-            if($('#search-txt').val() == ''){
-                return
+            if(startDate!="" && endDate!="" ) {
+                url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
             }
-        });
 
-         var startDate = $('#start-date').val();
-         var endDate = $('#end-date').val();
-         var today = new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate());
+            window.location.assign(url)
+        }
+
+        $('#search').click(q);
+
+        var today = new Date(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate());
+
         $('#start-date').datepicker({
             uiLibrary: 'bootstrap4',
             iconsLibrary: 'fontawesome',
             format: 'yyyy-mm-dd',
 
             maxDate: function () {
-            return $('#end-date').val();
+                return new Date($('#end-date').val()) == '' ? today: ( new Date($('#end-date').val()) < today ? $('#end-date').val() : today);
             }
         }).on('change', function (ev)
          {
@@ -171,7 +182,7 @@
             {
                alert("date difference is greater than 31");
                $('#start-date').val("");
-            }
+            } else if ($("#start-date").val() != '' && $("#end-date").val() != ''){q();}
          });
 
 
@@ -182,6 +193,8 @@
 
             minDate: function () {
                 return $('#start-date').val();
+            },  maxDate: function () {
+                return today;
             }
         }).on('change', function (ev)
          {
@@ -198,31 +211,10 @@
             {
                alert("date difference is greater than 31");
                $('#end-date').val("");
-            }
+            } else if ($("#start-date").val() != '' && $("#end-date").val() != ''){q();}
          });
      });
 
-    </script>
-
-    <script>
-        $("#period").change(function() {
-            period = $(this).val()
-            qs = "{{ qs }}"
-            {% if qs %}
-                url = "{% url "commission:display-commission" %}?{{ qs }}"
-            {% else %}
-                url = "{% url "commission:display-commission" %}"
-            {% endif %}
-
-            if(qs != '') {
-                url += '&period=' + period
-                window.location.assign(url)
-            } else {
-                url += '?period=' + period
-                window.location.assign(url)
-            }
-            console.log(qs)
-        })
     </script>
 
     <script>
@@ -231,3 +223,69 @@
         })
     </script>
 {% endblock %}
+
+{% block extrascripts %}
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.min.js"></script>
+
+    <script>
+      var csrftoken = jQuery("[name=csrfmiddlewaretoken]").val();
+
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+
+        $('body')
+            .on('click', '#settle-comm', function(e) {
+                if ({{total_commission}} == 0.00) {
+                    alert("There are no commissions to settle. All commissions are already settled");
+                    e.target.blur();
+                    e.stopPropagation();
+                }
+            })
+            .on('click', '.settle_commission_confirm', function() {
+                $('.settle_commission_confirm').addClass('disabled')
+                $('.settle_commission_confirm').prop('disabled', true)
+                var user_id = "{{user_id}}"
+                var ids = "{{ids}}"
+                var total_commission = "{{total_commission}}"
+                console.log(user_id, total_commission);
+                <!-- AJAX Call -->
+                data = {
+                    'user_id': user_id,
+                    'total_commission': total_commission,
+                    'ids': ids
+                };
+
+                data = JSON.stringify(data);
+                console.log(data);
+                $.ajax({
+                    type: "POST",
+                    url: '/commission/settle_commission/',
+                    dataType: 'json',
+                    data: data,
+                    success: function (data) {
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 1000);
+                    },
+                    error: function (data) {
+                        setTimeout(function () {
+                            console.log('data',data);
+                            window.location.reload();
+                        }, 1000);
+                    }
+                });
+                <!-- AJAX Call -->
+            })
+    </script>
+{% endblock extrascripts %}
