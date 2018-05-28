@@ -7,13 +7,6 @@
 {% block content %}
     {% if request.user.zr_admin_user.role.name != "RETAILER" %}
     <div class="content-wrapper">
-        {% if request.user.zr_admin_user.role.name == "RETAILER" %}
-        <div style="text-align:center;padding-top:30px;">
-            <h2>Welcome to </h2>
-            <h3>Zrupee Prepaid Loyalty Program</h3>
-        </div>
-        {% endif %}
-
         <p class="head-right">Dashboard</p>
 
         <div class="row rm-margin-side">
@@ -98,7 +91,7 @@
                 {% endif %}
 
             </div>
-            <div class="row" style="margin-bottom: 2.5rem">
+            <div class="row">
                 <div class="col-xl-4 col-sm-6 mb-3" style="height: 100%;">
                     <div class="card card-inverse o-hidden h-100">
                         <div class="card-block lightGrayBG blackTextColor">
@@ -211,22 +204,20 @@
                 </div>
 
             </div>
+        {% if total_payment_request %}
             <div class="row" style="margin-bottom: 2.5rem">
                 <div class="col-xl-3 col-sm-6 mb-3">
-                    {% if total_payment_request %}
-                        <div class="card card-block lightGrayBG blackTextColor">
+                    <div class="card card-block lightGrayBG blackTextColor">
 
-
-                        <span class="card-head spanAlignment">
-                                Payment Requests</span>
-                            <span class="card-data text-right spanAlignment">
-                                {{ total_payment_request }}</span>
-                        </div>
-                    {% endif %}
-
-
+                    <span class="card-head spanAlignment">
+                            Payment Requests</span>
+                        <span class="card-data text-right spanAlignment">
+                            {{ total_payment_request }}</span>
+                    </div>
                 </div>
             </div>
+        {% endif %}
+
     </div>
     {% endif %}
     {% if request.user.zr_admin_user.role.name == "RETAILER" %}
@@ -307,12 +298,17 @@
                                 </div>
                             </div>
 
-                            <div class="form-group col-sm-6" id="to_account_no_form" style="display:none">
-                                <label class="control-label"><b>Provide your Bank Name</b></label>
+                            <div class="form-group col-sm-6" id="to_account_no_form"  style="display:none">
+                                <label class="control-label"><b>To bank(Others)</b></label>
                                 <div>
-                                    <input type="text" class="form-control" name="to_bank_other" id="to_bank_other" style="box-shadow: 0px 0px;border-style: solid;">
+                                    <select id="to_bank_other" name="to_bank_other">
+                                        {% for b in bank_all %}
+                                            <option value="{{ b.pk }}">{{ b.bank_name }}</option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
                             </div>
+
 
                             <div class="form-group col-sm-6">
                                 <label class="control-label"><b>To Account Number</b></label>
@@ -737,11 +733,9 @@
                 $('#modal_message').html("");
 
                 // Create an FormData object
-                $('#from_bank').val('1');
-                $('#from_account_no').val('0');
                 var data = new FormData($('#challan_request_form')[0]);
                 if ( $('#to_bank_other').val() != '' ) {
-                    data.set('to_bank', $('#to_bank_other').val())
+                    data.set('to_bank', $('#to_bank_other').val());
                 }
                 data.delete('to_bank_other');
                 {# console.log(data);#}

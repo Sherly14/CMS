@@ -170,17 +170,15 @@
                 <li class="nav-item {% if url_name == 'offer-list' %}active{% endif %}">
                     <a class="nav-link text-right" href="{% url 'user:offer-list' %}">Offers</a>
                 </li>
+                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
+                <li class="nav-item {% if url_name == 'offer-create' %}active{% endif %}">
+                    <a class="nav-link text-right" href="{% url 'user:offer-create' %}">Create Offers</a>
+                </li>
+                {% endif %}
                 <li class="nav-item {% if url_name == 'payment-history' %}active{% endif %}">
                     <a class="nav-link text-right" href="{% url 'user:payment-history' pk=0 %}">Payment History</a>
                 </li>
                 {% endif %}
-                <li class="nav-item">
-                    <a class="nav-link text-right"></a>
-                </li>
-{#                <li class="nav-item">#}
-{#                    <a class="nav-link text-right" href="#">Settings</a>#}
-{#                </li>#}
-
             </ul>
             <ul class="navbar-nav">
                 {% if zr_user.role.name != "TERMINAL" %}
@@ -222,9 +220,6 @@
                 {% endif %}
 
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
-                <li class="nav-item leftMargin headerText">
-                    <a class="nav-link wheatTextColor" href="{% url 'user:offer-create' %}">Create Offers</a>
-                </li>
                 <li class="nav-item leftMargin headerText">
                     <a class="nav-link wheatTextColor" href="{% url 'user:distributor-create' %}">Add Distributor</a>
                 </li>

@@ -1151,6 +1151,7 @@ class DashBoardView(ListView):
             context['bank'] = Bank.objects.filter(
                 bank_code__in=[bank for bank, account in settings.TO_BANK.items()]
             )
+            context['bank_all'] = Bank.objects.all()
             context['bank_account'] = json.dumps(settings.TO_BANK)
 
             if start_date:
@@ -3271,13 +3272,13 @@ class PaymentHistoryView(View):
             )
 
 
-class OfferCreateView(CreateView):
+class   OfferCreateView(CreateView):
     template_name = 'zruser/offer_create.html'
 
     def get(self, request):
 
         return render(
-            request, self.template_name
+            request, self.template_name, {"url_name": "offer-create"}
         )
 
     @transaction.atomic
