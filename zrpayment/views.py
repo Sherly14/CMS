@@ -379,7 +379,7 @@ def merchant_payment_req_csv_download(request):
     else:
         qs = get_payment_request_qs(request, to_user=True)
 
-    if request.user.zr_admin_user.role.name == 'ADMINSTAFF':
+    if request.user.zr_admin_user.role.name == 'ADMINSTAFF' or request.user.zr_admin_user.role.name == 'OPERATIONS':
         qs = get_payment_request_qs(request, all_user=True)
 
     response = HttpResponse(content_type='text/csv')
