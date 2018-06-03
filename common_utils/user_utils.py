@@ -15,7 +15,7 @@ s3 = boto3.client('s3', region_name='ap-south-1', api_version=None,
 
 def is_user_superuser(request):
     if request.user.is_authenticated():
-        if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF":
+        if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "OPERATIONS":
             return True
     return False
 

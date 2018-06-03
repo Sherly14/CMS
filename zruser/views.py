@@ -20,6 +20,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views import View
 from django.views.generic import CreateView, DetailView, ListView, UpdateView
+from rest_framework.views import APIView
 
 from common_utils import date_utils
 from common_utils import transaction_utils
@@ -2469,52 +2470,21 @@ class TerminalView(View):
                 request, self.template_name, {"zr_user": user}
             )
 
-    # @transaction.atomic
-    # def post(self, request, pk):
-    #     user = ZrTerminal.objects.get(id=pk)
-    #     if "save" in request.POST:
-    #         merchant_form = zr_user_form.UpdateMerchantTerminalForm(data=request.POST, instance=user)
-    #         if not merchant_form.is_valid():
-    #             return render(
-    #                 request, self.template_name,
-    #                 {
-    #                     'merchant_form': merchant_form
-    #                 }
-    #             )
-    #
-    #         merchant_form.save()
-    #         # print(user.id)
-    #         # try:
-    #         #     userid = transaction_models.VendorZrTerminal.objects.get(zr_terminal=user.id)
-    #         #     print(userid.vendor_user)
-    #         #     response = requests.post(QUICKWALLET_API_CRUD_URL, json={
-    #         #         "secret": QUICKWALLET_SECRET,
-    #         #         "action": "update",
-    #         #         "entity": "outlet",
-    #         #         "details": {
-    #         #             "id": userid.vendor_user,
-    #         #             "name": "{0}".format(user.first_name)
-    #         #         }
-    #         #     })
-    #         #     print(response)
-    #         # except:
-    #         #     pass
-    #     return HttpResponseRedirect(reverse("user:terminal-list"))
 
-
-class UserCardCreateView(CreateView):
+class UserCardCreateView(APIView):
     template_name = 'zruser/card_create.html'
 
     def get(self, request):
 
         return render(
-            request, self.template_name
+            request, self.template_name, {'retailer_list': ZrUser.objects.filter(role__name=RETAILER)}
         )
 
     @transaction.atomic
     def post(self, request):
         quantity = request.POST.get('quantity', '')
-        zr_retailer_id = request.user.zr_admin_user.zr_user.id
+        zr_retailer_id = request.POST.get('retailer-id', '')
+        #zr_retailer_id = request.user.zr_admin_user.zr_user.id
         vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=zr_retailer_id)
         response = requests.post(QUICKWALLET_API_CARD_URL, json={"secret": QUICKWALLET_SECRET,
                                                                  "retailerid": vendor.vendor_user,
