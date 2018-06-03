@@ -46,7 +46,7 @@ for zruser in zu.ZrUser.objects.filter(
         dj_user.set_password(password)
         dj_user.save()
         zruser.send_welcome_email(password)
-    elif zruser.role.name == 'ADMINSTAFF':
+    elif zruser.role.name == 'ADMINSTAFF' or zruser.role.name == 'OPERATIONS':
         dj_user = zruser.zr_user.id
         dj_user.set_password(password)
         dj_user.save()

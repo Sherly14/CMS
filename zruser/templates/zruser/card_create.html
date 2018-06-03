@@ -18,9 +18,20 @@
         </div>
 
             <div class="row">
-                <div class="col-sm-4">
+                <div class="col-sm-3">
                     <div class="form-group">
-                        <label for="qty">Quantity</label>
+                        <label>Retailer</label>
+                        <select id="retailer-id"  name="retailer-id">
+                            <option value="-1">Select</option>
+                            {% for retailer in retailer_list %}
+                                <option value="{{ retailer.id }}" {% if  retailer.id == retailer_id %}selected{% endif %}>{{ retailer.first_name }} {{ retailer.last_name|default_if_none:""}} : {{retailer.mobile_no}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <label>Quantity</label>
                         <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" min="1" max="100" name="quantity" value="quantity" REQUIRED>
                     </div>
                 </div>
@@ -44,4 +55,9 @@
     <input type="hidden" id="<%=id%>" name="<%=id%>" value="<%=value%>" >
 </script>
 
+<script>
+    $(document).ready(function() {
+        $('#retailer-id').select2();
+    })
+</script>
 {% endblock %}

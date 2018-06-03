@@ -238,7 +238,7 @@ class SettleCommission(APIView):
             'to_bank': '100', 'dmt_amount': total_commission, 'to_account_no': 'XXXXXZrupee', 'from_bank': '100',
             'ref_id': '', 'to_user': supervisor, 'amount': total_commission, 'non_dmt_amount': '0', 'from_user': user,
             'payment_mode': payment_mode, 'document': 'NA', 'from_account_no': 'XXXXXMerchant', 'status': 1,
-            'comments': data.get("ids"), 'payment_type': 1
+            'comments': 'Commission Settlement', 'payment_type': 1
         }
         serializer = PaymentRequestSerializer(data=payment_req_data)
         payment_req_obj = None
