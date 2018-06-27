@@ -5,10 +5,10 @@
 {% block content %}
 
 <div class="content-wrapper">
-    <p class="head-right">Wallet Table</p>
+    <p class="head-right">Wallets</p>
     <div class="row rm-margin-side">
 
-        <div class="col-4">
+        <div class="col-12 col-lg-2 mt-2" data-toggle="tooltip" data-placement="top" title="Select User">
             <select id="user-id" name="user-id">
                 <option value="-1">ALL</option>
                 {% for user in user_list %}
@@ -16,38 +16,39 @@
                 {% endfor %}
             </select>
         </div>
+        <div class="col-6 col-lg-3 mt-2 float-left">
+            <input class="form-control form-control" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="Search by Name or Mobile">
+        </div>
+        <div class="col-2 col-lg-1 mt-2">
+            <button class="btn btn-outline-dark" type="button" id="search-btn" data-toggle="tooltip" data-placement="top" title="Search">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+        <div class="col-2 col-lg-1 mt-2">
+            <a href="{% url 'user:wallet-list' %}" data-toggle="tooltip" data-placement="top" title="Clear Filters">
+                <img src="https://png.icons8.com/ios/50/000000/clear-filters.png" height="30">
+            </a>
+        </div>
+        <div class="col-2 col-lg-1 mt-2 row-float-right" data-toggle="tooltip" data-placement="top" title="Download CSV">
+            <img src="https://png.icons8.com/ios/50/000000/export-csv.png" height="30" id="csv-download" class="float-right"
+             style="cursor: pointer;">
+        </div>
+
+        
         <div class="div-width-100">
             <!--<p class="head-left">PERIOD</p>-->
             <br>
-            <div class="row">
-                <div class="align-items-center div-width-100">
-                    <div class="float-left">
-                        <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                        <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
-                    </div>
-                    <input class="button red float-left mar_l_10" type="button" value="Search" id="search-btn">
-                    <input class="button red float-right" type="button" value="DOWNLOAD CSV" id="csv-download">
-                    <a class="nav-link float-right" href="{% url 'user:wallet-list' %}">Reset filters</a>
-                </div>
-            </div>
-            <br>
-            <div class="row">
-                <div class="fine">
-                    <p class="head-bg">List of Wallets</p>
-                </div>
-            </div>
             <div class="row scroll">
-
                 <div style="width: 100%;">
-                    <table>
-                        <tr>
-                            <th>Id</th>
-                            <th>Name</th>
-                            <th>DOJ</th>
-                            <th>Mobile</th>
-                            <th>Role</th>
-                            <th>DMT Balance</th>
-                            <th>NON-DMT Balance</th>
+                    <table class="table table-hover table-data">
+                        <tr style="border-bottom-style: solid;">
+                            <th scope="col">Id</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">DOJ</th>
+                            <th scope="col">Mobile</th>
+                            <th scope="col">Role</th>
+                            <th scope="col">DMT Balance</th>
+                            <th scope="col">NON-DMT Balance</th>
                         </tr>
                         {% for wallet in queryset %}
                             <tr>
@@ -60,23 +61,22 @@
                                 <td>{{ wallet.non_dmt_balance }}</td>
                             </tr>
                         {% endfor %}
-                    </table><br/>
-                     {% if is_paginated %}
+                    </table>
+                    {% if is_paginated %}
                     <div class="pagination">
                         {% if has_prev_page %}
                             <div class="pagination-prev">
-                                <a href="{% url 'user:wallet-list' %}?{{prev_page_qs}}" class="button red">Prev</a>
+                                <a href="{% url 'user:wallet-list' %}?{{prev_page_qs}}" class="btn btn-outline-dark">Prev</a>
                             </div>
                         {% endif %}
                         {% if has_next_page %}
                             <div class="pagination-next">
-                                    <a href="{% url 'user:wallet-list' %}?{{next_page_qs}}" class="button red">Next</a>
+                                    <a href="{% url 'user:wallet-list' %}?{{next_page_qs}}" class="btn btn-outline-dark">Next</a>
                             </div>
                         {% endif %}
                     </div>
                 {% endif %}
                 </div>
-
             </div>
             <div>
         </div>
@@ -88,6 +88,8 @@
 
     $(document).ready(function(){
     $('#user-id').select2();
+
+    $("#search-txt").focus();
 
     function q(){
              userId = $("#user-id").val();
@@ -110,6 +112,11 @@
 
     $('#user-id').change(q);
 
+    $("#search-txt").keypress(function(event) {
+        if (event.which == 13) {
+           q();
+        }
+    });
 
     $('#csv-download').click(function(){
         url = "{% url "user:wallet-csv" %}" + window.location.search

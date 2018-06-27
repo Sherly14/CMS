@@ -5,45 +5,43 @@
 
 {% block content %}
 
-<div class="content-wrapper py-2" style="padding-left: 0.5rem; padding-right: 4rem">
-    <p class="heading-right">Add Loyalty Cards</p>
+<div class="content-wrapper">
+    <p class="head-right">Add Loyalty Cards</p>
     {% if api_error %}
       <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
     {% endif %}
 
     <form id="add-card-form" method="POST">
-    <div class="container-fluid" style="position: relative;">
-        <div class="row">
-            <p class="heading-bg">CARD DETAILS:</p>
-        </div>
-
-            <div class="row">
-                <div class="col-sm-3">
+        <div class="container-fluid" style="position: relative;">
+            <div class="row d-flex justify-content-start">
+                <div class="col-sm-2">
                     <div class="form-group">
                         <label>Retailer</label>
-                        <select id="retailer-id"  name="retailer-id">
-                            <option value="-1">Select</option>
+                        <select id="retailer-id"  name="retailer-id" required>
+                            <option value="">Select</option>
                             {% for retailer in retailer_list %}
                                 <option value="{{ retailer.id }}" {% if  retailer.id == retailer_id %}selected{% endif %}>{{ retailer.first_name }} {{ retailer.last_name|default_if_none:""}} : {{retailer.mobile_no}}</option>
                             {% endfor %}
                         </select>
                     </div>
                 </div>
-                <div class="col-sm-2">
+                <div class="col-sm-2 ml-3">
                     <div class="form-group">
                         <label>Quantity</label>
-                        <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" min="1" max="100" name="quantity" value="quantity" REQUIRED>
+                        <input type="number" class="fill form-control" style="box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" min="1" max="100" name="quantity" value="" REQUIRED>
                     </div>
                 </div>
             </div>
-    </div>
-        <div class="col-md-5 colAlignment" style="float:right;">
-            <div class="fill margin-top" style="padding-left:6.5rem">
-                <input class="button red" type="submit" value="Create & Save Cards">
+            <div class="row d-flex justify-content-end">
+                <div class="col-md-5 float-right">
+                    <div class="margin-top float-right" >
+                        <input class="btn btn-outline-success" type="submit" name = "save" value="Create & Save Cards">
+                    </div>
+                </div>
             </div>
         </div>
         {% csrf_token %}
-        </form>
+    </form>
     <label class="fill"></label>
 </div>
 

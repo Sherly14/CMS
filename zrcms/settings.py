@@ -47,7 +47,8 @@ PROJECT_APPS = [
     'zrtransaction',
     'zruser',
     'zrutils',
-    'zrwallet'
+    'zrwallet',
+    'debug_toolbar'
 ]
 
 EXTERNAL_APPS = [
@@ -67,6 +68,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'zrcms.urls'
@@ -269,5 +271,6 @@ try:
 except ImportError:
     pass
 
-TO_BANK = {'UTIB': '918020030276406', 'ICIC': '001105026711', 'INDB': '201001458436'}
+TO_BANK = {'UTIB': '918020030276406', 'ICIC': '001105026711', 'INDB': '201001458436', 'SBIN': '32910001AADCL2120N'}
 
+INTERNAL_IPS = ('127.0.0.1', 'localhost',)

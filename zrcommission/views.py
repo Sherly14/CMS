@@ -56,7 +56,7 @@ def get_commission_display_qs(request):
     search = request.GET.get('q')
 
     req_usr = request.user.zr_admin_user
-    queryset = Commission.objects.filter(commission_user=None, is_settled=False).order_by('-at_created')
+    queryset = Commission.objects.select_related('commission_user', 'transaction', 'transaction__type').filter(commission_user=None, is_settled=False).order_by('-at_created')
     query_filter = Q(
         commission_user__mobile_no__contains=search
     ) | Q(
@@ -82,10 +82,11 @@ def get_commission_display_qs(request):
                 is_settled=False
             ).order_by('-at_created')
 
-    start_date = request.GET.get('startDate')
-    end_date = request.GET.get('endDate')
-    if start_date != None and end_date != None:
-        queryset = queryset.filter(at_created__range=(start_date, end_date))
+    start_date = request.GET.get('startDate', '')
+    end_date = request.GET.get('endDate', '')
+    if start_date != '' and end_date != '':
+        queryset = queryset.filter(at_created__date__gte=start_date)
+        queryset = queryset.filter(at_created__date__lte=end_date)
 
     return queryset
 
@@ -96,10 +97,10 @@ class CommissionDisplay(ListView):
     paginated_by = 10
 
     def get_context_data(self, *args, **kwargs):
-        pg_no = self.request.GET.get('page_no')
-        search = self.request.GET.get('q')
-        start_date = self.request.GET.get('startDate')
-        end_date = self.request.GET.get('endDate')
+        pg_no = self.request.GET.get('page_no', 1)
+        q = self.request.GET.get('q', '')
+        start_date = self.request.GET.get('startDate', '')
+        end_date = self.request.GET.get('endDate', '')
 
         context = super(CommissionDisplay, self).get_context_data(*args, **kwargs)
 
@@ -122,16 +123,14 @@ class CommissionDisplay(ListView):
         else:
             context['total_commission'] = '%.2f' % 0
 
-        context['search'] = search
+        context['q'] = q
 
-        if not is_user_superuser(self.request):
-            context['user_id'] = user.id
+        context['is_user_superuser'] = is_user_superuser(request=self.request)
 
-        if start_date:
-            context['startDate'] = start_date
+        context['user_id'] = -1 if is_user_superuser(self.request) else user.id
 
-        if end_date:
-            context['endDate'] = end_date
+        context['startDate'] = start_date
+        context['endDate'] = end_date
 
         query_result = self.get_queryset()
         p = Paginator(query_result, self.paginated_by)
@@ -148,8 +147,8 @@ class CommissionDisplay(ListView):
         context['url_name'] = "display-commission"
 
         query_string = {}
-        if search:
-            query_string['search'] = search
+        if q:
+            query_string['q'] = q
 
         if page.has_next():
             query_string['page_no'] = page.next_page_number()
@@ -236,7 +235,7 @@ class SettleCommission(APIView):
         payment_mode = PaymentMode.objects.all().filter(name='WALLET')
         payment_req_data = {
             'to_bank': '100', 'dmt_amount': total_commission, 'to_account_no': 'XXXXXZrupee', 'from_bank': '100',
-            'ref_id': '', 'to_user': supervisor, 'amount': total_commission, 'non_dmt_amount': '0', 'from_user': user,
+            'ref_no': '', 'to_user': supervisor, 'amount': total_commission, 'non_dmt_amount': '0', 'from_user': user,
             'payment_mode': payment_mode, 'document': 'NA', 'from_account_no': 'XXXXXMerchant', 'status': 1,
             'comments': 'Commission Settlement', 'payment_type': 1
         }

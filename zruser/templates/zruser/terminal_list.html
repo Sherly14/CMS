@@ -6,110 +6,100 @@
 
     <div class="content-wrapper">
         <p class="head-right">Terminal Table</p>
-        <div class="col-12" >
-
-            <div class="row rm-margin-side">
-                    <div class="col-2">
-                        <p class="head-left">START DATE</p>
-                    </div>
-                    <div class="col-2">
-                        <p class="head-left">END DATE</p>
-                    </div>
+        <div class="row rm-margin-side">
+            <div class="col-6 col-lg-2 mt-2">
+                <input id="start-date" name="startDate" value="{{startDate}}" placeholder="From" data-toggle="tooltip" data-placement="top" title="User Registration Date: From"/>
             </div>
-            <div class="row rm-margin-side">
-                <div class="col-2">
-                    <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-                </div>
-                <div class="col-2">
-                    <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-                </div>
-
-                <div class="col-4">
-                    <select id="terminal-id"  name="terminal-id">
-                        <option value="-1">ALL</option>
-                            {% for key,val in terminaldict.items %}
-                                <optgroup label = "{{val.0.0}} ">
-                                     <option value="{{key}}"{% if key == retailer_id %}selected{% endif %}>ALL-{{val.0.0}}</option>
-                                    {% for subdrow in val %}
-                                        <option value="{{subdrow.1}}" {% if subdrow.1 == terminal_id %}selected{% endif %}>{{ subdrow.2 }}</option>
-                                    {% endfor %}
-                                </optgroup>
-                            {% endfor %}
-                    </select>
-                </div>
+            <div class="col-6 col-lg-2 mt-2">
+                <input id="end-date" name="endDate" value="{{endDate}}" placeholder="To" data-toggle="tooltip" data-placement="top" title="User Registration Date: To"/>
             </div>
-            <br>
-            <div class="row rm-margin-side">
-                <div style="position: relative;">
-                    <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                    <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
-                </div>
-                &nbsp;&nbsp;
-                <input class="button red" type="button" value="Search" id="search-btn">
-                <a class="nav-link" href="{% url 'user:terminal-list' %}">Reset filters</a>
-                <input class="button red" type="button" value="DOWNLOAD CSV" id="csv-download">
+            <div class="col-12 col-lg-2 mt-2" data-toggle="tooltip" data-placement="top" title="Select Terminal">
+                <select id="terminal-id"  name="terminal-id">
+                    <option value="-1">ALL</option>
+                        {% for key,val in terminaldict.items %}
+                            <optgroup label = "{{val.0.0}} ">
+                                 <option value="{{key}}"{% if key == retailer_id %}selected{% endif %}>ALL-{{val.0.0}}</option>
+                                {% for subdrow in val %}
+                                    <option value="{{subdrow.1}}" {% if subdrow.1 == terminal_id %}selected{% endif %}>{{ subdrow.2 }}</option>
+                                {% endfor %}
+                            </optgroup>
+                        {% endfor %}
+                </select>
             </div>
-
-            <br>
-            <div class="row" style="padding-right: 50px;">
-                <div class="fine">
-                    <p class="head-bg">List of Terminals</p>
-                </div>
+            <div class="col-6 col-lg-3 mt-2 float-left">
+                <input class="form-control form-control" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="Search by Id, Name or Mobile">
             </div>
-            <div class="row scroll">
-
-                <div style="width: 100%;">
-                    <table>
-                        <tr>
-                            <th>Terminal Id</th>
-                            <th>Terminal Name</th>
-                            <th>DOJ</th>
-                            <th>Mobile No</th>
-                            <th>Email</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                            <th>Update</th>
-                            {% if request.user.zr_admin_user.role.name == "RETAILER" %}
-                            <th>Manage</th>
-                            {% endif %}
-                        </tr>
-                        {% for terminal in queryset %}
-                            <tr>
-                                <td>{{ terminal.terminal.id }}</td>
-                                <td>{{ terminal.terminal.first_name }} {{ terminal.terminal.last_name|default_if_none:""}}</td>
-                                <td>{{ terminal.terminal.at_created }}</td>
-                                <td>{{ terminal.terminal.mobile_no }}</td>
-                                <td>{{ terminal.terminal.email }}</td>
-                                <td>{% if terminal.terminal.is_active %}Active{% else %}Inactive{% endif %}</td>
-                                <td>
-                                    {% if terminal.terminal.is_active %}
-                                        <a href='{% url "user:terminal-list" %}?disable={{ terminal.id }}'>Disable</a>
-                                    {% else %}
-                                        <a href='{% url "user:terminal-list" %}?activate={{ terminal.id }}'>Activate</a>
-                                    {% endif %}
-                                </td>
-                                 <td> <a href='{% url "user:terminal-update" pk=terminal.id%}'>Update</a></td>
+            <div class="col-2 col-lg-1 mt-2">
+                <button class="btn btn-outline-dark" type="button" id="search-btn" data-toggle="tooltip" data-placement="top" title="Search">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+            <div class="col-2 col-lg-1 mt-2">
+                <a href="{% url 'user:terminal-list' %}" data-toggle="tooltip" data-placement="top" title="Clear Filters">
+                    <img src="https://png.icons8.com/ios/50/000000/clear-filters.png" height="30">
+                </a>
+            </div>
+            <div class="col-2 col-lg-1 mt-2 float-right" data-toggle="tooltip" data-placement="top" title="Download CSV">
+                <img src="https://png.icons8.com/ios/50/000000/export-csv.png" height="30" id="csv-download" class="float-right"
+                 style="cursor: pointer;">
+            </div>
+            <div class="div-width-100">
+                <br>
+                <div class="row scroll">
+                    <div class="div-width-100">
+                        <table class="table table-hover table-data">
+                            <tr style="border-bottom-style: solid;">
+                                <th>Terminal Id</th>
+                                <th>Terminal Name</th>
+                                <th>DOJ</th>
+                                <th>Mobile No</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                                <th>Update</th>
                                 {% if request.user.zr_admin_user.role.name == "RETAILER" %}
-                                 <td> <a href='{% url "user:terminal-view" pk=terminal.id%}'>Access</a></td>
+                                <th>Manage</th>
                                 {% endif %}
                             </tr>
-
-                        {% endfor %}
-                    </table>
-                </div>
-                <div class="pagination-prev">
-                {% if has_prev_page %}
-                    <a href="{% url "user:terminal-list" %}?{{prev_page_qs}}" class="button red" >Prev</a>
-                {% endif %}
-                </div>
-
-                <div class="pagination-next">
-                    {% if has_next_page %}
-                        <a href="{% url "user:terminal-list" %}?{{next_page_qs}}" class="button red" >Next</a>
-                    {% endif %}
+                            {% for terminal in queryset %}
+                                <tr>
+                                    <td>{{ terminal.terminal.id }}</td>
+                                    <td>{{ terminal.terminal.first_name }} {{ terminal.terminal.last_name|default_if_none:""}}</td>
+                                    <td>{{ terminal.terminal.at_created }}</td>
+                                    <td>{{ terminal.terminal.mobile_no }}</td>
+                                    <td>{{ terminal.terminal.email }}</td>
+                                    <td>{% if terminal.terminal.is_active %}Active{% else %}Inactive{% endif %}</td>
+                                    <td>
+                                        {% if terminal.terminal.is_active %}
+                                            <a class="btn btn-outline-danger btn-xs" href='{% url "user:terminal-list" %}?disable={{ terminal.id }}'>Disable</a>
+                                        {% else %}
+                                            <a class="btn btn-outline-success btn-xs" href='{% url "user:terminal-list" %}?activate={{ terminal.id }}'>Activate</a>
+                                        {% endif %}
+                                    </td>
+                                     <td> <a class="btn btn-outline-info btn-xs" href='{% url "user:terminal-update" pk=terminal.id%}'>Update</a></td>
+                                    {% if request.user.zr_admin_user.role.name == "RETAILER" %}
+                                     <td> <a class="btn btn-outline-success btn-xs" href='{% url "user:terminal-view" pk=terminal.id%}'>Access</a></td>
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        </table>
+                        {% if is_paginated %}
+                            <div class="pagination">
+                                {% if has_prev_page %}
+                                    <div class="pagination-prev">
+                                        <a href="{% url 'user:terminal-list' %}?{{prev_page_qs}}" class="btn btn-outline-dark" >Prev</a>
+                                    </div>
+                                {% endif %}
+                                {% if has_next_page %}
+                                    <div class="pagination-next">
+                                        <a href="{% url 'user:terminal-list' %}?{{next_page_qs}}" class="btn btn-outline-dark" >Next</a>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-            <br>
         </div>
     </div>
 
@@ -118,15 +108,11 @@
     $(document).ready(function()
     {
         $('#terminal-id').select2();
+        $("#search-txt").focus();
         $('#search-btn').click(function(){
         startDate = $('#start-date').val();
         endDate = $('#end-date').val();
-
-            {% if filter_by %}
-                url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}";
-            {% else %}
-                url = window.location.pathname + "?q=" + $('#search-txt').val();
-            {% endif %}
+            url = window.location.pathname + "?q=" + $('#search-txt').val();
 
             if(startDate!="" && endDate!="" )
             {
@@ -166,6 +152,12 @@
             {% endif %}
             window.location.assign(url)
         });
+
+        $("#search-txt").keypress(function(event) {
+            if (event.which == 13) {
+               q();
+            }
+         });
 
         $('#csv-download').click(function()
         {

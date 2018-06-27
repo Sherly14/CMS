@@ -5,8 +5,8 @@
 
 {% block content %}
 
-<div class="content-wrapper py-2" style="padding-left: 0.5rem; padding-right: 4rem">
-    <p class="heading-right">Add a Terminal</p>
+<div class="content-wrapper py-2">
+    <p class="head-right">Add a Terminal</p>
     {% if api_error %}
       <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
     {% endif %}
@@ -20,7 +20,7 @@
                 <div class="col-sm-2">
                     <div class="form-group">
                         <label for="firstname">First Name</label>
-                        {{ merchant_form.first_name|attr:"id:firstname"|attr:"class:fill" }}
+                        {{ merchant_form.first_name|attr:"id:firstname"|attr:"class:fill, form-control" }}
                         {% if merchant_form.first_name.errors %}
                             {{ merchant_form.first_name.errors }}
                         {% endif %}
@@ -29,7 +29,7 @@
                 <div class="col-sm-2">
                     <div class="form-group">
                         <label for="lastname">Last Name</label>
-                        {{ merchant_form.last_name|attr:"id:lastname"|attr:"class:fill" }}
+                        {{ merchant_form.last_name|attr:"id:lastname"|attr:"class:fill, form-control" }}
                         {% if merchant_form.last_name.errors %}
                             {{ merchant_form.last_name.errors }}
                         {% endif %}
@@ -38,7 +38,7 @@
                 <div class="col-sm-2">
                     <div class="form-group">
                         <label for="phone">Phone No.</label>
-                        {{ merchant_form.mobile_no|attr:"id:phone"|attr:"name:phone"|attr:"class:fill" }}
+                        {{ merchant_form.mobile_no|attr:"id:phone"|attr:"name:phone"|attr:"class:fill, form-control" }}
                         {% if merchant_form.mobile_no.errors %}
                             {{ merchant_form.mobile_no.errors }}
                         {% endif %}
@@ -55,7 +55,7 @@
                 <div class="col-sm-6">
                     <div class="form-group">
                         <label for="business">Terminal name</label>
-                        {{ merchant_form.business_name|attr:"id:business"|attr:"class:input-80" }}
+                        {{ merchant_form.business_name|attr:"id:business"|attr:"class:input-80, form-control" }}
                         {% if merchant_form.business_name.errors %}
                             {{ merchant_form.business_name.errors }}
                         {% endif %}
@@ -64,7 +64,7 @@
                 <div class="col-sm-3">
                     <div class="form-group">
                         <label for="pan">PAN No.</label>
-                        {{ merchant_form.pan_no|attr:"id:pan"|attr:"class:input-80" }}
+                        {{ merchant_form.pan_no|attr:"id:pan"|attr:"class:input-80, form-control" }}
                         {% if merchant_form.pan_no.errors %}
                             {{ merchant_form.pan_no.errors }}
                         {% endif %}
@@ -73,7 +73,7 @@
                  <div class="col-sm-3">
                     <div class="form-group">
                         <label for="business_type">Terminal Type</label>
-                        {{ merchant_form.business_type|attr:"class:fill"|attr:"id:business_type" }}
+                        {{ merchant_form.business_type|attr:"class:fill, form-control"|attr:"id:business_type" }}
                         {% if merchant_form.business_type.errors %}
                             {{ merchant_form.business_type.errors }}
                         {% endif %}
@@ -84,7 +84,7 @@
                 <div class="col-md-12">
                     <div class="form-group">
                         <label for="address">Address</label>
-                        {{ merchant_form.address_line_1|attr:"class:fill"|attr:"id:address" }}
+                        {{ merchant_form.address_line_1|attr:"class:fill, form-control"|attr:"id:address" }}
                         {% if merchant_form.address_line_1.errors %}
                             {{ merchant_form.address_line_1.errors }}
                         {% endif %}
@@ -96,7 +96,7 @@
                 <div class="col-md-12">
                     <div class="form-group">
                         <label for="residence_address">Residence Address</label>
-                        {{ merchant_form.residence_address|attr:"class:fill"|attr:"id:residence_address" }}
+                        {{ merchant_form.residence_address|attr:"class:fill, form-control"|attr:"id:residence_address" }}
                         {% if merchant_form.residence_address.errors %}
                             {{ merchant_form.residence_address.errors }}
                         {% endif %}
@@ -108,7 +108,7 @@
                 <div class="col-sm-3">
                     <div class="form-group">
                         <label for="city">City</label>
-                        {{ merchant_form.city|attr:"class:fill"|attr:"id:city" }}
+                        {{ merchant_form.city|attr:"class:fill, form-control"|attr:"id:city" }}
                         {% if merchant_form.city.errors %}
                             {{ merchant_form.city.errors }}
                         {% endif %}
@@ -117,7 +117,7 @@
                 <div class="col-sm-3">
                     <div class="form-group">
                         <label for="state">State</label>
-                        {{ merchant_form.state|attr:"class:fill"|attr:"id:state" }}
+                        {{ merchant_form.state|attr:"class:fill, form-control"|attr:"id:state" }}
                         {% if merchant_form.state.errors %}
                             {{ merchant_form.state.errors }}
                         {% endif %}
@@ -126,7 +126,7 @@
                 <div class="col-sm-3">
                     <div class="form-group">
                         <label for="pincode">Pincode</label>
-                        {{ merchant_form.pincode|attr:"class:fill"|attr:"id:pincode" }}
+                        {{ merchant_form.pincode|attr:"class:fill, form-control"|attr:"id:pincode" }}
                         {% if merchant_form.pincode.errors %}
                             {{ merchant_form.pincode.errors }}
                         {% endif %}
@@ -135,8 +135,8 @@
             </div>
     </div>
         <div class="col-md-5 colAlignment" style="float:right;">
-            <div class="fill margin-top" style="padding-left:6.5rem">
-                <input class="button red" type="submit" value="Save & Submit">
+            <div class="row margin-top float-right mt-2">
+                <input class="btn btn-outline-success btn-md" type="submit" value="Save & Submit">
             </div>
         </div>
         {% csrf_token %}

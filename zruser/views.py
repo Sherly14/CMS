@@ -15,6 +15,7 @@ from django.db import transaction
 from django.db.models import F
 from django.db.models import Q
 from django.db.models import Sum
+from django.db.models import Prefetch
 from django.http import Http404, HttpResponse, HttpResponseRedirect, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -111,7 +112,7 @@ def get_merchant_qs(request):
 
     if is_user_superuser(request):
         if q:
-            query_filter = Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(mobile_no__icontains=q)
+            query_filter = Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(mobile_no__icontains=q) | Q(id__icontains=q)
             queryset = queryset.filter(
                 query_filter
             )
@@ -171,18 +172,6 @@ def get_merchant_qs(request):
         else:
             queryset = queryset
 
-        if filter == 'Today':
-            queryset = queryset.filter(
-                at_created__gte=datetime.datetime.now().date()
-            )
-        elif filter == 'Last-Week':
-            queryset = queryset.filter(
-                at_created__range=last_week_range()
-            )
-        elif filter == 'Last-Month':
-            queryset = queryset.filter(
-                at_created__range=last_month()
-            )
     elif request.user.zr_admin_user.role.name == SUBDISTRIBUTOR:
         merchant_queryset = request.user.zr_admin_user.zr_user.merchant_sub_mappings.filter(
             is_active=True
@@ -202,16 +191,7 @@ def get_merchant_qs(request):
             )
         else:
             queryset = queryset
-        if filter == 'Today':
-            queryset = queryset.filter(
-                at_created__gte=datetime.datetime.now().date()
-            )
-        elif filter == 'Last-Week':
-            queryset = queryset.filter(
-                at_created__range=last_week_range()
-            )
-        elif filter == 'Last-Month':
-            queryset = queryset.filter(at_created__range=last_month())
+
     sub_merchant_id = []
     subDistMerchant = zrmappings_models.SubDistributorMerchant.objects.filter(sub_distributor=request.user.zr_admin_user.zr_user)
     if subDistMerchant:
@@ -282,11 +262,12 @@ def get_merchant_qs(request):
         if merchantlist:
            queryset = ZrUser.objects.filter(id__in=merchantlist)
 
-    start_date = request.GET.get('startDate')
-    end_date = request.GET.get('endDate')
+    start_date = request.GET.get('startDate', '')
+    end_date = request.GET.get('endDate', '')
 
-    if start_date != None and end_date != None:
-        queryset = queryset.filter(at_created__range=(start_date, end_date))
+    if start_date != '' and end_date != '':
+        queryset = queryset.filter(at_created__date__gte=start_date)
+        queryset = queryset.filter(at_created__date__lte=end_date)
 
     return queryset
 
@@ -434,14 +415,14 @@ class MerchantListView(ListView):
     def get_context_data(self, *args, **kwargs):
         context = super(MerchantListView, self).get_context_data(*args, **kwargs)
         queryset = self.get_queryset()
-        start_date = self.request.GET.get('startDate')
-        end_date = self.request.GET.get('endDate')
-        q = self.request.GET.get('q')
-        pg_no = self.request.GET.get('page_no')
+        start_date = self.request.GET.get('startDate', '')
+        end_date = self.request.GET.get('endDate', '')
+        q = self.request.GET.get('q', '')
+        pg_no = self.request.GET.get('page_no', 1)
         # sub_dist_merchant_list =zrmappings_models.SubDistributorMerchant.objects.all()
         distributor_list = ZrUser.objects.filter(role__name=DISTRIBUTOR)
-        merchant_id = self.request.GET.get('merchant-id')
-        distributor_id = self.request.GET.get('distributor-id')
+        merchant_id = self.request.GET.get('merchant-id', -1)
+        distributor_id = self.request.GET.get('distributor-id', -1)
         sub_distributor = []
         sub_distributor_list = []
         sub_dist_merchant = []
@@ -492,21 +473,10 @@ class MerchantListView(ListView):
                 else:
                     subDistMerchant[-1] = [["MERCHANTS", distmerchant.merchant.id, distmerchant.merchant.first_name]]
 
-        if not pg_no:
-            pg_no = 1
-        filter = self.request.GET.get('filter')
         context['is_queryset'] = False
-        if q:
-            context['q'] = q
-
-        if filter:
-            context['filter_by'] = filter
-
-        if start_date:
-            context['startDate'] = start_date
-
-        if end_date:
-            context['endDate'] = end_date
+        context['q'] = q
+        context['startDate'] = start_date
+        context['endDate'] = end_date
 
         if subDistMerchant:
             context['subDistMerchant'] = subDistMerchant
@@ -515,7 +485,7 @@ class MerchantListView(ListView):
             context['merchant_id'] = int(merchant_id)
 
         if distributor_id:
-            context['distributor_id'] =int(distributor_id)
+            context['distributor_id'] = int(distributor_id)
 
         if is_user_superuser(self.request):
             context['distributor_list'] = distributor_list
@@ -562,9 +532,6 @@ class MerchantListView(ListView):
             if q:
                 query_string['q'] = q
 
-            if filter:
-                query_string['filter'] = filter
-
             if page.has_next():
                 query_string['page_no'] = page.next_page_number()
                 context['next_page_qs'] = urlencode(query_string)
@@ -589,9 +556,6 @@ class MerchantListView(ListView):
             if q:
                 query_string['q'] = q
 
-            if filter:
-                query_string['filter'] = filter
-
             if page.has_next():
                 query_string['page_no'] = page.next_page_number()
                 context['next_page_qs'] = urlencode(query_string)
@@ -614,16 +578,14 @@ class KYCRequestsView(ListView):
     paginate_by = 10
 
     def get_context_data(self, **kwargs):
-        filter_by = self.request.GET.get('filter', 'All')
         q = self.request.GET.get('q', "")
         user_list = ZrUser.objects.filter(is_kyc_verified=False)
         context = super(KYCRequestsView, self).get_context_data(**kwargs)
-        start_date = self.request.GET.get('startDate')
-        end_date = self.request.GET.get('endDate')
+        start_date = self.request.GET.get('startDate', '')
+        end_date = self.request.GET.get('endDate', '')
         queryset = self.get_queryset()
-        context['filter_by'] = filter_by
         context['q'] = q
-        user_id = self.request.GET.get('user_id')
+        user_id = self.request.GET.get('user_id', -1)
 
         approve = self.request.GET.get('approve')
         reject = self.request.GET.get('reject')
@@ -666,38 +628,30 @@ class KYCRequestsView(ListView):
         except PageNotAnInteger:
             queryset = paginator.page(1)
 
+        for k in queryset.object_list:
+            try:
+                k.approval_status = k.kyc_details.last.approval_status
+            except:
+                k.approval_status = None
+
         context['page_obj'] = queryset
         context['url_name'] = "kyc-requests"
 
         if user_list:
             context['user_list'] = user_list
 
-        if start_date:
-            context['startDate'] = start_date
-
-        if end_date:
-            context['endDate'] = end_date
-
-        if user_id:
-            context['user_id'] = int(user_id)
+        context['startDate'] = start_date
+        context['endDate'] = end_date
+        context['user_id'] = int(user_id)
 
         return context
 
     def get_queryset(self):
-
-        filter_by = self.request.GET.get('filter', 'All')
         q = self.request.GET.get('q')
         user_id = self.request.GET.get('user_id')
-        queryset = ZrUser.objects.filter(
+        queryset = ZrUser.objects.prefetch_related('role', 'kyc_details').filter(
             is_kyc_verified=False
         ).order_by('-at_created')
-
-        if filter_by == "Last-Week":
-            queryset = queryset.filter(at_created__range=last_week_range())
-        elif filter_by == "Last-Month":
-            queryset = queryset.filter(at_created__range=last_month())
-        elif filter_by == "Today":
-            queryset = queryset.filter(at_created__date__gte=datetime.date.today())
 
         if q:
             # added search from mobile number of user
@@ -709,11 +663,12 @@ class KYCRequestsView(ListView):
                 mobile_no__contains=q
             )
             queryset = queryset.filter(query)
-        start_date = self.request.GET.get('startDate')
-        end_date = self.request.GET.get('endDate')
+        start_date = self.request.GET.get('startDate', '')
+        end_date = self.request.GET.get('endDate', '')
 
-        if start_date != None and end_date != None:
-            queryset = queryset.filter(at_created__range=(start_date, end_date))
+        if start_date != '' and end_date != '':
+            queryset = queryset.filter(at_created__date__gte=start_date)
+            queryset = queryset.filter(at_created__date__lte=end_date)
 
         if user_id != None and int(user_id) > 0:
             queryset = queryset.filter(id=user_id)
@@ -728,33 +683,27 @@ class DistributorDetailView(DetailView):
 
 
 def get_distributor_qs(request):
-    queryset = ZrUser.objects.filter(role__name=DISTRIBUTOR).order_by('-at_created')
+    queryset = ZrUser.objects.select_related('role').filter(role__name=DISTRIBUTOR).order_by('-at_created')
+    #queryset = ZrUser.objects.raw("select * from zruser_zruser where role_id = %s", [2])
+
     q = request.GET.get('q')
-    filter = request.GET.get('filter')
     if q:
-        query_filter = Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(mobile_no__icontains=q)
+        query_filter = Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(mobile_no__icontains=q) | Q(id__icontains=q)
         queryset = queryset.filter(
             query_filter
         )
 
-    start_date = request.GET.get('startDate')
-    end_date = request.GET.get('endDate')
+    start_date = request.GET.get('startDate', '')
+    end_date = request.GET.get('endDate', '')
 
-    if start_date!=None and end_date!=None:
-        queryset=queryset.filter(at_created__range=(start_date, end_date))
+    if start_date != '' and end_date != '':
+        queryset = queryset.filter(at_created__date__gte=start_date)
+        queryset = queryset.filter(at_created__date__lte=end_date)
 
     distributor_id = request.GET.get('distributor-id')
 
     if distributor_id!=None and int(distributor_id) > 0:
         queryset = queryset.filter(id=distributor_id)
-
-
-    if filter == 'Today':
-        queryset = queryset.filter(at_created__gte=datetime.datetime.now().date())
-    elif filter == 'Last-Week':
-        queryset = queryset.filter(at_created__range=last_week_range())
-    elif filter == 'Last-Month':
-        queryset = queryset.filter(at_created__range=last_month())
 
     return queryset
 
@@ -763,15 +712,19 @@ def get_sub_distributor_qs(request):
     queryset = zrmappings_models.DistributorSubDistributor.objects.none()
     if request.user.zr_admin_user:
         try:
-            queryset = request.user.zr_admin_user.zr_user.sub_dist_dist_mappings.order_by('-at_created')
-        except:
+            queryset = request.user.zr_admin_user.zr_user.sub_dist_dist_mappings.select_related(
+                    'distributor', 'sub_distributor'
+                ).order_by('-at_created')
+        except Exception as e:
+            print 'exception', e
             pass
 
     if is_user_superuser(request):
-        queryset = zrmappings_models.DistributorSubDistributor.objects.order_by('-at_created')
+        queryset = zrmappings_models.DistributorSubDistributor.objects.select_related(
+                    'distributor', 'sub_distributor'
+                ).order_by('-at_created')
 
     q = request.GET.get('q')
-    filter = request.GET.get('filter')
 
     if q:
         query_filter = Q(
@@ -780,16 +733,19 @@ def get_sub_distributor_qs(request):
             sub_distributor__last_name__icontains=q
         ) | Q(
             sub_distributor__mobile_no__icontains=q
+        ) | Q(
+            sub_distributor__id__icontains=q
         )
         queryset = queryset.filter(
             query_filter
         )
 
-    start_date = request.GET.get('startDate')
-    end_date = request.GET.get('endDate')
+    start_date = request.GET.get('startDate', '')
+    end_date = request.GET.get('endDate', '')
 
-    if start_date != None and end_date != None:
-        queryset = queryset.filter(at_created__range=(start_date, end_date))
+    if start_date != '' and end_date != '':
+        queryset = queryset.filter(at_created__date__gte=start_date)
+        queryset = queryset.filter(at_created__date__lte=end_date)
 
     sub_distributor_id = request.GET.get('sub-distributor-id')
 
@@ -800,13 +756,6 @@ def get_sub_distributor_qs(request):
 
     if sub_distributor_id != None and int(sub_distributor_id) > 0:
         queryset = queryset.filter(sub_distributor_id=sub_distributor_id)
-
-    if filter == 'Today':
-        queryset = queryset.filter(at_created__gte=datetime.datetime.now().date())
-    elif filter == 'Last-Week':
-        queryset = queryset.filter(at_created__range=last_week_range())
-    elif filter == 'Last-Month':
-        queryset = queryset.filter(at_created__range=last_month())
 
     return queryset
 
@@ -834,7 +783,6 @@ def download_distributor_list_csv(request):
 
 class DistributorListView(ListView):
     template_name = 'zruser/distributor_list.html'
-    queryset = ZrUser.objects.filter(role__name=DISTRIBUTOR)
     context_object_name = 'distributor_list'
     paginate_by = 10
 
@@ -843,13 +791,12 @@ class DistributorListView(ListView):
         activate = self.request.GET.get('activate')
         disable = self.request.GET.get('disable')
         queryset = self.get_queryset()
-        distributor_list = ZrUser.objects.filter(role__name=DISTRIBUTOR)
-        q = self.request.GET.get('q')
-        filter = self.request.GET.get('filter')
+        distributor_list = ZrUser.objects.select_related('role')
+        q = self.request.GET.get('q', '')
         pg_no = self.request.GET.get('page_no', 1)
-        start_date = self.request.GET.get('startDate')
-        end_date = self.request.GET.get('endDate')
-        distributor_id = self.request.GET.get('distributor-id')
+        start_date = self.request.GET.get('startDate', '')
+        end_date = self.request.GET.get('endDate', '')
+        distributor_id = self.request.GET.get('distributor-id', -1)
 
         if activate:
             zruser = ZrUser.objects.filter(id=activate).last()
@@ -883,37 +830,25 @@ class DistributorListView(ListView):
             dj_user.save(update_fields=['is_active'])
             zruser.save(update_fields=['is_active'])
 
-        if q:
-            context['q'] = q
-
-        if filter:
-            context['filter_by'] = filter
-
-        if start_date:
-            context['startDate'] = start_date
-
-        if end_date:
-            context['endDate'] = end_date
-
-        if distributor_id:
-            context['distributor_id'] =int(distributor_id)
+        context['q'] = q
+        context['startDate'] = start_date
+        context['endDate'] = end_date
+        context['distributor_id'] = int(distributor_id)
 
         context['distributor_list'] = distributor_list
-        context['queryset'] = queryset
-        p = Paginator(context['queryset'], self.paginate_by)
+        p = Paginator(queryset, self.paginate_by)
         try:
             page = p.page(pg_no)
         except EmptyPage:
             raise Http404
 
         context['queryset'] = page.object_list
-        context['url_name']= "distributor-list"
+        context['url_name'] = "distributor-list"
         query_string = {}
         if q:
             query_string['q'] = q
 
-        if filter:
-            query_string['filter'] = filter
+        context['has_prev_page'] = context['has_next_page'] = None
 
         if page.has_next():
             query_string['page_no'] = page.next_page_number()
@@ -964,22 +899,17 @@ class DashBoardView(ListView):
             return context
 
         else:
-            period = self.request.GET.get('period')
-            start_date = self.request.GET.get('startDate')
-            end_date = self.request.GET.get('endDate')
+            start_date = self.request.GET.get('startDate', '')
+            end_date = self.request.GET.get('endDate', '')
             dt_filter = {}
-            if period == 'today':
-              dt_filter['at_created'] = datetime.datetime.now().date()
-            elif period == 'last-week':
-               dt_filter['at_created__range'] = date_utils.last_week_range()
-            elif period == 'last-month':
-               dt_filter['at_created__range'] = date_utils.last_month()
 
-            if start_date is not None and end_date is not None:
+            if start_date is not '' and end_date is not '':
                 dt_filter['at_created__date__gte'] = start_date
                 dt_filter['at_created__date__lte'] = end_date
 
             context = super(DashBoardView, self).get_context_data(*args, **kwargs)
+            context['url_name'] = "dashboard"
+
             if is_user_superuser(self.request):
                 total_commission = commission_models.Commission.objects.filter(
                     commission_user=None,
@@ -999,67 +929,69 @@ class DashBoardView(ListView):
                 ))['commission']
 
             total_commission = total_commission if total_commission else 0
-            context['total_commission'] = "%.4f" % total_commission
+            context['total_commission'] = "%.2f" % total_commission
 
             if is_user_superuser(self.request):
                 '''
                 Total commission value
                 '''
-                context["dmt_commission_value"] = commission_models.Commission.objects.filter(
+                context["dmt_commission_value"] = "%.2f" % (commission_models.Commission.objects.select_related('transaction__type').filter(
                     transaction__type__name='DMT',
                     commission_user=None,
                     is_settled=False,
+                    **dt_filter
                 ).aggregate(
                     value=Sum(F('user_commission') - F('user_tds'))
-                )['value'] or 0
+                )['value'] or 0)
 
-                context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
+                context["total_bill_pay_commission_value"] = "%.2f" % (commission_models.Commission.objects.select_related('transaction__type').filter(
                     transaction__type__name__in=BILLS_TYPE,
                     commission_user=None,
                     is_settled=False,
                     **dt_filter
                 ).aggregate(
                     value=Sum(F('user_commission') - F('user_tds'))
-                )['value'] or 0
+                )['value'] or 0)
 
-                context["total_recharge_commission_value"] = commission_models.Commission.objects.filter(
+                context["total_recharge_commission_value"] = "%.2f" % (commission_models.Commission.objects.select_related('transaction__type').filter(
                     transaction__type__name__in=RECHARGES_TYPE,
                     commission_user=None,
                     is_settled=False,
                     **dt_filter
                 ).aggregate(
                     value=Sum(F('user_commission') - F('user_tds'))
-                )['value'] or 0
+                )['value'] or 0)
 
             else:
                 merchants = transaction_utils.get_merchants_from_distributor(
                     self.request.user.zr_admin_user.zr_user
                 )
-                context["dmt_commission_value"] = commission_models.Commission.objects.filter(
+                context["dmt_commission_value"] = "%.2f" % (commission_models.Commission.objects.filter(
                     transaction__type__name='DMT',
                     commission_user=self.request.user.zr_admin_user.zr_user,
                     is_settled=False,
+                    **dt_filter
                 ).aggregate(
                     value=Sum(F('user_commission') - F('user_tds'))
-                )['value'] or 0
+                )['value'] or 0)
 
-                context["total_bill_pay_commission_value"] = commission_models.Commission.objects.filter(
+                context["total_bill_pay_commission_value"] = "%.2f" % (commission_models.Commission.objects.filter(
                     transaction__type__name__in=BILLS_TYPE,
                     commission_user=self.request.user.zr_admin_user.zr_user,
                     is_settled=False,
                     **dt_filter
                 ).aggregate(
                     value=Sum(F('user_commission') - F('user_tds'))
-                )['value'] or 0
+                )['value'] or 0)
 
-                context["total_recharge_commission_value"] = commission_models.Commission.objects.filter(
+                context["total_recharge_commission_value"] = "%.2f" % (commission_models.Commission.objects.filter(
                     transaction__type__name__in=RECHARGES_TYPE,
                     commission_user=self.request.user.zr_admin_user.zr_user,
                     is_settled=False,
                     **dt_filter
                 ).aggregate(
                     value=Sum(F('user_commission') - F('user_tds'))
-                )['value'] or 0
+                )['value'] or 0)
 
                 dt_filter['user__id__in'] = merchants
 
@@ -1101,31 +1033,34 @@ class DashBoardView(ListView):
             '''
             Total transaction value
             '''
-            context["dmt_transaction_value"] = transaction_models.Transaction.objects.filter(
+            context["dmt_transaction_value"] = "%.2f" % (transaction_models.Transaction.objects.filter(
                 type__name='DMT',
                 status=TRANSACTION_STATUS_SUCCESS,
                 **dt_filter
             ).aggregate(
                 value=Sum('amount')
-            )['value'] or 0
+            )['value'] or 0)
 
-            context["bill_pay_transaction_value"] = transaction_models.Transaction.objects.filter(
+            context["bill_pay_transaction_value"] = "%.2f" % (transaction_models.Transaction.objects.filter(
                 type__name__in=BILLS_TYPE,
                 status=TRANSACTION_STATUS_SUCCESS,
                 **dt_filter
             ).aggregate(
                 value=Sum('amount')
-            )['value'] or 0
+            )['value'] or 0)
 
-            context["recharge_transaction_value"] = transaction_models.Transaction.objects.filter(
+            context["recharge_transaction_value"] = "%.2f" % (transaction_models.Transaction.objects.filter(
                 type__name__in=RECHARGES_TYPE,
                 status=TRANSACTION_STATUS_SUCCESS,
                 **dt_filter
             ).aggregate(
                 value=Sum('amount')
-            )['value'] or 0
+            )['value'] or 0)
 
             zr_admin_user = self.request.user.zr_admin_user
+            context["total_merchants"] = 0
+            context['total_payment_request'] = 0
+
             if self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
                 context["total_merchants"] = zrmappings_models.DistributorMerchant.objects.filter(
                     distributor=zr_admin_user.zr_user,
@@ -1155,11 +1090,8 @@ class DashBoardView(ListView):
             context['bank_all'] = Bank.objects.all()
             context['bank_account'] = json.dumps(settings.TO_BANK)
 
-            if start_date:
-                context['startDate'] = start_date
-
-            if end_date:
-                context['endDate'] = end_date
+            context['startDate'] = start_date
+            context['endDate'] = end_date
 
             to_list=[]
             distributor_merchant = zrmappings_models.DistributorMerchant.objects.filter(
@@ -1167,7 +1099,6 @@ class DashBoardView(ListView):
             if distributor_merchant:
                 for distributor_merchant_map in distributor_merchant:
                     to_list.append(distributor_merchant_map.merchant)
-
 
             distributor_subdistributor = zrmappings_models.DistributorSubDistributor.objects.filter(
                 distributor_id=self.request.user.zr_admin_user.zr_user)
@@ -1651,7 +1582,6 @@ class SubDistributorCreateView(CreateView):
 
 class SubDistributorListView(ListView):
     template_name = 'zruser/sub_distributor_list.html'
-    queryset = ZrUser.objects.filter(role__name=SUBDISTRIBUTOR)
     context_object_name = 'sub_distributor_list'
     paginate_by = 10
 
@@ -1660,24 +1590,26 @@ class SubDistributorListView(ListView):
         activate = self.request.GET.get('activate')
         disable = self.request.GET.get('disable')
         queryset = self.get_queryset()
-        q = self.request.GET.get('q')
-        filter = self.request.GET.get('filter')
+        q = self.request.GET.get('q', '')
         pg_no = self.request.GET.get('page_no', 1)
-        start_date = self.request.GET.get('startDate')
-        end_date = self.request.GET.get('endDate')
-        sub_distributor_id = self.request.GET.get('sub-distributor-id')
-        distributor_id = self.request.GET.get('distributor-id')
+        start_date = self.request.GET.get('startDate', '')
+        end_date = self.request.GET.get('endDate', '')
+        sub_distributor_id = self.request.GET.get('sub-distributor-id', -1)
+        distributor_id = self.request.GET.get('distributor-id', -1)
         subDistributor = {}
-        sub_distributor_list =[]
+        sub_distributor_list = []
 
         if self.request.user.zr_admin_user:
             try:
-                sub_distributor_list = zrmappings_models.DistributorSubDistributor.objects.filter(distributor=self.request.user.zr_admin_user.zr_user)
+                sub_distributor_list = zrmappings_models.DistributorSubDistributor.objects.select_related(
+                    'distributor', 'sub_distributor'
+                ).filter(distributor=self.request.user.zr_admin_user.zr_user)
             except:
                 pass
 
         if is_user_superuser(self.request):
-            sub_distributor_list = zrmappings_models.DistributorSubDistributor.objects.all()
+            sub_distributor_list = zrmappings_models.DistributorSubDistributor.objects.select_related(
+                'distributor', 'sub_distributor')
 
         if activate:
             zruser = ZrUser.objects.filter(id=activate).last()
@@ -1711,24 +1643,15 @@ class SubDistributorListView(ListView):
             dj_user.save(update_fields=['is_active'])
             zruser.save(update_fields=['is_active'])
 
-        if q:
-            context['q'] = q
+        context['q'] = q
 
-        if filter:
-            context['filter_by'] = filter
+        context['startDate'] = start_date
 
+        context['endDate'] = end_date
 
-        if start_date:
-            context['startDate'] = start_date
+        context['sub_distributor_id'] = int(sub_distributor_id)
 
-        if end_date:
-            context['endDate'] = end_date
-
-        if sub_distributor_id:
-            context['sub_distributor_id'] = int(sub_distributor_id)
-
-        if distributor_id:
-            context['distributor_id'] = int(distributor_id)
+        context['distributor_id'] = int(distributor_id)
 
         if sub_distributor_list:
             for subdist in sub_distributor_list:
@@ -1736,7 +1659,6 @@ class SubDistributorListView(ListView):
                     subDistributor[subdist.distributor.id].append([subdist.distributor.first_name, subdist.sub_distributor.id,subdist.sub_distributor.first_name])
                 else:
                     subDistributor[subdist.distributor.id] = [[subdist.distributor.first_name, subdist.sub_distributor.id,subdist.sub_distributor.first_name]]
-                    # subDistributor[subdist.distributor.id] = [subdist.distributor.first_name, subdist.sub_distributor.id,subdist.sub_distributor.first_name]
 
         context['queryset'] = queryset
 
@@ -1749,13 +1671,10 @@ class SubDistributorListView(ListView):
             raise Http404
 
         context['queryset'] = page.object_list
-        context['url_name']= "sub-distributor-list"
+        context['url_name'] = "sub-distributor-list"
         query_string = {}
         if q:
             query_string['q'] = q
-
-        if filter:
-            query_string['filter'] = filter
 
         if page.has_next():
             query_string['page_no'] = page.next_page_number()
@@ -1936,7 +1855,6 @@ class RetailerCreateView(CreateView):
 
 class RetailerListView(ListView):
     template_name = 'zruser/retailer_list.html'
-    queryset = ZrUser.objects.filter(role__name=RETAILER)
     context_object_name = 'retailer_list'
     paginate_by = 10
 
@@ -1946,12 +1864,11 @@ class RetailerListView(ListView):
         disable = self.request.GET.get('disable')
         queryset = self.get_queryset()
         retailer_list = ZrUser.objects.filter(role__name=RETAILER)
-        q = self.request.GET.get('q')
-        filter = self.request.GET.get('filter')
+        q = self.request.GET.get('q', '')
         pg_no = self.request.GET.get('page_no', 1)
-        start_date = self.request.GET.get('startDate')
-        end_date = self.request.GET.get('endDate')
-        retailer_id = self.request.GET.get('retailer-id')
+        start_date = self.request.GET.get('startDate', '')
+        end_date = self.request.GET.get('endDate', '')
+        retailer_id = self.request.GET.get('retailer-id', -1)
 
         if activate:
             zruser = ZrUser.objects.filter(id=activate).last()
@@ -2001,20 +1918,10 @@ class RetailerListView(ListView):
                 })
             except:
                 pass
-        if q:
-            context['q'] = q
-
-        if filter:
-            context['filter_by'] = filter
-
-        if start_date:
-            context['startDate'] = start_date
-
-        if end_date:
-            context['endDate'] = end_date
-
-        if retailer_id:
-            context['retailer_id'] =int(retailer_id)
+        context['q'] = q
+        context['startDate'] = start_date
+        context['endDate'] = end_date
+        context['retailer_id'] =int(retailer_id)
 
         context['retailer_list'] = retailer_list
         context['queryset'] = queryset
@@ -2029,11 +1936,9 @@ class RetailerListView(ListView):
         context['url_name']= "retailer-list"
 
         query_string = {}
-        if q:
-            query_string['q'] = q
+        query_string['q'] = q
 
-        if filter:
-            query_string['filter'] = filter
+        context['has_next_page'] = context['has_prev_page'] = None
 
         if page.has_next():
             query_string['page_no'] = page.next_page_number()
@@ -2056,16 +1961,17 @@ def get_retailer_qs(request):
     filter = request.GET.get('filter')
 
     if q:
-        query_filter = Q(first_name__contains=q) | Q(last_name__contains=q) | Q(mobile_no__contains=q)
+        query_filter = Q(first_name__icontains=q) | Q(last_name__icontains=q) | Q(mobile_no__icontains=q)
         queryset = queryset.filter(
             query_filter
         )
 
-    start_date = request.GET.get('startDate')
-    end_date = request.GET.get('endDate')
+    start_date = request.GET.get('startDate', '')
+    end_date = request.GET.get('endDate', '')
 
-    if start_date!=None and end_date!=None:
-        queryset=queryset.filter(at_created__range=(start_date, end_date))
+    if start_date != '' and end_date != '':
+        queryset = queryset.filter(at_created__date__gte=start_date)
+        queryset = queryset.filter(at_created__date__lte=end_date)
 
     retailer_id = request.GET.get('retailer-id')
 
@@ -2209,7 +2115,6 @@ class TerminalCreateView(CreateView):
 
 class TerminalListView(ListView):
     template_name = 'zruser/terminal_list.html'
-    queryset = ZrTerminal.objects.filter(role__name=TERMINAL)
     context_object_name = 'terminal_list'
     paginate_by = 10
 
@@ -2219,13 +2124,12 @@ class TerminalListView(ListView):
         disable = self.request.GET.get('disable')
         queryset = self.get_queryset()
         terminal_list = ZrTerminal.objects.filter(role__name=TERMINAL)
-        q = self.request.GET.get('q')
-        filter = self.request.GET.get('filter')
+        q = self.request.GET.get('q', '')
         pg_no = self.request.GET.get('page_no', 1)
-        start_date = self.request.GET.get('startDate')
-        end_date = self.request.GET.get('endDate')
-        terminal_id = self.request.GET.get('terminal-id')
-        retailer_id = self.request.GET.get('retailer-id')
+        start_date = self.request.GET.get('startDate', '')
+        end_date = self.request.GET.get('endDate', '')
+        terminal_id = self.request.GET.get('terminal-id', -1)
+        retailer_id = self.request.GET.get('retailer-id', -1)
         terminaldict = {}
 
         if self.request.user.zr_admin_user:
@@ -2235,7 +2139,7 @@ class TerminalListView(ListView):
                 pass
 
         if is_user_superuser(self.request):
-            terminal_list = zrmappings_models.RetailerTerminal.objects.all()
+            terminal_list = zrmappings_models.RetailerTerminal.objects.select_related('retailer', 'terminal').all()
 
         if activate:
             zruser = ZrTerminal.objects.filter(id=activate).last()
@@ -2302,26 +2206,16 @@ class TerminalListView(ListView):
                         [terminal.retailer.first_name, terminal.terminal.id,
                          terminal.terminal.first_name]]
 
-        if q:
-            context['q'] = q
-
-        if filter:
-            context['filter_by'] = filter
-
-        if start_date:
-            context['startDate'] = start_date
-
-        if end_date:
-            context['endDate'] = end_date
+        context['q'] = q
+        context['startDate'] = start_date
+        context['endDate'] = end_date
 
         if terminaldict:
             context['terminaldict']=terminaldict
 
-        if terminal_id:
-            context['terminal_id'] = int(terminal_id)
+        context['terminal_id'] = int(terminal_id)
+        context['retailer_id'] = int(retailer_id)
 
-        if retailer_id:
-            context['retailer_id'] = int(retailer_id)
         context['terminal_list'] = terminal_list
         context['queryset'] = queryset
         p = Paginator(context['queryset'], self.paginate_by)
@@ -2333,11 +2227,9 @@ class TerminalListView(ListView):
         context['queryset'] = page.object_list
         context['url_name']= "terminal-list"
         query_string = {}
-        if q:
-            query_string['q'] = q
 
-        if filter:
-            query_string['filter'] = filter
+        query_string['q'] = q
+        context['has_next_page'] = context['has_prev_page'] = None
 
         if page.has_next():
             query_string['page_no'] = page.next_page_number()
@@ -2355,7 +2247,7 @@ class TerminalListView(ListView):
 
 
 def get_terminal_qs(request):
-    queryset = zrmappings_models.RetailerTerminal.objects.none()
+    queryset = zrmappings_models.RetailerTerminal.objects.select_related('retailer', 'terminal').none()
     if request.user.zr_admin_user:
         try:
             queryset = request.user.zr_admin_user.zr_user.terminal_retailer_mappings.order_by('at_created')
@@ -2363,13 +2255,12 @@ def get_terminal_qs(request):
             pass
 
     if is_user_superuser(request):
-        queryset = zrmappings_models.RetailerTerminal.objects.order_by('at_created')
+        queryset = zrmappings_models.RetailerTerminal.objects.select_related('retailer', 'terminal').order_by('at_created')
 
     q = request.GET.get('q')
-    filter = request.GET.get('filter')
 
     if q:
-        query_filter = Q(terminal__first_name__contains=q) | Q(terminal__last_name__contains=q) | Q(terminal__mobile_no__contains=q)
+        query_filter = Q(terminal__first_name__icontains=q) | Q(terminal__last_name__icontains=q) | Q(terminal__mobile_no__contains=q)
         queryset = queryset.filter(
             query_filter
         )
@@ -2389,13 +2280,6 @@ def get_terminal_qs(request):
 
     if terminal_id != None and int(terminal_id) > 0:
         queryset = queryset.filter(terminal_id=terminal_id)
-
-    if filter == 'Today':
-        queryset = queryset.filter(at_created__gte=datetime.datetime.now().date())
-    elif filter == 'Last-Week':
-        queryset = queryset.filter(at_created__range=last_week_range())
-    elif filter == 'Last-Month':
-        queryset = queryset.filter(at_created__range=last_month())
 
     return queryset
 
@@ -3363,7 +3247,7 @@ class OfferListView(View):
     def post(self, request, **kwargs):
 
         if request.user.zr_admin_user.role.name != "RETAILER":
-            retailer_id = request.POST.get('retailer','')
+            retailer_id = request.POST.get('retailer',)
             offer_id = request.POST.get('offer_id','')
             order_id_list = []
             order_id_list.append(str(offer_id))
@@ -3470,7 +3354,8 @@ def get_wallets_qs(request):
     user_list = []
 
     if is_user_superuser(request):
-        user_list = zrwallet_models.Wallet.objects.all()
+        user_list = zrwallet_models.Wallet.objects.select_related('merchant__role')
+        #user_list = list(zrwallet_models.Wallet.objects.raw("select * from zrwallet_wallet"))
 
     elif request.user.zr_admin_user.role.name == DISTRIBUTOR:
         dist_subd = list(zrmappings_models.DistributorSubDistributor.objects.filter(
@@ -3527,21 +3412,19 @@ def download_wallet_list_csv(request):
 
 class WalletListView(ListView):
     template_name = 'zruser/wallet_list.html'
-    # queryset = ZrUser.objects.filter(role__name=SUBDISTRIBUTOR)
     context_object_name = 'wallet_list'
     paginate_by = 10
 
     def get_context_data(self, *args, **kwargs):
         context = super(WalletListView, self).get_context_data()
         queryset = self.get_queryset()
-        q = self.request.GET.get('q')
-        filter = self.request.GET.get('filter')
+        q = self.request.GET.get('q', '')
         pg_no = self.request.GET.get('page_no', 1)
-        user_id = self.request.GET.get('user-id')
+        user_id = self.request.GET.get('user-id', -1)
         user_list = []
 
         if is_user_superuser(self.request):
-            user_list = zrwallet_models.Wallet.objects.all()
+            user_list = zrwallet_models.Wallet.objects.select_related('merchant')
 
         elif self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
             dist_subd = list(zrmappings_models.DistributorSubDistributor.objects.filter(
@@ -3556,17 +3439,10 @@ class WalletListView(ListView):
                 merchant_id__in=list(zrmappings_models.SubDistributorMerchant.objects.filter(
                     sub_distributor=self.request.user.zr_admin_user.zr_user).values_list(
                     'merchant_id', flat=True)))
-        if q:
-            context['q'] = q
 
-        if filter:
-            context['filter_by'] = filter
-
-        if user_id:
-            context['user_id'] = int(user_id)
-
-        if user_list:
-            context['user_list'] = user_list
+        context['q'] = q
+        context['user_id'] = int(user_id)
+        context['user_list'] = user_list
 
         p = Paginator(queryset, self.paginate_by)
         try:
@@ -3575,14 +3451,14 @@ class WalletListView(ListView):
             raise Http404
 
         context['queryset'] = page.object_list
-        context['url_name']= "wallet-list"
+        context['url_name'] = "wallet-list"
 
         query_string = {}
         if q:
             query_string['q'] = q
 
-        if filter:
-            query_string['filter'] = filter
+        context['has_next_page'] = None
+        context['has_prev_page'] = None
 
         if page.has_next():
             query_string['page_no'] = page.next_page_number()

@@ -9,31 +9,23 @@
 <div class="content-wrapper">
     <p class="head-right">Transactions Table</p>
     <div class="row rm-margin-side">
-        <div class="col-2">
-            <p class="head-left">START DATE</p>
+        <div class="col-6 col-lg-2 mt-2">
+            <input id="start-date" name="startDate" value="{{startDate}}" placeholder="From" data-toggle="tooltip" data-placement="top" title="Transaction Date: From"/>
         </div>
-        <div class="col-2">
-            <p class="head-left">END DATE</p>
+        <div class="col-6 col-lg-2 mt-2">
+            <input id="end-date" name="endDate" value="{{endDate}}" placeholder="To" data-toggle="tooltip" data-placement="top" title="Transaction Date: To"/>
         </div>
-    </div>
-    <div class="row rm-margin-side">
-         <div class="col-2">
-            <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-        </div>
-         <div class="col-2">
-            <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-        </div>
-         {% if distributor_list %}
-            <div class="col-4">
+        {% if distributor_list %}
+            <div class="col-12 col-lg-2 mt-2" data-toggle="tooltip" data-placement="top" title="Select Distributor">
                 <select id="user-distributor-id"  name="user-distributor-id">
-                <option value="-1">ALL</option>
-                {% for distributor in distributor_list %}
-                    <option value="{{ distributor.id }}" {% if  distributor.id == distributor_id %}selected{% endif %}>{{ distributor.first_name }} {{ distributor.last_name|default_if_none:""}}</option>
-                 {% endfor %}
-            </select>
+                    <option value="-1">ALL</option>
+                    {% for distributor in distributor_list %}
+                        <option value="{{ distributor.id }}" {% if  distributor.id == distributor_id %}selected{% endif %}>{{ distributor.first_name }} {{ distributor.last_name|default_if_none:""}}</option>
+                    {% endfor %}
+                </select>
             </div>
-         {% endif %}
-         <div class="col-4">
+        {% endif %}
+        <div class="col-12 col-lg-2 mt-2" data-toggle="tooltip" data-placement="top" title="Select Sub-Distributor">
             <select id="user-subdistributor-id" name="user-subdistributor-id">
                 <option value="-3">ALL</option>
                 {% for key,val in subDistMerchant.items %}
@@ -46,44 +38,44 @@
                 {% endfor %}
             </select>
         </div>
+        <div class="col-6 col-lg-3 mt-2 float-left">
+            <input class="form-control form-control" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="Search by Id, Name or Mobile">
+        </div>
+        <div class="col-2 col-lg-1 mt-2">
+            <button class="btn btn-outline-dark" type="button" id="search-btn" data-toggle="tooltip" data-placement="top" title="Search">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+        <div class="col-2 col-lg-1 mt-2">
+            <a href="{% url 'transaction:transaction-list' %}" data-toggle="tooltip" data-placement="top" title="Clear Filters">
+                <img src="https://png.icons8.com/ios/50/000000/clear-filters.png" height="30">
+            </a>
+        </div>
+        <div class="col-2 col-lg-1 mt-2 float-right" data-toggle="tooltip" data-placement="top" title="Download CSV">
+            <img src="https://png.icons8.com/ios/50/000000/export-csv.png" height="30" id="csv-download" class="float-right"
+             style="cursor: pointer;">
+        </div>
+        <input hidden id="is_data_exists" value="{% if queryset %}1{% else %}0{% endif %}">
+        
+        
          <div class="div-width-100">
              <br>
-             <div class="row">
-                 <div class="align-items-center div-width-100">
-                    <div class="float-left">
-                        <input class="search" id="search-txt" type="search" name="search" value="{{ q }}"
-                               placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                        <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
-                    </div>
-                    <input class="button red float-left mar_l_10" type="button" value="Search" id="search-btn">
-                    <input class="button red float-right" type="button" value="DOWNLOAD CSV" id="csv-download">
-                    <a class="nav-link float-right" href="{% url 'transaction:transaction-list' %}">Reset filters</a>
-                    <input hidden id="is_data_exists" value="{% if queryset %}1{% else %}0{% endif %}">
-                 </div>
-             </div>
-             <br>
-             <div class="row">
-                <div class="fine">
-                    <p class="head-bg">Transactions</p>
-                </div>
-            </div>
              <div class="row scroll">
-
                  <div class="div-width-100">
-                     <table>
-                         <tr>
-                            <th>Transaction Id</th>
-                            <th>Merchant Id</th>
-                            <th>Vendor Txn Id</th>
-                            <th>status</th>
-                            <th>Amount</th>
-                            <th>Type</th>
-                            <th>Mobile number</th>
-                            <th>Customer</th>
-                            <th>Amount</th>
-                            <th>Additional charges</th>
-                            <th>Transaction type</th>
-                            <th>Service provider</th>
+                     <table class="table table-hover table-data">
+                         <tr style="border-bottom-style: solid;">
+                            <th scope="col">Transaction Id</th>
+                            <th scope="col">Merchant Id</th>
+                            <th scope="col">Vendor Txn Id</th>
+                            <th scope="col">status</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Mobile number</th>
+                            <th scope="col">Customer</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Additional charges</th>
+                            <th scope="col">Transaction type</th>
+                            <th scope="col">Service provider</th>
                          </tr>
                          {% for transaction in queryset %}
                             <tr>
@@ -98,21 +90,20 @@
                                 <td>{{ transaction.amount }}</td>
                                 <td>{{ transaction.additional_charges }}</td>
                                 <td>{{ transaction.type }}</td>
-                                <td>{{ transaction.service_provider.name }}</td>
+                                <td>{{ transaction.service_provider | default_if_none:"NA" }}</td>
                             </tr>
                          {% endfor %}
                      </table>
-                     <br/>
                      {% if is_paginated %}
                          <div class="pagination">
                              {% if has_prev_page %}
                                 <div class="pagination-prev">
-                                    <a href="{% url 'transaction:transaction-list' %}?{{ prev_page_qs }}" class="button red">Prev</a>
+                                    <a href="{% url 'transaction:transaction-list' %}?{{ prev_page_qs }}" class="btn btn-outline-dark">Prev</a>
                                 </div>
                              {% endif %}
                              {% if has_next_page %}
                                 <div class="pagination-next">
-                                    <a href="{% url 'transaction:transaction-list' %}?{{ next_page_qs }} " class="button red">Next</a>
+                                    <a href="{% url 'transaction:transaction-list' %}?{{ next_page_qs }} " class="btn btn-outline-dark">Next</a>
                                 </div>
                              {% endif %}
                          </div>
@@ -126,10 +117,12 @@
 
 </div>
 
-
     <script>
     $(document).ready(function(){
      distributor_id = $("#user-distributor-id").val()
+
+     $("#search-txt").focus();
+
     $("#user-distributor-id").change(function()
      {
         var id = $(this).val();
@@ -198,11 +191,8 @@
         $('#search-btn').click(function () {
         startDate = $('#start-date').val();
         endDate = $('#end-date').val();
-            {% if filter_by %}
-                url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}";
-            {% else %}
-                url = window.location.pathname + "?q=" + $('#search-txt').val();
-            {% endif %}
+
+        url = window.location.pathname + "?q=" + $('#search-txt').val();
 
          if(startDate!="" && endDate!="" )
             {
@@ -233,7 +223,11 @@
           window.location.assign(url)
         });
 
-
+        $("#search-txt").keypress(function(event) {
+            if (event.which == 13) {
+               q();
+            }
+        });
 
         $('#csv-download').click(function () {
             if($("#is_data_exists").val() == "1"){

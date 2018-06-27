@@ -5,8 +5,8 @@
 
 {% block content %}
 
-<div class="content-wrapper py-2" style="padding-left: 0.5rem; padding-right: 4rem">
-    <p class="heading-right">Create Offer</p>
+<div class="content-wrapper">
+    <p class="head-right">Create Offer</p>
     {% if api_error %}
       <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
     {% endif %}
@@ -17,95 +17,91 @@
 
     <form id="add-card-form" method="POST">
     <div class="container-fluid" style="position: relative;">
-        <div class="row">
-            <p class="heading-bg">OFFER DETAILS:</p>
-        </div>
-
-                <div class="row">
-                    <div class="col-sm-3 col-md-3">
-                        <div class="form-group">
-                            <label for="id">Id</label>
-                                <input type="text" class="fill" name="id" maxlength="125" REQUIRED>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-3 col-md-3">
-                        <div class="form-group">
-                            <label for="type">Type</label>
-                                <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" name="type" maxlength="125" REQUIRED>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-3 col-md-3">
-                        <div class="form-group">
-                            <label for="availability">Availability</label>
-                            <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" min="1" name="availability" maxlength="125" REQUIRED>
-                        </div>
-                    </div>
+        <div class="row d-flex justify-content-between">
+            <div class="col-sm-3 col-md-3">
+                <div class="form-group">
+                    <label for="id">Id</label>
+                        <input type="text" class="fill form-control" name="id" maxlength="125" REQUIRED>
                 </div>
+            </div>
 
-                <div class="row">
-                    <div class="col-sm-4 col-md-4">
-                        <div class="form-group">
-                            <label for="short_desc">Short Description</label>
-                            <input type="text" class="fill" name="short_desc" maxlength="125" REQUIRED>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-8 col-md-8">
-                       <div class="form-group">
-                            <label for="long_desc">Long Description</label>
-                            <input type="text" class="input-80" name="long_desc" maxlength="256" REQUIRED>
-                        </div>
-                    </div>
+            <div class="col-sm-3 col-md-3">
+                <div class="form-group">
+                    <label for="type">Type</label>
+                        <input type="number" class="fill form-control" style="box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" name="type" maxlength="125" REQUIRED>
                 </div>
+            </div>
 
-                <div class="row">
-                    <div class="col-sm-3 col-md-3">
-                       <div class="form-group">
-                            <label for="cashback">Cashback</label>
-                            <!--<input type="text" style="border: 2px solid; border-color: #aaa;" name="cashback" REQUIRED>-->
-                           <select class="fill" name="cashback" default="true" REQUIRED>
-                                <option value="true">True</option>
-                                <option value="false">False</option>
-                           </select>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-3 col-md-3">
-                       <div class="form-group">
-                            <label for="isactive">Isactive</label>
-                            <!--<input type="text" style="border: 2px solid; border-color: #aaa;" name="cashback" REQUIRED>-->
-                           <select class="fill" name="isactive" default="true" REQUIRED>
-                                <option value="true">True</option>
-                                <option value="false">False</option>
-                           </select>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-3 col-md-3">
-                       <div class="form-group">
-                            <label for="minamount">Min Amount</label>
-                            <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" min="1" name="minamount" REQUIRED>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-3 col-md-3">
-                       <div class="form-group">
-                            <label for="dis">Dis</label>
-                            <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" min="1" name="dis" REQUIRED>
-                        </div>
-                    </div>
+            <div class="col-sm-3 col-md-3">
+                <div class="form-group">
+                    <label for="availability">Availability</label>
+                    <input type="number" class="fill form-control" style="box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" min="1" name="availability" maxlength="125" REQUIRED>
                 </div>
-
-    </div>
-        <div class="col-md-5 colAlignment" style="float:right;">
-            <div class="fill margin-top" style="padding-left:6.5rem">
-                <input class="button red" type="submit" name = "save" value="Create Offer">
             </div>
         </div>
-        {% csrf_token %}
-        </form>
+
+        <div class="row d-flex justify-content-between">
+            <div class="col-sm-4 col-md-4">
+                <div class="form-group">
+                    <label for="short_desc">Short Description</label>
+                    <input type="text" class="fill form-control" name="short_desc" maxlength="125" REQUIRED>
+                </div>
+            </div>
+
+            <div class="col-sm-8 col-md-8">
+               <div class="form-group">
+                    <label for="long_desc">Long Description</label>
+                    <input type="text" class="form-control" name="long_desc" maxlength="256" REQUIRED>
+                </div>
+            </div>
+        </div>
+
+        <div class="row d-flex justify-content-between">
+            <div class="col-sm-3 col-md-3">
+               <div class="form-group">
+                   <label for="cashback">Cashback</label>
+                   <!--<input type="text" style="border: 2px solid; border-color: #aaa;" name="cashback" REQUIRED>-->
+                   <select class="fill form-control" name="cashback" default="true" REQUIRED>
+                        <option value="true">True</option>
+                        <option value="false">False</option>
+                   </select>
+                </div>
+            </div>
+            <div class="col-sm-3 col-md-3">
+               <div class="form-group">
+                    <label for="isactive">Isactive</label>
+                    <!--<input type="text" style="border: 2px solid; border-color: #aaa;" name="cashback" REQUIRED>-->
+                   <select class="fill form-control" name="isactive" default="true" REQUIRED>
+                        <option value="true">True</option>
+                        <option value="false">False</option>
+                   </select>
+                </div>
+            </div>
+
+            <div class="col-sm-3 col-md-3">
+               <div class="form-group">
+                    <label for="minamount">Min Amount</label>
+                    <input type="number" class="fill form-control" style="box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" min="1" name="minamount" REQUIRED>
+                </div>
+            </div>
+
+            <div class="col-sm-3 col-md-3">
+                   <div class="form-group">
+                        <label for="dis">Dis</label>
+                        <input type="number" class="fill form-control" style="box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" min="1" name="dis" REQUIRED>
+                    </div>
+                </div>
+        </div>
+        <div class="row d-flex justify-content-end">
+            <div class="col-md-5 float-right">
+                <div class="margin-top float-right" >
+                    <input class="btn btn-outline-success" type="submit" name = "save" value="Create Offer">
+                </div>
+            </div>
+        </div>
+    </div>
+    {% csrf_token %}
+    </form>
     <label class="fill"></label>
 </div>
 

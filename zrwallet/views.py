@@ -25,7 +25,9 @@ from common_utils.transaction_utils import get_merchant_id_list_from_distributor
 def get_transaction_qs(request):
     queryset = None
     if is_user_superuser(request):
-        queryset = WalletTransactions.objects.exclude(wallet_id=None).order_by('-id')
+        queryset = WalletTransactions.objects.exclude(wallet_id=None).select_related(
+            'wallet', 'wallet__merchant', 'wallet__merchant__role', 'transaction', 'transaction__beneficiary_user'
+        ).order_by('-id')
 
     elif request.user.zr_admin_user.role.name == DISTRIBUTOR:
         dist_subd = list(zrmappings_models.DistributorSubDistributor.objects.filter(
@@ -45,7 +47,7 @@ def get_transaction_qs(request):
             + list(ZrUser.objects.filter(id=request.user.zr_admin_user.zr_user.id).values_list(
                 'id', flat=True))).order_by('-id')
 
-    q = request.GET.get('q')
+    q = request.GET.get('q', '')
     if q:
         query_filter = Q(wallet__merchant__first_name__icontains=q) | Q(wallet__merchant__last_name__icontains=q) | \
                        Q(wallet__merchant__mobile_no__contains=q)
@@ -54,11 +56,12 @@ def get_transaction_qs(request):
             query_filter
         )
 
-    start_date = request.GET.get('startDate')
-    end_date = request.GET.get('endDate')
-    user_id = request.GET.get('user_id')
-    if start_date is not None and end_date is not None:
-        queryset = queryset.filter(at_created__range=(start_date, end_date))
+    start_date = request.GET.get('startDate', '')
+    end_date = request.GET.get('endDate', '')
+    user_id = request.GET.get('user_id', -1)
+    if start_date != '' and end_date != '':
+        queryset = queryset.filter(at_created__date__gte=start_date)
+        queryset = queryset.filter(at_created__date__lte=end_date)
 
     if user_id is not None and int(user_id) > 0:
         queryset = queryset.filter(wallet_id=user_id)
@@ -74,16 +77,15 @@ class PassbookListView(ListView):
     def get_context_data(self, *args, **kwargs):
         context = super(PassbookListView, self).get_context_data()
         user_list = None
-        filter_by = self.request.GET.get('filter', 'all')
-        q = self.request.GET.get('q')
+        q = self.request.GET.get('q', '')
         queryset = self.get_queryset()
         pg_no = self.request.GET.get('page_no', 1)
-        start_date = self.request.GET.get('startDate')
-        end_date = self.request.GET.get('endDate')
-        user_id = self.request.GET.get('user_id')
+        start_date = self.request.GET.get('startDate', '')
+        end_date = self.request.GET.get('endDate', '')
+        user_id = self.request.GET.get('user_id', -1)
 
         if is_user_superuser(self.request):
-            user_list = WalletTransactions.objects.all().distinct('wallet_id')
+            user_list = WalletTransactions.objects.select_related('wallet__merchant').distinct('wallet_id')
 
         elif self.request.user.zr_admin_user.role.name == DISTRIBUTOR:
             dist_subd = list(zrmappings_models.DistributorSubDistributor.objects.filter(
@@ -102,22 +104,44 @@ class PassbookListView(ListView):
                     'merchant_id', flat=True))
                 + list(ZrUser.objects.filter(id=self.request.user.zr_admin_user.zr_user.id).values_list(
                     'id', flat=True))).distinct('wallet_id')
-        if q:
-            context['q'] = q
-        if start_date:
-            context['startDate'] = start_date
-        if end_date:
-            context['endDate'] = end_date
-        if user_id:
-            context['user_id'] = int(user_id)
-        if user_list:
-            context['user_list'] = user_list
+
+        context['q'] = q
+        context['startDate'] = start_date
+        context['endDate'] = end_date
+        context['user_id'] = int(user_id)
+        context['user_list'] = user_list
 
         p = Paginator(queryset, self.paginate_by)
         try:
             page = p.page(pg_no)
         except EmptyPage:
             raise Http404
+
+        for w in page.object_list:
+            try:
+                w.type = w.transaction.type
+            except:
+                w.type = None
+            try:
+                w.bank_ref = w.transaction.transaction_response_json.data.bank_ref_num
+            except:
+                w.bank_ref = None
+            try:
+                w.customer = w.transaction.customer
+            except:
+                w.customer = None
+            try:
+                w.beneficiary = w.transaction.beneficiary
+            except:
+                w.beneficiary = None
+            try:
+                w.account_no = w.transaction.account_no
+            except:
+                w.account_no = None
+            try:
+                w.status = w.transaction.status
+            except:
+                w.status = None
 
         context['queryset'] = page.object_list
         context['url_name'] = "passbook-list"
@@ -131,6 +155,9 @@ class PassbookListView(ListView):
             query_string['startDate'] = start_date
         if end_date:
             query_string['endDate'] = end_date
+
+        context['has_next_page'] = None
+        context['has_prev_page'] = None
 
         if page.has_next():
             query_string['page_no'] = page.next_page_number()

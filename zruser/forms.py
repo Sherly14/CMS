@@ -22,7 +22,6 @@ class LoginForm(forms.Form):
         return self.cleaned_data
 
     def login(self, request):
-        print request
         username = self.cleaned_data.get('username')
         password = self.cleaned_data.get('password')
         user = authenticate(username=username, password=password)

@@ -2,109 +2,87 @@
 
 {% block title %} Commissions List {% endblock %}
 
-
 {% block content %}
     <div class="content-wrapper">
         <p class="head-right">Commissions</p>
-
-        <div class="row rm-margin-side">
-            <div class="col-12">
-                <p class="head-bg">My Commission Balance:</p>
-            </div>
-        </div>
-       <div class="row rm-margin-side align-items-center">
+        <div class="row align-items-center">
             <div>
                 <p class="inr">Net Commission INR {% if total_commission %} {{ total_commission }} {% else %} 0 {% endif %}</p>
             </div>
             <div>
                 {% if not request.user.is_superuser and request.user.zr_admin_user.role.name != "ADMINSTAFF"%}
-                    <input class="button red float-right" type="button" value="Settle Commission" id="settle-comm" data-toggle="modal" data-target="#confirm_settlement">
+                    <input class="btn btn-outline-success float-right ml-4" type="button" value="Settle Commission" id="settle-comm" data-toggle="modal" data-target="#confirm_settlement">
                 {% endif %}
             </div>
         </div>
-        &nbsp;&nbsp;
-
         <div class="row rm-margin-side">
-            <div class="col-2">
-                <p class="head-left">START DATE</p>
+            <div class="col-6 col-lg-2 mt-2">
+                <input id="start-date" name="startDate" value="{{startDate}}" placeholder="From" data-toggle="tooltip" data-placement="top" title="Commission Created: From"/>
             </div>
-            <div class="col-2">
-                <p class="head-left">END DATE</p>
-            </div>
-        </div>
-        <div class="row rm-margin-side">
-            <div class="col-2">
-                <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-            </div>
-            <div class="col-2">
-                <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-            </div>
-        </div>
-        <br>
-        <div class="row rm-margin-side">
-            <div class="row div-width-100">
-                <div class="align-items-center div-width-100">
-                    <div class="float-left">
-                        <input id="search-txt" {% if search %}value={{ search }}{% endif %} class="search" type="search" name="search" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                        <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
-                    </div>
-
-                    <input class="button red float-left mar_l_10" type="button" value="Search" id="search">
-                    <input class="button red float-right mar_l_10" type="button" value="DOWNLOAD CSV" id="download-csv">
-                    <a href='{% url "commission:display-commission" %}' class="float-right mar_l_10">Reset filters</a>
-                    {% csrf_token %}
-                </div>
+            <div class="col-6 col-lg-2 mt-2">
+                <input id="end-date" name="endDate" value="{{endDate}}" placeholder="To" data-toggle="tooltip" data-placement="top" title="Commission Created: To"/>
             </div>
 
+            <div class="col-6 col-lg-3 mt-2 float-left">
+                <input class="form-control form-control" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="Search by Name, Mobile, Bank, Amount">
+            </div>
+            <div class="col-2 col-lg-1 mt-2">
+                <button class="btn btn-outline-dark" type="button" id="search-btn" data-toggle="tooltip" data-placement="top" title="Search">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+            <div class="col-2 col-lg-1 mt-2">
+                <a href="{% url 'commission:display-commission' %}" data-toggle="tooltip" data-placement="top" title="Clear Filters">
+                    <img src="https://png.icons8.com/ios/50/000000/clear-filters.png" height="30">
+                </a>
+            </div>
+            <div class="col-2 col-lg-1 mt-2 row-float-right" data-toggle="tooltip" data-placement="top" title="Download CSV">
+                <img src="https://png.icons8.com/ios/50/000000/export-csv.png" height="30" id="csv-download" class="float-right"
+                 style="cursor: pointer;">
+            </div>
+            {% csrf_token %}
         </div>
         <br>
         <div class="row rm-margin-side">
-            <div class="row div-width-100">
-                <div class="fine">
-                    <p class="head-bg">Transactions, Commissions and Taxes</p>
-                </div>
-            </div>
             <div class="row scroll div-width-100" style="overflow: auto;">
                 <div class="div-width-100">
-                    <table class=''>
+                    <table id="data" class="table table-hover table-data">
                         <thead>
-                            <th>Transaction ID</th>
-                            <th>Tr. Amount</th>
-                            <th>Tr. Type</th>
-                            <th>Gross Commission</th>
-                            <th>TDS amount</th>
-                            <th>GST amount</th>
-                            <th>Net Commission</th>
+                            <tr style="border-bottom-style: solid;">
+                                <th scope="col">Transaction ID</th>
+                                <th scope="col">Tr. Amount</th>
+                                <th scope="col">Tr. Type</th>
+                                <th scope="col">Gross Commission</th>
+                                <th scope="col">TDS amount</th>
+                                <th scope="col">GST amount</th>
+                                <th scope="col">Net Commission</th>
+                            </tr>
                         </thead>
-                    <div class="">
-                            <tbody>
-                                {% for com in commissions.object_list %}
-                                    <tr>
-                                        <td>{{ com.transaction_id }}</td>
-                                        <td>{{ com.transaction.amount }}</td>
-                                        <td>{{ com.transaction.type }}</td>
-                                        <td>{{ com.gross_amount }}</td>
-                                        <td>{{ com.user_tds }}</td>
-                                        <td>{{ com.user_gst }}</td>
-                                        <td>{{ com.net_commission }}</td>
-                                    </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                        <br/>
-
-                            <div class="pagination">
-                                {% if commissions.has_previous %}
-                                    <div class="pagination-prev">
-                                        <a href='{% url "commission:display-commission" %}?{{ prev_page_qs }}' class="button red">Prev</a>
-                                    </div>
-                                {% endif %}
-                                {% if commissions.has_next %}
-                                    <div class="pagination-next">
-                                        <a href='{% url "commission:display-commission" %}?{{ next_page_qs }}' class="button red">Next</a>
-                                    </div>
-                                {% endif %}
+                        <tbody>
+                            {% for com in commissions.object_list %}
+                                <tr>
+                                    <td>{{ com.transaction_id }}</td>
+                                    <td>{{ com.transaction.amount }}</td>
+                                    <td>{{ com.transaction.type }}</td>
+                                    <td>{{ com.gross_amount }}</td>
+                                    <td>{{ com.user_tds }}</td>
+                                    <td>{{ com.user_gst }}</td>
+                                    <td>{{ com.net_commission }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="pagination">
+                        {% if commissions.has_previous %}
+                            <div class="pagination-prev">
+                                <a href='{% url "commission:display-commission" %}?{{ prev_page_qs }}' class="btn btn-outline-dark">Prev</a>
                             </div>
+                        {% endif %}
+                        {% if commissions.has_next %}
+                            <div class="pagination-next">
+                                <a href='{% url "commission:display-commission" %}?{{ next_page_qs }}' class="btn btn-outline-dark">Next</a>
+                            </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -125,21 +103,21 @@
             </div>
             <div class="modal-footer btn-block-group" style="align-self: center;">
                 <div class="modal-footer" style="text-align:center">
-                    <button type="button" class="btn btn-primary btn-small max-225 settle_commission_confirm">Yes
+                    <button type="button" class="btn btn-success btn-small max-225 settle_commission_confirm">Yes
                     </button>
-                    <button type="button" class="btn btn-default btn-small max-225" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger btn-small max-225" data-dismiss="modal">No</button>
                 </div>
             </div>
         </form>
         </div>
     </div>
 
-    <br>
-
     <script>
     $(document).ready(function(){
         var startDate = $('#start-date').val();
         var endDate = $('#end-date').val();
+
+        $("#search-txt").focus();
 
         function q(){
             if($('#search-txt').val() != "") {
@@ -155,7 +133,13 @@
             window.location.assign(url)
         }
 
-        $('#search').click(q);
+        $('#search-btn').click(q);
+
+        $("#search-txt").keypress(function(event) {
+            if (event.which == 13) {
+               q();
+            }
+        });
 
         var today = new Date(new Date().getFullYear() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getDate());
 
@@ -218,7 +202,7 @@
     </script>
 
     <script>
-        $('#download-csv').click(function(){
+        $('#csv-download').click(function(){
             window.location.assign('{% url "commission:commission-request-csv" %}')
         })
     </script>
@@ -255,10 +239,10 @@
             .on('click', '.settle_commission_confirm', function() {
                 $('.settle_commission_confirm').addClass('disabled')
                 $('.settle_commission_confirm').prop('disabled', true)
+
                 var user_id = "{{user_id}}"
                 var ids = "{{ids}}"
                 var total_commission = "{{total_commission}}"
-                console.log(user_id, total_commission);
                 <!-- AJAX Call -->
                 data = {
                     'user_id': user_id,
@@ -287,5 +271,6 @@
                 });
                 <!-- AJAX Call -->
             })
+
     </script>
 {% endblock extrascripts %}

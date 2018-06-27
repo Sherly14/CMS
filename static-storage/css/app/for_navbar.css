@@ -12,9 +12,10 @@
     border: 2px solid #DC3826;
     background-color: transparent;
     position: absolute;
-    right: 15px;
+    margin-left: 155px;
     top: 10px;
     border-radius: 11px;
+    display:inline-block
 }
 
 /*background of top nav bar*/
@@ -119,8 +120,8 @@ body.fixed-nav {
 
 @media (min-width: 992px) {
   #mainNav .navbar-brand {
-    width: 250px;
-    padding-left: 20px;
+    width: 200px;
+    padding-left: 16px;
 
    }
   #mainNav .navbar-collapse {
@@ -133,7 +134,7 @@ body.fixed-nav {
       overflow: hidden;
       flex-direction: column;
       //height: 100vh;
-      margin-top: 100px;
+      margin-top: 70px;
       /*margin-left: -70px;*/
       /*padding-bottom: 56px;*/
       background: transparent;
