@@ -584,8 +584,7 @@
                    $('#to_account_no_form').hide();
                }
             {% endfor %}
-            console.log('code', code);
-            console.log('bank_account', bank_account[code]);
+
             $('#to_account_no').val(bank_account[code]);
             if($('#to_bank').val() == 'Other') {
                 $('#to_account_no_form').show();

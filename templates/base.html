@@ -55,7 +55,7 @@
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <a class="navbar-brand ml-2" href="/">Zrupee</a>
+        <a class="navbar-brand ml-2 header-logo" href="/"><img src="/static/images/logo.png" alt="Zrupee"></a>
         <ul class="navbar-nav ml-auto">
             {% if zr_user.role.name != "TERMINAL" %}
             <li class="nav-item"><a class="nav-link wheatTextColor headerTextName">{{ request.user.username.upper }} - {{ request.user.zr_admin_user.role.name }}
