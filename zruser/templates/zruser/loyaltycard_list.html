@@ -11,24 +11,18 @@
             <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
         {% endif %}
         <div class="col-12" >
-            <div class="row" style="padding-right: 50px;">
-                <div class="fine">
-                    <p class="head-bg">List of Cards</p>
-                </div>
-            </div>
             <div class="row scroll">
 
                 <div style="width: 100%;">
-                    <table>
-                        <tr>
-                            <th>Card Id</th>
-                            <th>Card Number</th>
-                            <th>Created</th>
-                            <th>Name</th>
-                            <th>Balance</th>
-                            <th>Mobile No</th>
+                    <table class="table table-hover table-data">
+                        <tr style="border-bottom-style: solid;">
+                            <th scope="col">Card Id</th>
+                            <th scope="col">Card Number</th>
+                            <th scope="col">Created</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Balance</th>
+                            <th scope="col">Mobile No</th>
                         </tr>
-
                         {% for card in loyalty_cards %}
                             <tr>
                                 <td>{{ card.prepaidcardid }}</td>
@@ -66,12 +60,7 @@
         $('#search-btn').click(function(){
         startDate = $('#start-date').val();
         endDate = $('#end-date').val();
-
-            {% if filter_by %}
-                url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}";
-            {% else %}
-                url = window.location.pathname + "?q=" + $('#search-txt').val();
-            {% endif %}
+            url = window.location.pathname + "?q=" + $('#search-txt').val();
 
             if(startDate!="" && endDate!="" )
             {

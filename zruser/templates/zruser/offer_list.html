@@ -184,7 +184,7 @@
                             <div class="col-sm-6">
                                 <div class="form-group">
                                     <label class="control-label"><b>Offer Id</b></label>
-                                    <input type="text" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" name="offer_id_terminal" id="offer_id_terminal" value="" readonly>
+                                    <input type="text" class="fill" style="box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" name="offer_id_terminal" id="offer_id_terminal" value="" readonly>
                                 </div>
                             </div>
                         </div>
@@ -194,7 +194,7 @@
                                 <div class="form-group">
                                     <label class="control-label"><b>Terminal</b></label>
                                     <br>
-                                    <select class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" name="terminal" id="terminal" required>
+                                    <select class="fill" style="box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" name="terminal" id="terminal" required>
                                         <option value="-1">ALL</option>
                                             {% for terminal in terminal_list %}
                                                 <option value="{{ terminal.terminal.mobile_no }}" {% if  terminal.terminal.id == terminal_id %}selected{% endif %}>{{ terminal.terminal.first_name }} {{ terminal.terminal.last_name|default_if_none:""}}</option>

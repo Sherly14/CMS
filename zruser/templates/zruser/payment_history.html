@@ -63,12 +63,7 @@
         $('#search-btn').click(function(){
         startDate = $('#start-date').val();
         endDate = $('#end-date').val();
-
-            {% if filter_by %}
-                url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}";
-            {% else %}
-                url = window.location.pathname + "?q=" + $('#search-txt').val();
-            {% endif %}
+            url = window.location.pathname + "?q=" + $('#search-txt').val();
 
             if(startDate!="" && endDate!="" )
             {
