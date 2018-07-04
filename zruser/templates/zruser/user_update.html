@@ -64,23 +64,22 @@ Update {{zr_user.role.name|title}}
                         </select>
                         <!--<label class="fill">Not Manadatory for Terminals</label>-->
                         <input type="file" id="kyc-file" style="display:none;">
-                        <input class="btn btn-outline-warning btn-md float-right" type="button" value="upload" id="upload-kyc-btn" onclick="upload_kyc_doc()">
+                        <input class="btn btn-outline-warning btn-md float-right" type="button" value="Upload" id="upload-kyc-btn" onclick="upload_kyc_doc()">
                         <p id="file-err-msg" style="display:none;">
                             {% if kyc_error %}
                                 <h6 style="color:red">{{ kyc_error }}</h6>
                             {% endif %}
                         </p>
-
                     </div>
                     <div class="row margin-top" id="kyc-docs">
                     </div>
                 </div>
             </div>
             <div class="row">
-                <div class="col-10">
+                <div class="col-7 col-md-10">
                     <input class="btn btn-outline-danger btn-md float-right" type="submit" name="cancel" value="Cancel" />
                 </div>
-                <div class="col-2">
+                <div class="col-5 col-md-2">
                     <input class="btn btn-outline-success btn-md float-right" type="submit" name = "save" value="Save & Submit">
                 </div>
             </div>
@@ -100,7 +99,7 @@ Update {{zr_user.role.name|title}}
             </a>
         </h5><span class="fill">
             </span>
-        <input class="button yellow small remove-kyc" doc_type="<%=document_type%>" type="button" value="Remove">
+        <input class="btn btn-outline-warning btn-md remove-kyc" doc_type="<%=document_type%>" type="button" value="Remove">
     </div>
 </script>
 

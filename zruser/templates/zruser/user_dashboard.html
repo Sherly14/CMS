@@ -30,9 +30,9 @@
                      style="cursor: pointer;">
                 </div>
             </div>
-            <br><br>
+            <br>
             <!-- Icon Cards -->
-            <div class="row" style="margin-bottom: 2.5rem">
+            <div class="row" style="margin-bottom: 0.1rem">
                 <div class="col-xl-3 col-sm-6 mb-3">
                     <div class="card bg-light mb-3">
                         <div class="card-header">Total Commission</div>
@@ -64,7 +64,7 @@
                                 DMT Balance
                             </h5>
                             <p class="card-text">INR {{ user_wallet.dmt_balance | floatformat:2 }}</p>
-                            <br>
+                            <hr>
                             <h5 class="card-title">
                                 Non-DMT Balance
                             </h5>
@@ -118,6 +118,7 @@
                                     </tr>
                                 </tbody>
                             </table>
+                            <hr>
                             <h5 class="card-title">Pending+Failed</h5>
                             <table class="card-data table table-condensed">
                                 <tbody>
@@ -262,7 +263,7 @@
                         <input id="from_account_no" name="from_account_no" value="0" hidden>
 
                         <div class="row">
-                             <div class="form-group col-sm-6">
+                             <div class="form-group col-6 col-sm-6">
                                 <label class="control-label"><b>To bank</b></label>
                                 <div>
                                     <select id="to_bank" name="to_bank" class="form-control">
@@ -475,6 +476,11 @@
     <!-- /.modal -->
 
     <script>
+        $('#to_bank').select2();
+        $('#payment_mode').select2();
+        $('#from_user').select2();
+        $('#type').select2();
+
         $('#search-btn').click(function()
         {
             startDate = $('#start-date').val();

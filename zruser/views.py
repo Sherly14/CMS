@@ -1132,6 +1132,7 @@ class DashBoardView(ListView):
 class DistributorCreateView(CreateView):
     template_name = 'zruser/add_distributor.html'
     kyc_doc_types = KYCDocumentType.objects.all().values_list('name', flat=True)
+    sales_agents = ZrUser.objects.all().values_list('sales_agent', flat=True).distinct('sales_agent')
 
     def get(self, request):
         merchant_form = zr_user_form.MerchantDistributorForm()
@@ -1142,7 +1143,8 @@ class DistributorCreateView(CreateView):
             {
                 'merchant_form': merchant_form,
                 'bank_detail_form': bank_detail_form,
-                'kyc_doc_types': self.kyc_doc_types
+                'kyc_doc_types': self.kyc_doc_types,
+                'url_name': "distributor-create"
             }
         )
 
@@ -1329,6 +1331,7 @@ class MerchantCreateView(View):
                 'merchant_form': merchant_form,
                 'bank_detail_form': bank_detail_form,
                 'kyc_doc_types': self.kyc_doc_types,
+                'url_name': "merchant-create"
             }
         )
 
@@ -1468,7 +1471,8 @@ class SubDistributorCreateView(CreateView):
             {
                 'merchant_form': merchant_form,
                 'bank_detail_form': bank_detail_form,
-                'kyc_doc_types': self.kyc_doc_types
+                'kyc_doc_types': self.kyc_doc_types,
+                'url_name': "sub-distributor-create"
             }
         )
 
@@ -1704,7 +1708,8 @@ class RetailerCreateView(CreateView):
                 {
                     'merchant_form': merchant_form,
                     'bank_detail_form': bank_detail_form,
-                    'kyc_doc_types': self.kyc_doc_types
+                    'kyc_doc_types': self.kyc_doc_types,
+                    'url_name': "retailer-create"
                 }
             )
 
@@ -2018,7 +2023,8 @@ class TerminalCreateView(CreateView):
         return render(
             request, self.template_name,
             {
-                'merchant_form': merchant_form
+                'merchant_form': merchant_form,
+                'url_name': "terminal-create"
             }
         )
 

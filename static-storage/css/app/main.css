@@ -13,16 +13,6 @@ input, textarea{
 textarea:focus, input:focus {
     color: #ff0000;
 }
-select{
-    padding-left: 1rem;
-    width:12rem;
-    border:none;
-    border-radius: 5px;
-    text-decoration: none;
-    height:2rem;
-    text-align:center;
-    box-shadow: 2px 3px 10px #E5E5E5;
-}
 
 /*table styling*/
 .table td {
@@ -282,6 +272,10 @@ a.button.red{
     height: 32px !important;
 }
 
+.select2-container {
+    width: 100% !important;
+}
+
 .btn.btn-xs {
     font-size: 0.6rem;
     padding: .12rem .5rem;
@@ -305,4 +299,8 @@ a.button.red{
 
 .row-float-right {
     margin-left: auto;
+}
+
+.table {
+    margin-bottom: 0rem;
 }

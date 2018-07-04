@@ -11,12 +11,11 @@
     {% if api_error %}
       <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
     {% endif %}
-
-    <form id="add-merchant-form" method="POST">
     <div class="container-fluid" style="position: relative;">
         <div class="row">
             <p class="heading-bg">PERSONAL DETAILS:</p>
         </div>
+        <form id="add-merchant-form" method="POST">
             <div class="row">
                 <div class="col-sm-2">
                     <div class="form-group">
@@ -54,15 +53,9 @@
                         {% endif %}
                     </div>
                 </div>
-{#                <div class="col-sm-2">#}
-{#                    <div class="form-group">#}
-{#                        <label for="merchant_id">Merchant ID</label>#}
-{#                        <span id="merchant_id">98DDFSDE8</span>#}
-{#                    </div>#}
-{#                </div>#}
             </div>
             <div class="row">
-                <div class="col-sm-6">
+                <div class="col-sm-3">
                     <div class="form-group">
                         <label for="business">Business name</label>
                         {{ merchant_form.business_name|attr:"id:business"|attr:"class:input-80, form-control" }}
@@ -80,7 +73,16 @@
                         {% endif %}
                     </div>
                 </div>
-                 <div class="col-sm-3">
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label for="aadhaar">Aadhaar No.</label>
+                        {{ merchant_form.aadhaar_no|attr:"id:aadhaar"|attr:"class:input-80, form-control" }}
+                        {% if merchant_form.aadhaar_no.errors %}
+                            {{ merchant_form.aadhaar_no.errors }}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-sm-3">
                     <div class="form-group">
                         <label for="business_type">Business Type</label>
                         {{ merchant_form.business_type|attr:"class:fill, form-control"|attr:"id:business_type" }}
@@ -142,99 +144,83 @@
                         {% endif %}
                     </div>
                 </div>
-
             </div>
     </div>
-    <div class="container-fluid">
+    <div class="container-fluid banking-details">
         <div class="row">
             <p class="heading-bg">BANK DETAILS:</p>
         </div>
-            <div class="row">
-                <div class="col-sm-2">
-                    <div class="form-group">
-                        <label for="acname">A/c Name</label>
-                        {{ bank_detail_form.account_name|attr:"id:acname"|attr:"class:fill, form-control" }}
-                        {% if bank_detail_form.account_name.errors %}
-                            {{ bank_detail_form.account_name.errors }}
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="col-sm-2">
-                    <div class="form-group">
-                        <label for="acno">A/c No</label>
-                        {{ bank_detail_form.account_no|attr:"id:acno"|attr:"class:fill, form-control" }}
-                        {% if bank_detail_form.account_no.errors %}
-                            {{ bank_detail_form.account_no.errors }}
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="col-sm-2">
-                    <div class="form-group">
-                        <label for="ifsc_code">IFSC #</label>
-                        {{ bank_detail_form.IFSC_code|attr:"id:ifsc_code"|attr:"class:fill, form-control" }}
-                        {% if bank_detail_form.IFSC_code.errors %}
-                            {{ bank_detail_form.IFSC_code.errors }}
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="col-sm-4">
-                    <div class="form-group">
-                        <label for="bank_city">Bank City</label>
-                        {{ bank_detail_form.bank_city|attr:"id:bank_city"|attr:"class:fill, form-control" }}
-                        {% if bank_detail_form.bank_city.errors %}
-                            {{ bank_detail_form.bank_city.errors }}
-                        {% endif %}
-                    </div>
-                </div>
-{#                <div class="col-sm-2">#}
-{#                    <div class="form-group">#}
-{#                        <label for="merchant_id">Merchant ID</label>#}
-{#                        <span id="merchant_id">98DDFSDE8</span>#}
-{#                    </div>#}
-{#                </div>#}
-            </div>
-            <div class="row">
-                <div class="col-sm-8">
-                    <div class="form-group">
-                        <label for="bank_name">Bank name</label>
-                        {{ bank_detail_form.bank_name|attr:"id:bank_name"|attr:"class:input-80, form-control" }}
-                        {% if bank_detail_form.bank_name.errors %}
-                            {{ bank_detail_form.bank_name.errors }}
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="UPIID">UPI ID</label>
-                        {{ merchant_form.UPIID|attr:"id:UPIID"|attr:"class:input-80, form-control" }}
-                        {% if merchant_form.UPIID.errors %}
-                            {{ merchant_form.UPIID.errors }}
-                        {% endif %}
-                    </div>
-
-                    <div class="form-group">
-                        <label for="account_type">Bank account type</label>
-                        {{ bank_detail_form.account_type|attr:"id:account_type"|attr:"class:input-80, form-control" }}
-                        {% if bank_detail_form.account_type.errors %}
-                            {{ bank_detail_form.account_type.errors }}
-                        {% endif %}
-                    </div>
+        <div class="row">
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label for="acname">Account Name</label>
+                    {{ bank_detail_form.account_name|attr:"id:acname"|attr:"class:fill, form-control" }}
+                    {% if bank_detail_form.account_name.errors %}
+                        {{ bank_detail_form.account_name.errors }}
+                    {% endif %}
                 </div>
             </div>
+            <div class="col-sm-2">
+                <div class="form-group">
+                    <label for="acno">Account No</label>
+                    {{ bank_detail_form.account_no|attr:"id:acno"|attr:"class:fill, form-control" }}
+                    {% if bank_detail_form.account_no.errors %}
+                        {{ bank_detail_form.account_no.errors }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <div class="form-group">
+                    <label for="ifsc_code">IFSC Code</label>
+                    {{ bank_detail_form.IFSC_code|attr:"id:ifsc_code"|attr:"class:fill, form-control" }}
+                    {% if bank_detail_form.IFSC_code.errors %}
+                        {{ bank_detail_form.IFSC_code.errors }}
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="form-group">
+                    <label for="bank_city">Bank City</label>
+                    {{ bank_detail_form.bank_city|attr:"id:bank_city"|attr:"class:fill, form-control" }}
+                    {% if bank_detail_form.bank_city.errors %}
+                        {{ bank_detail_form.bank_city.errors }}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="form-group col-md-4">
+                <label for="bank_name">Bank name</label>
+                {{ bank_detail_form.bank_name|attr:"id:bank_name"|attr:"class:input-80, form-control" }}
+                {% if bank_detail_form.bank_name.errors %}
+                    {{ bank_detail_form.bank_name.errors }}
+                {% endif %}
+            </div>
+
+            <div class="form-group col-md-4">
+                <label for="UPIID">UPI ID</label>
+                {{ merchant_form.UPIID|attr:"id:UPIID"|attr:"class:input-80, form-control" }}
+                {% if merchant_form.UPIID.errors %}
+                    {{ merchant_form.UPIID.errors }}
+                {% endif %}
+            </div>
+
+            <div class="form-group col-md-4">
+                <label for="account_type">Bank account type</label>
+                {{ bank_detail_form.account_type|attr:"id:account_type"|attr:"class:input-80, form-control" }}
+                {% if bank_detail_form.account_type.errors %}
+                    {{ bank_detail_form.account_type.errors }}
+                {% endif %}
+            </div>
+        </div>
     </div>
     <div class="container-fluid margin-bot">
-        <div class="col-md-7 colAlignment">
+        <div class="col-md-4 colAlignment float-left">
             <div class="row margin-top">
                 <p class="heading-bg">KYC PROOFS:</p>
             </div>
             <div class="row margin-top">
                 <label class="fill" for="doc_type">Select Document Type</label>
-                <!-- <div class="btn-group">
-                <button  id="doc_type" type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">select<span class="glyphicon glyphicon-chevron-down"></span></button>
-                <ul class="dropdown-menu">
-                    <li><a href="#">doc1</a></li>
-                    <li><a href="#">doc2</a></li>
-                </ul>
-            </div> -->
                 <select id="doc_type">
                     {% for doc_type in kyc_doc_types %}
                         <option value="{{ doc_type }}">{{ doc_type }}</option>
@@ -247,17 +233,14 @@
                         <h6 style="color:red">{{ kyc_error }}</h6>
                     {% endif %}
                 </p>
-
             </div>
             <div class="row margin-top" id="kyc-docs">
             </div>
-
         </div>
-        <div class="col-md-5 colAlignment" style="float:right;">
+        <div class="col-md-4 colAlignment float-left" >
             <div class="row margin-top">
                 <p class="heading-bg">GST INFO:</p>
             </div>
-
             <div class="row margin-top">
                 <label class="fill" for="gstin">GSTIN</label>
                 {{ merchant_form.gstin|attr:"id:gstin"|attr:"class:form-control" }}
@@ -265,14 +248,25 @@
                     {{ merchant_form.gstin.errors }}
                 {% endif %}
             </div>
-            <div class="row margin-top float-right mt-2">
+        </div>
+        <div class="col-md-4 colAlignment float-left">
+            <div class="row margin-top">
+                <p class="heading-bg">OTHERS:</p>
+            </div>
+            <div class="row margin-top">
+                <label class="fill" for="sales_agent">Sales Agent</label>
+                {{ merchant_form.sales_agent|attr:"id:sales_agent"|attr:"class:form-control" }}
+                {% if merchant_form.sales_agent.errors %}
+                    {{ merchant_form.sales_agent.errors }}
+                {% endif %}
+            </div>
+            <div class="row margin-top float-right mt-4">
                 <input class="btn btn-outline-success btn-md" type="submit" value="Save & Submit">
             </div>
         </div>
-    </div>
         {% csrf_token %}
         </form>
-    <label class="fill"></label>
+    </div>
 </div>
 
 <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.12.min.js"></script>

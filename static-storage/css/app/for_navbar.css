@@ -32,19 +32,16 @@ body.fixed-nav {
 /*wrapper for the column */
 .content-wrapper {
   background: white;
-    min-height: 800px;
+    min-height: 91vh;
+    overflow: auto;
   }
-  @media (min-width: 992px) {
-    .content-wrapper {
-      margin-left: 230px; } }
 
-@media only screen and (max-width: 500px) {
-  .content-wrapper {
-    background: white;
-        min-height: 800px;
+@media (min-width: 992px) {
+    .content-wrapper {
+        margin-left: 230px;
     }
-  }
 }
+
 .o-hidden {
   overflow: hidden !important; }
 
@@ -135,7 +132,7 @@ body.fixed-nav {
       position: absolute;
       top: 0;
       left: 0;
-      overflow: hidden;
+      //overflow: hidden;
       flex-direction: column;
       //height: 100vh;
       margin-top: 59px;
@@ -191,6 +188,11 @@ body.fixed-nav {
       max-width: 300px; } }
 
 
+.scrollbar {
+    height: 91vh;
+    overflow-y: auto;
+}
+
 .scrollbar-black::-webkit-scrollbar-track {
   -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
   background-color: #F5F5F5;
@@ -198,6 +200,7 @@ body.fixed-nav {
 
 .scrollbar-black::-webkit-scrollbar {
   width: 12px;
+  height: 91vh; overflow-y: auto;
   background-color: #F5F5F5; }
 
 .scrollbar-black::-webkit-scrollbar-thumb {
@@ -241,3 +244,4 @@ body.fixed-nav {
     width: 88px;
     height: auto;
 }
+

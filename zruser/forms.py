@@ -89,7 +89,8 @@ class MerchantDistributorForm(forms.ModelForm):
         fields = [
             'id', 'mobile_no', 'first_name', 'last_name', 'email', 'gender', 'city',
             'state', 'pincode', 'address_line_1', 'address_line_2',
-            'business_name', 'pan_no', 'gstin', 'UPIID', 'residence_address', 'business_type'
+            'business_name', 'pan_no', 'aadhaar_no', 'gstin', 'UPIID', 'residence_address', 'business_type',
+            'sales_agent'
         ]
 
 
