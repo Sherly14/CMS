@@ -8,18 +8,15 @@ Update {{terminal_user.role.name|title}}
 {% block content %}
 
 
-<div class="content-wrapper py-2" style="padding-left: 0.5rem; padding-right: 4rem">
-    <p class="heading-right">Update a {{terminal_user.role.name|title}}</p>
+<div class="content-wrapper py-2 scrollbar scrollbar-black bordered-black">
+    <p class="head-right">Update a {{terminal_user.role.name|title}}</p>
     <div class="container-fluid" style="position: relative;">
-        <div class="row">
-            <p class="heading-bg">PERSONAL DETAILS:</p>
-        </div>
         <form id="add-merchant-form" method="POST">
             <div class="row">
                 <div class="col-sm-2">
                     <div class="form-group">
                         <label for="firstname">First Name</label>
-                        {{ merchant_form.first_name|attr:"id:firstname"|attr:"class:fill" }}
+                        {{ merchant_form.first_name|attr:"id:firstname"|attr:"class:fill, form-control" }}
                         {% if merchant_form.first_name.errors %}
                             {{ merchant_form.first_name.errors }}
                         {% endif %}
@@ -29,7 +26,7 @@ Update {{terminal_user.role.name|title}}
                     <div class="form-group">
                         <label for="lastname">Last Name</label>
                         {{distributor.last_name}}
-                        {{ merchant_form.last_name|attr:"id:lastname"|attr:"class:fill"  }}
+                        {{ merchant_form.last_name|attr:"id:lastname"|attr:"class:fill, form-control"  }}
                         {% if merchant_form.last_name.errors %}
                             {{ merchant_form.last_name.errors }}
                         {% endif %}
@@ -39,7 +36,7 @@ Update {{terminal_user.role.name|title}}
                 <div class="col-sm-4">
                     <div class="form-group">
                         <label for="email">E-mail ID</label>
-                        {{ merchant_form.email|attr:"id:email"|attr:"class:fill" }}
+                        {{ merchant_form.email|attr:"id:email"|attr:"class:fill, form-control" }}
                         {% if merchant_form.email.errors %}
                             {{ merchant_form.email.errors }}
                         {% endif %}
@@ -47,11 +44,14 @@ Update {{terminal_user.role.name|title}}
                 </div>
             </div>
 
-            <div class="fill margin-top" style="padding-left:6.5rem">
-                <input class="button red" type="submit" name = "save" value="Save & Submit">
+            <div class="row">
+                <div class="col-10">
+                    <input class="btn btn-outline-danger btn-md float-right" type="submit" name="cancel" value="Cancel" />
+                </div>
+                <div class="col-2">
+                    <input class="btn btn-outline-success btn-md float-right" type="submit" name = "save" value="Save & Submit">
+                </div>
             </div>
-            <input class="button yellow bg mr-5" type="submit" name="cancel" value="Cancel" />
-
         {% csrf_token %}
         </form>
     </div>

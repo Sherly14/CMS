@@ -19,3 +19,8 @@
 .hr-black{
     background: black;
 }
+
+.btn.btn-xs {
+    font-size: 0.6rem;
+    padding: .12rem .5rem;
+}

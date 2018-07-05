@@ -5,8 +5,8 @@
 
 {% block content %}
 
-<div class="content-wrapper py-2" style="padding-left: 0.5rem; padding-right: 4rem">
-    <p class="heading-right">Deactivate Card</p>
+<div class="content-wrapper py-2 scrollbar scrollbar-black bordered-black">
+    <p class="head-right">Deactivate Card</p>
     {% if api_error %}
       <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
     {% endif %}
@@ -14,16 +14,13 @@
       <div class="alert alert-success" id="success_msg" style="text-align:center">{{ success }}</div>
     {% endif %}
     <div class="container-fluid" style="position: relative;">
-        <div class="row">
-            <p class="heading-bg">DETAILS:</p>
-        </div>
         <form id="add-merchant-form" method="POST">
             <div class="row">
                 <div class="col-sm-3 col-md-3">
                     <div class="form-group">
                         <label for="cardnumber">Card Number</label>
                             <div class="">
-                                <select id="cardnumber"  name="cardnumber" required>
+                                <select id="cardnumber" name="cardnumber" class="form-control" required>
                                     <option value="">Select one Cardnumber</option>
                                     {% for card in loyalty_cardslist %}
                                         <option value="{{ card }}" {% if card == oldcardnumber %}selected{% endif %} >{{ card }} </option>
@@ -36,31 +33,31 @@
                 <div class="col-sm-3 col-md-3">
                     <div class="form-group">
                         <label for="udoutletid">OutletId</label>
-                        <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" name="udoutletid" value="{{zr_user.mobile_no}}" readonly>
+                        <input type="number" class="fill form-control" style="box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" name="udoutletid" value="{{zr_user.mobile_no}}" readonly>
                     </div>
                 </div>
 
                 <div class="col-sm-3 col-md-3">
                    <div class="form-group">
                         <label for="mobileno">Mobile Number</label>
-                        <input type="number" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" value="{{mobile}}" name="mobile" REQUIRED>
+                        <input type="number" class="fill form-control" style="box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" value="{{mobile}}" name="mobile" REQUIRED>
                     </div>
                 </div>
 
                 <div class="col-sm-3 col-md-3">
                    <div class="form-group">
                         <label for="otp">OTP</label>
-                        <input type="text" class="fill" name="otp">
+                        <input type="text" class="fill form-control" name="otp">
                     </div>
                 </div>
             </div>
 
             <div class="row">
                 <div class="col-9">
-                        <input class="button red" type="submit" name = "OTP" value="Generate OTP">
+                        <input class="btn btn-outline-success btn-md float-right" type="submit" name = "OTP" value="Generate OTP">
                 </div>
                 <div class="col-3">
-                    <input class="button red" type="submit" name = "save" value="Deactivate Card">
+                    <input class="btn btn-outline-success btn-md float-right" type="submit" name = "save" value="Deactivate Card">
                 </div>
             </div>
 

@@ -6,210 +6,197 @@
 
 {% block content %}
     {% if request.user.zr_admin_user.role.name != "RETAILER" %}
-    <div class="content-wrapper">
+    <div class="content-wrapper scrollbar scrollbar-black bordered-black">
         <p class="head-right">Dashboard</p>
-
-        <div class="row rm-margin-side">
-            <div class="col-2">
-                <p class="head-left">START DATE</p>
-            </div>
-            <div class="col-2">
-                <p class="head-left">END DATE</p>
-            </div>
-        </div>
-
-        <div class="div-width-100">
             <div class="row">
-                <div class="align-items-center div-width-100">
-                    <div class="col-2 float-left">
-                        <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-                    </div>
-                    <div class="col-2 float-left">
-                        <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-                    </div>
-                    <div class="float-left mar_l_10" style="margin-left: 15px;">
-                       <input type="button" id="search-btn" class="button red" value="Search">
-                    </div>
-
-                    <div class="col-4 float-right">
-                          <button data-toggle="modal" data-target="#get_email_modal" style="float: right;" class="button red">
-                              DOWNLOAD REPORT
-                          </button>
-                    </div>
+                <div class="col-6 col-lg-2 mt-2">
+                    <input id="start-date" name="startDate" value="{{startDate}}" placeholder="From" data-toggle="tooltip" data-placement="top" title="Commission Created: From"/>
+                </div>
+                <div class="col-6 col-lg-2 mt-2">
+                    <input id="end-date" name="endDate" value="{{endDate}}" placeholder="To" data-toggle="tooltip" data-placement="top" title="Commission Created: To"/>
+                </div>
+                <div class="col-2 col-lg-1 mt-2">
+                    <button class="btn btn-outline-dark" type="button" id="search-btn" data-toggle="tooltip" data-placement="top" title="Search">
+                        <i class="fa fa-search"></i>
+                    </button>
+                </div>
+                <div class="col-2 col-lg-1 mt-2">
+                    <a href="{% url 'user:dashboard' %}" data-toggle="tooltip" data-placement="top" title="Clear Filters">
+                        <img src="https://png.icons8.com/ios/50/000000/clear-filters.png" height="30">
+                    </a>
+                </div>
+                <div class="col-2 col-lg-1 mt-2 row-float-right" data-toggle="tooltip" data-placement="top" title="Download CSV">
+                    <img src="https://png.icons8.com/ios/50/000000/export-csv.png" data-toggle="modal" data-target="#get_email_modal" height="30" id="csv-download" class="float-right"
+                     style="cursor: pointer;">
                 </div>
             </div>
-            <br><br>
-        </div>
+            <br>
             <!-- Icon Cards -->
-            <div class="row" style="margin-bottom: 2.5rem">
-                <div class="col-xl-3 col-sm-6 mb-3" style="height: 100%;">
-                    <div class="card card-inverse o-hidden h-100">
-                        <div class="card-block lightGrayBG blackTextColor">
-
-
-                        <span class="card-head spanAlignment" >
-                                Total Commissions</span>
-                            <span class="card-data text-right spanAlignment">
-                                INR {{ total_commission }}</span>
+            <div class="row" style="margin-bottom: 0.1rem">
+                <div class="col-xl-3 col-sm-6 mb-3">
+                    <div class="card bg-light mb-3">
+                        <div class="card-header">Total Commission</div>
+                        <div class="card-body">
+                        <h5 class="card-title">Unsettled</h5>
+                        <p class="card-text">INR {{ total_commission }}</p>
                         </div>
-
                     </div>
                 </div>
                 {% if total_merchants %}
                     <div class="col-xl-3 col-sm-6 mb-3">
-                        <div class="card card-inverse o-hidden h-100">
-                            <div class="card-block lightGrayBG blackTextColor">
-
-                        <span class="card-head spanAlignment">
-                                Merchants </span>
-                                <span class="card-data text-right spanAlignment">
+                        <div class="card bg-light">
+                            <div class="card-block">
+                                <span class="card-header spanAlignment">Merchants</span>
+                                <span class="card-data">
                                 Total : {{ total_merchants }}</span>
                             </div>
-
                         </div>
                     </div>
                 {% endif %}
                 {% if not is_user_superuser %}
                 <div class="col-xl-3 col-sm-6 mb-3">
-                    <div class="card card-inverse o-hidden h-100">
-                        <div class="card-block lightGrayBG blackTextColor" >
-                                <span class="card-head spanAlignment">
-                                    DMT Balance : {{ user_wallet.dmt_balance }}
-                                </span>
-                                <span class="card-head spanAlignment">
-                                    Non-DMT Balance : {{ user_wallet.non_dmt_balance }}
-                                </span>
+                    <div class="card bg-light">
+                        <div class="card-header">
+                            Balance
                         </div>
-                        <button data-toggle="modal" data-target="#modal" class="title m-b-md button red downloadcsv" style="margin: 0.8em auto;">
-                            Request Balance
-                        </button>
-                        <button data-toggle="modal" data-target="#top_up_modal" class="title m-b-md button red downloadcsv" style="margin: 0em auto 0.8em auto;">
-                            Top-Up
-                        </button>
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                DMT Balance
+                            </h5>
+                            <p class="card-text">INR {{ user_wallet.dmt_balance | floatformat:2 }}</p>
+                            <hr>
+                            <h5 class="card-title">
+                                Non-DMT Balance
+                            </h5>
+                            <p class="card-text">INR {{ user_wallet.non_dmt_balance | floatformat:2 }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                 <div class="col-xl-3 col-sm-6 mb-3">
+                    <div class="card bg-light">
+                        <div class="card-header">
+                            Recharge
+                        </div>
+                        <div class="card-body">
+                            <div class="card-text">
+                                <button data-toggle="modal" data-target="#modal" class="btn btn-outline-primary title m-b-md downloadcsv">
+                                    Request Balance
+                                </button>
+                            </div>
+                            <div class="card-text">
+                                <button data-toggle="modal" data-target="#top_up_modal" class="btn btn-outline-primary title m-b-md downloadcsv mt-3">
+                                    Top-Up
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 {% endif %}
-
             </div>
             <div class="row">
-                <div class="col-xl-4 col-sm-6 mb-3" style="height: 100%;">
-                    <div class="card card-inverse o-hidden h-100">
-                        <div class="card-block lightGrayBG blackTextColor">
-
-                            <div class="mr-5 card-head">
-                                Total Transactions
-                            </div>
-                            <span class="pull-right"><b>Successful</b></span>
-                            <table class="card-data table table-condensed">
-                                <tbody>
-                                <tr>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td>DMT</td>
-                                    <td class="text-right">{{ successful_dmt_transactions }}</td>
-                                </tr>
-                                <tr>
-                                    <td>Bills</td>
-                                    <td class="text-right">{{ successful_bill_pay_transactions }}</td>
-                                </tr>
-                                <tr>
-                                    <td>Recharges</td>
-                                    <td class="text-right">{{ successful_recharge_transactions }}</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                            <span class="pull-right"><b>Pending+Failed</b></span>
-                            <table class="card-data table table-condensed">
-                                <tbody>
-                                <tr>
-                                    <td></td>
-                                </tr>
-                                <tr>
-                                    <td>DMT</td>
-                                    <td class="text-right">{{ pending_failure_dmt_transactions }}</td>
-                                </tr>
-                                <tr>
-                                    <td>Bills</td>
-                                    <td class="text-right">{{ pending_failure_bill_pay_transactions }}</td>
-                                </tr>
-                                <tr>
-                                    <td>Recharges</td>
-                                    <td class="text-right">{{ pending_failure_recharge_transactions }}</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                            <br/>
+                <div class="col-xl-4 col-sm-6 mb-3">
+                    <div class="card bg-light">
+                        <div class="card-header">
+                            Total Transactions
                         </div>
+                        <div class="card-body">
+                            <h5 class="card-title">Successful</h5>
+                            <table class="card-text table table-condensed">
+                                <tbody>
+                                    <tr>
+                                        <td style="border-top:none;">DMT</td>
+                                        <td style="border-top:none;">{{ successful_dmt_transactions }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bills</td>
+                                        <td>{{ successful_bill_pay_transactions }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Recharges</td>
+                                        <td>{{ successful_recharge_transactions }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <hr>
+                            <h5 class="card-title">Pending+Failed</h5>
+                            <table class="card-data table table-condensed">
+                                <tbody>
+                                    <tr>
+                                        <td style="border-top:none;">DMT</td>
+                                        <td style="border-top:none;">{{ pending_failure_dmt_transactions }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bills</td>
+                                        <td>{{ pending_failure_bill_pay_transactions }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Recharges</td>
+                                        <td>{{ pending_failure_recharge_transactions }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
 
+                <div class="col-xl-4 col-sm-6 mb-3">
+                    <div class="card bg-light" >
+                        <div class="card-header">
+                            Successful Transactions Value
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-condensed">
+                                <tbody>
+                                    <tr>
+                                        <td style="border-top:none;">DMT</td>
+                                        <td style="border-top:none;">INR {{ dmt_transaction_value }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Bills</td>
+                                        <td>INR {{ bill_pay_transaction_value }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Recharges</td>
+                                        <td>INR {{ recharge_transaction_value }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
 
                 <div class="col-xl-4 col-sm-6 mb-3" style="height: 100%;">
-                    <div class="card card-inverse o-hidden h-100" >
-                        <div class="card-block lightGrayBG blackTextColor">
-
-                            <div class="mr-5 card-head">
-                                Successful Transactions Value
-                            </div>
-
-                            <table class="card-data table table-condensed">
+                    <div class="card bg-light">
+                        <div class="card-header">
+                            Commissions Value
+                        </div>
+                        <div class="card-body">
+                            <table class="table table-condensed">
                                 <tbody>
                                 <tr>
-                                    <td>DMT</td>
-                                    <td class="text-right">INR {{ dmt_transaction_value }}</td>
+                                    <td style="border-top:none;">DMT</td>
+                                    <td style="border-top:none;">INR {{ dmt_commission_value }}</td>
                                 </tr>
                                 <tr>
                                     <td>Bills</td>
-                                    <td class="text-right">INR {{ bill_pay_transaction_value }}</td>
+                                    <td>INR {{ total_bill_pay_commission_value }}</td>
                                 </tr>
                                 <tr>
                                     <td>Recharges</td>
-                                    <td class="text-right">INR {{ recharge_transaction_value }}</td>
+                                    <td>INR {{ total_recharge_commission_value }}</td>
                                 </tr>
                                 </tbody>
                             </table>
                         </div>
-
                     </div>
                 </div>
-
-                <div class="col-xl-4 col-sm-6 mb-3" style="height: 100%;">
-                    <div class="card card-inverse o-hidden h-100">
-                        <div class="card-block lightGrayBG blackTextColor">
-
-                            <div class="mr-5 card-head">
-                                Commissions Value
-                            </div>
-
-                            <table class="card-data table table-condensed">
-                                <tbody>
-                                <tr>
-                                    <td>DMT</td>
-                                    <td class="text-right">INR {{ dmt_commission_value }}</td>
-                                </tr>
-                                <tr>
-                                    <td>Bills</td>
-                                    <td class="text-right">INR {{ total_bill_pay_commission_value }}</td>
-                                </tr>
-                                <tr>
-                                    <td>Recharges</td>
-                                    <td class="text-right">INR {{ total_recharge_commission_value }}</td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                    </div>
-                </div>
-
             </div>
         {% if total_payment_request %}
             <div class="row" style="margin-bottom: 2.5rem">
                 <div class="col-xl-3 col-sm-6 mb-3">
-                    <div class="card card-block lightGrayBG blackTextColor">
-
-                    <span class="card-head spanAlignment">
+                    <div class="card">
+                    <span class="card-header">
                             Payment Requests</span>
                         <span class="card-data text-right spanAlignment">
                             {{ total_payment_request }}</span>
@@ -217,27 +204,20 @@
                 </div>
             </div>
         {% endif %}
-
     </div>
     {% endif %}
     {% if request.user.zr_admin_user.role.name == "RETAILER" %}
-        <div class="content-wrapper">
+        <div class="content-wrapper scrollbar scrollbar-black bordered-black">
             <p class="head-right">Transaction History</p>
 
             {% if no_payments %}
                 <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ no_payments }}</div>
             {% endif %}
             <div class="col-md-12" >
-                <div class="row" style="padding-right: 50px;">
-                    <div class="fine">
-                        <p class="head-bg">Transaction</p>
-                    </div>
-                </div>
                 <div class="row scroll">
-
                     <div style="width: 100%;">
-                        <table>
-                            <tr>
+                        <table class="table table-hover table-data">
+                            <tr style="border-bottom-style: solid;">
                                 <th>Id</th>
                                 <th>Bill Number</th>
                                 <th>Amount</th>
@@ -246,9 +226,7 @@
                                 <th>Create Date</th>
                                 <th>Update Date</th>
                                 <th>Name</th>
-
                             </tr>
-
                             {% for payment in payments %}
                                 <tr>
                                     <td>{{ payment.id }}</td>
@@ -261,7 +239,6 @@
                                     <td>{{ payment.name }}</td>
                                 </tr>
                             {% endfor %}
-
                         </table>
                     </div>
                 </div>
@@ -274,8 +251,8 @@
     <div id="modal" class="modal fade">
         <div class="modal-dialog" role="document">
             <div class="modal-content" style="width: 700px;">
-                <div class="modal-header" style="    background-color: #e2e2e2;">
-                    <h1 class="modal-title" style="font-size: 1.5rem; font-size: 1.5rem;font-weight: bold;line-height: 2rem;padding-left: 12px;">Request Balance</h1>
+                <div class="modal-header" style="background-color: #e2e2e2;">
+                    <h1 class="modal-title" style="font-size: 1.5rem;font-weight: bold;line-height: 2rem;">Request Balance</h1>
                 </div>
                 <div class="modal-body">
 
@@ -285,11 +262,11 @@
                         <input id="from_bank" name="from_bank" value="100" hidden>
                         <input id="from_account_no" name="from_account_no" value="0" hidden>
 
-                        <div class="row" style="padding-left: 3rem;">
-                             <div class="form-group col-sm-6">
+                        <div class="row">
+                             <div class="form-group col-6 col-sm-6">
                                 <label class="control-label"><b>To bank</b></label>
                                 <div>
-                                    <select id="to_bank" name="to_bank">
+                                    <select id="to_bank" name="to_bank" class="form-control">
                                         {% for b in bank %}
                                             <option value="{{ b.pk }}">{{ b.bank_name }}</option>
                                         {% endfor %}
@@ -301,7 +278,7 @@
                             <div class="form-group col-sm-6" id="to_account_no_form"  style="display:none">
                                 <label class="control-label"><b>To bank(Others)</b></label>
                                 <div>
-                                    <select id="to_bank_other" name="to_bank_other">
+                                    <select id="to_bank_other" name="to_bank_other" class="form-control">
                                         {% for b in bank_all %}
                                             <option value="{{ b.pk }}">{{ b.bank_name }}</option>
                                         {% endfor %}
@@ -313,12 +290,12 @@
                             <div class="form-group col-sm-6">
                                 <label class="control-label"><b>To Account Number</b></label>
                                 <div>
-                                    <input type="number" class="form-control" name="to_account_no" id="to_account_no" style="box-shadow: 0px 0px;border-style: solid;" required>
+                                    <input type="text" class="form-control" name="to_account_no" id="to_account_no" style="box-shadow: 0px 0px;border-style: solid;" required>
                                 </div>
                             </div>
 
                         </div>
-                        <div class="row" style="padding-left: 3rem;">
+                        <div class="row" >
                             <div class="form-group col-sm-6">
                                 <label class="control-label"><b>Enter Amount ₹</b></label>
                                 <div>
@@ -337,7 +314,7 @@
 
                         </div>
 
-                        <div class="row" style="padding-left: 3rem;">
+                        <div class="row" >
                             <div class="form-group col-sm-6">
                                 <label class="control-label"><b>Non DMT Amount ₹</b></label>
                                 <div>
@@ -349,12 +326,12 @@
                             <div class="form-group col-sm-6">
                                 <label class="control-label"><b>Ref Id (if Online transfer)</b></label>
                                 <div>
-                                    <input type="text" class="form-control" style="box-shadow: 0px 0px;border-style: solid;" name="ref_id" id="ref_id">
+                                    <input type="text" class="form-control" style="box-shadow: 0px 0px;border-style: solid;" name="ref_no" id="ref_no">
                                 </div>
                             </div>
                         </div>
 
-                        <div class="row" style="padding-left: 3rem;">
+                        <div class="row" >
 
                             <div class="form-group col-sm-6">
                                 <label class="control-label"><b>Payment Mode</b></label>
@@ -369,10 +346,10 @@
                             <input type="text" id="document" name="document" value="" hidden>
                         </div>
 
-                        <div class="row" style="padding-left: 3rem;">
+                        <div class="row" >
                             <div class="form-group col-sm-6"></div>
                             <div class="form-group col-sm-6">
-                                <button type="submit" id="submit_request" class="pull-right submit_request button red downloadcsv" type="submit">
+                                <button type="submit" id="submit_request" class="btn btn-outline-success float-right submit_request downloadcsv">
                                     Request
                                 </button>
                             </div>
@@ -391,19 +368,19 @@
     <div id="top_up_modal" class="modal fade">
         <div class="modal-dialog" role="document">
             <div class="modal-content" style="width: 700px;">
-                <div class="modal-header" style="    background-color: #e2e2e2;">
-                    <h1 class="modal-title" style="font-size: 1.5rem; font-size: 1.5rem;font-weight: bold;line-height: 2rem;padding-left: 12px;">Top Up</h1>
+                <div class="modal-header" style="background-color: #e2e2e2;">
+                    <h1 class="modal-title" style="font-size: 1.5rem;font-weight: bold;line-height: 2rem;">Top Up</h1>
                 </div>
                 <div class="modal-body">
 
                     <div id="top_up_modal_message" tabindex='1'></div>
                     <form class="form-horizontal" method="POST" id="topup_request_form" enctype="multipart/form-data">
                         {% csrf_token %}
-                        <div class="row" style="padding-left: 3rem;padding-top: 25px;">
+                        <div class="row">
                             <div class="form-group col-sm-6">
                                 <label class="control-label"><b>To User</b></label>
                                 <div>
-                                    <select id="from_user" name="from_user" required style="padding-left:5px">
+                                    <select id="from_user" name="from_user" class="form-control" required style="padding-left:5px">
                                         {% for zr_user in to_list %}
                                             <option value="{{ zr_user.id }}" >{{zr_user.first_name }} {{ zr_user.last_name|default_if_none:""}} ({{ zr_user.mobile_no|default_if_none:""}})</option>
                                         {% endfor %}
@@ -417,7 +394,7 @@
                             <div class="form-group col-sm-6">
                                 <label class="control-label"><b>Type</b></label>
                                 <div>
-                                    <select id="type" name="type" required style="padding-left:5px">
+                                    <select id="type" name="type" required style="padding-left:5px" class="form-control">
                                         <option value="">-----------</option>
                                         <option value="DMT">DMT</option>
                                         <option value="NONDMT">NON DMT</option>
@@ -428,7 +405,7 @@
                             <div class="form-group col-sm-6">
                                 <label class="control-label"><b>Amount</b></label>
                                 <div>
-                                    {{ topup_form.amount|attr:"id:amount"|attr:"class:fill padding-left-5" }}
+                                    {{ topup_form.amount|attr:"id:amount"|attr:"class:form-control padding-left-5" }}
                                     {% if topup_form.amount.errors %}
                                         {{ topup_form.amount.errors }}
                                     {% endif %}
@@ -445,10 +422,9 @@
                         </div>
 
 
-                        <div class="row container" style="padding-left: 3rem;">
-                            <div class="form-group col-sm-9"></div>
-                            <div class="form-group col-sm-3" style="    position: relative;left: 13%;">
-                                <button type="submit" id="top_up_submit_request" class="pull-right submit_request button red downloadcsv mr-5" style="background-color: red" type="submit">
+                        <div class="row container">
+                            <div class="form-group col-sm-12">
+                                <button type="submit" id="top_up_submit_request" class="btn btn-outline-success float-right submit_request downloadcsv">
                                     Top Up
                                 </button>
                             </div>
@@ -473,10 +449,7 @@
 
                     <form class="form-horizontal" method="POST" id="report_mail_form" enctype="multipart/form-data">
                         {% csrf_token %}
-                        <input hidden name="period" value="{{ request.GET.period }}">
-                        <input hidden name="startDate" value="{{ request.GET.startDate }}">
-                        <input hidden name="endDate" value="{{ request.GET.endDate }}">
-                        <div class="row" style="padding-left: 3rem;padding-top: 25px;">
+                        <div class="row">
                             <div class="form-group col-sm-12">
                                 <label class="control-label"><b>Email list</b></label>
                                 <div>
@@ -484,15 +457,12 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="row container" style="padding-left: 3rem;">
-                            <div class="form-group col-sm-3">
-                            </div>
-                            <div class="form-group col-sm-6">
-                                <button type="submit" id="mail_report" class="pull-right submit_request button red downloadcsv mr-5" style="background-color: red">
+                        <div class="row container" >
+                            <div class="form-group col-sm-4">
+                                <button type="submit" id="mail_report" class="btn btn-outline-success submit_request downloadcsv">
                                     Mail a report
                                 </button>
                             </div>
-                            <div class="form-group col-sm-3" style=" position: relative;left: 13%;">
                             </div>
                         </div>
                     </form>
@@ -506,6 +476,11 @@
     <!-- /.modal -->
 
     <script>
+        $('#to_bank').select2();
+        $('#payment_mode').select2();
+        $('#from_user').select2();
+        $('#type').select2();
+
         $('#search-btn').click(function()
         {
             startDate = $('#start-date').val();
@@ -605,29 +580,7 @@
             }
         });
 
-        function bank_account() {
-            var bank_account = JSON.parse('{{bank_account | escapejs }}');
-            var bankVal = $('#to_bank').val();
-            var code;
-            {% for b in bank %}
-               if ( bankVal == "{{ b.pk }}") {
-                   code = '{{ b.bank_code }}'
-                   $('#to_account_no_form').hide();
-               }
-            {% endfor %}
-            $('#to_account_no').val(bank_account[code]);
-            if($('#to_bank').val() == 'Other') {
-                $('#to_account_no_form').show();
-            } else {
-                $('#to_account_no_form').hide();
-            }
-        }
-
-        $(document).ready(bank_account);
-
-        $('body').on('change', '#to_bank', bank_account);
-
-        var amount_validator = function () {
+        jQuery.validator.addMethod("dmt_non_dmt_sum_valid", function(value, element, param) {
             non_dmt_val = parseInt($('#non_dmt_amount').val())
             dmt_val = parseInt($('#dmt_amount').val())
             amount_val = parseInt($('#amount').val())
@@ -641,10 +594,10 @@
                 $('#alert_msg').show()
                 return false
             }
-        }
-        $('body').on('keyup', '#amount', amount_validator);
-        $('body').on('keyup', '#non_dmt_amount', amount_validator);
-        $('body').on('keyup', '#dmt_amount', amount_validator);
+
+        }, function(data, data2, data3) {
+
+        });
 
         var challan_request_form = $('#challan_request_form');
         var sign_in_error = $('.alert-danger', challan_request_form);
@@ -658,7 +611,8 @@
             },
             amount: {
                 required: true,
-                min: 1
+                min: 1,
+                dmt_non_dmt_sum_valid: true
             },
             document: {
                 required: true
@@ -738,7 +692,9 @@
                     data.set('to_bank', $('#to_bank_other').val());
                 }
                 data.delete('to_bank_other');
-                {# console.log(data);#}
+                //for (var pair of data.entries()) {
+                //  console.log(pair[0]+ ', ' + pair[1]);
+                //}
                 $('#submit_request').prop('disabled', true);
                 $('#submit_request').addClass('disabled');
                 $.ajax({
@@ -908,9 +864,9 @@
         $("#payment_mode").change(function(){
             var payment_mode = $('#payment_mode option:selected').text();
             if(payment_mode == 'CASH') {
-                $("#ref_id").prop('required',false);
+                $("#ref_no").prop('required',false);
             } else {
-                $("#ref_id").prop('required',true);
+                $("#ref_no").prop('required',true);
             }
         });
 

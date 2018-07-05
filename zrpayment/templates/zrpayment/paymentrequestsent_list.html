@@ -3,31 +3,17 @@
 {% block title %} Payment Requests List {% endblock %}
 
 {% block content %}
-<style>
-        td {
-            min-width : 100px;
-            padding-left: 25px;
-        }
 
-</style>
-<div class="content-wrapper">
+<div class="content-wrapper scrollbar scrollbar-black bordered-black">
     <p class="head-right">Payment Request Sent</p>
     <div class="row rm-margin-side">
-        <div class="col-2">
-            <p class="head-left">START DATE</p>
+        <div class="col-6 col-lg-2 mt-2">
+            <input id="start-date" name="startDate" value="{{startDate}}" placeholder="From" data-toggle="tooltip" data-placement="top" title="Payment Request Date: From"/>
         </div>
-        <div class="col-2">
-            <p class="head-left">END DATE</p>
+        <div class="col-6 col-lg-2 mt-2">
+            <input id="end-date" name="endDate" value="{{endDate}}" placeholder="To" data-toggle="tooltip" data-placement="top" title="Payment Request Date: To"/>
         </div>
-    </div>
-    <div class="row rm-margin-side">
-        <div class="col-2">
-            <input id="start-date" name="startDate" width="160" class="search" value="{{startDate}}"/>
-        </div>
-        <div class="col-2">
-            <input id="end-date" name="endDate" width="160" class="search" value="{{endDate}}"/>
-        </div>
-        <div class="col-4">
+        <div class="col-12 col-lg-2 mt-2" data-toggle="tooltip" data-placement="top" title="Select User">
             <select id="to-user-id" name="to-user-id">
                 <option value="-1">ALL</option>
                 {% for touser in touser_list %}
@@ -37,48 +23,46 @@
                 {% endfor %}
             </select>
         </div>
+        <div class="col-6 col-lg-3 mt-2 float-left">
+                <input class="form-control form-control" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="Search by Name, Mobile, Bank, Amount">
+        </div>
+        <div class="col-2 col-lg-1 mt-2">
+            <button class="btn btn-outline-dark" type="button" id="search-btn" data-toggle="tooltip" data-placement="top" title="Search">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+        <div class="col-2 col-lg-1 mt-2">
+            <a href="{% url 'payment-requests:payment-request-sent-view' %}" data-toggle="tooltip" data-placement="top" title="Clear Filters">
+                <img src="https://png.icons8.com/ios/50/000000/clear-filters.png" height="30">
+            </a>
+        </div>
+        <div class="col-2 col-lg-1 mt-2 float-right" data-toggle="tooltip" data-placement="top" title="Download CSV">
+            <img src="https://png.icons8.com/ios/50/000000/export-csv.png" height="30" id="csv-download" class="float-right"
+             style="cursor: pointer;">
+        </div>
+        
+        {% csrf_token %}
+        <input type="hidden" id="request_id" value="">
+    
         <div class="div-width-100">
             <br>
-            <div class="row">
-                <div class="align-items-center div-width-100">
-                    <div class="float-left">
-                        <input class="search" id="search-txt" type="search" name="search"
-                               value="{% if q %}{{ q }}{% endif %}" placeholder="search"
-                               style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                        <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
-                    </div>
-                    <input type="button" id="search-btn" class="button red float-left mar_l_10" value="Search">
-                    <input class="button red float-right mar_l_10" type="button" value="DOWNLOAD CSV" id="download-csv">
-                    <a href='{% url "payment-requests:payment-request-sent-view" %}' class="float-right mar_l_10">Reset filters</a>
-                    {% csrf_token %}
-                    <input type="hidden" id="request_id" value="">
-                </div>
-            </div>
-            <br>
-            <div style="">
-            <div class="row" style="padding-right: 50">
-                <div class="fine">
-                    <p class="head-bg">New Requests</p>
-                </div>
-            </div>
             <div class="row scroll">
-
                 <div class="div-width-100">
-                    <table>
+                    <table id="data" class="table table-hover table-data">
                         <tr style="border-bottom-style: solid;">
-                            <th>Status</th>
-                            <th>Date</th>
-                            <th>Amount</th>
-                            <th>DMT Amount</th>
-                            <th>NON DMT Amount</th>
-                            <th>Payment Mode</th>
-                            <th>Challan document</th>
-                            <th>To User Name</th>
-                            <th>From Bank Account Number</th>
-                            <th>To Bank Account Number</th>
-                            <th>From bank</th>
-                            <th>To bank</th>
-                            <th>Ref Id</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Date</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">DMT Amount</th>
+                            <th scope="col">NON DMT Amount</th>
+                            <th scope="col">Payment Mode</th>
+                            <th scope="col">Challan document</th>
+                            <th scope="col">To User Name</th>
+                            <th scope="col">From Bank Account Number</th>
+                            <th scope="col">To Bank Account Number</th>
+                            <th scope="col">From bank</th>
+                            <th scope="col">To bank</th>
+                            <th scope="col">Ref Id</th>
                         </tr>
                         {% for payment_request in page_obj %}
                         <tr>
@@ -98,7 +82,7 @@
                             <td>{{ payment_request.dmt_amount }}</td>
                             <td>{{ payment_request.non_dmt_amount }}</td>
                             <td>{{ payment_request.payment_mode }}</td>
-                            <td><a href="{{ payment_request.document }}">Download</a></td>
+                            <td><a class="btn btn-outline-success btn-xs" href="{{ payment_request.document }}">Download</a></td>
                             <td>
                                 {% if payment_request.to_user.role.name == 'ADMINSTAFF' %}
                                 ADMIN
@@ -114,60 +98,24 @@
                         </tr>
                         {% endfor %}
                     </table>
-
-                    <br/>
-                    {% if is_paginated %}
-                    <div class="pagination">
-                        <!--<span class="page-links">-->
-
-                        {% if page_obj.has_previous %}
-                        <div class="pagination-prev">
-                            {% if filter_by and q %}
-                                <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}"
-                                   class="button red">Prev</a>
-                                {% elif q %}
-                                <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}&q={{ q }}"
-                                   class="button red">Prev</a>
-                                {% elif filter_by %}
-                                <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}"
-                                   class="button red">Prev</a>
-                                {% else %}
-                                <a href="/payment_request/payment-request-sent/?page={{ page_obj.previous_page_number }}"
-                                   class="button red">Prev</a>
-                            {% endif %}
-                        </div>
-                        {% endif %}
-                        {% if page_obj.has_next %}
-                            <div class="pagination-next">
-
-                            {% if filter_by and q %}
-                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}"
-                               class="button red">Next</a>
-                            {% elif q %}
-                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}&q={{ q }}"
-                               class="button red">Next</a>
-                            {% elif filter_by %}
-                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}&filter={{ filter_by }}"
-                               class="button red">Next</a>
-                            {% else %}
-                            <a href="/payment_request/payment-request-sent/?page={{ page_obj.next_page_number }}"
-                               class="button red">Next</a>
-                            {% endif %}
-                        </div>
-                        {% endif %}
-                        <!--</span>-->
-
-                    </div>
-                    <br/>
-                    {% endif %}
                 </div>
-
+                 {% if is_paginated %}
+                        {% if has_prev_page %}
+                            <div class="pagination-prev">
+                                <a href="{% url 'payment-requests:payment-request-sent-view' %}?{{prev_page_qs}}" class="btn btn-outline-dark" >Prev</a>
+                            </div>
+                        {% endif %}
+                        {% if has_next_page %}
+                            <div class="pagination-next">
+                               <a href="{% url 'payment-requests:payment-request-sent-view' %}?{{next_page_qs}}" class="btn btn-outline-dark" >Next</a>
+                            </div>
+                        {% endif %}
+                    {% endif %}
             </div>
             <br>
         </div>
         </div>
     </div>
-    <br>
 </div>
 
 <!-- Modal HTML Markup -->
@@ -223,6 +171,8 @@
 <script>
 $(document).ready(function(){
     $('#to-user-id').select2();
+    $("#search-txt").focus();
+
     $('#search-btn').click(function(){
         startDate = $('#start-date').val();
         endDate = $('#end-date').val();
@@ -257,6 +207,12 @@ $(document).ready(function(){
                 }
 
           window.location.assign(url)
+    });
+
+    $("#search-txt").keypress(function(event) {
+        if (event.which == 13) {
+           q();
+        }
     });
 
     $('#download-csv').click(function(){

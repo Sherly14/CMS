@@ -113,10 +113,13 @@ class ZrUser(RowInfo):
     business_name = models.CharField(max_length=256, null=True, blank=True)
     residence_address = models.CharField(max_length=256, null=True, blank=True)
     pan_no = models.CharField(max_length=10, null=True, blank=True)
+    aadhaar_no = models.CharField(max_length=12, null=True, blank=True)
     gstin = models.CharField(max_length=20, null=True, blank=True)
 
     UPIID = models.CharField(max_length=256, null=True, blank=True)
     business_type = models.ForeignKey(to=BusinesssType, related_name='business_type', null=True, blank=True)
+
+    sales_agent = models.CharField(max_length=512, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         # self.pass_word = make_password(self.pass_word)

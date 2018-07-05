@@ -3,31 +3,16 @@
 {% block title %} Payment Requests List {% endblock %}
 
 {% block content %}
-    <style>
-        td {
-            min-width : 100px;
-            padding-left: 25px;
-        }
-    </style>
-
-    <div class="content-wrapper">
-        <p class="head-right">Payment Request Table</p>
+    <div class="content-wrapper scrollbar scrollbar-black bordered-black">
+        <p class="head-right">Payment Requests</p>
         <div class="row rm-margin-side">
-            <div class="col-2">
-                <p class="head-left">START DATE</p>
+            <div class="col-6 col-lg-2 mt-2">
+                <input id="start-date" name="startDate" value="{{startDate}}" placeholder="From" data-toggle="tooltip" data-placement="top" title="Payment Request Date: From"/>
             </div>
-            <div class="col-2">
-                <p class="head-left">END DATE</p>
+            <div class="col-6 col-lg-2 mt-2">
+                <input id="end-date" name="endDate" value="{{endDate}}" placeholder="To" data-toggle="tooltip" data-placement="top" title="Payment Request Date: To"/>
             </div>
-        </div>
-        <div class="row rm-margin-side">
-            <div class="col-2">
-                <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-            </div>
-            <div class="col-2">
-                <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-            </div>
-            <div class="col-2">
+            <div class="col-12 col-lg-2 mt-2" data-toggle="tooltip" data-placement="top" title="Select User">
                 <select id="from-user-id" name="from-user-id">
                     <option value="-1">ALL</option>
                     {% for fromuser in fromuser_list %}
@@ -35,66 +20,65 @@
                     {% endfor %}
                 </select>
             </div>
+            
+            <div class="col-6 col-lg-3 mt-2 float-left">
+                <input class="form-control form-control" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="Search by Name, Mobile, Bank, Amount">
+            </div>
+            <div class="col-2 col-lg-1 mt-2">
+                <button class="btn btn-outline-dark" type="button" id="search-btn" data-toggle="tooltip" data-placement="top" title="Search">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+            <div class="col-2 col-lg-1 mt-2">
+                <a href="{% url 'payment-requests:payment-request-list' %}" data-toggle="tooltip" data-placement="top" title="Clear Filters">
+                    <img src="https://png.icons8.com/ios/50/000000/clear-filters.png" height="30">
+                </a>
+            </div>
+            <div class="col-2 col-lg-1 mt-2 float-right" data-toggle="tooltip" data-placement="top" title="Download CSV">
+                <img src="https://png.icons8.com/ios/50/000000/export-csv.png" height="30" id="csv-download" class="float-right"
+                 style="cursor: pointer;">
+            </div>
+            
+            {% csrf_token %}
+            <input type="hidden" id="request_id" value="">
+            
             <div class="div-width-100">
                 <br>
-                <div class="row">
-                    <div class="align-items-center div-width-100">
-                        <div class="float-left">
-                            <input class="search" id="search-txt" type="search" name="search" value="{% if q %}{{ q }}{% endif %}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                            <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
-                        </div>
-                        <input type="button" id="search-btn" class="button red float-left mar_l_10" value="Search">
-                        <input class="button red float-right mar_l_10" type="button" value="DOWNLOAD CSV" id="download-csv" >
-                        <a href='{% url "payment-requests:payment-request-list" %}' class="float-right mar_l_10">Reset filters</a>
-                        <span class="float-right mar_l_10">|</span>
-                        <a href='{% url "payment-requests:payment-request-sent-view" %}?view-all=true' class="float-right mar_l_10">View all sent requests</a>
-                        {% csrf_token %}
-                        <input type="hidden" id="request_id" value="">
-                    </div>
-                </div>
-                <br>
-                <div class="row">
-                    <div class="fine">
-                        <p class="head-bg">New Requests</p>
-                    </div>
-                </div>
                 <div class="row scroll">
                     <div class="div-width-100">
-                        <table>
+                        <table id="data" class="table table-hover table-data">
                             <tr style="border-bottom-style: solid;">
-                            <th>Actions</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                            <th>Amount</th>
-                            <th>DMT Amount</th>
-                            <th>NON DMT Amount</th>
-                            <th>Payment Mode</th>
-                            <th>Challan document</th>
-                            <th>From User Name</th>
-                            <th>From Bank Account Number</th>
-                            <th>To Bank Account Number</th>
-                            <th>From bank</th>
-                            <th>To bank</th>
-                            <th>Ref Id</th>
-                            <th>Revoke</th>
-
-                        </tr>
+                                <th scope="col">Actions</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Date </th>
+                                <th scope="col">Amount</th>
+                                <th scope="col">DMT Amount</th>
+                                <th scope="col">NON DMT Amount</th>
+                                <th scope="col">Payment Mode</th>
+                                <th scope="col">Challan document</th>
+                                <th scope="col">From User Name</th>
+                                <th scope="col">From Bank Account Number</th>
+                                <th scope="col">To Bank Account Number</th>
+                                <th scope="col">From bank</th>
+                                <th scope="col">To bank</th>
+                                <th scope="col">Ref Id</th>
+                            </tr>
                             {% for payment_request in payment_request_list %}
                                 <tr>
                                     <td>
                                         {% if is_superuser %}
                                             {% with payment_request.pk as payment_id %}
                                                 {% if payment_request.status == 0 %}
-                                                    <input type="button" class="button green payment change_request_id" value="Approve" data-toggle="modal" data-target="#confirm_approve" data-slug-id="{{ payment_request.pk }}">
-                                                    <input type="button" class="button red payment change_request_id" value="Reject" data-toggle="modal" data-target="#confirm_reject" data-slug-id="{{ payment_request.pk }}">
+                                                    <input type="button" class="btn btn-outline-success btn-xs payment change_request_id" value="Approve" data-toggle="modal" data-target="#confirm_approve" data-slug-id="{{ payment_request.pk }}">
+                                                    <input type="button" class="btn btn-outline-danger btn-xs payment change_request_id" value="Reject" data-toggle="modal" data-target="#confirm_reject" data-slug-id="{{ payment_request.pk }}">
                                                 {% endif %}
                                             {% endwith %}
                                         {% else %}
                                             {% if wallet.dmt_balance >= payment_request.dmt_amount and wallet.non_dmt_balance >= payment_request.non_dmt_amount %}
                                                 {% with payment_request.pk as payment_id %}
                                                     {% if payment_request.status == 0 %}
-                                                        <input type="button" class="button green payment change_request_id" value="Approve" data-toggle="modal" data-target="#confirm_approve" data-slug-id="{{ payment_request.pk }}">
-                                                        <input type="button" class="button red payment change_request_id" value="Reject" data-toggle="modal" data-target="#confirm_reject" data-slug-id="{{ payment_request.pk }}">
+                                                        <input type="button" class="btn btn-outline-success btn-xs payment change_request_id" value="Approve" data-toggle="modal" data-target="#confirm_approve" data-slug-id="{{ payment_request.pk }}">
+                                                        <input type="button" class="btn btn-outline-danger btn-xs payment change_request_id" value="Reject" data-toggle="modal" data-target="#confirm_reject" data-slug-id="{{ payment_request.pk }}">
                                                     {% endif %}
                                                 {% endwith %}
                                             {% else %}
@@ -127,7 +111,7 @@
                                     <td>{{ payment_request.dmt_amount }}</td>
                                     <td>{{ payment_request.non_dmt_amount }}</td>
                                     <td>{{ payment_request.payment_mode }}</td>
-                                    <td><a href="{{ payment_request.document }}">Download</a></td>
+                                    <td><a class="btn btn-outline-success btn-xs" href="{{ payment_request.document }}">Download</a></td>
                                     <td>
                                         {{ payment_request.from_user.get_full_name }}
                                     </td>
@@ -152,41 +136,20 @@
                                 </tr>
                             {% endfor %}
                         </table>
-
-                        <br />
-                        {% if is_paginated %}
-                            <div class="pagination">
-                                    {% if page_obj.has_previous %}
-                                        <div class="pagination-prev">
-                                            {% if filter_by and q %}
-                                                <a href="/payment_request?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}&q={{ q }}" class="button red">Prev</a>
-                                            {% elif q %}
-                                                <a href="/payment_request?page={{ page_obj.previous_page_number }}&q={{ q }}" class="button red">Prev</a>
-                                            {% elif filter_by %}
-                                                <a href="/payment_request?page={{ page_obj.previous_page_number }}&filter={{ filter_by }}" class="button red">Prev</a>
-                                            {% else %}
-                                                <a href="/payment_request?page={{ page_obj.previous_page_number }}" class="button red">Prev</a>
-                                            {% endif %}
-                                        </div>
-                                    {% endif %}
-                                    {% if page_obj.has_next %}
-                                        <div class="pagination-next">
-                                                {% if filter_by and q %}
-                                                    <a href="/payment_request?page={{ page_obj.next_page_number }}&filter={{ filter_by }}&q={{ q }}" class="button red">Next</a>
-                                                {% elif q %}
-                                                    <a href="/payment_request?page={{ page_obj.next_page_number }}&q={{ q }}" class="button red">Next</a>
-                                                {% elif filter_by %}
-                                                    <a href="/payment_request?page={{ page_obj.next_page_number }}&filter={{ filter_by }}" class="button red">Next</a>
-                                                {% else %}
-                                                    <a href="/payment_request?page={{ page_obj.next_page_number }}" class="button red">Next</a>
-                                                {% endif %}
-                                        </div>
-                                    {% endif %}
+                    </div>
+                    {% if is_paginated %}
+                        {% if has_prev_page %}
+                            <div class="pagination-prev">
+                                <a href="{% url 'payment-requests:payment-request-list' %}?{{prev_page_qs}}" class="btn btn-outline-dark" >Prev</a>
                             </div>
                         {% endif %}
-                     </div>
+                        {% if has_next_page %}
+                            <div class="pagination-next">
+                               <a href="{% url 'payment-requests:payment-request-list' %}?{{next_page_qs}}" class="btn btn-outline-dark" >Next</a>
+                            </div>
+                        {% endif %}
+                    {% endif %}
                 </div>
-                <br>
             </div>
         </div>
     </div>
@@ -205,9 +168,9 @@
             </div>
             <div class="modal-footer btn-block-group" style="align-self: center;">
                 <div class="modal-footer" style="text-align:center">
-                    <button type="button" class="btn btn-primary btn-small max-225 approve_payment_confirm">Yes
+                    <button type="button" class="btn btn-outline-success btn-sm max-225 approve_payment_confirm">Yes
                     </button>
-                    <button type="button" class="btn btn-default btn-small max-225" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm max-225" data-dismiss="modal">No</button>
                 </div>
             </div>
         </form>
@@ -228,9 +191,9 @@
             </div>
             <div class="modal-footer btn-block-group" style="align-self: center;">
                 <div class="modal-footer" style="text-align:center">
-                    <button type="button" id="confirm_refund_btn" class="btn btn-primary btn-small max-225 confirm_refund_btn" loading-text="Yes">Yes
+                    <button type="button" id="confirm_refund_btn" class="btn btn-outline-success btn-sm max-225 confirm_refund_btn" loading-text="Yes">Yes
                     </button>
-                    <button type="button" class="btn btn-default btn-small max-225" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm max-225" data-dismiss="modal">No</button>
                 </div>
             </div>
         </form>
@@ -256,9 +219,9 @@
             <div class="modal-footer btn-block-group" style="align-self: center;">
                 <div class="modal-footer" style="text-align:center">
 
-                    <button type="button" class="btn btn-primary btn-small max-225 reject_payment_confirm">Yes
+                    <button type="button" class="btn btn-outline-success btn-sm max-225 reject_payment_confirm">Yes
                     </button>
-                    <button type="button" class="btn btn-default btn-small max-225" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm max-225" data-dismiss="modal">No</button>
                 </div>
             </div>
         </form>
@@ -271,45 +234,41 @@ $(document).ready(function()
     {
     $('#from-user-id').select2();
     window.current_payment_request = null
-    $('#search-btn').click(function(){
+
+    $("#search-txt").focus();
+
+    function q(){
+        from_user_id = $("#from-user-id").val();
         startDate = $('#start-date').val();
         endDate = $('#end-date').val();
-        search = $('#search-txt').val();
-        {% if filter_by %}
-            url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}"
-        {% else %}
-            url = window.location.pathname + "?q=" + $('#search-txt').val()
-        {% endif %}
 
-        if(startDate!="" && endDate!="" )
-            {
-                url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
-            }
+        if($('#search-txt').val() != "") {
+            url = window.location.pathname + "?q=" + $('#search-txt').val();
+        } else {
+            url = window.location.pathname + '?';
+        }
+
+        if(from_user_id !="") {
+            url += '&from_user_id=' + from_user_id
+        }
+
+        if(startDate!="" && endDate!="" ) {
+            url +=  '&startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
+        }
 
         window.location.assign(url)
-    })
+    }
+    $("#from-user-id").change(q);
 
-     $('#from-user-id').change(function(){
-         from_user_id = $('#from-user-id').val();
-          all = "";
-         var selectedAll = $("#from-user-id :selected").text();
-             if (selectedAll.includes("ALL"))
-             {
-                all = from_user_id;
-                from_user_id = ""
-                 url = window.location.pathname +'?from_user_id=' + all
-             }
+    $('#search-btn').click(q);
 
-
-              if(from_user_id !="")
-                {
-                    url = window.location.pathname +'?from_user_id=' + from_user_id
-                }
-
-          window.location.assign(url)
+    $("#search-txt").keypress(function(event) {
+        if (event.which == 13) {
+           q();
+        }
     });
 
-    $('#download-csv').click(function(){
+    $('#csv-download').click(function(){
         url = '{% url "payment-requests:payment-request-csv" %}' + window.location.search
         window.location.assign(url)
     })

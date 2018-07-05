@@ -8,6 +8,8 @@ import json
 import random
 import string
 
+from urllib import urlencode
+
 from django.conf import settings
 from django.core.paginator import Paginator, PageNotAnInteger
 from django.db.models import Q
@@ -65,7 +67,7 @@ class PaymentRequestSerializer(serializers.ModelSerializer):
             'to_user', 'from_user',
             'payment_mode', 'document',
             'from_account_no', 'to_account_no',
-            'from_bank', 'to_bank','payment_type'
+            'from_bank', 'to_bank','payment_type', 'ref_no'
         )
 
 
@@ -81,6 +83,7 @@ class GeneratePaymentRequestView(APIView):
                 #data[detail] = file_save_s3(value)
                 pass
             else:
+                print detail, value
                 data[detail] = value if value else ""
 
         data["from_user"] = request.user.zr_admin_user.zr_user.id
@@ -317,24 +320,22 @@ class RejectPaymentRequestView(APIView):
 
 
 def get_payment_request_qs(request, from_user=False, to_user=False, all_user=False, all_req=False):
-    q = request.GET.get('q')
+    q = request.GET.get('q', '')
 
     queryset = []
     if is_user_superuser(request):
-        if all_user and all_req:
-            queryset = PaymentRequest.objects.all()
-        elif all_user:
-            queryset = PaymentRequest.objects.all()
+        if all_user:
+            queryset = PaymentRequest.objects.select_related('from_user', 'from_bank', 'to_bank', 'payment_mode')
         else:
-            queryset = PaymentRequest.objects.filter(to_user__role__name='ADMINSTAFF',)
+            queryset = PaymentRequest.objects.select_related('from_user', 'from_bank', 'to_bank', 'payment_mode').filter(to_user__role__name='ADMINSTAFF',)
     elif request.user.zr_admin_user.role.name in ['DISTRIBUTOR', 'SUBDISTRIBUTOR']:
         # To get own payment request
         if from_user:
-            queryset = PaymentRequest.objects.filter(
+            queryset = PaymentRequest.objects.select_related('from_user', 'from_bank', 'to_bank', 'payment_mode').filter(
                 from_user=request.user.zr_admin_user.zr_user
             )
         else:
-            queryset = PaymentRequest.objects.filter(
+            queryset = PaymentRequest.objects.select_related('from_user', 'from_bank', 'to_bank', 'payment_mode').filter(
                 to_user=request.user.zr_admin_user.zr_user
             ).exclude(from_user=request.user.zr_admin_user.zr_user)
     if q:
@@ -345,23 +346,30 @@ def get_payment_request_qs(request, from_user=False, to_user=False, all_user=Fal
         ) | Q(
             to_user__mobile_no__contains=q
         ) | Q(
-            to_user__first_name__icontains=q
+            from_user__first_name__icontains=q
         ) | Q(
-            to_user__last_name__icontains=q
+            from_user__last_name__icontains=q
         ) | Q(
-            to_user__mobile_no__contains=q
+            from_user__mobile_no__icontains=q
+        ) | Q(
+            from_bank__bank_name__icontains=q
+        ) | Q(
+            to_bank__bank_name__icontains=q
+        ) | Q(
+            amount__contains=q
+        ) | Q(
+            ref_no=q
         )
         queryset = queryset.filter(query)
 
+    start_date = request.GET.get('startDate', '')
+    end_date = request.GET.get('endDate', '')
+    to_user_id = request.GET.get('to_user_id', -1)
+    from_user_id =request.GET.get('from_user_id', -1)
 
-
-    start_date = request.GET.get('startDate')
-    end_date = request.GET.get('endDate')
-    to_user_id = request.GET.get('to_user_id')
-    from_user_id =request.GET.get('from_user_id')
-
-    if start_date != None and end_date != None:
-        queryset = queryset.filter(at_created__range=(start_date, end_date))
+    if start_date != '' and end_date != '':
+        queryset = queryset.filter(at_created__date__gte=start_date)
+        queryset = queryset.filter(at_created__date__lte=end_date)
 
     if from_user_id!=None and int(from_user_id) > 0:
         queryset = queryset.filter(from_user_id=from_user_id)
@@ -492,22 +500,17 @@ class PaymentRequestListView(ListView):
     paginate_by = 10
 
     def get_context_data(self, **kwargs):
-        filter_by = self.request.GET.get('filter')
-        q = self.request.GET.get('q')
-        start_date = self.request.GET.get('startDate')
-        end_date = self.request.GET.get('endDate')
-        from_user_id = self.request.GET.get('from_user_id')
+        q = self.request.GET.get('q', '')
+        start_date = self.request.GET.get('startDate', '')
+        end_date = self.request.GET.get('endDate', '')
+        from_user_id = self.request.GET.get('from_user_id', -1)
         context = super(PaymentRequestListView, self).get_context_data(**kwargs)
-        fromuser_list = PaymentRequest.objects.all().filter(to_user__role__name='ADMINSTAFF', ).distinct('from_user_id')
-        distributor_id = self.request.GET.get('distributor-id')
-        sub_distributor_list = []
+        fromuser_list = PaymentRequest.objects.select_related('from_user').filter(to_user__role__name='ADMINSTAFF', ).distinct('from_user_id')
+        distributor_id = self.request.GET.get('distributor-id', -1)
         queryset = self.get_queryset()
-       # if not queryset:
-       #     context['filter_by'] = filter_by
-        #    context['q'] = q
-         #   return context
+
         if is_user_superuser(self.request):
-            fromuser_list = PaymentRequest.objects.all().filter(to_user__role__name='ADMINSTAFF', ).distinct(
+            fromuser_list = PaymentRequest.objects.select_related('from_user').filter(to_user__role__name='ADMINSTAFF', ).distinct(
                 'from_user_id')
 
         elif self.request.user.zr_admin_user.role.name in ['DISTRIBUTOR']:
@@ -518,15 +521,14 @@ class PaymentRequestListView(ListView):
             fromuser_list = PaymentRequest.objects.all().filter(to_user__role__name='SUBDISTRIBUTOR', ).distinct('from_user_id')
 
         paginator = Paginator(queryset, self.paginate_by)
-        page = self.request.GET.get('page', 1)
+        page = self.request.GET.get('page_no', 1)
 
         try:
-            queryset = paginator.page(page)
+            page = paginator.page(page)
         except PageNotAnInteger:
-            queryset = paginator.page(1)
+            page = paginator.page(1)
 
-        context['page_obj'] = queryset
-        context['filter_by'] = filter_by
+        context['queryset'] = page.object_list
         context['q'] = q
 
         wallet = None
@@ -540,20 +542,29 @@ class PaymentRequestListView(ListView):
         context['wallet'] = wallet
         context['url_name'] = "payment-request-list"
         context['is_superuser'] = is_user_superuser(self.request)
-        if start_date:
-            context['startDate'] = start_date
+        context['startDate'] = start_date
+        context['endDate'] = end_date
+        context['distributor_id'] = int(distributor_id)
+        context['from_user_id'] = int(from_user_id)
+        context['fromuser_list'] = fromuser_list
 
-        if end_date:
-            context['endDate'] = end_date
-
-        if distributor_id:
-            context['distributor_id'] = int(distributor_id)
-
+        query_string = {}
+        query_string['q'] = q
         if from_user_id:
-            context['from_user_id'] = int(from_user_id)
+            query_string['user_id'] = int(from_user_id)
+        query_string['startDate'] = start_date
+        query_string['endDate'] = end_date
 
-        if fromuser_list:
-            context['fromuser_list'] = fromuser_list
+        context['has_next_page'] = context['has_prev_page'] = None
+
+        if page.has_next():
+            query_string['page_no'] = page.next_page_number()
+            context['next_page_qs'] = urlencode(query_string)
+            context['has_next_page'] = page.has_next()
+        if page.has_previous():
+            query_string['page_no'] = page.previous_page_number()
+            context['prev_page_qs'] = urlencode(query_string)
+            context['has_prev_page'] = page.has_previous()
 
         return context
 
@@ -563,7 +574,7 @@ class PaymentRequestListView(ListView):
 
 def get_payment_qs(request):
     q = request.GET.get('q')
-    queryset = Payments.objects.all()
+    queryset = Payments.objects.select_related('vendor', 'user', 'mode')
 
     if q:
         query = Q(
@@ -585,12 +596,13 @@ def get_payment_qs(request):
         )
         queryset = queryset.filter(query)
 
-    start_date = request.GET.get('startDate')
-    end_date = request.GET.get('endDate')
-    user_payment_id = request.GET.get('user_payment_id')
+    start_date = request.GET.get('startDate', '')
+    end_date = request.GET.get('endDate', '')
+    user_payment_id = request.GET.get('user_payment_id', -1)
 
-    if start_date != None and end_date != None:
-        queryset = queryset.filter(at_created__range=(start_date, end_date))
+    if start_date != '' and end_date != '':
+        queryset = queryset.filter(at_created__date__gte=start_date)
+        queryset = queryset.filter(at_created__date__lte=end_date)
 
     if user_payment_id!=None and int(user_payment_id) > 0:
         queryset = queryset.filter(user_id=user_payment_id)
@@ -638,18 +650,13 @@ class PaymentListView(ListView):
     paginate_by = 10
 
     def get_context_data(self, **kwargs):
-        filter_by = self.request.GET.get('filter', 'all')
-        q = self.request.GET.get('q')
-        start_date = self.request.GET.get('startDate')
-        end_date = self.request.GET.get('endDate')
+        q = self.request.GET.get('q', '')
+        start_date = self.request.GET.get('startDate', '')
+        end_date = self.request.GET.get('endDate', '')
         user_payment_id = self.request.GET.get('user_payment_id')
         context = super(PaymentListView, self).get_context_data(**kwargs)
-        user_list = Payments.objects.all().distinct('user_id')
+        user_list = Payments.objects.select_related('user').distinct('user_id')
         queryset = self.get_queryset()
-       # if not queryset:
-        #    context['filter_by'] = filter_by
-         #   context['q'] = q
-          #  return context
 
         paginator = Paginator(queryset, self.paginate_by)
         page = self.request.GET.get('page', 1)
@@ -660,11 +667,8 @@ class PaymentListView(ListView):
             queryset = paginator.page(1)
         from django.core.urlresolvers import reverse
 
-        if start_date:
-            context['startDate'] = start_date
-
-        if end_date:
-            context['endDate'] = end_date
+        context['startDate'] = start_date
+        context['endDate'] = end_date
 
         if user_list:
             context['user_list'] = user_list
@@ -674,11 +678,25 @@ class PaymentListView(ListView):
 
         context['main_url'] = reverse('payment-requests:payment-list')
         context['page_obj'] = queryset
-        context['filter_by'] = filter_by
         context['q'] = q
         context['url_name'] = "payment-list"
 
         context['is_superuser'] = is_user_superuser(self.request)
+
+        query_string = {}
+        if q:
+            query_string['q'] = q
+
+        context['has_prev_page'] = context['has_next_page'] = None
+
+        if queryset.has_next():
+            query_string['page'] = queryset.next_page_number()
+            context['next_page_qs'] = urlencode(query_string)
+            context['has_next_page'] = queryset.has_next()
+        if queryset.has_previous():
+            query_string['page'] = queryset.previous_page_number()
+            context['prev_page_qs'] = urlencode(query_string)
+            context['has_prev_page'] = queryset.has_previous()
         return context
 
     def get_queryset(self):
@@ -691,30 +709,24 @@ class PaymentRequestSentListView(ListView):
     paginate_by = 10
 
     def get_context_data(self, **kwargs):
-        filter_by = self.request.GET.get('filter')
-        q = self.request.GET.get('q')
-        start_date = self.request.GET.get('startDate')
-        end_date = self.request.GET.get('endDate')
-        to_user_id = self.request.GET.get('to_user_id')
+        q = self.request.GET.get('q', '')
+        start_date = self.request.GET.get('startDate', '')
+        end_date = self.request.GET.get('endDate', '')
+        to_user_id = self.request.GET.get('to_user_id', -1)
         touser_list = []
         context = super(PaymentRequestSentListView, self).get_context_data(**kwargs)
 
         queryset = self.get_queryset()
-        #if not queryset:
-         #   context['filter_by'] = filter_by
-          #  context['q'] = q
-           # return context
 
         paginator = Paginator(queryset, self.paginate_by)
-        page = self.request.GET.get('page', 1)
+        page = self.request.GET.get('page_no', 1)
 
         try:
-            queryset = paginator.page(page)
+            page = paginator.page(page)
         except PageNotAnInteger:
-            queryset = paginator.page(1)
+            page = paginator.page(1)
 
-        context['page_obj'] = queryset
-        context['filter_by'] = filter_by
+        context['page_obj'] = page
         context['q'] = q
 
         if is_user_superuser(self.request):
@@ -722,17 +734,13 @@ class PaymentRequestSentListView(ListView):
         elif self.request.user.zr_admin_user.role.name in ['DISTRIBUTOR', 'SUBDISTRIBUTOR']:
             touser_list = PaymentRequest.objects.filter(to_user=self.request.user.zr_admin_user.zr_user)
 
-        if start_date:
-            context['startDate'] = start_date
-
-        if end_date:
-            context['endDate'] = end_date
+        context['startDate'] = start_date
+        context['endDate'] = end_date
 
         if touser_list:
             context['touser_list'] = touser_list
 
-        if to_user_id:
-            context['to_user_id'] = int(to_user_id)
+        context['to_user_id'] = int(to_user_id)
 
         wallet = None
         if not is_user_superuser(self.request):
@@ -746,6 +754,23 @@ class PaymentRequestSentListView(ListView):
         context['wallet'] = wallet
         context['url_name'] = "payment-request-sent-view"
         context['is_superuser'] = is_user_superuser(self.request)
+
+        query_string = {}
+        query_string['q'] = q
+        query_string['user_id'] = int(to_user_id)
+        query_string['startDate'] = start_date
+        query_string['endDate'] = end_date
+
+        context['has_next_page'] = context['has_prev_page'] = None
+
+        if page.has_next():
+            query_string['page_no'] = page.next_page_number()
+            context['next_page_qs'] = urlencode(query_string)
+            context['has_next_page'] = page.has_next()
+        if page.has_previous():
+            query_string['page_no'] = page.previous_page_number()
+            context['prev_page_qs'] = urlencode(query_string)
+            context['has_prev_page'] = page.has_previous()
         return context
 
     def get_queryset(self):

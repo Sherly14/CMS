@@ -100,19 +100,9 @@ def get_transactions_qs(request):
     ) | Q(
         user__mobile_no__icontains=q
     )
-    start_date = request.GET.get('startDate')
-    end_date = request.GET.get('endDate')
+    start_date = request.GET.get('startDate', '')
+    end_date = request.GET.get('endDate', '')
     user_transaction_id = request.GET.get('user_transaction_id')
-    p_filter = request.GET.get('filter', 'All')
-    if p_filter == 'All':
-        p_filter = request.GET.get('period', "All")
-
-    if p_filter in ['Today', 'today']:
-        q_obj.add(Q(at_created__gte=datetime.datetime.now().date()), q_obj.connector)
-    elif p_filter in ['Last-Week' or 'last-week']:
-        q_obj.add(Q(at_created__range=last_week_range()), q_obj.connector)
-    elif p_filter in ['Last-Month' or 'last-month']:
-        q_obj.add(Q(at_created__range=last_month()), q_obj.connector)
 
     if user_utils.is_user_superuser(request):
         pass
@@ -140,17 +130,14 @@ def get_transactions_qs(request):
             q_obj.connector
         )
 
-    queryset = Transaction.objects.filter(q_obj).order_by('-at_created')
-
-
+    queryset = Transaction.objects.select_related('user', 'service_provider', 'type').filter(q_obj).order_by('-at_created')
 
     if user_transaction_id!=None and int(user_transaction_id) > 0:
         queryset = queryset.filter(user_id=user_transaction_id)
 
-
-    if start_date != None and end_date != None:
-        queryset = queryset.filter(at_created__range=(start_date, end_date))
-    print(q_obj)
+    if start_date != '' and end_date != '':
+        queryset = queryset.filter(at_created__date__gte=start_date)
+        queryset = queryset.filter(at_created__date__lte=end_date)
 
     distributor_id = request.GET.get('distributor-id')
     merchant_id = request.GET.get('merchant-id')
@@ -192,8 +179,6 @@ def get_transactions_qs(request):
         if distmerchantlist:
             queryset = Transaction.objects.filter(user_id__in=distmerchantlist)
 
-
-
     return queryset
 
 
@@ -208,11 +193,11 @@ class TransactionsListView(ListView):
     def get_context_data(self, *args, **kwargs):
         context = super(TransactionsListView, self).get_context_data()
         query_string = {}
-        start_date = self.request.GET.get('startDate')
-        end_date = self.request.GET.get('endDate')
-        merchant_id = self.request.GET.get('merchant-id')
-        distributor_id = self.request.GET.get('distributor-id')
-        sub_distributor_id = self.request.GET.get('sub-distributor-id')
+        start_date = self.request.GET.get('startDate', '')
+        end_date = self.request.GET.get('endDate', '')
+        merchant_id = self.request.GET.get('merchant-id', -1)
+        distributor_id = self.request.GET.get('distributor-id', -1)
+        sub_distributor_id = self.request.GET.get('sub-distributor-id', -1)
         sub_distributor = []
         sub_distributor_list = []
         sub_dist_merchant = []
@@ -238,19 +223,12 @@ class TransactionsListView(ListView):
             merchant = zrmappings_models.DistributorMerchant.objects.filter(distributor=self.request.user.zr_admin_user.zr_user)
             distributor_list = []
 
-        user_transaction_id =self.request.GET.get('user_transaction_id')
+        user_transaction_id = self.request.GET.get('user_transaction_id', 0)
         # Search context
-        q = self.request.GET.get('q')
+        q = self.request.GET.get('q', '')
+        context['q'] = q
         if q:
-            context['q'] = q
             query_string['q'] = q
-
-        # Period filter
-        p_filter = self.request.GET.get('filter')
-
-        if p_filter:
-            context['filter_by'] = p_filter
-            query_string['filter'] = p_filter
 
         # Pagination
         pg_no = self.request.GET.get('page_no', 1)
@@ -261,6 +239,12 @@ class TransactionsListView(ListView):
             page = p.page(pg_no)
         except EmptyPage:
             raise Http404
+
+        for t in page.object_list:
+            try:
+                t.service_provider = t.service_provider.name
+            except:
+                t.service_provider = None
 
         if sub_distributor:
             for subdist in sub_distributor:
@@ -284,40 +268,27 @@ class TransactionsListView(ListView):
                 else:
                     subDistMerchant[-1] = [["MERCHANTS", distmerchant.merchant.id, distmerchant.merchant.first_name]]
 
-        if start_date:
-            context['startDate'] = start_date
-
-        if end_date:
-            context['endDate'] = end_date
+        context['startDate'] = start_date
+        context['endDate'] = end_date
 
         if user_transaction_data:
             context['user_transaction_data'] = user_transaction_data
 
+        context['user_transaction_id'] =int(user_transaction_id)
 
-        if user_transaction_id :
-            context['user_transaction_id'] =int(user_transaction_id)
+        context['subDistMerchant'] = subDistMerchant
 
-        if subDistMerchant:
-            context['subDistMerchant'] = subDistMerchant
-
-        if merchant_id:
-            context['merchant_id'] = int(merchant_id)
-
-        if distributor_id:
-            context['distributor_id'] =int(distributor_id)
-
-        if sub_distributor_id:
-            context['sub_distributor_id'] = int(sub_distributor_id)
-
-        if merchant_id:
-            context['sub_distributor_id'] = int(merchant_id)
-
+        context['merchant_id'] = int(merchant_id)
+        context['distributor_id'] =int(distributor_id)
+        context['sub_distributor_id'] = int(sub_distributor_id)
+        context['sub_distributor_id'] = int(merchant_id)
 
         context['distributor_list'] = distributor_list
 
-
         context['queryset'] = page.object_list
         context['url_name'] = "transaction-list"
+
+        context['has_next_page'] = context['has_prev_page'] = None
         if page.has_next():
             query_string['page_no'] = page.next_page_number()
             context['next_page_qs'] = urlencode(query_string)

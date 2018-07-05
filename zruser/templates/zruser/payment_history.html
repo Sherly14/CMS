@@ -5,34 +5,26 @@
 
 {% block content %}
 
-    <div class="content-wrapper">
+    <div class="content-wrapper scrollbar scrollbar-black bordered-black">
         <p class="head-right">Payment History</p>
 
         {% if api_error %}
             <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
         {% endif %}
         <div class="col-12" >
-            <div class="row" style="padding-right: 50px;">
-                <div class="fine">
-                    <p class="head-bg">Payments</p>
-                </div>
-            </div>
             <div class="row scroll">
-
                 <div style="width: 100%;">
-                    <table>
-                        <tr>
-                            <th>Id</th>
-                            <th>Bill Number</th>
-                            <th>Amount</th>
-                            <th>Discount</th>
-                            <th>State</th>
-                            <th>Create Date</th>
-                            <th>Update Date</th>
-                            <th>Name</th>
-
+                    <table class="table table-hover table-data">
+                        <tr style="border-bottom-style: solid;">
+                            <th scope="col">Id</th>
+                            <th scope="col">Bill Number</th>
+                            <th scope="col">Amount</th>
+                            <th scope="col">Discount</th>
+                            <th scope="col">State</th>
+                            <th scope="col">Create Date</th>
+                            <th scope="col">Update Date</th>
+                            <th scope="col">Name</th>
                         </tr>
-
                         {% for payment in payments %}
                             <tr>
                                 <td>{{ payment.id }}</td>
@@ -45,7 +37,6 @@
                                 <td>{{ payment.name }}</td>
                             </tr>
                         {% endfor %}
-
                     </table>
                 </div>
                 <!--<div class="pagination-prev">-->
@@ -72,12 +63,7 @@
         $('#search-btn').click(function(){
         startDate = $('#start-date').val();
         endDate = $('#end-date').val();
-
-            {% if filter_by %}
-                url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}";
-            {% else %}
-                url = window.location.pathname + "?q=" + $('#search-txt').val();
-            {% endif %}
+            url = window.location.pathname + "?q=" + $('#search-txt').val();
 
             if(startDate!="" && endDate!="" )
             {
