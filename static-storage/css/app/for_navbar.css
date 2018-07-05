@@ -12,9 +12,10 @@
     border: 2px solid #DC3826;
     background-color: transparent;
     position: absolute;
-    right: 15px;
+    margin-left: 155px;
     top: 10px;
     border-radius: 11px;
+    display:inline-block
 }
 
 /*background of top nav bar*/
@@ -31,12 +32,15 @@ body.fixed-nav {
 /*wrapper for the column */
 .content-wrapper {
   background: white;
-    min-height: 800px;
+    min-height: 91vh;
+    overflow: auto;
   }
-  @media (min-width: 992px) {
-    .content-wrapper {
-      margin-left: 230px; } }
 
+@media (min-width: 992px) {
+    .content-wrapper {
+        margin-left: 230px;
+    }
+}
 
 .o-hidden {
   overflow: hidden !important; }
@@ -119,9 +123,7 @@ body.fixed-nav {
 
 @media (min-width: 992px) {
   #mainNav .navbar-brand {
-    width: 250px;
-    padding-left: 20px;
-
+    width: 200px;
    }
   #mainNav .navbar-collapse {
     overflow: visible;
@@ -130,10 +132,10 @@ body.fixed-nav {
       position: absolute;
       top: 0;
       left: 0;
-      overflow: hidden;
+      //overflow: hidden;
       flex-direction: column;
       //height: 100vh;
-      margin-top: 100px;
+      margin-top: 59px;
       /*margin-left: -70px;*/
       /*padding-bottom: 56px;*/
       background: transparent;
@@ -184,4 +186,64 @@ body.fixed-nav {
         text-align: center; }
     #mainNav .navbar-collapse .navbar-nav > .nav-item.dropdown .dropdown-menu > .dropdown-item > .dropdown-message {
       max-width: 300px; } }
+
+@media (min-width: 992px) {
+
+.scrollbar {
+    height: 91vh;
+    overflow-y: auto;
+}
+
+.scrollbar-black::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+  background-color: #F5F5F5;
+  border-radius: 10px; }
+
+.scrollbar-black::-webkit-scrollbar {
+  width: 8px;
+  height: 91vh; overflow-y: auto;
+  background-color: #F5F5F5; }
+
+.scrollbar-black::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+  background-color: #8e8e8e; }
+
+.bordered-black::-webkit-scrollbar-track {
+  -webkit-box-shadow: none;
+  border: 1px solid #F5F5F5; }
+
+.bordered-black::-webkit-scrollbar-thumb {
+  -webkit-box-shadow: none; }
+
+.square::-webkit-scrollbar-track {
+  border-radius: 0 !important; }
+
+.square::-webkit-scrollbar-thumb {
+  border-radius: 0 !important; }
+
+.thin::-webkit-scrollbar {
+  width: 6px; }
+}
+
+.header-logo img {
+    display: block;
+    margin: 0;
+    padding: 0;
+    outline: 0;
+    border: 0;
+    width: 140px;
+    height: auto;
+    background-size: 100%;
+    font: 0/0 a;
+    text-shadow: none;
+    color: transparent;
+    transition: all .5s ease-in-out;
+}
+
+@media only screen and (max-width: 899px)
+.header-logo img {
+    width: 88px;
+    height: auto;
+}
 

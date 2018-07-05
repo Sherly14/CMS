@@ -3,30 +3,16 @@
 {% block title %} Payment Requests List {% endblock %}
 
 {% block content %}
-    <style>
-        td {
-            min-width : 80px;
-        }
-    </style>
-
-    <div class="content-wrapper">
-        <p class="head-right">Passbook Table</p>
+    <div class="content-wrapper scrollbar scrollbar-black bordered-black">
+        <p class="head-right">Passbook</p>
         <div class="row rm-margin-side">
-            <div class="col-2">
-                <p class="head-left">START DATE</p>
+            <div class="col-6 col-lg-2 mt-2">
+                <input id="start-date" name="startDate" value="{{startDate}}" placeholder="From" data-toggle="tooltip" data-placement="top" title="Transaction Date: From"/>
             </div>
-            <div class="col-2">
-                <p class="head-left">END DATE</p>
+            <div class="col-6 col-lg-2 mt-2">
+                <input id="end-date" name="endDate" value="{{endDate}}" placeholder="To" data-toggle="tooltip" data-placement="top" title="Transaction Date: To"/>
             </div>
-        </div>
-        <div class="row rm-margin-side">
-            <div class="col-2">
-                <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
-            </div>
-            <div class="col-2">
-                <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
-            </div>
-            <div class="col-4">
+            <div class="col-12 col-lg-2 mt-2" data-toggle="tooltip" data-placement="top" title="Select User">
                 <select id="user_id" name="user_id">
                     <option value="-1">ALL</option>
                     {% for user in user_list %}
@@ -35,112 +21,81 @@
                 </select>
             </div>
 
+            <div class="col-6 col-lg-3 mt-2 float-left">
+                <input class="form-control form-control" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="Search by Name or Mobile">
+            </div>
+            <div class="col-2 col-lg-1 mt-2">
+                <button class="btn btn-outline-dark" type="button" id="search-btn" data-toggle="tooltip" data-placement="top" title="Search">
+                    <i class="fa fa-search"></i>
+                </button>
+            </div>
+            <div class="col-2 col-lg-1 mt-2">
+                <a href="{% url 'wallet:passbook-list' %}" data-toggle="tooltip" data-placement="top" title="Clear Filters">
+                    <img src="https://png.icons8.com/ios/50/000000/clear-filters.png" height="30">
+                </a>
+            </div>
+            <div class="col-2 col-lg-1 mt-2 float-right" data-toggle="tooltip" data-placement="top" title="Download CSV">
+                <img src="https://png.icons8.com/ios/50/000000/export-csv.png" height="30" id="csv-download" class="float-right"
+                 style="cursor: pointer;">
+            </div>
+
+            {% csrf_token %}
+            <input type="hidden" id="request_id" value="">
+            
             <div class="div-width-100">
                 <br>
-                <div class="row">
-                    <div class="align-items-center div-width-100">
-                        <div class="float-left">
-                            <input class="search" id="search-txt" type="search" name="search" value="{% if q %}{{ q }}{% endif %}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                            <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
-                        </div>
-                        <input type="button" id="search-btn" class="button red float-left mar_l_10" value="Search">
-                        <input class="button red float-right mar_l_10" type="button" value="DOWNLOAD CSV" id="csv-download">
-                        <a class="float-right" href="{% url 'wallet:passbook-list' %}" >Reset filters</a>
-                        {% csrf_token %}
-                        <input type="hidden" id="request_id" value="">
-                    </div>
-                </div>
-                <br>
-                <div class="row">
-                    <div class="fine">
-                        <p class="head-bg">New Requests</p>
-                    </div>
-                </div>
                 <div class="row scroll">
                     <div class="div-width-100">
-                        <table>
+                        <table id="data" class="table table-hover table-data">
                             <tr style="border-bottom-style: solid;">
-                                <th>Date</th>
-                                <th>User name</th>
-                                <th>Mobile No</th>
-                                <th>Role</th>
-                                <th>Transaction ID</th>
-                                <th>Transaction type</th>
-                                <th>Payment ID</th>
-                                <th>DMT Transaction</th>
-                                <th>Non DMT Transaction</th>
-                                <th>DMT Balance</th>
-                                <th>Non DMT Balance</th>
-                                <th>Bank UTR</th>
-                                <th>Sender Mobile</th>
-                                <th>Beneficiary Mobile</th>
-                                <th>Beneficiary Account No</th>
-                                <th>Transaction Status</th>
+                                <th scope="col">Date</th>
+                                <th scope="col">User name</th>
+                                <th scope="col">Mobile No</th>
+                                <th scope="col">Role</th>
+                                <th scope="col">Transaction ID</th>
+                                <th scope="col">Transaction type</th>
+                                <th scope="col">Payment ID</th>
+                                <th scope="col">DMT Transaction</th>
+                                <th scope="col">Non DMT Transaction</th>
+                                <th scope="col">DMT Balance</th>
+                                <th scope="col">Non DMT Balance</th>
+                                <th scope="col">Bank UTR</th>
+                                <th scope="col">Sender Mobile</th>
+                                <th scope="col">Beneficiary Mobile</th>
+                                <th scope="col">Beneficiary Account No</th>
+                                <th scope="col">Transaction Status</th>
                             </tr>
                             {% for passbook in queryset %}
                                 <tr>
-                                    <td style="width: 140px;">{{ passbook.at_created }}</td>
-                                    <td style="width: 140px;">{{ passbook.wallet.merchant.full_name }}</td>
+                                    <td>{{ passbook.at_created }}</td>
+                                    <td>{{ passbook.wallet.merchant.full_name }}</td>
                                     <td>{{ passbook.wallet.merchant.mobile_no }}</td>
                                     <td>{{ passbook.wallet.merchant.role.name }}</td>
-                                    {% if passbook.transaction_id is None %}
-                                        <td>NA</td>
-                                    {% else %}
-                                        <td>{{ passbook.transaction_id}}</td>
-                                    {% endif %}
-                                    {% if passbook.transaction.type is None %}
-                                        <td>NA</td>
-                                    {% else %}
-                                        <td>{{ passbook.transaction.type}}</td>
-                                    {% endif %}
-                                    {% if passbook.payment_request_id is None %}
-                                        <td>NA</td>
-                                    {% else %}
-                                        <td>{{ passbook.payment_request_id}}</td>
-                                    {% endif %}
+                                    <td>{{ passbook.transaction_id | default_if_none:"NA"}}</td>
+                                    <td>{{ passbook.type | default_if_none:"NA"}}</td>
+                                    <td>{{ passbook.payment_request_id | default_if_none:"NA"}}</td>
                                     <td>{{ passbook.dmt_balance }}</td>
                                     <td>{{ passbook.non_dmt_balance }}</td>
                                     <td>{{ passbook.dmt_closing_balance }}</td>
                                     <td>{{ passbook.non_dmt_closing_balance }}</td>
-                                    {% if passbook.transaction.transaction_response_json.data.bank_ref_num is None %}
-                                        <td>NA</td>
-                                    {% else %}
-                                        <td>{{ passbook.transaction.transaction_response_json.data.bank_ref_num }}</td>
-                                    {% endif %}
-                                    {% if passbook.transaction.customer is None %}
-                                        <td>NA</td>
-                                    {% else %}
-                                        <td>{{ passbook.transaction.customer}}</td>
-                                    {% endif %}
-                                    {% if passbook.transaction.beneficiary is None %}
-                                        <td>NA</td>
-                                    {% else %}
-                                        <td>{{ passbook.transaction.beneficiary}}</td>
-                                    {% endif %}
-                                    {% if passbook.transaction.beneficiary_user.account_no is None %}
-                                        <td>NA</td>
-                                    {% else %}
-                                        <td>{{ passbook.transaction.beneficiary_user.account_no}}</td>
-                                    {% endif %}
-                                    {% if passbook.transaction.status is None %}
-                                        <td>NA</td>
-                                    {% else %}
-                                        <td>{{ passbook.transaction.status}}</td>
-                                    {% endif %}
+                                    <td>{{ passbook.bank_ref | default_if_none:"NA" }}</td>
+                                    <td>{{ passbook.customer | default_if_none:"NA"}}</td>
+                                    <td>{{ passbook.beneficiary | default_if_none:"NA"}}</td>
+                                    <td>{{ passbook.account_no | default_if_none:"NA"}}</td>
+                                    <td>{{ passbook.status | default_if_none:"NA"}}</td>
                                 </tr>
                             {% endfor %}
                         </table>
-                        <br />
                     </div>
                         {% if is_paginated %}
                             {% if has_prev_page %}
                                 <div class="pagination-prev">
-                                    <a href="{% url 'wallet:passbook-list' %}?{{prev_page_qs}}" class="button red" >Prev</a>
+                                    <a href="{% url 'wallet:passbook-list' %}?{{prev_page_qs}}" class="btn btn-outline-dark" >Prev</a>
                                 </div>
                             {% endif %}
                             {% if has_next_page %}
                                 <div class="pagination-next">
-                                   <a href="{% url 'wallet:passbook-list' %}?{{next_page_qs}}" class="button red" >Next</a>
+                                   <a href="{% url 'wallet:passbook-list' %}?{{next_page_qs}}" class="btn btn-outline-dark" >Next</a>
                                 </div>
                             {% endif %}
                         {% endif %}
@@ -148,6 +103,7 @@
                 <br>
             </div>
         </div>
+    </div>
 
 
     <!-- Modal to get Email -->
@@ -161,7 +117,6 @@
 
                     <form class="form-horizontal" method="POST" id="report_mail_form" enctype="multipart/form-data">
                         {% csrf_token %}
-                        <input hidden name="period" value="{{ request.GET.period }}">
                         <div class="row" style="padding-left: 3rem;padding-top: 25px;">
                             <input name="q" hidden value="{{ q }}">
                             <div class="form-group col-sm-12">
@@ -196,6 +151,8 @@
     window.current_payment_request = null
     $('#user_id').select2();
 
+    $("#search-txt").focus();
+
     function q(){
         userId = $("#user_id").val();
         startDate = $('#start-date').val();
@@ -220,6 +177,12 @@
     $("#user_id").change(q);
 
     $('#search-btn').click(q);
+
+    $("#search-txt").keypress(function(event) {
+        if (event.which == 13) {
+           q();
+        }
+    });
 
     $('#csv-download').click(function()
     {
@@ -250,7 +213,7 @@
         if(diff>31) {
             alert("date difference is greater than 31");
             $('#start-date').val("");
-        } else if ($("#start-date").val() != '' && $("#end-date").val() != ''){q();}
+        } else if ($("#start-date").val() != '' && $("#end-date").val() != ''){}
     });
 
 
@@ -277,7 +240,7 @@
             {
                alert("date difference is greater than 31");
                $('#end-date').val("");
-            } else if ($("#start-date").val() != '' && $("#end-date").val() != ''){q();}
+            } else if ($("#start-date").val() != '' && $("#end-date").val() != ''){}
          });
 
 

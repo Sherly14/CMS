@@ -4,24 +4,16 @@
 
 {% block content %}
 
-<div class="content-wrapper">
-    <p class="head-right">Distributor Table</p>
+<div class="content-wrapper scrollbar scrollbar-black bordered-black">
+    <p class="head-right">Distributors</p>
     <div class="row rm-margin-side">
-            <div class="col-2">
-                <p class="head-left">START DATE</p>
-            </div>
-            <div class="col-2">
-                <p class="head-left">END DATE</p>
-            </div>
-    </div>
-    <div class="row rm-margin-side">
-        <div class="col-2">
-            <input id="start-date" name="startDate" width="160" class="search"  value="{{startDate}}"  />
+        <div class="col-6 col-lg-2 mt-2">
+            <input id="start-date" name="startDate" value="{{startDate}}" placeholder="From" data-toggle="tooltip" data-placement="top" title="User Registration Date: From"/>
         </div>
-        <div class="col-2">
-            <input id="end-date" name="endDate" width="160"  class="search" value="{{endDate}}"   />
+        <div class="col-6 col-lg-2 mt-2">
+            <input id="end-date" name="endDate" value="{{endDate}}" placeholder="To" data-toggle="tooltip" data-placement="top" title="User Registration Date: To"/>
         </div>
-        <div class="col-4">
+        <div class="col-12 col-lg-2 mt-2" data-toggle="tooltip" data-placement="top" title="Select Distributor">
             <select id="distributor-id"  name="distributor-id">
                 <option value="-1">ALL</option>
                 {% for distributor in distributor_list %}
@@ -29,39 +21,38 @@
                 {% endfor %}
             </select>
         </div>
+        <div class="col-6 col-lg-3 mt-2 float-left">
+            <input class="form-control form-control" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="Search by Id, Name or Mobile">
+        </div>
+        <div class="col-2 col-lg-1 mt-2">
+            <button class="btn btn-outline-dark" type="button" id="search-btn" data-toggle="tooltip" data-placement="top" title="Search">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+        <div class="col-2 col-lg-1 mt-2">
+            <a href="{% url 'user:distributor-list' %}" data-toggle="tooltip" data-placement="top" title="Clear Filters">
+                <img src="https://png.icons8.com/ios/50/000000/clear-filters.png" height="30">
+            </a>
+        </div>
+        <div class="col-2 col-lg-1 mt-2 float-right" data-toggle="tooltip" data-placement="top" title="Download CSV">
+            <img src="https://png.icons8.com/ios/50/000000/export-csv.png" height="30" id="csv-download" class="float-right"
+             style="cursor: pointer;">
+        </div>
+
         <div class="div-width-100">
             <br>
-            <div class="row">
-                <div class="align-items-center div-width-100">
-                    <div style="" class="float-left">
-                        <input class="search" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="search" style="background-color: #e7e7e7;width: 290px;height: 36px;">
-                        <i id="filtersubmit" class="fa fa-search" style="position: absolute;right: 10px;top: 10px;"></i>
-                    </div>
-                    <input class="button red float-left mar_l_10" type="button" value="Search" id="search-btn">
-                    <input class="button red float-right" type="button" value="DOWNLOAD CSV" id="csv-download">
-
-                    <a class="nav-link float-right" href="{% url 'user:distributor-list' %}">Reset filters</a>
-                </div>
-            </div>
-            <br>
-            <div class="row">
-                <div class="fine">
-                    <p class="head-bg">List of Distributors</p>
-                </div>
-            </div>
             <div class="row scroll">
                 <div class="div-width-100">
-                    <table>
-                        <tr>
-                            <th>Distributor Id</th>
-                            <th>Distributor Name</th>
-                            <th>DOJ</th>
-                            <th>Mobile No</th>
-                            <th>Email</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                            <th>Update</th>
-
+                    <table class="table table-hover table-data">
+                        <tr style="border-bottom-style: solid;">
+                            <th scope="col">Distributor Id</th>
+                            <th scope="col">Distributor Name</th>
+                            <th scope="col">DOJ</th>
+                            <th scope="col">Mobile No</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Actions</th>
+                            <th scope="col">Update</th>
                         </tr>
                         {% for distributor in queryset %}
                             <tr>
@@ -73,46 +64,44 @@
                                 <td>{% if distributor.is_active %}Active{% else %}Inactive{% endif %}</td>
                                 <td>
                                     {% if distributor.is_active %}
-                                        <a href='{% url "user:distributor-list" %}?disable={{ distributor.id }}'>Disable</a>
+                                        <a class="btn btn-outline-danger btn-xs" href='{% url "user:distributor-list" %}?disable={{ distributor.id }}'>Disable</a>
                                     {% else %}
-                                        <a href='{% url "user:distributor-list" %}?activate={{ distributor.id }}'>Activate</a>
+                                        <a class="btn btn-outline-success btn-xs" href='{% url "user:distributor-list" %}?activate={{ distributor.id }}'>Activate</a>
                                     {% endif %}
                                 </td>
-                                 <td> <a href='{% url "user:user-update" pk=distributor.id%}'>Update</a></td>
+                                <td> <a class="btn btn-outline-info btn-xs" href='{% url "user:user-update" pk=distributor.id%}'>Update</a></td>
                             </tr>
-
                         {% endfor %}
                     </table>
-                    <br>
                     {% if is_paginated %}
                         <div class="pagination">
                             {% if has_prev_page %}
                             <div class="pagination-prev">
-                                <a href="{% url 'user:distributor-list' %}?{{prev_page_qs}}" class="button red" >Prev</a>
+                                <a href="{% url 'user:distributor-list' %}?{{prev_page_qs}}" class="btn btn-outline-dark" >Prev</a>
                             </div>
                             {% endif %}
                             {% if has_next_page %}
                             <div class="pagination-next">
-                                <a href="{% url 'user:distributor-list' %}?{{next_page_qs}}" class="button red" >Next</a>
+                                <a href="{% url 'user:distributor-list' %}?{{next_page_qs}}" class="btn btn-outline-dark" >Next</a>
                             </div>
                             {% endif %}
                         </div>
                     {% endif %}
                 </div>
             </div>
-            <br>
         </div>
     </div>
     <br>
 </div>
-
 <script>
 
 
     $(document).ready(function()
     {
 
-         $('#distributor-id').select2();
+         $('#distributor-id').select2({ height:'1000px', placeholder:'select an option'});
+
+         $("#search-txt").focus();
 
          function q(){
              distributorId = $("#distributor-id").val();
@@ -142,19 +131,13 @@
 
          $('#distributor-id').change(q);
 
-         //$('#search-txt').on('input', q);
+         $("#search-txt").keypress(function(event) {
+            if (event.which == 13) {
+               q();
+            }
+         });
 
-        $('#period').change(function() {
-            period_val = $(this).val();
-            url = window.location.pathname + '?filter=' + period_val.replace(' ', '-');
-            {% if q %}
-                url += "&q={{ q }}";
-            {% endif %}
-            window.location.assign(url)
-        });
-
-
-
+        $('#date_btn').on('change',function(e){e.preventDefault();});
         $('#csv-download').click(function()
         {
             url = "{% url "user:distributor-csv" %}" + window.location.search;
@@ -167,13 +150,12 @@
             uiLibrary: 'bootstrap4',
             iconsLibrary: 'fontawesome',
             format: 'yyyy-mm-dd',
-
             maxDate: function () {
                 return new Date($('#end-date').val()) == '' ? today: ( new Date($('#end-date').val()) < today ? $('#end-date').val() : today);
-            }
-        }).on('change', function (ev)
+            },
+        }).on('change.dp', function (ev)
          {
-
+            console.log('works1');
             var start = $("#start-date").val();
             var startD = new Date(start);
             var end = $("#end-date").val();
@@ -186,7 +168,7 @@
             {
                alert("date difference is greater than 31");
                $('#start-date').val("");
-            } else if ($("#start-date").val() != '' && $("#end-date").val() != ''){q();}
+            } else if ($("#start-date").val() != '' && $("#end-date").val() != ''){}
          });
 
 
@@ -202,22 +184,29 @@
             maxDate: function () {
                 return today;
             }
-        }).on('change', function (ev)
+        }).on('change.dp', function (ev)
          {
+            console.log('works2', ev);
+            ev.preventDefault();
+            ev.stopPropagation();
 
             var start = $("#start-date").val();
             var startD = new Date(start);
             var end = $("#end-date").val();
             var endD = new Date(end);
+                        console.log('dates',startD, endD);
+
             var diff = parseInt((endD.getTime()-startD.getTime())/(24*3600*1000));
 
             $("#days").val(diff);
+            console.log('diff', diff);
 
             if(diff>31)
             {
                alert("date difference is greater than 31");
                $('#end-date').val("");
-            }else if ($("#start-date").val() != '' && $("#end-date").val() != ''){q();}
+            }else if ($("#start-date").val() != '' && $("#end-date").val() != ''){            console.log('works3');
+}
          });
 
 

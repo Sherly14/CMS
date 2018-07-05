@@ -5,7 +5,7 @@
 
 {% block content %}
 
-    <div class="content-wrapper">
+    <div class="content-wrapper scrollbar scrollbar-black bordered-black">
         <p class="head-right">Offers</p>
         {% if api_error %}
             <div class="alert alert-danger" id="alert_msg" style="text-align:center">{{ api_error }}</div>
@@ -16,116 +16,110 @@
 
         <div class="row rm-margin-side" >
         <div class="div-width-100">
-            <div class="row">
-                        <div class="fine">
-                            <p class="head-bg">List of Offers</p>
-                        </div>
-                    </div>
             <div class="row scroll">
+                <div class="div-width-100">
+                    <table class="table table-hover table-data">
+                        <tr style="border-bottom-style: solid;">
+                            <th scope="col">Id</th>
+                            <th scope="col">Min Amount</th>
+                            <th scope="col">Short Desc</th>
+                            <th scope="col">Long Desc</th>
+                            <th scope="col">Redemption</th>
+                            <th scope="col">Is_Active</th>
+                            <th scope="col">Dis</th>
+                            <th scope="col">Proxy</th>
+                            {% if request.user.zr_admin_user.role.name != "RETAILER" %}
+                            <th scope="col">Assigned_To_Retailer</th>
+                            {% endif %}
+                            <th scope="col">Assigned_To_Terminal(By Retailer)</th>
+                            <th scope="col">Cashback</th>
+                            <th scope="col">Type</th>
+                            <th scope="col">Availability</th>
+                            {% if request.user.zr_admin_user.role.name != "RETAILER" %}
+                            <th scope="col">Assign_To_Retailer</th>
+                            {% endif %}
+                            {% if request.user.zr_admin_user.role.name == "RETAILER" %}
+                            <th scope="col">Assign_To_Terminal</th>
+                            {% endif %}
+                        </tr>
 
-                        <div class="div-width-100">
-                            <table>
+                        {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
+                            {% for offer in offers %}
                                 <tr>
-                                    <th>Id</th>
-                                    <th>Min Amount</th>
-                                    <th>Short Desc</th>
-                                    <th>Long Desc</th>
-                                    <th>Redemption</th>
-                                    <th>Is_Active</th>
-                                    <th>Dis</th>
-                                    <th>Proxy</th>
+                                    <td>{{ offer.id }}</td>
+                                    <td>{{ offer.minamount }}</td>
+                                    <td>{{ offer.sdesc }}</td>
+                                    <td>{{ offer.ldesc }}</td>
+                                    <td>{{ offer.redemptions }}</td>
+                                    <td>{{ offer.isactive }}</td>
+                                    <td>{{ offer.dis }}</td>
+                                    <td>{{ offer.proxy }}</td>
                                     {% if request.user.zr_admin_user.role.name != "RETAILER" %}
-                                    <th>Assigned_To_Retailer</th>
+                                    <td>{{ offer.r }}</td>
                                     {% endif %}
-                                    <th>Assigned_To_Terminal(By Retailer)</th>
-                                    <th>Cashback</th>
-                                    <th>Type</th>
-                                    <th>Availability</th>
+                                    <td>{{ offer.o }}</td>
+                                    <td>{{ offer.cashback }}</td>
+                                    <td>{{ offer.type }}</td>
+                                    <td>{{ offer.availability }}</td>
                                     {% if request.user.zr_admin_user.role.name != "RETAILER" %}
-                                    <th>Assign_To_Retailer</th>
+                                    {% if not offer.r %}
+                                        <td> <button class="btn btn-outline-success btn-xs get_assign_retailer" data-toggle="modal" data-id = "{{ offer.id }}" data-target="#get_assign_retailer" >Assign</button></td>
+                                    {% endif %}
                                     {% endif %}
                                     {% if request.user.zr_admin_user.role.name == "RETAILER" %}
-                                    <th>Assign_To_Terminal</th>
+                                    {% if not offer.o %}
+                                        <td> <button class="btn btn-outline-success btn-xs get_assign_terminal" data-toggle="modal" data-id = "{{ offer.id }}" data-target="#get_assign_terminal" >Assign</button></td>
+                                    {% endif %}
                                     {% endif %}
                                 </tr>
+                            {% endfor %}
+                        {% endif %}
 
-                                {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" %}
-                                    {% for offer in offers %}
-                                        <tr>
-                                            <td>{{ offer.id }}</td>
-                                            <td>{{ offer.minamount }}</td>
-                                            <td>{{ offer.sdesc }}</td>
-                                            <td>{{ offer.ldesc }}</td>
-                                            <td>{{ offer.redemptions }}</td>
-                                            <td>{{ offer.isactive }}</td>
-                                            <td>{{ offer.dis }}</td>
-                                            <td>{{ offer.proxy }}</td>
-                                            {% if request.user.zr_admin_user.role.name != "RETAILER" %}
-                                            <td>{{ offer.r }}</td>
-                                            {% endif %}
-                                            <td>{{ offer.o }}</td>
-                                            <td>{{ offer.cashback }}</td>
-                                            <td>{{ offer.type }}</td>
-                                            <td>{{ offer.availability }}</td>
-                                            {% if request.user.zr_admin_user.role.name != "RETAILER" %}
-                                            {% if not offer.r %}
-                                                <td> <button class=" button red get_assign_retailer" data-toggle="modal" data-id = "{{ offer.id }}" data-target="#get_assign_retailer" >Assign</button></td>
-                                            {% endif %}
-                                            {% endif %}
-                                            {% if request.user.zr_admin_user.role.name == "RETAILER" %}
-                                            {% if not offer.o %}
-                                                <td> <button class=" button red get_assign_terminal" data-toggle="modal" data-id = "{{ offer.id }}" data-target="#get_assign_terminal" >Assign</button></td>
-                                            {% endif %}
-                                            {% endif %}
-                                        </tr>
-                                    {% endfor %}
-                                {% endif %}
+                        {% if request.user.zr_admin_user.role.name == "RETAILER" %}
+                            {% for offer in offers %}
+                                <tr>
+                                    {% if offer.r == vendor.vendor_user %}
+                                        <td>{{ offer.id }}</td>
+                                        <td>{{ offer.minamount }}</td>
+                                        <td>{{ offer.sdesc }}</td>
+                                        <td>{{ offer.ldesc }}</td>
+                                        <td>{{ offer.redemptions }}</td>
+                                        <td>{{ offer.isactive }}</td>
+                                        <td>{{ offer.dis }}</td>
+                                        <td>{{ offer.proxy }}</td>
+                                        {% if request.user.zr_admin_user.role.name != "RETAILER" %}
+                                        <td>{{ offer.r }}</td>
+                                        {% endif %}
+                                        <td>{{ offer.o }}</td>
+                                        <td>{{ offer.cashback }}</td>
+                                        <td>{{ offer.type }}</td>
+                                        <td>{{ offer.availability }}</td>
+                                        {% if request.user.zr_admin_user.role.name != "RETAILER" %}
+                                        {% if not offer.r %}
+                                            <td> <button class="btn btn-outline-success btn-sm get_assign_retailer " data-toggle="modal" data-id = "{{ offer.id }}" data-target="#get_assign_retailer" >Assign</button></td>
+                                        {% endif %}
+                                        {% endif %}
+                                        {% if request.user.zr_admin_user.role.name == "RETAILER" %}
+                                            <td> <button class="btn btn-outline-success btn-sm get_assign_terminal " data-toggle="modal" data-id = "{{ offer.id }}" data-target="#get_assign_terminal" >Assign</button></td>
+                                        {% endif %}
+                                    {% endif %}
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                    </table>
+                </div>
+                <!--<div class="pagination-prev">-->
+                <!--{% if has_prev_page %}-->
+                    <!--<a href="{% url "user:terminal-list" %}?{{prev_page_qs}}" class="button red" >Prev</a>-->
+                <!--{% endif %}-->
+                <!--</div>-->
 
-                                {% if request.user.zr_admin_user.role.name == "RETAILER" %}
-                                    {% for offer in offers %}
-                                        <tr>
-                                            {% if offer.r == vendor.vendor_user %}
-                                                <td>{{ offer.id }}</td>
-                                                <td>{{ offer.minamount }}</td>
-                                                <td>{{ offer.sdesc }}</td>
-                                                <td>{{ offer.ldesc }}</td>
-                                                <td>{{ offer.redemptions }}</td>
-                                                <td>{{ offer.isactive }}</td>
-                                                <td>{{ offer.dis }}</td>
-                                                <td>{{ offer.proxy }}</td>
-                                                {% if request.user.zr_admin_user.role.name != "RETAILER" %}
-                                                <td>{{ offer.r }}</td>
-                                                {% endif %}
-                                                <td>{{ offer.o }}</td>
-                                                <td>{{ offer.cashback }}</td>
-                                                <td>{{ offer.type }}</td>
-                                                <td>{{ offer.availability }}</td>
-                                                {% if request.user.zr_admin_user.role.name != "RETAILER" %}
-                                                {% if not offer.r %}
-                                                    <td> <button class="button red get_assign_retailer " data-toggle="modal" data-id = "{{ offer.id }}" data-target="#get_assign_retailer" >Assign</button></td>
-                                                {% endif %}
-                                                {% endif %}
-                                                {% if request.user.zr_admin_user.role.name == "RETAILER" %}
-                                                    <td> <button class="button red get_assign_terminal " data-toggle="modal" data-id = "{{ offer.id }}" data-target="#get_assign_terminal" >Assign</button></td>
-                                                {% endif %}
-                                            {% endif %}
-                                        </tr>
-                                    {% endfor %}
-                                {% endif %}
-                            </table>
-                        </div>
-                        <!--<div class="pagination-prev">-->
-                        <!--{% if has_prev_page %}-->
-                            <!--<a href="{% url "user:terminal-list" %}?{{prev_page_qs}}" class="button red" >Prev</a>-->
-                        <!--{% endif %}-->
-                        <!--</div>-->
-
-                        <!--<div class="pagination-next">-->
-                            <!--{% if has_next_page %}-->
-                                <!--<a href="{% url "user:terminal-list" %}?{{next_page_qs}}" class="button red" >Next</a>-->
-                            <!--{% endif %}-->
-                        <!--</div>-->
-                    </div>
+                <!--<div class="pagination-next">-->
+                    <!--{% if has_next_page %}-->
+                        <!--<a href="{% url "user:terminal-list" %}?{{next_page_qs}}" class="button red" >Next</a>-->
+                    <!--{% endif %}-->
+                <!--</div>-->
+            </div>
             <br>
         </div>
         </div>
@@ -142,17 +136,17 @@
 
                     <form class="form-horizontal" method="POST" id="retailer_assign_form" enctype="multipart/form-data">
                         {% csrf_token %}
-                        <div class="row" style="padding-left: 3rem;padding-top: 25px;">
+                        <div class="row">
                             <div class="form-group col-sm-12">
                                 <label class="control-label"><b>Offer Id</b></label>
                                 <div>
-                                    <input type="text"  style="border: 2px solid; border-color: #aaa;"  name="offer_id" id="offer_id" value="" readonly>
+                                    <input type="text" class="form-control" name="offer_id" id="offer_id" value="" readonly>
                                 </div>
                             </div>
 
                             <div class="form-group col-sm-2">
                                 <label class="control-label"><b>Retailer</b></label>
-                                 <select style="border: 2px solid; border-color: #aaa;" name="retailer" id="retailer" required>
+                                 <select class="form-control" name="retailer" id="retailer" required>
                                      <option value="">Select Retailer</option>
                                         {% for retailer in retailer_list %}
                                             <option value="{{ retailer.id }}" {% if  retailer.id == retailer_id %}selected{% endif %}>{{ retailer.first_name }} {{ retailer.last_name|default_if_none:""}}</option>
@@ -162,7 +156,7 @@
                         </div>
                         <div class="row">
                             <div class="form-group col-10">
-                                <button type="submit"  id="assign_retailer" class="button red ">
+                                <button type="submit" id="assign_retailer" class="btn btn-outline-success btn-sm">
                                     Assign Retailer
                                 </button>
                             </div>
@@ -190,7 +184,7 @@
                             <div class="col-sm-6">
                                 <div class="form-group">
                                     <label class="control-label"><b>Offer Id</b></label>
-                                    <input type="text" class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" name="offer_id_terminal" id="offer_id_terminal" value="" readonly>
+                                    <input type="text" class="fill" style="box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" name="offer_id_terminal" id="offer_id_terminal" value="" readonly>
                                 </div>
                             </div>
                         </div>
@@ -200,7 +194,7 @@
                                 <div class="form-group">
                                     <label class="control-label"><b>Terminal</b></label>
                                     <br>
-                                    <select class="fill" style="border: none; box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" name="terminal" id="terminal" required>
+                                    <select class="fill" style="box-shadow: 2px 5px 11px #f3f1f1; padding-left: 1rem;" name="terminal" id="terminal" required>
                                         <option value="-1">ALL</option>
                                             {% for terminal in terminal_list %}
                                                 <option value="{{ terminal.terminal.mobile_no }}" {% if  terminal.terminal.id == terminal_id %}selected{% endif %}>{{ terminal.terminal.first_name }} {{ terminal.terminal.last_name|default_if_none:""}}</option>
@@ -255,12 +249,7 @@
         $('#search-btn').click(function(){
         startDate = $('#start-date').val();
         endDate = $('#end-date').val();
-
-            {% if filter_by %}
-                url = window.location.pathname + '?q=' + $('#search-txt').val() + "&filter={{ filter_by }}";
-            {% else %}
-                url = window.location.pathname + "?q=" + $('#search-txt').val();
-            {% endif %}
+            url = window.location.pathname + "?q=" + $('#search-txt').val();
 
             if(startDate!="" && endDate!="" )
             {
