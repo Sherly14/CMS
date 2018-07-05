@@ -187,6 +187,7 @@ body.fixed-nav {
     #mainNav .navbar-collapse .navbar-nav > .nav-item.dropdown .dropdown-menu > .dropdown-item > .dropdown-message {
       max-width: 300px; } }
 
+@media (min-width: 992px) {
 
 .scrollbar {
     height: 91vh;
@@ -199,7 +200,7 @@ body.fixed-nav {
   border-radius: 10px; }
 
 .scrollbar-black::-webkit-scrollbar {
-  width: 12px;
+  width: 8px;
   height: 91vh; overflow-y: auto;
   background-color: #F5F5F5; }
 
@@ -210,7 +211,7 @@ body.fixed-nav {
 
 .bordered-black::-webkit-scrollbar-track {
   -webkit-box-shadow: none;
-  border: 1px solid #000; }
+  border: 1px solid #F5F5F5; }
 
 .bordered-black::-webkit-scrollbar-thumb {
   -webkit-box-shadow: none; }
@@ -223,6 +224,7 @@ body.fixed-nav {
 
 .thin::-webkit-scrollbar {
   width: 6px; }
+}
 
 .header-logo img {
     display: block;

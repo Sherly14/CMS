@@ -6,7 +6,7 @@
 
 {% block content %}
     {% if request.user.zr_admin_user.role.name != "RETAILER" %}
-    <div class="content-wrapper">
+    <div class="content-wrapper scrollbar scrollbar-black bordered-black">
         <p class="head-right">Dashboard</p>
             <div class="row">
                 <div class="col-6 col-lg-2 mt-2">
@@ -207,7 +207,7 @@
     </div>
     {% endif %}
     {% if request.user.zr_admin_user.role.name == "RETAILER" %}
-        <div class="content-wrapper">
+        <div class="content-wrapper scrollbar scrollbar-black bordered-black">
             <p class="head-right">Transaction History</p>
 
             {% if no_payments %}
@@ -580,30 +580,7 @@
             }
         });
 
-        function bank_account() {
-            var bank_account = JSON.parse('{{bank_account | escapejs }}');
-            var bankVal = $('#to_bank').val();
-            var code;
-            {% for b in bank %}
-               if ( bankVal == "{{ b.pk }}") {
-                   code = '{{ b.bank_code }}'
-                   $('#to_account_no_form').hide();
-               }
-            {% endfor %}
-
-            $('#to_account_no').val(bank_account[code]);
-            if($('#to_bank').val() == 'Other') {
-                $('#to_account_no_form').show();
-            } else {
-                $('#to_account_no_form').hide();
-            }
-        }
-
-        $(document).ready(bank_account);
-
-        $('body').on('change', '#to_bank', bank_account);
-
-        var amount_validator = function () {
+        jQuery.validator.addMethod("dmt_non_dmt_sum_valid", function(value, element, param) {
             non_dmt_val = parseInt($('#non_dmt_amount').val())
             dmt_val = parseInt($('#dmt_amount').val())
             amount_val = parseInt($('#amount').val())
@@ -617,10 +594,10 @@
                 $('#alert_msg').show()
                 return false
             }
-        }
-        $('body').on('keyup', '#amount', amount_validator);
-        $('body').on('keyup', '#non_dmt_amount', amount_validator);
-        $('body').on('keyup', '#dmt_amount', amount_validator);
+
+        }, function(data, data2, data3) {
+
+        });
 
         var challan_request_form = $('#challan_request_form');
         var sign_in_error = $('.alert-danger', challan_request_form);
@@ -634,7 +611,8 @@
             },
             amount: {
                 required: true,
-                min: 1
+                min: 1,
+                dmt_non_dmt_sum_valid: true
             },
             document: {
                 required: true
@@ -714,9 +692,9 @@
                     data.set('to_bank', $('#to_bank_other').val());
                 }
                 data.delete('to_bank_other');
-                for (var pair of data.entries()) {
-    console.log(pair[0]+ ', ' + pair[1]);
-}
+                //for (var pair of data.entries()) {
+                //  console.log(pair[0]+ ', ' + pair[1]);
+                //}
                 $('#submit_request').prop('disabled', true);
                 $('#submit_request').addClass('disabled');
                 $.ajax({

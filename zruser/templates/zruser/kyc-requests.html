@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<div class="content-wrapper">
+<div class="content-wrapper scrollbar scrollbar-black bordered-black">
     <p class="head-right">KYC Requests</p>
     <div class="row rm-margin-side">
         <div class="col-6 col-lg-2 mt-2">
@@ -58,7 +58,7 @@
                             <td>{{kyc_req.id}}</td>
                             <td>{{ kyc_req.first_name }} {% if kyc_req.last_name %}{{ kyc_req.last_name }}{% endif %} </td>
                             <td>{{ kyc_req.role.name }}</td>
-                            <td>{{ kyc_req.at_created|date:"d/m/Y" }}</td>
+                            <td>{{ kyc_req.at_created}}</td>
                             <td>
                                 {% if kyc_req.in_process %}
                                     {% for kyc in kyc_req.kyc_details.all %}
@@ -107,11 +107,8 @@
                         </div>
                     {% endif %}
                 </div>
-
-                <br/>
                 <br/>
                 </div>
-            <br/>
             </div>
         </div>
     <br/>

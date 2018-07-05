@@ -107,7 +107,7 @@
                 </li>
             </ul>
             <hr class="white-line">
-            <ul class="sidebar-nav navbar-nav mx-auto scrollbar scrollbar-black bordered-black square">
+            <ul class="sidebar-nav navbar-nav mx-auto scrollbar scrollbar-black bordered-black">
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "OPERATIONS"%}
                 <li class="nav-item {% if url_name == 'distributor-list' %}active{% endif %}">
                      <a class="nav-link side-nav-pl" href="{% url 'user:distributor-list' %}">Distributors</a>
