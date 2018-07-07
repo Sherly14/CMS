@@ -63,7 +63,7 @@
                                 <th scope="col">To bank</th>
                                 <th scope="col">Ref Id</th>
                             </tr>
-                            {% for payment_request in payment_request_list %}
+                            {% for payment_request in queryset %}
                                 <tr>
                                     <td>
                                         {% if is_superuser %}
@@ -130,7 +130,7 @@
                                     <td>{{ payment_request.ref_no|default_if_none:"N/A" }}</td>
                                     <td>
                                        {# {% if payment_request.status == 1 and not payment_request.status == 3 %}#}
-                                          {#   <input type="button" class="button red payment change_request_id confirm_refund_select" value="Revoke" data-toggle="modal" data-target="#confirm_refund" data-slug-id="{{ payment_request.pk }}">#}
+                                          {#   <input type="button" class="btn btn-outline-success payment change_request_id confirm_refund_select" value="Revoke" data-toggle="modal" data-target="#confirm_refund" data-slug-id="{{ payment_request.pk }}">#}
                                        {#{% endif %}#}
                                     </td>
                                 </tr>
