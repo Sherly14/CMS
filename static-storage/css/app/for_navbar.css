@@ -32,7 +32,7 @@ body.fixed-nav {
 /*wrapper for the column */
 .content-wrapper {
   background: white;
-    min-height: 91vh;
+    min-height: 93vh;
     overflow: auto;
   }
 
@@ -135,7 +135,7 @@ body.fixed-nav {
       //overflow: hidden;
       flex-direction: column;
       //height: 100vh;
-      margin-top: 59px;
+      margin-top: 7vh;
       /*margin-left: -70px;*/
       /*padding-bottom: 56px;*/
       background: transparent;
@@ -190,7 +190,7 @@ body.fixed-nav {
 @media (min-width: 992px) {
 
 .scrollbar {
-    height: 91vh;
+    height: 93vh;
     overflow-y: auto;
 }
 
@@ -201,7 +201,7 @@ body.fixed-nav {
 
 .scrollbar-black::-webkit-scrollbar {
   width: 8px;
-  height: 91vh; overflow-y: auto;
+  height: 93vh; overflow-y: auto;
   background-color: #F5F5F5; }
 
 .scrollbar-black::-webkit-scrollbar-thumb {
@@ -232,7 +232,7 @@ body.fixed-nav {
     padding: 0;
     outline: 0;
     border: 0;
-    width: 140px;
+    width: 100px;
     height: auto;
     background-size: 100%;
     font: 0/0 a;
@@ -243,7 +243,15 @@ body.fixed-nav {
 
 @media only screen and (max-width: 899px)
 .header-logo img {
-    width: 88px;
+    width: 50px;
     height: auto;
 }
 
+.navbar {
+    padding: 0.0rem 1rem !important;
+    min-height: 7vh;
+}
+
+.nav-link {
+    padding: 0.2rem 1rem;
+}
