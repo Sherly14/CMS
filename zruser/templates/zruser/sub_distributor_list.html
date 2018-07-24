@@ -69,12 +69,12 @@
                                 <td>{{ subdist_mapping.at_created }}</td>
                                 <td>{{ subdist_mapping.sub_distributor.mobile_no }}</td>
                                 <td>{{ subdist_mapping.sub_distributor.email }}</td>
-                                <td>{% if subdist_mapping.is_active %}Active{% else %}Inactive{% endif %}</td>
+                                <td>{% if subdist_mapping.sub_distributor.is_active %}Active{% else %}Inactive{% endif %}</td>
                                 <td>
-                                    {% if subdist_mapping.is_active %}
-                                        <a class="btn btn-outline-danger btn-xs" href='{% url "user:sub-distributor-list" %}?disable={{ subdist_mapping.id }}'>Disable</a>
+                                    {% if subdist_mapping.sub_distributor.is_active %}
+                                        <a class="btn btn-outline-danger btn-xs" href='{% url "user:sub-distributor-list" %}?disable={{ subdist_mapping.sub_distributor.id }}'>Disable</a>
                                     {% else %}
-                                        <a class="btn btn-outline-success btn-xs" href='{% url "user:sub-distributor-list" %}?activate={{ subdist_mapping.id }}'>Activate</a>
+                                        <a class="btn btn-outline-success btn-xs" href='{% url "user:sub-distributor-list" %}?activate={{ subdist_mapping.sub_distributor.id }}'>Activate</a>
                                     {% endif %}
                                 </td>
                                 <td> <a class="btn btn-outline-info btn-xs" href='{% url "user:user-update" pk=subdist_mapping.sub_distributor.id%}'>Update</a></td>
@@ -105,7 +105,9 @@
 <script>
 
     $(document).ready(function(){
-    $('#sub-distributor-id').select2();
+    $('#sub-distributor-id').select2({
+        width: '100%'
+    });
 
     $("#search-txt").focus();
 

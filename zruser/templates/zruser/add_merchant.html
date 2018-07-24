@@ -8,11 +8,11 @@
 
 <div class="content-wrapper py-2 scrollbar scrollbar-black bordered-black">
     <p class="head-right">Add a Merchant</p>
-    <div class="container-fluid" style="position: relative;">
+    <form id="add-merchant-form" method="POST">
+        <div class="container-fluid" style="position: relative;">
         <div class="row">
             <p class="heading-bg">PERSONAL DETAILS:</p>
         </div>
-        <form id="add-merchant-form" method="POST">
             <div class="row">
                 <div class="col-sm-2">
                     <div class="form-group">
@@ -143,7 +143,7 @@
                 </div>
             </div>
     </div>
-    <div class="container-fluid banking-details">
+        <div class="container-fluid banking-details">
         <div class="row">
             <p class="heading-bg">BANK DETAILS:</p>
         </div>
@@ -211,8 +211,8 @@
             </div>
         </div>
     </div>
-    <div class="container-fluid margin-bot">
-        <div class="col-md-4 colAlignment float-left">
+        <div class="container-fluid">
+        <div class="col-md-4 colAlignment float-left mb-4">
             <div class="row margin-top">
                 <p class="heading-bg">KYC PROOFS:</p>
             </div>
@@ -234,7 +234,7 @@
             <div class="row margin-top" id="kyc-docs">
             </div>
         </div>
-        <div class="col-md-4 colAlignment float-left" >
+        <div class="col-md-4 colAlignment float-left mb-4" >
             <div class="row margin-top">
                 <p class="heading-bg">GST INFO:</p>
             </div>
@@ -246,7 +246,7 @@
                 {% endif %}
             </div>
         </div>
-        <div class="col-md-4 colAlignment float-left">
+        <div class="col-md-4 colAlignment float-left mb-4">
             <div class="row margin-top">
                 <p class="heading-bg">OTHERS:</p>
             </div>
@@ -262,8 +262,8 @@
             </div>
         </div>
         {% csrf_token %}
-        </form>
     </div>
+    </form>
 </div>
 
 <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1.12.min.js"></script>
@@ -290,7 +290,6 @@
     function upload_kyc_doc() {
         $('#kyc-file').val('').clone(true)
         $('#file-err-msg').hide();
-        console.log("fsdf");
         $("#kyc-file").trigger('click');
     }
 

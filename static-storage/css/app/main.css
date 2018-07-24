@@ -272,10 +272,6 @@ a.button.red{
     height: 32px !important;
 }
 
-.select2-container {
-    width: 100% !important;
-}
-
 .btn.btn-xs {
     font-size: 0.6rem;
     padding: .12rem .5rem;
@@ -303,4 +299,8 @@ a.button.red{
 
 .table {
     margin-bottom: 0rem;
+}
+
+.modal-header {
+    justify-content: center;
 }

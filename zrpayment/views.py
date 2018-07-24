@@ -189,10 +189,13 @@ class AcceptPaymentRequestView(APIView):
     def post(self, request):
         data = dict(json.loads(request.data.keys()[0]))
         request_id = data.get("request_id")
+        comments = data.get("comments")
         payment_request = PaymentRequest.objects.filter(id=request_id).last()
         message = "Something went wrong, Please try again!"
         if payment_request:
             if payment_request.status == 0:
+                payment_request.comments = comments
+                payment_request.save(update_fields=['comments'])
                 if is_user_superuser(self.request) and payment_request.to_user.role.name == 'ADMINSTAFF':
                     zr_wallet = zrwallet_models.Wallet.objects.get(
                         merchant=payment_request.from_user

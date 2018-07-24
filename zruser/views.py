@@ -44,7 +44,7 @@ from zrtransaction.utils.constants import RECHARGES_TYPE, TRANSACTION_STATUS_SUC
     TRANSACTION_STATUS_FAILURE, BILLS_TYPE, TRANSACTION_STATUS_PENDING
 from zrtransaction.views import get_transactions_qs_with_dict
 from zruser import forms as zr_user_form
-from zruser.models import ZrUser, UserRole, ZrAdminUser, KYCDocumentType, KYCDetail, Bank, ZrTerminal
+from zruser.models import ZrUser, UserRole, ZrAdminUser, KYCDocumentType, KYCDetail, Bank, ZrTerminal, BankDetail
 from zruser.utils.constants import DEFAULT_DISTRIBUTOR_MOBILE_NUMBER
 from zrwallet import models as zrwallet_models
 from django.contrib.auth.models import User
@@ -396,9 +396,8 @@ def mail_report(request):
         "user_type": user_type,
         "q": request.GET.get('q', ""),
         "filter": request.GET.get('filter', ""),
-        "period": request.POST.get('period', ''),
-        "start_date": request.POST.get('startDate',''),
-        "end_date": request.POST.get('endDate',''),
+        "start_date": request.POST.get('startDate', ''),
+        "end_date": request.POST.get('endDate', ''),
         "user_id": request.user.id,
     }
     from zruser import tasks as zu_celery_tasks
@@ -1242,16 +1241,33 @@ class UserUpdateView(View):
 
     def get(self, request, pk,  **kwargs):
         user = ZrUser.objects.get(id=pk)
+        bank = BankDetail.objects.get(for_user=user.id)
         merchant_form = zr_user_form.UpdateMerchantDistributorForm(
-            initial={'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email})
+            initial={'mobile_no':user.mobile_no, 'first_name': user.first_name, 'last_name': user.last_name,
+                     'email': user.email, 'gender': user.gender, 'city': user.city, 'state': user.state,
+                     'pincode': user.pincode, 'address_line_1': user.address_line_1,
+                     'address_line_2': user.address_line_2, 'business_name': user.business_name,
+                     'pan_no': user.pan_no, 'aadhaar_no': user.aadhaar_no, 'gstin': user.gstin,
+                     'UPIID': user.UPIID, 'residence_address': user.residence_address,
+                     'business_type': user.business_type, 'sales_agent': user.sales_agent
+                     }
+        )
+        bank_detail_form = zr_user_form.BankDetailForm(
+            initial={'account_no': bank.account_no, 'IFSC_code': bank.IFSC_code,
+                     'account_name': bank.account_name, 'bank_name': bank.bank_name,
+                     'bank_city': bank.bank_city, 'account_type': bank.account_type
+                     }
+        )
+
         return render(
             request, self.template_name,
-            {"merchant_form": merchant_form, "zr_user": user, "kyc_doc_types": self.kyc_doc_types}
+            {"merchant_form": merchant_form, 'bank_detail_form': bank_detail_form, "zr_user": user, "kyc_doc_types": self.kyc_doc_types}
         )
 
     @transaction.atomic
     def post(self, request, pk):
         user = ZrUser.objects.get(id=pk)
+        bank = BankDetail.objects.get(for_user=user.id)
         if "save" in request.POST:
             merchant_form = zr_user_form.UpdateMerchantDistributorForm(data=request.POST, instance=user)
             if not merchant_form.is_valid():
@@ -1265,12 +1281,23 @@ class UserUpdateView(View):
 
             merchant_form.save()
             if hasattr(user, "zr_user"):
-                if hasattr(user.zr_user,"id"):
+                if hasattr(user.zr_user, "id"):
                     dj_user = user.zr_user.id
                     dj_user.first_name = user.first_name
-                    #dj_user.last_name = user.last_name
+                    dj_user.last_name = user.last_name
                     dj_user.email = user.email
                     dj_user.save()
+
+            bank_detail_form = zr_user_form.BankDetailForm(data=request.POST, instance=bank)
+            if not bank_detail_form.is_valid():
+                return render(
+                    request, self.template_name,
+                    {
+                        'bank_detail_form': bank_detail_form,
+                    }
+                )
+
+            bank_detail_form.save()
 
             kyc_docs = []
             for doc_type in KYCDocumentType.objects.all().values_list('name', flat=True):
@@ -1648,13 +1675,9 @@ class SubDistributorListView(ListView):
             zruser.save(update_fields=['is_active'])
 
         context['q'] = q
-
         context['startDate'] = start_date
-
         context['endDate'] = end_date
-
         context['sub_distributor_id'] = int(sub_distributor_id)
-
         context['distributor_id'] = int(distributor_id)
 
         if sub_distributor_list:

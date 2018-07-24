@@ -215,7 +215,7 @@
         </div>
     </div>
     <div class="container-fluid margin-bot">
-        <div class="col-md-4 colAlignment float-left">
+        <div class="col-md-4 colAlignment float-left mb-4">
             <div class="row margin-top">
                 <p class="heading-bg">KYC PROOFS:</p>
             </div>
@@ -237,7 +237,7 @@
             <div class="row margin-top" id="kyc-docs">
             </div>
         </div>
-        <div class="col-md-4 colAlignment float-left" >
+        <div class="col-md-4 colAlignment float-left mb-4" >
             <div class="row margin-top">
                 <p class="heading-bg">GST INFO:</p>
             </div>
@@ -249,7 +249,7 @@
                 {% endif %}
             </div>
         </div>
-        <div class="col-md-4 colAlignment float-left">
+        <div class="col-md-4 colAlignment float-left mb-4">
             <div class="row margin-top">
                 <p class="heading-bg">OTHERS:</p>
             </div>
@@ -293,7 +293,6 @@
     function upload_kyc_doc() {
         $('#kyc-file').val('').clone(true)
         $('#file-err-msg').hide();
-        console.log("fsdf");
         $("#kyc-file").trigger('click');
     }
 
