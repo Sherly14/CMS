@@ -3410,6 +3410,8 @@ def get_wallets_qs(request):
         merchant__last_name__icontains=q
     ) | Q(
         merchant__mobile_no__icontains=q
+    ) | Q(
+        merchant__id__icontains=q
     )
 
     user_list = user_list.filter(q_obj).order_by('-at_created')

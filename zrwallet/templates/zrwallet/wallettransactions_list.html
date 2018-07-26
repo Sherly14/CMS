@@ -152,6 +152,9 @@
     $('#user_id').select2();
 
     $("#search-txt").focus();
+    var search_txt_val = $("#search-txt").val();
+    $("#search-txt").val('');
+    $("#search-txt").val(search_txt_val);
 
     function q(){
         userId = $("#user_id").val();

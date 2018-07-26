@@ -140,6 +140,9 @@ $(document).ready(function(){
         window.current_payment_request = null
 
     $("#search-txt").focus();
+    var search_txt_val = $("#search-txt").val();
+    $("#search-txt").val('');
+    $("#search-txt").val(search_txt_val);
 
     $('#search-btn').click(function()
     {
