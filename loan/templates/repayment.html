@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
+    <br/><br/>
+    <input id="date_in" type="date">
+    <button onclick="getRepayments()">Get Repayment</button>
+
+    <div id="response"></div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<Script>
+function getRepayments() {
+ 
+  var loader_el = document.getElementById("loader");
+  loader_el.style.display = "block";
+  var repay_date = document.getElementById("date_in").value;
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      console.log(this.responseText);
+      document.getElementById("response").innerHTML = this.responseText;
+       loader_el.style.display = "none";
+    }
+  };
+  xhttp.open("GET", "/get-repayments" + "/" + repay_date, true);
+  xhttp.send();
+}
+
+</Script>
+{% endblock %}

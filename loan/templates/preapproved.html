@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+body{
+	background-color: #f7f7f7;
+}
+
+</style>
+
+<div class="container col-md-7" style="margin-top: 2%;">
+    <h3><u>Partner Portal - Preapproved Offers</u></h3>
+    <div>
+        </ul>
+
+        {% if not offer %}
+        Sorry No offer for you
+        {% else %}
+        <div>Congratulations ! You have a preapproved Loan offer from Happy Loans. <br/>
+            Please fill the form Below to get Loan
+        </div>
+    </div>
+    <form class="jumbotron" style="background-color: white;" action="/loan-apply" id="loan-form" method="post"
+          enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group row">
+            <label for="example-text-input" class="col-2 col-form-label">Loan Amount</label>
+            <div class="col-10">
+                <input class="form-control" name="loan_amount" type="number" value="15000" id="loan_amount">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="example-text-input" class="col-2 col-form-label">FirstName</label>
+            <div class="col-10">
+                <input class="form-control" name="first_name" type="text" value="{{up.first_name}}" id="first_name">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="example-text-input" class="col-2 col-form-label">LastName</label>
+            <div class="col-10">
+                <input class="form-control" name="last_name" type="text" value="{{up.last_name}}" id="last_name">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="example-text-input" class="col-2 col-form-label">Date of Birth</label>
+            <div class="col-10">
+                <input class="form-control" name="dob" type="text" value="{{up.date_of_birth}}" id="dob" readonly>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="example-text-input" class="col-2 col-form-label">Mobile</label>
+            <div class="col-10">
+                <input class="form-control" name="mobile" type="number" value="9789840703" id="mobile" readonly>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="example-text-input" class="col-2 col-form-label">Email</label>
+            <div class="col-10">
+                <input class="form-control" name="email" type="email" value="{{up.email}}" id="email" readonly>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="example-text-input" class="col-2 col-form-label">Aadhaar No</label>
+            <div class="col-10">
+                <input class="form-control" name="aadhaar_no" type="number" value="123" id="aadhaar_no">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="example-text-input" class="col-2 col-form-label">Pan No</label>
+            <div class="col-10">
+                <input class="form-control" name="pan_no" ype="number" value="{{up.pan_number}}" id="pan_no">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="example-text-input" class="col-2 col-form-label">State</label>
+            <div class="col-10">
+                <input class="form-control" name="state" type="text" value="{{up.state}}" id="state" readonly>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="example-text-input" class="col-2 col-form-label">City</label>
+            <div class="col-10">
+                <input class="form-control" name="city" type="text" value="{{up.city}}" id="city" readonly>
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="example-text-input" class="col-2 col-form-label">Aadhaar Front</label>
+            <div class="col-10">
+                <input class="form-control" type="file" value="" id="example-text-input">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="example-text-input" class="col-2 col-form-label">Aadhaar Back</label>
+            <div class="col-10">
+                <input class="form-control" type="file" value="" id="example-text-input">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="example-text-input" class="col-2 col-form-label">Pan Card Photo</label>
+            <div class="col-10">
+                <input class="form-control" type="file" value="" id="example-text-input">
+            </div>
+        </div>
+        <div class="form-group row">
+            <label for="example-text-input" class="col-2 col-form-label">Profile Photo</label>
+            <div class="col-10">
+                <input class="form-control" type="file" value="" id="example-text-input">
+            </div>
+        </div>
+        <input class="btn btn-primary" type="submit" value="Submit">
+    </form>
+    {% endif %}
+</div>
+<div id="loader"></div>
+{% endblock content %}
+{% block javascript %}
+<script>
+mixpanel.track("preapproved page loaded");	
+
+</script>
+{% endblock javascript %}
