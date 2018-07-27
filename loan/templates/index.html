@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+
+
+</style>
+<div class="content-wrapper scrollbar scrollbar-black bordered-black">
+    <p class="head-right">Loan</p>
+
+    <div class="row rm-margin-side">
+        <button type="button" style="" class="btn btn-primary" onclick="getLoan()"> Check Your Happy Loan Offer
+            <span class="glyphicon glyphicon-ok"></span>
+        </button>
+        <div id="status"></div>
+    </div>
+</div>
+
+
+{% block javascript %}
+<script>
+function getLoan() {
+  mixpanel.track("Offer clicked");
+  //var loader_el = document.getElementById("loader");
+  //loader_el.style.display = "block";
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      //loader_el.style.display = "none";
+      data_parsed = JSON.parse(this.responseText);
+      document.getElementById("status").innerHTML = "Your Status: ";
+      if (data_parsed.data_cohort_status.pre_qualifications[0].failure_reason != null){
+      	document.getElementById("status").innerHTML += "Rejected <br/> reason: ";
+      	document.getElementById("status").innerHTML += data_parsed.data_cohort_status.pre_qualifications[0].failure_reason;	
+      } else {
+      	document.getElementById("status").innerHTML += "Success <br/> approved amount: ";
+      	document.getElementById("status").innerHTML += data_parsed.data_cohort_status.pre_qualifications[0].amount_offered;
+        document.getElementById("status").innerHTML += "<br/>Please <a class=''btn btn-primary' href='/preapproved'>Apply here</a>";
+      }
+    }
+  };
+  xhttp.open("GET", "/loan/get_loan", true);
+  xhttp.send();
+}
+mixpanel.track("index page loaded");
+mixpanel.track("index page loaded2");
+
+</script>
+{% endblock javascript %}
+
+{% endblock content %}

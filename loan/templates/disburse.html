@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block content %}
+<style>
+body{
+	background-color: #f7f7f7;
+}
+
+</style>
+<div class="container col-md-6" id="fullbody" style="margin-top: 5%">
+    <p>Your offer details below</p>
+    <table class="table jumbotron" style="background-color: white;">
+        <tbody id="tablebody">
+        <tr>
+            <td>Loan id</td>
+            <td> {{request.session.offer_data.0.loan_uid}}</td>
+        </tr>
+        <tr>
+            <td>Loan Amount</td>
+            <td> {{request.session.offer_data.0.amount_offered}}</td>
+        </tr>
+        <tr>
+            <td>Loan Tenure</td>
+            <td> {{request.session.offer_data.0.tenure}}</td>
+        </tr>
+        <tr>
+            <td>Loan Interest</td>
+            <td> {{request.session.offer_data.0.offer_interest}}</td>
+        </tr>
+        <tr>
+            <td>Loan Processing Fees</td>
+            <td> {{request.session.offer_data.0.offer_pf}}</td>
+        </tr>
+        </tbody>
+    </table>
+    <button class="btn btn-primary" id="recheck_status" style="display:none;" onclick="checkStatus()">Recheck Status
+    </button>
+    <div id="checkbox_div">
+        <input type="checkbox" id="tnccheckbox">&nbsp;I understand and agree to the <a
+            href="{{request.session.offer_data.0.tnc.link}}">terms and conditions </a>
+    </div>
+    <br/>
+    <button class="btn btn-success" id="sub-btn" onclick="disburseLoan()">Submit</button>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+function disburseLoan() {
+  var checkbox = document.getElementById("tnccheckbox");
+  if (!checkbox.checked){
+  	alert("please accept tnc");
+  	return;
+  }
+  var loader_el = document.getElementById("loader");
+  loader_el.style.display = "block";
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      loader_el.style.display = "none";	
+      response_data = JSON.parse(this.responseText);
+      table_str = "<tr><td>Loan ID</td><td>" + response_data.response.loan_uid +"</td></tr>";
+      table_str += "<tr><td>Loan Amount</td><td>" + response_data.response.principal_amount +"</td></tr>";
+	  table_str += "<tr><td>Disbursed Amount</td><td id='dis_amnt'>" + response_data.response.amount_disbursed +"</td></tr>";
+	  table_str += "<tr><td>Loan Status</td><td id='loan_status'>" + response_data.response.loan_status +"</td></tr>";
+      document.getElementById("tablebody").innerHTML = table_str;
+      document.getElementById("recheck_status").style.display = "block";
+	  document.getElementById("sub-btn").style.display = "none";
+	  document.getElementById("checkbox_div").style.display = "none";
+    }
+  };
+  data ={};
+  var csrfmiddlewaretoken = getCookie("csrftoken");
+  data["loan_id"] =  "{{request.session.offer_data.0.loan_uid}}";
+  console.log(data);
+  xhttp.open("POST", "/loan-accept", true);
+  
+  xhttp.setRequestHeader("X-CSRFTOKEN", csrfmiddlewaretoken);
+  xhttp.send(JSON.stringify(data));
+}
+
+
+function checkStatus() {
+  var loader_el = document.getElementById("loader");
+  loader_el.style.display = "block";
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      loader_el.style.display = "none";
+      response_data = JSON.parse(this.responseText);
+      document.getElementById("loan_status").innerHTML = response_data.response.loan_status;
+      document.getElementById("dis_amnt").innerHTML = response_data.response.amount_disbursed;
+    }
+  };
+  data ={};
+  xhttp.open("GET", "/get-loan-status", true);
+  xhttp.send();
+}
+
+
+</script>
+{% endblock %}

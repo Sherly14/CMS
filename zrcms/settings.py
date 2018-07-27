@@ -48,7 +48,8 @@ PROJECT_APPS = [
     'zruser',
     'zrutils',
     'zrwallet',
-    'debug_toolbar'
+    'debug_toolbar',
+    'loan'
 ]
 
 EXTERNAL_APPS = [
