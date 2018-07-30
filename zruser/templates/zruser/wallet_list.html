@@ -17,7 +17,7 @@
             </select>
         </div>
         <div class="col-6 col-lg-3 mt-2 float-left">
-            <input class="form-control form-control" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="Search by Name or Mobile">
+            <input class="form-control form-control" id="search-txt" type="search" name="search" value="{{ q }}" placeholder="Search by Id, Name or Mobile">
         </div>
         <div class="col-2 col-lg-1 mt-2">
             <button class="btn btn-outline-dark" type="button" id="search-btn" data-toggle="tooltip" data-placement="top" title="Search">
@@ -90,6 +90,9 @@
     $('#user-id').select2();
 
     $("#search-txt").focus();
+    var search_txt_val = $("#search-txt").val();
+    $("#search-txt").val('');
+    $("#search-txt").val(search_txt_val);
 
     function q(){
              userId = $("#user-id").val();

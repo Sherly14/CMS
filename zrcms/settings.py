@@ -146,7 +146,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Calcutta'
 
 USE_I18N = True
 
@@ -248,9 +248,9 @@ elif SETUP == 'prod':
     UPI_SECRET = "LZpydM6fLcMULdgnd6dxOA=="
     UPI_PARTNER_ID = "M89218"
 else:
-    # CELERY_BROKER_URL = 'amqp://localhost'
-    BROKER_HOST = 'localhost'
-    BROKER_PORT = 6379
+    BROKER_URL = 'redis://localhost:6379/'
+    #BROKER_HOST = 'localhost'
+    #BROKER_PORT = 6379
 
     UPI_URL = 'http://114.143.22.139/'
     UPI_API_PASSWORD = "EE560B75E235E2180107D0160"

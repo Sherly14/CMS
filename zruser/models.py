@@ -10,6 +10,7 @@ from django.db import models
 from common_utils import email_utils
 from zruser.utils.constants import KYC_APPROVAL_CHOICES, GENDER_CHOICES, BANK_ACCOUNT_TYPES, BANK_CHANNEL_TYPES
 from zrutils.common.modelutils import RowInfo, get_slugify_value
+from options import STATE_OPTIONS
 
 
 # Create your models here.
@@ -102,7 +103,7 @@ class ZrUser(RowInfo):
     role = models.ForeignKey(to=UserRole, related_name='zr_users')
 
     city = models.CharField(max_length=256, null=True, blank=True)
-    state = models.CharField(max_length=256, null=True, blank=True)
+    state = models.CharField(max_length=256, null=True, blank=True, choices=STATE_OPTIONS)
     pincode = models.IntegerField(null=True, blank=True)
     address_line_1 = models.CharField(max_length=512, null=True, blank=True)
     address_line_2 = models.CharField(max_length=512, null=True, blank=True)

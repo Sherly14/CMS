@@ -16,7 +16,7 @@ django.setup()  # NOQA
 from zruser.models import Bank
 
 # input_file = os.path.join(cur_dir, 'NON-DMT DEFAULT COMMISSION STRUCTURE new.xls')
-input_file = os.path.join(cur_dir, 'Bank_list_TILL11APR.xlsx')
+input_file = os.path.join(cur_dir, 'Bank_Detail_sheet_5.7.18.xlsx')
 
 
 if not os.path.exists(input_file):
