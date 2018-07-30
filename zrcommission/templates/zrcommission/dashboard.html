@@ -118,6 +118,9 @@
         var endDate = $('#end-date').val();
 
         $("#search-txt").focus();
+        var search_txt_val = $("#search-txt").val();
+        $("#search-txt").val('');
+        $("#search-txt").val(search_txt_val);
 
         function q(){
             if($('#search-txt').val() != "") {

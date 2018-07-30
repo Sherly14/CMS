@@ -40,23 +40,12 @@ def get_transactions_qs_with_dict(report_params):
             user__mobile_no__icontains=q
         )
 
-    p_filter = report_params.get('filter', 'All')
-    if p_filter == 'All':
-        p_filter = report_params.get('period', "All")
-
     start_date = report_params.get('start_date')
     end_date = report_params.get('end_date')
 
-    if start_date is not None and end_date is not None:
+    if start_date != '' and end_date != '':
         q_obj.add(Q(at_created__date__gte=start_date), q_obj.connector)
         q_obj.add(Q(at_created__date__lte=end_date), q_obj.connector)
-
-    if p_filter in ['Today', 'today']:
-        q_obj.add(Q(at_created__gte=datetime.datetime.now().date()), q_obj.connector)
-    elif p_filter in ['Last-Week' or 'last-week']:
-        q_obj.add(Q(at_created__range=last_week_range()), q_obj.connector)
-    elif p_filter in ['Last-Month' or 'last-month']:
-        q_obj.add(Q(at_created__range=last_month()), q_obj.connector)
 
     user = get_user_model().objects.filter(pk=report_params.get('user_id')).last()
     if report_params.get('user_type') == "SU":
@@ -83,10 +72,7 @@ def get_transactions_qs_with_dict(report_params):
             q_obj.connector
         )
 
-
     queryset = Transaction.objects.filter(q_obj).order_by('-at_created')
-
-
 
     return queryset
 

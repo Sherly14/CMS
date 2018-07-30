@@ -37,18 +37,17 @@
                     <div class="card bg-light mb-3">
                         <div class="card-header">Total Commission</div>
                         <div class="card-body">
-                        <h5 class="card-title">Unsettled</h5>
-                        <p class="card-text">INR {{ total_commission }}</p>
+                            <h5 class="card-title">Unsettled</h5>
+                            <p class="card-text">INR {{ total_commission }}</p>
                         </div>
                     </div>
                 </div>
                 {% if total_merchants %}
                     <div class="col-xl-3 col-sm-6 mb-3">
-                        <div class="card bg-light">
-                            <div class="card-block">
-                                <span class="card-header spanAlignment">Merchants</span>
-                                <span class="card-data">
-                                Total : {{ total_merchants }}</span>
+                        <div class="card bg-light mb-3">
+                            <div class="card-header">Merchants</div>
+                            <div class="card-body">
+                                <p class="card-text">Total : {{ total_merchants }}</p>
                             </div>
                         </div>
                     </div>
@@ -255,7 +254,6 @@
                     <h1 class="modal-title" style="font-size: 1.5rem;font-weight: bold;line-height: 2rem;">Request Balance</h1>
                 </div>
                 <div class="modal-body">
-
                     <div id="modal_message" tabindex='1'></div>
                     <form class="form-horizontal" method="POST" id="challan_request_form" enctype="multipart/form-data">
                         {% csrf_token %}
@@ -324,16 +322,6 @@
                             </div>
 
                             <div class="form-group col-sm-6">
-                                <label class="control-label"><b>Ref Id (if Online transfer)</b></label>
-                                <div>
-                                    <input type="text" class="form-control" style="box-shadow: 0px 0px;border-style: solid;" name="ref_no" id="ref_no">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row" >
-
-                            <div class="form-group col-sm-6">
                                 <label class="control-label"><b>Payment Mode</b></label>
                                 <div>
                                     <select type="text" class="form-control" name="payment_mode" id="payment_mode" style="box-shadow: 0px 0px;font-size:80%">
@@ -341,6 +329,15 @@
                                         <option value="{{ mod.id }}">{{ mod.name }}</option>
                                         {% endfor %}
                                     </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" >
+                            <div class="form-group col-sm-6">
+                                <label class="control-label"><b>Reference Id</b></label>
+                                <div>
+                                    <input type="text" class="form-control" style="box-shadow: 0px 0px;border-style: solid;" name="ref_no" id="ref_no" required>
                                 </div>
                             </div>
                             <input type="text" id="document" name="document" value="" hidden>
@@ -404,9 +401,9 @@
                             </div>
 
                             <div class="form-group col-sm-6">
-                                <label class="control-label"><b>Amount</b></label>
+                                <label class="control-label"><b>Amount ₹</b></label>
                                 <div>
-                                    {{ topup_form.amount|attr:"id:amount"|attr:"class:form-control padding-left-5" }}
+                                    {{ topup_form.amount|attr:"id:amount"|attr:"class:form-control padding-left-5"|attr:"placeholder:INR !important" }}
                                     {% if topup_form.amount.errors %}
                                         {{ topup_form.amount.errors }}
                                     {% endif %}
@@ -443,15 +440,17 @@
     <!-- Modal to get Email -->
     <div id="get_email_modal" class="modal fade">
         <div class="modal-dialog" role="document">
-            <div class="modal-content" style="width: 700px;">
-                <div class="modal-header" style="    background-color: #e2e2e2;">
+            <div class="modal-content">
+                <div class="modal-header" style="background-color: #e2e2e2;">
                     <h1 class="modal-title" style="font-size: 1.5rem; font-size: 1.5rem;font-weight: bold;line-height: 2rem;padding-left: 12px;">Send report as mail</h1>
                 </div>
                 <div class="modal-body">
 
                     <form class="form-horizontal" method="POST" id="report_mail_form" enctype="multipart/form-data">
                         {% csrf_token %}
-                        <div class="row">
+                        <input hidden name="startDate" value="{{ request.GET.startDate }}">
+                        <input hidden name="endDate" value="{{ request.GET.endDate }}">
+                        <div class="row" style="padding-top: 25px;">
                             <div class="form-group col-sm-12">
                                 <label class="control-label"><b>Email list</b></label>
                                 <div>
@@ -492,7 +491,6 @@
                 {
                     //window.location.assign('{% url "user:dashboard" %}?period=today')
                     url =window.location.pathname +'?startDate='+ $('#start-date').val() +'&endDate='+ $('#end-date').val();
-
                 }
             window.location.assign(url)
         });
@@ -581,6 +579,29 @@
                 }
             }
         });
+
+        function bank_account() {
+            var bank_account = JSON.parse('{{bank_account | escapejs }}');
+            var bankVal = $('#to_bank').val();
+            var code;
+            {% for b in bank %}
+               if ( bankVal == "{{ b.pk }}") {
+                   code = '{{ b.bank_code }}'
+                   $('#to_account_no_form').hide();
+               }
+            {% endfor %}
+
+            $('#to_account_no').val(bank_account[code]);
+            if($('#to_bank').val() == 'Other') {
+                $('#to_account_no_form').show();
+            } else {
+                $('#to_account_no_form').hide();
+            }
+        }
+
+        $(document).ready(bank_account);
+
+        $('body').on('change', '#to_bank', bank_account);
 
         jQuery.validator.addMethod("dmt_non_dmt_sum_valid", function(value, element, param) {
             non_dmt_val = parseInt($('#non_dmt_amount').val())
@@ -682,7 +703,7 @@
                 $(element)
                     .closest('.input-icon').find('.err').hide();
                 $(element)
-                    .closest('.input-icon').find('.suc').show();
+                    .closest('.input-icon').find('.suc').show(startDate);
             },
             submitHandler: function (form) {
                 <!-- AJAX Call -->

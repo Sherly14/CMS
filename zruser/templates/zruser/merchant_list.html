@@ -129,9 +129,12 @@
     $('#distributor-id').select2();
     $('#sub-distributor-id').select2();
 
-     distributor_id = $("#distributor-id").val()
+    distributor_id = $("#distributor-id").val()
 
-     $("#search-txt").focus();
+    $("#search-txt").focus();
+    var search_txt_val = $("#search-txt").val();
+    $("#search-txt").val('');
+    $("#search-txt").val(search_txt_val);
 
     $("#distributor-id").change(function()
      {

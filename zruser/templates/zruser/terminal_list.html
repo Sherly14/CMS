@@ -76,9 +76,9 @@
                                             <a class="btn btn-outline-success btn-xs" href='{% url "user:terminal-list" %}?activate={{ terminal.id }}'>Activate</a>
                                         {% endif %}
                                     </td>
-                                     <td> <a class="btn btn-outline-info btn-xs" href='{% url "user:terminal-update" pk=terminal.id%}'>Update</a></td>
+                                    <td> <a class="btn btn-outline-info btn-xs" href='{% url "user:terminal-update" pk=terminal.id%}'>Update</a></td>
                                     {% if request.user.zr_admin_user.role.name == "RETAILER" %}
-                                     <td> <a class="btn btn-outline-success btn-xs" href='{% url "user:terminal-view" pk=terminal.id%}'>Access</a></td>
+                                        <td><a class="btn btn-outline-success btn-xs" href='{% url "user:terminal-view" pk=terminal.id%}'>Access</a></td>
                                     {% endif %}
                                 </tr>
                             {% endfor %}
@@ -109,6 +109,9 @@
     {
         $('#terminal-id').select2();
         $("#search-txt").focus();
+        var search_txt_val = $("#search-txt").val();
+        $("#search-txt").val('');
+        $("#search-txt").val(search_txt_val);
         $('#search-btn').click(function(){
         startDate = $('#start-date').val();
         endDate = $('#end-date').val();

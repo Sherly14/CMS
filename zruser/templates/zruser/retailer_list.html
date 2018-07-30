@@ -97,6 +97,9 @@
     {
         $('#retailer-id').select2();
         $("#search-txt").focus();
+        var search_txt_val = $("#search-txt").val();
+        $("#search-txt").val('');
+        $("#search-txt").val(search_txt_val);
         $('#search-btn').click(function(){
         startDate = $('#start-date').val();
         endDate = $('#end-date').val();

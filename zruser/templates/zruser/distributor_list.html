@@ -102,6 +102,10 @@
          $('#distributor-id').select2({ height:'1000px', placeholder:'select an option'});
 
          $("#search-txt").focus();
+         var search_txt_val = $("#search-txt").val();
+         $("#search-txt").val('');
+         $("#search-txt").val(search_txt_val);
+
 
          function q(){
              distributorId = $("#distributor-id").val();
