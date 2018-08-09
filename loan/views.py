@@ -197,7 +197,8 @@ def LoanApply(request):
     print(request.POST)
     sent_at = "?sent_at=" + str(int(round(time.time())))
     req_dict["loan"] = {}
-    user_profile = UserProfile.objects.get(user=request.user)
+    # user_profile = UserProfile.objects.get(user=request.user)
+    user_profile = ZrUser.objects.get(id=request.user.zr_admin_user.zr_user.id)
     req_dict["loan"]["amount_requested"] = request.POST["loan_amount"]
     req_dict["loan"]["customer_uid"] = random.randint(100, 1000000)
     # req_dict["loan"]["customer_uid"] = "NICT-9d45fb07-5c21-4ef6-9538-94f1c9f3784b"
