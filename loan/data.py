@@ -1792,7 +1792,7 @@ DATA_UAT2 = {
   "cohort": [
     {
       "customer_uid": "NOQN-01400-42966",
-      "joined_on": "2015-10-23",
+      "joined_on": "2018-3-01",
       "pincode": 400014,
       "transaction_summary": [
         {
