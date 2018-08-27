@@ -10,7 +10,7 @@
                 <p class="inr">Net Commission INR {% if total_commission %} {{ total_commission }} {% else %} 0 {% endif %}</p>
             </div>
             <div>
-                {% if not request.user.is_superuser and request.user.zr_admin_user.role.name != "ADMINSTAFF"%}
+                {% if not request.user.is_superuser and request.user.zr_admin_user.role.name != "ADMINSTAFF" and request.user.zr_admin_user.role.name != "OPERATIONS"%}
                     <input class="btn btn-outline-success float-right ml-4" type="button" value="Settle Commission" id="settle-comm" data-toggle="modal" data-target="#confirm_settlement">
                 {% endif %}
             </div>
