@@ -508,7 +508,7 @@ class MerchantListView(ListView):
                     raise Http404
 
                 zruser.is_active = True
-                zruser.save(update_fields=['is_active'])
+                zruser.save()
 
             if disable:
                 zruser = ZrUser.objects.filter(id=disable).last()
@@ -516,7 +516,7 @@ class MerchantListView(ListView):
                     raise Http404
 
                 zruser.is_active = False
-                zruser.save(update_fields=['is_active'])
+                zruser.save()
 
             p = Paginator(queryset, self.paginate_by)
             try:
@@ -605,12 +605,12 @@ class KYCRequestsView(ListView):
                 zruser.kyc_details.filter(approval_status='I').update(
                     approval_status=status
                 )
-                zruser.save(update_fields=['is_kyc_verified'])
+                zruser.save()
 
                 if zruser.is_kyc_verified and status == constants.KYC_APPROVAL_CHOICES[1][0]:
                     password = zrupee_security.generate_password()
                     zruser.pass_word = password
-                    zruser.save(update_fields=['pass_word'])
+                    zruser.save()
 
                     if is_zruser_djuser(zruser):
                         dj_user = zruser.zr_user.id
@@ -810,8 +810,8 @@ class DistributorListView(ListView):
             )
             dj_user = zruser.zr_user
             dj_user.is_active = True
-            dj_user.save(update_fields=['is_active'])
-            zruser.save(update_fields=['is_active'])
+            dj_user.save()
+            zruser.save()
 
         if disable:
             zruser = ZrUser.objects.filter(id=disable).last()
@@ -826,8 +826,8 @@ class DistributorListView(ListView):
             )
             dj_user = zruser.zr_user
             dj_user.is_active = False
-            dj_user.save(update_fields=['is_active'])
-            zruser.save(update_fields=['is_active'])
+            dj_user.save()
+            zruser.save()
 
         context['q'] = q
         context['startDate'] = start_date
@@ -1247,7 +1247,7 @@ class DistributorCreateView(CreateView):
         )
         bank_detail = bank_detail_form.save()
         bank_detail.for_user = merchant_zr_user
-        bank_detail.save(update_fields=['for_user'])
+        bank_detail.save()
 
         ZrAdminUser.objects.create(
             id=dj_user,
@@ -1460,7 +1460,7 @@ class MerchantCreateView(View):
         merchant_zr_user.save()
         bank_detail = bank_detail_form.save()
         bank_detail.for_user = merchant_zr_user
-        bank_detail.save(update_fields=['for_user'])
+        bank_detail.save()
 
         if request.user.zr_admin_user.role.name == DISTRIBUTOR:
             distributor = request.user.zr_admin_user.zr_user
@@ -1603,7 +1603,7 @@ class SubDistributorCreateView(CreateView):
         )
         bank_detail = bank_detail_form.save()
         bank_detail.for_user = merchant_zr_user
-        bank_detail.save(update_fields=['for_user'])
+        bank_detail.save()
 
         ZrAdminUser.objects.create(
             id=dj_user,
@@ -1692,8 +1692,8 @@ class SubDistributorListView(ListView):
             )
             dj_user = zruser.zr_user
             dj_user.is_active = True
-            dj_user.save(update_fields=['is_active'])
-            zruser.save(update_fields=['is_active'])
+            dj_user.save()
+            zruser.save()
 
         if disable:
             zruser = ZrUser.objects.filter(id=disable).last()
@@ -1708,8 +1708,8 @@ class SubDistributorListView(ListView):
             )
             dj_user = zruser.zr_user
             dj_user.is_active = False
-            dj_user.save(update_fields=['is_active'])
-            zruser.save(update_fields=['is_active'])
+            dj_user.save()
+            zruser.save()
 
         context['q'] = q
         context['startDate'] = start_date
@@ -1881,7 +1881,7 @@ class RetailerCreateView(CreateView):
                             )
                             bank_detail = bank_detail_form.save()
                             bank_detail.for_user = merchant_zr_user
-                            bank_detail.save(update_fields=['for_user'])
+                            bank_detail.save()
 
                             ZrAdminUser.objects.create(
                                 id=dj_user,
@@ -1943,8 +1943,8 @@ class RetailerListView(ListView):
             zruser.is_active = True
             dj_user = zruser.zr_user
             dj_user.is_active = True
-            dj_user.save(update_fields=['is_active'])
-            zruser.save(update_fields=['is_active'])
+            dj_user.save()
+            zruser.save()
             try:
                 vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=int(zruser.id))
                 response = requests.post(QUICKWALLET_API_CRUD_URL, json={
@@ -1967,8 +1967,8 @@ class RetailerListView(ListView):
             zruser.is_active = False
             dj_user = zruser.zr_user
             dj_user.is_active = False
-            dj_user.save(update_fields=['is_active'])
-            zruser.save(update_fields=['is_active'])
+            dj_user.save()
+            zruser.save()
 
             try:
                 vendor = transaction_models.VendorZrRetailer.objects.get(zr_user=int(zruser.id))
@@ -2212,7 +2212,7 @@ class TerminalListView(ListView):
             if not zruser:
                 raise Http404
             zruser.is_active = True
-            zruser.save(update_fields=['is_active'])
+            zruser.save()
             zrmappings_models.RetailerTerminal.objects.filter(
                 terminal=zruser
             ).update(
@@ -2239,7 +2239,7 @@ class TerminalListView(ListView):
             if not zruser:
                 raise Http404
             zruser.is_active = False
-            zruser.save(update_fields=['is_active'])
+            zruser.save()
             zrmappings_models.RetailerTerminal.objects.filter(
                 terminal=zruser
             ).update(

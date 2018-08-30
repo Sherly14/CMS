@@ -27,7 +27,7 @@ for zruser in zu.ZrUser.objects.filter(
 
     password = zrupee_security.generate_password()
     zruser.pass_word = password
-    zruser.save(update_fields=['pass_word'])
+    zruser.save()
 
     if zruser.role.name == 'DISTRIBUTOR':
         dj_user = zruser.zr_user.id
