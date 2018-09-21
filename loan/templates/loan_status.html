@@ -1,18 +1,22 @@
-{% extends "base.html" %}
-{% block content %}
-<div class="container">
+{% extends "loan_base.html" %}
+{% block loan_content %}
+<div>
     <br/><br/>
-    <input id="loan_id" type="text">
-    <button onclick="getLoanStatus()">Get Loan status</button>
-
-    <div id="response"></div>
+    <div class="row">
+        <div class="col-sm-12">
+            <input id="loan_id" type="text">
+            <button onclick="getLoanStatus()">Get Loan status</button>
+            <div id="response"></div>
+        </div>
+    </div>
 </div>
 
 <input type="hidden" value="Hidden Element" name="hidden">
-</form>
-{% endblock %}
 
-{% block javascript %}
+{% endblock loan_content %}
+
+
+{% block loan_javascript %}
 <Script>
 function getLoanStatus() {
   var loader_el = document.getElementById("loader");
@@ -26,9 +30,9 @@ function getLoanStatus() {
        loader_el.style.display = "none";
     }
   };
-  xhttp.open("GET", "/get-loan-api-status" + "/" + loan_id, true);
+  xhttp.open("GET", "/loan/get-loan-status-api" + "/" + loan_id, true);
   xhttp.send();
 }
 
 </Script>
-{% endblock %}
+{% endblock loan_javascript%}

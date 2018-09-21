@@ -51,6 +51,18 @@ def file_save_s3(file_obj, directory="default", user_id=""):
     return s3_url
 
 
+def file_save_s3_bucket(file_obj, bucket_name):
+    # Create unique file name
+    file_name = str(get_unique_id()) + '.' + (file_obj._get_name().split('.')[-1].lower())
+    # file_name = str(get_unique_id()) + '.' + (file_obj._get_name().split('.')[-1].lower())
+    try:
+        s3.upload_fileobj(file_obj, bucket_name, file_name, ExtraArgs={'ACL': 'public-read'})
+    except:
+        pass
+    s3_url = "{}/{}/{}".format('https://s3.ap-south-1.amazonaws.com', bucket_name, file_name)
+    return s3_url
+
+
 def push_file_to_s3(file_path, file_name, bucket_name, timeout=600):
     with open(file_path, 'rb') as data:
         s3.upload_fileobj(data, bucket_name, file_name, ExtraArgs={'ACL': 'public-read'})

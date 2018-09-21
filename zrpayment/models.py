@@ -18,11 +18,11 @@ PAYMENT_REQUEST_STATUS = (
 )
 
 
-
 PAYMENT_REQUEST_TYPE = (
     (0, 'Credit'),
     (1, 'Commission'),
     (2, 'Topup'),
+    (3, 'Loan'),
 )
 
 
@@ -95,7 +95,7 @@ class PaymentRequest(RowInfo):
     from_account_no = models.CharField(max_length=30)
 
     payment_mode = models.ForeignKey(to=PaymentMode, related_name='payment_request_mode')
-    ref_no = models.CharField(max_length=30, null=True, blank=True)
+    ref_no = models.CharField(max_length=80, null=True, blank=True)
     document = models.CharField(max_length=512, blank=True)
 
     comments = models.TextField(max_length=1024, null=True, blank=True)

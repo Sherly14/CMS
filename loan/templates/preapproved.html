@@ -1,120 +1,340 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "loan_base.html" %}
+{% block loan_content %}
 <style>
-body{
-	background-color: #f7f7f7;
-}
 
 </style>
 
-<div class="container col-md-7" style="margin-top: 2%;">
-    <h3><u>Partner Portal - Preapproved Offers</u></h3>
+<div>
+    <p class="head-right">Preapproved Loan Offers</p>
     <div>
-        </ul>
-
+        <hr>
         {% if not offer %}
-        Sorry No offer for you
+        <div class="row">
+            <div class="col-sm-6">
+                <p style="background-color: #f9ab98; border-radius:5px; padding:7px; margin:5px; font-size:20px;">
+                Sorry No offer for you today! Kindly check later.
+                </p>
+            </div>
+        </div>
         {% else %}
-        <div>Congratulations ! You have a preapproved Loan offer from Happy Loans. <br/>
-            Please fill the form Below to get Loan
-        </div>
-    </div>
-    <form class="jumbotron" style="background-color: white;" action="/loan-apply" id="loan-form" method="post"
-          enctype="multipart/form-data">
-        {% csrf_token %}
-        <div class="form-group row">
-            <label for="example-text-input" class="col-2 col-form-label">Loan Amount</label>
-            <div class="col-10">
-                <input class="form-control" name="loan_amount" type="number" value="15000" id="loan_amount">
+        <div class="row" >
+            <div class="col-sm-9" >
+                <p style="background-color: #b2ccf7; border-radius:5px; padding:7px;">Congratulations !
+                    You have a preapproved Loan offer of <B>Rs. {{offer.amount|floatformat}}</B> from <b>Happy Loans</b>. <br/>
+                    Please fill the form below to get a Loan
+                </p>
             </div>
-        </div>
-        <div class="form-group row">
-            <label for="example-text-input" class="col-2 col-form-label">FirstName</label>
-            <div class="col-10">
-                <input class="form-control" name="first_name" type="text" value="{{up.first_name}}" id="first_name">
+            <div class="col-sm-3" >
+                 <button type="button" style="border-radius:5px; padding:7px;" class="btn btn-primary float-right" id="update_offer-btn" onclick="updateOffer()">
+                     Update Your <br/>Happy Loan Offer</button>
             </div>
-        </div>
-        <div class="form-group row">
-            <label for="example-text-input" class="col-2 col-form-label">LastName</label>
-            <div class="col-10">
-                <input class="form-control" name="last_name" type="text" value="{{up.last_name}}" id="last_name">
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="example-text-input" class="col-2 col-form-label">Date of Birth</label>
-            <div class="col-10">
-                <input class="form-control" name="dob" type="text" value="{{up.date_of_birth}}" id="dob" readonly>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="example-text-input" class="col-2 col-form-label">Mobile</label>
-            <div class="col-10">
-                <input class="form-control" name="mobile" type="number" value="9789840703" id="mobile" readonly>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="example-text-input" class="col-2 col-form-label">Email</label>
-            <div class="col-10">
-                <input class="form-control" name="email" type="email" value="{{up.email}}" id="email" readonly>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="example-text-input" class="col-2 col-form-label">Aadhaar No</label>
-            <div class="col-10">
-                <input class="form-control" name="aadhaar_no" type="number" value="123" id="aadhaar_no">
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="example-text-input" class="col-2 col-form-label">Pan No</label>
-            <div class="col-10">
-                <input class="form-control" name="pan_no" ype="number" value="{{up.pan_number}}" id="pan_no">
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="example-text-input" class="col-2 col-form-label">State</label>
-            <div class="col-10">
-                <input class="form-control" name="state" type="text" value="{{up.state}}" id="state" readonly>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="example-text-input" class="col-2 col-form-label">City</label>
-            <div class="col-10">
-                <input class="form-control" name="city" type="text" value="{{up.city}}" id="city" readonly>
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="example-text-input" class="col-2 col-form-label">Aadhaar Front</label>
-            <div class="col-10">
-                <input class="form-control" type="file" value="" id="example-text-input">
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="example-text-input" class="col-2 col-form-label">Aadhaar Back</label>
-            <div class="col-10">
-                <input class="form-control" type="file" value="" id="example-text-input">
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="example-text-input" class="col-2 col-form-label">Pan Card Photo</label>
-            <div class="col-10">
-                <input class="form-control" type="file" value="" id="example-text-input">
-            </div>
-        </div>
-        <div class="form-group row">
-            <label for="example-text-input" class="col-2 col-form-label">Profile Photo</label>
-            <div class="col-10">
-                <input class="form-control" type="file" value="" id="example-text-input">
-            </div>
-        </div>
-        <input class="btn btn-primary" type="submit" value="Submit">
-    </form>
-    {% endif %}
-</div>
-<div id="loader"></div>
-{% endblock content %}
-{% block javascript %}
-<script>
-mixpanel.track("preapproved page loaded");	
 
+        </div>
+        <hr>
+        <div class="row" >
+            <div class="col-sm-6" >
+                <p style="background-color: #b2ccf7; border-radius:5px; padding:7px;"><b>Offer Amount</b>:<i> Rs. {{offer.amount|floatformat}}</i></p>
+                <br/>
+            </div>
+            <div class="col-sm-6" >
+                {% if kyc_status == "COMPLETE" or kyc_status == "ACCEPT" %}
+                <p style="background-color: #b2ccf7; border-radius:5px; padding:7px;"><b>KYC status</b>:<i> {{kyc_status}}</i></p>
+                    <br/>
+                {% else %}
+                <p style="background-color: #f9ab98; border-radius:5px; padding:7px;"><b>KYC status</b>:<i>{{kyc_status}}</i></p>
+                    <br/>
+                {% endif %}
+            </div>
+        </div>
+        <br>
+        {%if request.session.offer_data and request.session.offer_data.status == "REJECTED"%}
+        <div class="row">
+            <div class="col-sm-12" >
+            <p style="background-color: #f9ab98; border-radius:5px; padding:7px;" >
+                <i>Sorry !, Your previous loan application has been rejected by <b>Happy Loans</b>. <br/>
+                    <b>Reason: {{request.session.offer_data.reason}}.</b></i> <br/>
+                </p>
+            </div>
+        </div>
+        <br>
+        {% endif %}
+        <hr>
+        {%if 1%}
+        <div>
+            <form action="/loan/loan-apply" id="loan-form-kyc" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+                <div class="form-group col-sm-2">
+                    <label for="loan_amount">Loan Amount</label>
+                    <input class="fill form-control"  name="loan_amount" type="number" value={{offer.amount|default:''|floatformat}} id="loan_amount" required>
+                </div>
+                <div class="form-group col-sm-2">
+                    <label for="first_name">First Name</label>
+                    <input class="fill form-control"  name="first_name" type="text" maxlength="200" value="{{up.first_name|default:zr_user.first_name}}" id="first_name" required>
+                </div>
+                <div class="form-group col-sm-3">
+                    <label for="last_name">Last Name</label>
+                    <input class="fill form-control"  name="last_name" type="text" maxlength="200" value="{{up.last_name|default:zr_user.last_name|default:''}}" id="last_name" required>
+                </div>
+                <div class="form-group col-sm-3">
+                    <label for="date_of_birth">Date of Birth</label>
+                    <input class="fill form-control"  name="date_of_birth" type="date" value="{{up.date_of_birth|date:'Y-m-d' |default:''}}" id="date_of_birth" required>
+                </div>
+                <div class="form-group col-sm-2">
+                    <label for="gender">Gender</label>
+                    <select class="fill form-control"  id="gender" name="gender" required>
+                        <option value="{{up.gender|default:zr_user.gender|default:''}}">{{up.gender|default:zr_user.gender|default:''}}</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-sm-6">
+                    <label for="father_name">Father Name (Optional)</label>
+                    <input class="fill form-control"  name="father_name" maxlength="200" type="text" value="{{up.father_name|default:''}}" id="father_name">
+                </div>
+
+                <div class="form-group col-sm-3">
+                    <label for="joined_on">Joined On</label>
+                    <input class="fill form-control"  name="joined_on" type="date" value={{zr_user.at_created|date:'Y-m-d'}} id="joined_on" required readonly>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-sm-3">
+                    <label for="mobile">Mobile</label>
+                    <input class="fill form-control" name="mobile" type="number" value={{zr_user.mobile_no}} id="mobile" readonly>
+                </div>
+                <div class="form-group col-sm-3">
+                    <label for="email">Email</label>
+                    <input class="fill form-control"  name="email" type="email" value="{{up.email|default:zr_user.email|default:''}}" id="email" required>
+                </div>
+                <div class="form-group col-sm-3">
+                    <label for="aadhaar_number">Aadhaar No</label>
+                    <input class="fill form-control"  name="aadhaar_number" type="number"
+                           value={{up.aadhaar_number|default:zr_user.aadhaar_no|default:''}} id="aadhaar_number"
+                           required>
+                </div>
+                <div class="form-group col-sm-3">
+                    <label for="pan_number">PAN</label>
+                    <input class="fill form-control"  name="pan_number" type="text" maxlength="15" value="{{up.pan_number|default:zr_user.pan_no|default:''}}" id="pan_number" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-sm-3">
+                    <label for="state">State</label>
+                    <input class="form-control" name="state" type="text" maxlength="50" value="{{up.state|default:zr_user.state|default:''}}" id="state" required>
+                </div>
+                <div class="form-group col-sm-3">
+                    <label for="city">City</label>
+                    <input class="form-control"  name="city" type="text" maxlength="50" value="{{up.city|default:zr_user.city|default:''}}" id="city" required>
+                </div>
+                <div class="form-group col-sm-3">
+                    <label for="pincode">Pincode</label>
+                    <input class="form-control" name="pincode" type="number" maxlength="15" value="{{up.pincode|default:zr_user.pincode|default:''}}" id="pincode" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-sm-6">
+                    <label for="locality">Locality</label>
+                    <input class="form-control"  name="locality" type="text" maxlength="512" value="{{up.locality|default:zr_user.address_line_2|default:''}}" id="locality" required>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="street_address">Street Address</label>
+                    <input class="form-control"  name="street_address" type="text" maxlength="512" value="{{up.street_address|default:zr_user.address_line_1|default:''}}" id="street_address" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-sm-6">
+                    <div>
+                        <span>
+                            <label for="aadhaar_photo_front">Aadhaar Front</label>
+                            {% if up.aadhaar_photo_front %}
+                            <a href="{{up.aadhaar_photo_front}}"><img src={{up.aadhaar_photo_front}} alt="Aadhaar Front" class="m-1"
+                                                              style="max-height:74px; width:auto;"></a>
+                            {% endif %}
+
+                        </span>
+                        <span>
+                            {% if up.aadhaar_photo_front %}
+                            <div>
+                                <label>Update Aadhaar Front Photo? </label>
+                                <span><input class="form-control"  type="file" id="aadhaar_photo_front"  style="max-width:200px;" name="aadhaar_photo_front">
+                                </span>
+                            </div>
+                            {% else %}
+                            <input class="form-control" type="file" id="aadhaar_photo_front" name="aadhaar_photo_front" required>
+                            {% endif%}
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <div>
+                        <span>
+                            <label for="aadhaar_photo_back">Aadhaar back</label>
+                            {% if up.aadhaar_photo_back %}
+                            <a href="{{up.aadhaar_photo_back}}"><img src={{up.aadhaar_photo_back}} alt="Aadhaar back" class="m-1"
+                                                              style="max-height:74px; width:auto;"></a>
+                            {% endif%}
+                        </span>
+                        <span>
+                            {% if up.aadhaar_photo_back %}
+                            <div>
+                                <label>Update Aadhaar Back Photo? </label>
+                                <span><input class="form-control"  type="file" id="aadhaar_photo_back"  style="max-width:200px;" name="aadhaar_photo_back">
+                                </span>
+                            </div>
+                            {% else %}
+                            <input class="form-control" type="file" id="aadhaar_photo_back" name="aadhaar_photo_back" required>
+                            {% endif%}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-sm-6">
+                    <div>
+                        <span>
+                            <label for="pan_card_photo">Pan Card Photo</label>
+                            {% if up.pan_card_photo %}
+                                <a href="{{up.pan_card_photo}}"><img src={{up.pan_card_photo}} alt="Aadhaar Front" class="m-1"
+                                                              style="max-height:74px; width:auto;"></a>
+                            {% endif%}
+
+                        </span>
+                        <span>
+                            {% if up.pan_card_photo %}
+                            <div>
+                                <label>Update PAN photo? </label>
+                                <span><input class="form-control"  type="file" id="pan_card_photo"  style="max-width:200px;" name="pan_card_photo">
+                                </span>
+                            </div>
+                            {% else %}
+                            <input class="form-control" type="file" id="pan_card_photo" name="pan_card_photo" required>
+                            {% endif%}
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <div>
+                        <span>
+                            <label for="profile_photo">Profile Photo</label>
+                            {% if up.profile_photo %}
+                            <a href="{{up.profile_photo}}"><img src={{up.profile_photo}} alt="Aadhaar Front" class="m-1"
+                                                              style="max-height:74px; width:auto;"></a>
+                            {% endif%}
+
+                        </span>
+                        <span>
+                            {% if up.profile_photo %}
+                            <div>
+                                <label>Update Profile Photo? </label>
+                                <span><input class="form-control"  type="file" id="profile_photo"  style="max-width:200px;" name="profile_photo">
+                                </span>
+                            </div>
+                            {% else %}
+                            <input class="form-control" type="file" id="profile_photo" name="profile_photo" required>
+                            {% endif%}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <input name="kyc_status" type="text" value="{{offer.kyc_status|default:'None'}}" hidden>
+            <input type="hidden" name="preapproved_path" value="{{ request.path }}">
+            <hr>
+            <div class="row mt-4 mb-4">
+                <div class="form-group col-sm-12 text-center">
+                    <input class="btn btn-primary p-2" type="submit" value="Apply for Loan" id="submit-btn">
+                </div>
+            </div>
+        </form>
+        </div>
+        {% else %}
+        <form action="/loan/loan-apply" id="loan-form-wo-kyc" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="row">
+                <div class="form-group col-sm-2">
+                    <label for="loan_amount">Loan Amount</label>
+                    <input class="fill form-control" name="loan_amount" type="number" value={{offer.amount|default:''|floatformat}} id="loan_amount" required>
+                </div>
+            </div>
+            <hr>
+            <div class="row mt-4 mb-4">
+                <div class="form-group col-sm-12 text-center">
+                     <input class="btn btn-primary p-2" type="submit" value="Apply for Loan">
+                </div>
+            </div>
+            <input name="kyc_status" type="text" value="{{offer.kyc_status|default:'None'}}" hidden>
+            <input type="hidden" name="preapproved_path" value="{{ request.path }}">
+        </form>
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endblock loan_content %}
+
+{% block loan_javascript %}
+<script>
+    $('#loan-form-kyc').submit(function() {
+        //before_submit();
+        $('#loader').css('display', 'block');
+        $('#submit-btn').attr('disabled', true);
+        $('#update_offer-btn').attr('disabled', true);
+
+        $('#loan-form-kyc').find('input, textarea, select').attr('readonly', true);
+    });
+
+    function updateOffer() {
+        var loader_el = document.getElementById("loader");
+        loader_el.style.display = "block";
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                loader_el.style.display = "none";
+                location.reload(true);
+
+            }
+        };
+        xhttp.open("GET", "/loan/create-cohort-get-pq-user", true);
+        xhttp.send();
+    }
+    var tosubmit = []
+    function add(name) {
+        if(tosubmit.indexOf(name) == -1)
+            tosubmit.push(name);
+    }
+
+    function is_changed(name) {
+        for(var k = 0; k < tosubmit.length; k++)
+            if(name == tosubmit[k])
+                return name && true;
+        return false;
+    }
+
+    function before_submit() {
+        var allInputs = document.getElementsByTagName("input");
+        var allSelects = document.getElementsByTagName("select");
+        for(var k = 0; k < allInputs.length; k++) {
+            var name = allInputs[k].name;
+            if (name == "csrfmiddlewaretoken" || name == "loan_amount" || name == "preapproved_path") {
+                continue;
+            }
+            if(!is_changed(name))
+                allInputs[k].disabled = true;
+        }
+        for(var k = 0; k < allSelects.length; k++) {
+            var name = allSelects[k].name;
+            if(!is_changed(name))
+                allSelects[k].disabled = true;
+        }
+    }
 </script>
-{% endblock javascript %}
+{% endblock loan_javascript %}

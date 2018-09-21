@@ -251,11 +251,7 @@ class SettleCommission(APIView):
             zr_wallet.dmt_balance += payment_req_obj.dmt_amount
             zr_wallet.non_dmt_balance += payment_req_obj.non_dmt_amount
 
-            zr_wallet.save(
-                update_fields=[
-                    'dmt_balance', 'non_dmt_balance'
-                ]
-            )
+            zr_wallet.save()
 
             WalletTransactions.objects.create(
                 wallet=zr_wallet,

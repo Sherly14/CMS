@@ -1,0 +1,70 @@
+{% extends "loan_base.html" %}
+{% block loan_content %}
+    <div class="row">
+        <p class="mt-2 mb-4" style="font-size: 20px;"><b>User Loans</b></p>
+
+        <!--<div class="col-sm-12">-->
+        <table class="display" id="user_loans">
+            <thead>
+                <tr >
+                    <th>ZR ID</th>
+                    <th>Loan UID</th>
+                    <th>Loan_Date</th>
+                    <th>Status</th>
+                    <th>Amount Disbursed</th>
+                    <th>Outstanding Amount</th>
+                    <th>Principal Repaid</th>
+                    <th>Interest Repaid</th>
+                    <th>RRN/UTR</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user_loan in user_loans %}
+                    <tr>
+                        <td>{{ user_loan.zr_id }}</td>
+                        <td>{{ user_loan.loan_uid }}</td>
+                        <td>{{ user_loan.loan_date }}</td>
+                        <td>{{ user_loan.status }}</td>
+                        <td>{{ user_loan.amount_disbursed }}</td>
+                        <td>{{ user_loan.outstanding_amount }}</td>
+                        <td>{{ user_loan.principal_repaid }}</td>
+                        <td>{{ user_loan.interest_repaid }}</td>
+                        <td>{{ user_loan.rrn }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+{% endblock loan_content %}
+
+
+{% block loan_javascript %}
+<Script>
+
+    $('#user_loans').DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+           'copy', 'excel'
+        ],
+        "order": [[ 0, 'desc' ]]
+    });
+
+function getLoanStatus() {
+  var loader_el = document.getElementById("loader");
+  loader_el.style.display = "block";
+  var loan_id = document.getElementById("loan_id").value;
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      console.log(this.responseText);
+      document.getElementById("response").innerHTML = this.responseText;
+       loader_el.style.display = "none";
+    }
+  };
+  xhttp.open("GET", "/loan/get-loan-status-api" + "/" + loan_id, true);
+  xhttp.send();
+}
+
+</Script>
+{% endblock loan_javascript%}
