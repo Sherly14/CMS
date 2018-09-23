@@ -64,7 +64,7 @@
         {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "OPERATIONS"%}
             <a href="/loan/repayments" class="btn btn-outline-primary m-3">Repayments</a>
             <a href="/loan/user-loans" class="btn btn-outline-primary m-3">User Loans</a>
-            <a href="{% url 'loan:create-cohort-get-pq-all' %}" class="btn btn-outline-primary m-3">Create-Cohort Get-Pre-qualifications All</a>
+            <a href="{% url 'loan:cohort-pq' %}" class="btn btn-outline-primary m-3">Create Cohort Pre-Qualifications</a>
             <a href="/loan/loan-status" class="btn btn-outline-primary m-3">Loan Status</a>
         {% endif %}
 

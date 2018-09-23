@@ -16,7 +16,7 @@ from time import sleep
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.utils.decorators import method_decorator
 from django.http import HttpResponse
-from .models import DailyTransaction, UserProfile, RequestLog, UserHappyOffer, UserHappyLoan, UserHappyRepayment, \
+from .models import UserProfile, RequestLog, UserHappyOffer, UserHappyLoan, UserHappyRepayment, \
     ZR_LOAN_STATUS_CHOICES
 from zrpayment.models import PaymentRequest, PaymentMode, PAYMENT_REQUEST_STATUS, PAYMENT_REQUEST_TYPE
 from zrwallet.models import Wallet, WalletTransactions
@@ -44,7 +44,8 @@ loan_status_url = "loan-status"
 payment_advices_url = "payment_advices"
 upload_payment_url = "payments"
 
-wait_seconds = 300
+# wait_seconds = 1  # dev
+wait_seconds = 300  # prod
 
 
 def sent_at():
@@ -155,14 +156,7 @@ def transactions_by_month(user, cohort=True):
         select 
         to_char(to_date(d.ym, 'YYYY-MM'), 'YYYY')::int as year, 
         to_char(to_date(d.ym, 'YYYY-MM'), 'fmMM')::int as month, 
-        COALESCE(volume, 0)::int volume,                             
-        COALESCE(dmt_volume, 0)::int dmt_volume,                     
-        COALESCE(non_dmt_volume, 0)::int non_dmt_volume,             
-        COALESCE(dmt_count, 0) dmt_count,                            
-        COALESCE(non_dmt_count, 0) non_dmt_count,                    
-        COALESCE(q.cnt, 0)::int active_days,  
-        COALESCE(w.min_wallet_balance, 0)::int min_wallet_balance,         
-        COALESCE(w.max_wallet_balance, 0)::int max_wallet_balance,         
+      ''' + prod + '''
         case when (to_date(d.ym, 'YYYY-MM') + interval '1 month' - interval '1 day')::date - 
         (select at_created::date from zruser_zruser where id=''' + str(user.id) + ''') >
         (SELECT  
@@ -262,56 +256,6 @@ def transactions_by_month(user, cohort=True):
     return list(data_all)
 
 
-def transactions_by_day(user):
-    from datetime import datetime, timedelta
-    from_date = datetime.now() - timedelta(days=121)
-    from_date = from_date.strftime('%Y-%m-%d')
-    to_date = datetime.now() - timedelta(days=1)
-    to_date = to_date.strftime('%Y-%m-%d')
-
-    from django.db.models.functions import Cast
-    from django.db.models.fields import DateField
-    from django.db.models import Count, Case, When, IntegerField
-
-    if user.role.name == 'DISTRIBUTOR' or user.role.name == 'SUBDISTRIBUTOR':
-
-        trans = PaymentRequest.objects.filter(from_user=user, status=1, payment_type=0,
-                                              at_created__date__gte=from_date,
-                                              at_created__date__lte=to_date).\
-            values(date=Cast('at_created', DateField())).annotate(
-            volume=Sum('amount'), count=0,
-            dmt_amount=Sum('dmt_amount'),
-            dmt_count=Count(Case(When(dmt_amount__gt=0, then=1))),
-            non_dmt_amount=Sum('non_dmt_amount'),
-            non_dmt_count=Count(Case(When(non_dmt_amount__gt=0, then=1))))
-    elif user.role.name == 'MERCHANT':
-        trans = Transaction.objects.filter(user=user, status='S', at_created__date__gte=from_date,
-                                           at_created__date__lte=to_date).\
-            values(date=Cast('at_created', DateField())).annotate(
-            volume=Sum('amount'), count=Count('date'))
-
-    for trans_dict in trans:
-        # expensive step
-        trans_dict["date"] = trans_dict["date"].strftime('%Y-%m-%d')
-        trans_dict["volume"] = float(trans_dict["volume"])
-        trans_dict["count"] = trans_dict["dmt_count"] + trans_dict["non_dmt_count"]
-        trans_dict["verticals"] = [{
-            "vertical_name": "money_transfers",
-            "volume": float(trans_dict["dmt_amount"]),
-            "count": trans_dict["dmt_count"]
-        }, {
-            "vertical_name": "others",
-            "volume": float(trans_dict["non_dmt_amount"]),
-            "count": trans_dict["non_dmt_count"]
-        }]
-        del trans_dict["dmt_amount"]
-        del trans_dict["non_dmt_amount"]
-        del trans_dict["dmt_count"]
-        del trans_dict["non_dmt_count"]
-
-    return list(trans)
-
-
 def get_headers(api_url):
     headers = {'content-type': 'application/json', 'x-api-key': HAPPYLOAN_API_KEY,
                'x-signature': calculate_signature(api_url)}
@@ -327,8 +271,18 @@ def calculate_signature(api_url):
     return sig
 
 
-def create_cohort_get_pq_all(request=None):
-    users = list(ZrUser.objects.filter(role__name="DISTRIBUTOR"))
+def cohort_pq(request=None):
+    users = []
+    initiator = None
+
+    if request is not None and request.user.zr_admin_user.role.name != 'ADMINSTAFF':
+        user = initiator = ZrUser.objects.filter(id=request.user.zr_admin_user.zr_user.id).first()
+        users = [user]
+    else:
+        users = list(ZrUser.objects.filter(role__name="DISTRIBUTOR"))
+        admin = ZrUser.objects.filter(role__name='ADMINSTAFF').first()
+        initiator = admin
+
     data = {
         "cohort": [{
             "customer_uid": str(user.id),
@@ -339,93 +293,39 @@ def create_cohort_get_pq_all(request=None):
     }
 
     cohort_url = HAPPYLOAN_BASE_URL + cohort_api_url + sent_at()
-    # print cohort_url
     headers = get_headers(cohort_url)
 
-    admin = ZrUser.objects.filter(role__name='ADMINSTAFF').first()
-    req_obj = RequestLog(request_type='cc', url=cohort_url, user=admin)
+    req_obj = RequestLog(request_type='cc', url=cohort_url, user=initiator)
     r = requests.post(cohort_url, data=json.dumps(data), headers=headers)
     req_obj.response = r.json()
     req_obj.save()
 
     response_dict = {"data_cohort_creation": r.json()}
-    # print(r.json())
 
     if r.json()["code"] == "OK":
-        
-        #data_cohort_status = \
-        #check_cohort_status(r.json()["cohort_uid"], user=admin)
-        #response_dict["data_cohort_status"] = data_cohort_status.json()
-        #print(data_cohort_status.json())
-
-        cohort_status_timer = Thread(target=check_cohort_status, args=[r.json()["cohort_uid"], admin])
+        cohort_status_timer = Thread(target=check_cohort_status, args=[r.json()["cohort_uid"], initiator])
         cohort_status_timer.start()
 
     return HttpResponse(json.dumps(response_dict))
 
 
-def create_cohort_get_pq_user(request):
-    # user = request.user
-    # from pprint import pprint
-    # print pprint(vars(user))
-    #user_profile = UserProfile.objects.get(user=user)
-    user = ZrUser.objects.filter(id=request.user.zr_admin_user.zr_user.id).first()
-
-    # user = ZrUser.objects.get(id=105) # dev
-
-    data = {
-        "cohort": [{
-            "customer_uid": str(user.id),
-            "joined_on": user.at_created.strftime('%Y-%m-%d'),
-            "pincode": int(user.pincode),
-            "transaction_summary": transactions_by_month(user)
-        }]
-    }
-
-    cohort_url = HAPPYLOAN_BASE_URL + cohort_api_url + sent_at()
-    # print cohort_url
-    headers = get_headers(cohort_url)
-    req_obj = RequestLog(request_type='cc', url=cohort_url, user=user)
-    r = requests.post(cohort_url, data=json.dumps(data), headers=headers)
-    req_obj.response = r.json()
-    req_obj.save()
-
-    response_dict = {"data_cohort_creation": r.json()}
-    # print(r.json())
-
-    if r.json()["code"] == "OK":
-        # data_cohort_status = check_cohort_status(r.json()["cohort_uid"], user=user)
-        # response_dict["data_cohort_status"] = data_cohort_status.json()
-        # print(data_cohort_status.json())
-
-        cohort_status_timer = Thread(target=check_cohort_status, args=[r.json()["cohort_uid"], user])
-        cohort_status_timer.start()
-
-    return HttpResponse(json.dumps(response_dict))
-
-
-def check_cohort_status(cohort_uid, user):
+def check_cohort_status(cohort_uid, initiator):
     time.sleep(3)
+
     cohort_status_url = HAPPYLOAN_BASE_URL + cohort_api_url + "/" + cohort_uid + sent_at()
-    # print len(cohort_status_url)
     headers = get_headers(cohort_status_url)
-    req_obj = RequestLog(request_type='pq', url=cohort_status_url, user=user)
+    req_obj = RequestLog(request_type='pq', url=cohort_status_url, user=initiator)
 
     status = None
     counter = 0
     counter_limit = 12
+    r = None
     while status != "successful" and counter < counter_limit:
         r = requests.get(cohort_status_url, headers=headers)
-        req_obj.response = r.json()
-        req_obj.save()
 
         status = str(r.json()["status"]).lower() if "status" in r.json() else None
 
-        if status != "successful":
-            counter = counter + 1
-            sleep(wait_seconds)  # prod
-            # sleep(1)  # dev
-        elif status == "successful":
+        if status == "successful":
             for pq in r.json()['pre_qualifications']:
                 if pq['failure_reason'] is not None:
                     continue
@@ -438,8 +338,13 @@ def check_cohort_status(cohort_uid, user):
                                ).save()
         else:
             print "no successful response from get cohort"
-            req_obj.comment = "no successful response from get cohort after " + str(counter + 1) + " tries"
-            req_obj.save()
+            counter = counter + 1
+            sleep(wait_seconds)
+
+    req_obj.response = r.json()
+    if status != "successful":
+        req_obj.comment = "no successful response from get cohort after " + str(counter + 1) + " tries"
+    req_obj.save()
     return
 
 
@@ -474,8 +379,8 @@ def loan_apply(request):
                         update_fields[key] = value
         if request.FILES:
             for filename, file in request.FILES.iteritems():
-                # update_fields[filename] = "https://s3.ap-south-1.amazonaws.com/zrupee-kyc-documents/c4b5e92b-26ae-4208-9559-f94b961d63c0.jpg"
-                update_fields[filename] = file_save_s3_bucket(file, "zrupee-kyc-documents")
+                # update_fields[filename] = "https://s3.ap-south-1.amazonaws.com/zrupee-kyc-documents/c4b5e92b-26ae-4208-9559-f94b961d63c0.jpg" # dev
+                update_fields[filename] = file_save_s3_bucket(file, "zrupee-kyc-documents") # prod
 
         if user_profile is None:
             update_fields["phone_number"] = zr_user.mobile_no
@@ -485,8 +390,6 @@ def loan_apply(request):
             user_profile, created = UserProfile.objects.update_or_create(
                 user=zr_user,
                 defaults=update_fields)
-    else:
-        user_profile = UserProfile.objects.filter(user=zr_user.pk).first()
 
     req_dict["loan"]["kyc"]["mobile"] = user_profile.phone_number
     req_dict["loan"]["kyc"]["email"] = user_profile.email
@@ -519,7 +422,7 @@ def loan_apply(request):
         user_profile.aadhaar_photo_back
     ).content).decode('utf-8')
 
-    req_dict["loan"]["kyc"]["bank_account_name"] = "Lalwani Innovations Private Limited "
+    req_dict["loan"]["kyc"]["bank_account_name"] = "Lalwani Innovations Private Limited"
     req_dict["loan"]["kyc"]["bank_ifsc_code"] = "UTIB0000373"
     req_dict["loan"]["kyc"]["bank_account_number"] = "918020030276406"
 
@@ -534,13 +437,13 @@ def loan_apply(request):
     req_obj.response = r.json()
     req_obj.save()
 
-    response_from_api = r.json()
-    if response_from_api.get("status") == "OFFERED":
-        request.session['offer_data'] = response_from_api["offers"]
+    create_loan_response = r.json()
+    if create_loan_response.get("status") == "OFFERED":
+        request.session['offer_data'] = create_loan_response["offers"]
         return HttpResponseRedirect(reverse('loan:disburse-a-loan', args=()))
     preapproved_path = request.POST.get('preapproved_path', '/')
 
-    request.session['offer_data'] = response_from_api
+    request.session['offer_data'] = create_loan_response
 
     return HttpResponseRedirect(preapproved_path)
 
@@ -554,7 +457,7 @@ class DisburseLoan(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super(DisburseLoan, self).get_context_data(**kwargs)
-        context["offer"] = self.request.session['offer_data']
+        # context["offer"] = self.request.session['offer_data']
         return context
 
 
@@ -600,38 +503,40 @@ def accept_loan(request):
                                    disbursed_on=datetime.datetime.today())
         happy_loan.save()
 
-        cohort_status_timer = Thread(target=get_loan_status_disbursal, args=[loan_uid, user])
+        cohort_status_timer = Thread(target=get_loan_status_disbursal, args=[request, "true"])
         cohort_status_timer.start()
 
     response_dict = {"response": r.json()}
     return HttpResponse(json.dumps(response_dict))
 
 
-def get_loan_status_disbursal(loan_uid, user):
-    sleep(wait_seconds)  # production
-    # sleep(1)  # dev
+def get_loan_status_disbursal(request, auto="false"):
+    loan_uid = request.session['offer_data'][0]['loan_uid']
     get_disbursal_url = HAPPYLOAN_BASE_URL + disburse_status_url + "/" + loan_uid + sent_at()
     headers = get_headers(get_disbursal_url)
+    req_obj = None
 
-    # user = ZrUser.objects.get(id=105) #dev
+    if auto == "true":
+        sleep(wait_seconds)
+        admin = ZrUser.objects.filter(role__name='ADMINSTAFF').first()
+        req_obj = RequestLog(request_type='ldc', url=get_disbursal_url, user=admin)
 
     status = None
     counter = 0
     counter_limit = 12
+    r = None
     while status != "DISBURSED" and counter < counter_limit:
-        req_obj = RequestLog(request_type='ldc', url=get_disbursal_url, user=user)
         r = requests.get(get_disbursal_url, headers=headers)
-        req_obj.response = r.json()
-        req_obj.save()
-
         status = r.json()["loan_status"] if "loan_status" in r.json() else None
 
-        if status != "DISBURSED":
-            counter = counter + 1
-            sleep(wait_seconds)  # production
-            # sleep(1)  # dev
-        elif r.json()["code"] == "OK" and status == "DISBURSED":
-            payment_request = PaymentRequest.objects.filter(payment_type=3, ref_no=loan_uid)
+        if r.json()["code"] == "OK" and status == "DISBURSED":
+            payment_request = PaymentRequest.objects.filter(payment_type=3, ref_no=loan_uid).first()
+            if payment_request is None:
+                message = "either payment_request was not created or loan_uid changed to rrn/utr"
+                print(message)
+                if auto == "false":
+                    response_dict = {"response": r.json()}
+                    return HttpResponse(json.dumps(response_dict))
             if r.json()["rrn"] != "":
                 payment_request.ref_no = r.json()["rrn"]
             elif r.json()["utr"] != "":
@@ -645,46 +550,25 @@ def get_loan_status_disbursal(loan_uid, user):
                 happy_loan.save()
             else:
                 print "loan " + str(loan_uid) + "not found"
+            if auto == "false":
+                response_dict = {"response": r.json()}
+                return HttpResponse(json.dumps(response_dict))
         else:
-            print "no successful response from get loan status"
+            print "not disbursed"
             counter = counter + 1
-            req_obj.comment = "no successful response from get loan status after " + str(counter + 1) + " tries"
-            req_obj.save()
-    return
 
+            if auto == "true":
+                sleep(wait_seconds)
+            else:
+                response_dict = {"response": r.json()}
+                return HttpResponse(json.dumps(response_dict))
 
-def get_loan_status(request):
-    loan_uid = request.session['offer_data'][0]['loan_uid']
-    
-    get_disbursal_url = HAPPYLOAN_BASE_URL + disburse_status_url + "/" + loan_uid + sent_at()
-    headers = get_headers(get_disbursal_url)
-
-    user = ZrUser.objects.filter(id=request.user.zr_admin_user.zr_user.id).first()
-    # user = ZrUser.objects.get(id=105)
-    req_obj = RequestLog(request_type='ldc', url=get_disbursal_url, user=user)
-
-    r = requests.get(get_disbursal_url, headers=headers)
     req_obj.response = r.json()
+    if status != "DISBURSED":
+        req_obj.comment = "no successful response from get loan status after " + str(counter + 1) + " tries"
+        print "no successful response from get loan status after " + str(counter + 1) + " tries"
     req_obj.save()
-
-    if r.json()["code"] == "OK" and "loan_status" in r.json() and r.json()["loan_status"] == "DISBURSED":
-        payment_request = PaymentRequest.objects.filter(payment_type=3, ref_no=loan_uid).first()
-        if payment_request is None:
-            print "either payment_request was not created or loan_uid changed to rrn/utr"
-            pass
-        if r.json()["rrn"] != "":
-            payment_request.ref_no = r.json()["rrn"]
-        elif r.json()["utr"] != "":
-            payment_request.ref_no = r.json()["utr"]
-        payment_request.save()
-
-        happy_loan = UserHappyLoan.objects.filter(loan_uid=loan_uid).first()
-        happy_loan.response = r.json()
-        happy_loan.status = r.json()["loan_status"]
-        happy_loan.save()
-
-    response_dict = {"response": r.json()}
-    return HttpResponse(json.dumps(response_dict))
+    return
 
 
 class LoanStatusView(TemplateView):
@@ -727,17 +611,19 @@ class GetUserLoans(TemplateView):
         return context
 
 
-def get_repayments(request=None, date=None):
+def get_repayments(request=None, upload="false", date=datetime.datetime.today().strftime("%Y-%m-%d")):
     repayment_url_full = HAPPYLOAN_BASE_URL + payment_advices_url + "/" + date + sent_at()
     headers = get_headers(repayment_url_full)
     r = requests.get(repayment_url_full, headers=headers)
 
-    if request is not None:
-        request.session['repayments'] = r.json()
+    if request is not None and str(upload) == "false":
+        request.session['get_repayments'] = r.json()
         response_dict = {"response": r.json()}
         return HttpResponse(json.dumps(response_dict))
     else:
-        upload_repayments(repayments=json.dumps(r.json()))
+        if str(upload) == "true":
+            upload_repayments(repayments=json.dumps(r.json()))
+        return
 
 
 def upload_repayments(request=None, repayments=None):
@@ -745,14 +631,21 @@ def upload_repayments(request=None, repayments=None):
     response_dict = None
 
     if request is not None:
-        if "repayments_requested" not in request.session["repayments"]:
-            response_dict = {"response": "No repayments"}
+        if "repayments_requested" not in request.session["get_repayments"]:
+            response_dict = {"response": "No get_repayments"}
             return HttpResponse(json.dumps(response_dict))
-        repayments_requested = request.session["repayments"]["repayments_requested"]
-        repayments_request_ref = request.session["repayments"]["request_ref"]
+        repayments_requested = request.session["get_repayments"]["repayments_requested"]
+        repayments_request_ref = request.session["get_repayments"]["request_ref"]
     else:
-        repayments_requested = json.loads(repayments)["repayments_requested"]
-        repayments_request_ref = json.loads(repayments)["request_ref"]
+        repayments = json.loads(repayments)
+        if repayments["code"] != "OK":
+            print repayments["error"] if "error" in repayments else "Something went wrong"
+            return
+        repayments_requested = repayments["repayments_requested"]
+        if not repayments_requested:
+            print "repayments_requested is empty"
+            return
+        repayments_request_ref = repayments["request_ref"]
     
     upload_payment_url_full = HAPPYLOAN_BASE_URL + upload_payment_url + "/" + sent_at()
     headers = get_headers(upload_payment_url_full)
@@ -770,21 +663,13 @@ def upload_repayments(request=None, repayments=None):
 
         if loan_status == "fully_repaid" or repayment_today:
             print "fully_repaid or repayment_today"
-            if i == len(repayments_requested) - 1:
-                response_dict = {"response": response}
-                return HttpResponse(json.dumps(response_dict))
             continue
 
         user = ZrUser.objects.filter(id=repayment_requested['customer_uid']).first()
         wallet = Wallet.objects.filter(merchant=user).first()
 
-        #dev
         if user is None or wallet is None:
             print "user or wallet not found"
-
-            if i == len(repayments_requested) - 1:
-                response_dict = {"response": response}
-                return HttpResponse(json.dumps(response_dict))
             continue
 
         repayment_amount = decimal.Decimal(float(repayment_requested['repayment_amount']))
@@ -827,12 +712,8 @@ def upload_repayments(request=None, repayments=None):
                                                       amount_repaid=int(repayment_amount),
                                                       status=r.json()["payment_status"])
             user_happy_repayment.save()
-            continue
         else:
             print "wallet balance below the repayment_amount - " + str(user)
-            if i == len(repayments_requested) - 1:
-                response_dict = {"response": response}
-                return HttpResponse(json.dumps(response_dict))
-            continue
+
     response_dict = {"response": response}
     return HttpResponse(json.dumps(response_dict))
