@@ -12,7 +12,7 @@ sys.path.append(os.path.join(cur_dir, '..', '..', 'zrcms'))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')  # NOQA
 django.setup()  # NOQA
 
-from loan.views import create_cohort_get_pq_all
+from loan.views import cohort_pq
 
 
-create_cohort_get_pq_all()
+cohort_pq()

@@ -18,15 +18,15 @@
         </div>
         {% else %}
         <div class="row" >
-            <div class="col-sm-9" >
+            <div class="col-sm-10" >
                 <p style="background-color: #b2ccf7; border-radius:5px; padding:7px;">Congratulations !
                     You have a preapproved Loan offer of <B>Rs. {{offer.amount|floatformat}}</B> from <b>Happy Loans</b>. <br/>
                     Please fill the form below to get a Loan
                 </p>
             </div>
-            <div class="col-sm-3" >
+            <div class="col-sm-2" >
                  <button type="button" style="border-radius:5px; padding:7px;" class="btn btn-primary float-right" id="update_offer-btn" onclick="updateOffer()">
-                     Update Your <br/>Happy Loan Offer</button>
+                     Request Offer <br/>Update</button>
             </div>
 
         </div>
@@ -303,7 +303,7 @@
 
             }
         };
-        xhttp.open("GET", "/loan/create-cohort-get-pq-user", true);
+        xhttp.open("GET", "/loan/cohort-pq", true);
         xhttp.send();
     }
     var tosubmit = []

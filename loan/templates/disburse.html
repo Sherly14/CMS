@@ -38,6 +38,8 @@
             </table>
             <button class="btn btn-primary mt-3" id="recheck_status" style="display:none;" onclick="checkStatus()">Recheck Status
             </button>
+            <a href="/loan/user-loans" class="btn btn-primary p-2 mt-3" style="display:none;" id="goto_myloans">GoTo My Loans</a>
+
             <div id="checkbox_div" class="mt-3">
                 <input type="checkbox" id="tnccheckbox">&nbsp;I understand and agree to the <a
                     href="{{request.session.offer_data.0.tnc.link}}" target="_blank">terms and conditions </a>
@@ -53,6 +55,7 @@
 
 {% block loan_javascript %}
 <script>
+
 function disburseLoan() {
   var checkbox = document.getElementById("tnccheckbox");
   if (!checkbox.checked){
@@ -64,8 +67,6 @@ function disburseLoan() {
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
-    console.log("hereee", this.status);
-    console.log("--------this", this);
       loader_el.style.display = "none";
       response_data = JSON.parse(this.responseText);
         console.log('response_data1', response_data);
@@ -120,10 +121,16 @@ function checkStatus() {
       document.getElementById("loan_status").innerHTML = response_data.response.loan_status;
       document.getElementById("dis_amnt").innerHTML = response_data.response.amount_disbursed;
       document.getElementById("loan_disbursal_rrn").innerHTML = response_data.response.rrn;
+
+      if (response_data.response.loan_status == "DISBURSED") {
+        document.getElementById("recheck_status").style.display = "none";
+        document.getElementById("goto_myloans").style.display = "block"
+      }
     }
   };
   data ={};
-  xhttp.open("GET", "/loan/get-loan-status", true);
+  var auto = "false"
+  xhttp.open("GET", "/loan/get-loan-status-disbursal" + "/" + auto, true);
   xhttp.send();
 }
 
