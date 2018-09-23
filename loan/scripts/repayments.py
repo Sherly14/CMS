@@ -17,4 +17,4 @@ django.setup()  # NOQA
 from loan.views import get_repayments
 
 
-get_repayments(date=datetime.datetime.today().strftime("%Y-%m-%d"))
+get_repayments(upload="true", date=datetime.datetime.today().strftime("%Y-%m-%d"))

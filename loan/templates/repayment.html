@@ -28,7 +28,7 @@
                     <th>Name</th>
                     <th>Mobile</th>
                     <th>Role</th>
-                    <th>repayments request ref</th>
+                    <th>Repayments Request Ref</th>
                     <th>loan UID</th>
                     <th>Amount Repaid</th>
                     <th>Status</th>
@@ -72,11 +72,17 @@ var repayments = document.getElementById("repayments");
 //repayments.style.display = "none"
 
 function getRepayments() {
- 
+
+  var date = document.getElementById("date_in").value;
+  if (!date) {
+    alert("please select a date");
+    return;
+  }
+
   var loader_el = document.getElementById("loader");
   loader_el.style.display = "block";
 
-  var repay_date = document.getElementById("date_in").value;
+
   var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
@@ -86,16 +92,16 @@ function getRepayments() {
     } else{
        loader_el.style.display = "none";
     }
-
   };
-  xhttp.open("GET", "/loan/get-repayments" + "/" + repay_date, true);
+  var upload = "false";
+  xhttp.open("GET", "/loan/get-repayments" + "/" + upload + "/" + date, true);
   xhttp.send();
 }
 
 function uploadPayments() {
     var loader_el = document.getElementById("loader");
     loader_el.style.display = "block";
-    var repay_date = document.getElementById("date_in").value;
+    var date = document.getElementById("date_in").value;
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
     if (this.readyState == 4 && this.status == 200) {
@@ -103,7 +109,6 @@ function uploadPayments() {
         document.getElementById("response").innerHTML = this.responseText;
         loader_el.style.display = "none";
         repayments.style.display = "block"
-
     }
     };
     xhttp.open("GET", "/loan/upload-repayments", true);

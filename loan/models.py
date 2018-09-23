@@ -34,7 +34,7 @@ REQUEST_CHOICES = (
 
 
 class UserProfile(RowInfo):
-    user = models.OneToOneField(ZrUser, on_delete=models.PROTECT)
+    user = models.OneToOneField(ZrUser, on_delete=models.PROTECT, unique=True)
     first_name = models.CharField(max_length=200, blank=True, null=True)
     last_name = models.CharField(max_length=200, blank=True, null=True)
     father_name = models.CharField(max_length=200, blank=True, null=True)
@@ -68,15 +68,6 @@ class UserProfile(RowInfo):
 
     def __str__(self):
         return self.first_name
-
-
-class DailyTransaction(models.Model):
-    user = models.ForeignKey(User, on_delete=models.PROTECT)
-    date = models.DateField()
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
-
-    def __str__(self):
-        return self.user.first_name
 
 
 class RequestLog(RowInfo):
