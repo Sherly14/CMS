@@ -48,6 +48,7 @@
                     <div class="div-width-100">
                         <table id="data" class="table table-hover table-data">
                             <tr style="border-bottom-style: solid;">
+                                <th scope="col">Id</th>
                                 <th scope="col">Actions</th>
                                 <th scope="col">Status</th>
                                 <th scope="col">Date</th>
@@ -65,6 +66,7 @@
                             </tr>
                             {% for payment_request in queryset %}
                                 <tr>
+                                    <td>{{payment_request.pk}}</td>
                                     <td>
                                         {% if is_superuser %}
                                             {% with payment_request.pk as payment_id %}
