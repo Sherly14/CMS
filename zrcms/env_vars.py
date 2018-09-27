@@ -35,10 +35,12 @@ QUICKWALLET_OFFER_ASSIGN_TO_RETAILER_URL = QUICKWALLET_URL + 'partner/{0}/offers
 QUICKWALLET_OFFER_ASSIGN_TO_OUTLETS_URL = QUICKWALLET_URL + 'partner/{0}/offers/addforoutlets'.format(QUICKWALLET_ZR_PARTERNERID)
 
 
-# HAPPYLOAN_BASE_URL = os.getenv('HAPPYLOAN_BASE_URL', "https://api-uat.arthimpact.com/v1/zrupee/")
-# HAPPYLOAN_API_KEY = os.getenv('HAPPYLOAN_API_KEY', "cf579dea-e32c-4e1c-ae0f-832ba7749f09")
-# HAPPYLOAN_API_SALT = os.getenv('HAPPYLOAN_API_SALT', "uat")
+# uat
+HAPPYLOAN_BASE_URL = os.getenv('HAPPYLOAN_BASE_URL', "https://api-uat.arthimpact.com/v1/zrupee/")
+HAPPYLOAN_API_KEY = os.getenv('HAPPYLOAN_API_KEY', "cf579dea-e32c-4e1c-ae0f-832ba7749f09")
+HAPPYLOAN_API_SALT = os.getenv('HAPPYLOAN_API_SALT', "uat")
 
-HAPPYLOAN_BASE_URL = os.getenv('HAPPYLOAN_BASE_URL', "https://live-api.arthcloud.com/v1/zrupee/")
-HAPPYLOAN_API_KEY = os.getenv('HAPPYLOAN_API_KEY', "fnm579qj-8sav-3o64-0qly-2k3ap9uago9r")
-HAPPYLOAN_API_SALT = os.getenv('HAPPYLOAN_API_SALT', "opfg5uzuaydq")
+# live
+# HAPPYLOAN_BASE_URL = os.getenv('HAPPYLOAN_BASE_URL', "https://live-api.arthcloud.com/v1/zrupee/")
+# HAPPYLOAN_API_KEY = os.getenv('HAPPYLOAN_API_KEY', "fnm579qj-8sav-3o64-0qly-2k3ap9uago9r")
+# HAPPYLOAN_API_SALT = os.getenv('HAPPYLOAN_API_SALT', "opfg5uzuaydq")

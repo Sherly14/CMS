@@ -170,7 +170,7 @@ def transactions_by_month(user, cohort=True):
         4000000 max_wallet_balance,
     '''
 
-    all = '''  
+    transaction_summary_raw = '''  
         select 
         to_char(to_date(d.ym, 'YYYY-MM'), 'YYYY')::int as year, 
         to_char(to_date(d.ym, 'YYYY-MM'), 'fmMM')::int as month, 
@@ -251,10 +251,10 @@ def transactions_by_month(user, cohort=True):
     '''
 
     cursor = connection.cursor()
-    cursor.execute(all)
-    data_all = dictfetchall(cursor)
+    cursor.execute(transaction_summary_raw)
+    transaction_summary = dictfetchall(cursor)
       
-    for trans_dict in data_all:
+    for trans_dict in transaction_summary:
         # expensive step
     
         trans_dict["count"] = int(trans_dict["dmt_count"] + trans_dict["non_dmt_count"])
@@ -274,7 +274,7 @@ def transactions_by_month(user, cohort=True):
         del trans_dict["dmt_count"]
         del trans_dict["non_dmt_count"]
 
-    return list(data_all)
+    return list(transaction_summary)
 
 
 def get_headers(api_url):
