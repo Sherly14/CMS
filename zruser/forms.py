@@ -4,9 +4,7 @@ from django import forms
 from django.contrib.auth import authenticate
 
 from zruser.models import ZrAdminUser, ZrUser, BankDetail, ZrTerminal, KYCDocumentType
-from zruser.models import ZrAdminUser, ZrUser, BankDetail, KYCDocumentType
 from zrpayment.forms import forms
-
 
 
 class LoginForm(forms.Form):
@@ -170,7 +168,7 @@ class UpdateMerchantDistributorForm(forms.ModelForm):
             'first_name', 'last_name', 'email', 'gender', 'city',
             'state', 'pincode', 'address_line_1', 'address_line_2',
             'business_name', 'pan_no', 'aadhaar_no', 'gstin', 'UPIID', 'residence_address',
-            'business_type', 'sales_agent'
+            'business_type', 'sales_agent', 'father_name', 'date_of_birth'
         ]
 
 

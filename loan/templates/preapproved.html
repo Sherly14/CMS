@@ -70,23 +70,23 @@
                 </div>
                 <div class="form-group col-sm-2">
                     <label for="first_name">First Name</label>
-                    <input class="fill form-control"  name="first_name" type="text" maxlength="200" value="{{up.first_name|default:zr_user.first_name}}" id="first_name" required>
+                    <input class="fill form-control"  name="first_name" type="text" maxlength="200" value="{{zr_user.first_name}}" id="first_name" required>
                 </div>
                 <div class="form-group col-sm-3">
                     <label for="last_name">Last Name</label>
-                    <input class="fill form-control"  name="last_name" type="text" maxlength="200" value="{{up.last_name|default:zr_user.last_name|default:''}}" id="last_name" required>
+                    <input class="fill form-control"  name="last_name" type="text" maxlength="200" value="{{zr_user.last_name|default:''}}" id="last_name" required>
                 </div>
                 <div class="form-group col-sm-3">
                     <label for="date_of_birth">Date of Birth</label>
-                    <input class="fill form-control"  name="date_of_birth" type="date" value="{{up.date_of_birth|date:'Y-m-d' |default:''}}" id="date_of_birth" required>
+                    <input class="fill form-control"  name="date_of_birth" type="date" value="{{zr_user.date_of_birth|date:'Y-m-d' |default:''}}" id="date_of_birth" required>
                 </div>
                 <div class="form-group col-sm-2">
                     <label for="gender">Gender</label>
                     <select class="fill form-control"  id="gender" name="gender" required>
-                        <option value="{{up.gender|default:zr_user.gender|default:''}}">{{up.gender|default:zr_user.gender|default:''}}</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
+                        <option value="{{zr_user.gender|default:''}}">{{zr_user.gender|default:''}}</option>
+                        <option value="M">M</option>
+                        <option value="F">F</option>
+                        <option value="O">O</option>
                     </select>
                 </div>
             </div>
@@ -94,12 +94,12 @@
             <div class="row">
                 <div class="form-group col-sm-6">
                     <label for="father_name">Father Name (Optional)</label>
-                    <input class="fill form-control"  name="father_name" maxlength="200" type="text" value="{{up.father_name|default:''}}" id="father_name">
+                    <input class="fill form-control"  name="father_name" maxlength="200" type="text" value="{{zr_user.father_name|default:''}}" id="father_name">
                 </div>
 
                 <div class="form-group col-sm-3">
-                    <label for="joined_on">Joined On</label>
-                    <input class="fill form-control"  name="joined_on" type="date" value={{zr_user.at_created|date:'Y-m-d'}} id="joined_on" required readonly>
+                    <label for="at_created">Joined On</label>
+                    <input class="fill form-control"  name="at_created" type="date" value={{zr_user.at_created|date:'Y-m-d'}} id="at_created" required readonly>
                 </div>
             </div>
 
@@ -110,43 +110,43 @@
                 </div>
                 <div class="form-group col-sm-3">
                     <label for="email">Email</label>
-                    <input class="fill form-control"  name="email" type="email" value="{{up.email|default:zr_user.email|default:''}}" id="email" required>
+                    <input class="fill form-control"  name="email" type="email" value="{{zr_user.email|default:''}}" id="email" required>
                 </div>
                 <div class="form-group col-sm-3">
-                    <label for="aadhaar_number">Aadhaar No</label>
-                    <input class="fill form-control"  name="aadhaar_number" type="number"
-                           value={{up.aadhaar_number|default:zr_user.aadhaar_no|default:''}} id="aadhaar_number"
+                    <label for="aadhaar_no">Aadhaar No</label>
+                    <input class="fill form-control"  name="aadhaar_no" type="number"
+                           value={{zr_user.aadhaar_no|default:''}} id="aadhaar_no"
                            required>
                 </div>
                 <div class="form-group col-sm-3">
-                    <label for="pan_number">PAN</label>
-                    <input class="fill form-control"  name="pan_number" type="text" maxlength="15" value="{{up.pan_number|default:zr_user.pan_no|default:''}}" id="pan_number" required>
+                    <label for="pan_no">PAN</label>
+                    <input class="fill form-control"  name="pan_no" type="text" maxlength="15" value="{{zr_user.pan_no|default:''}}" id="pan_no" required>
                 </div>
             </div>
 
             <div class="row">
                 <div class="form-group col-sm-3">
                     <label for="state">State</label>
-                    <input class="form-control" name="state" type="text" maxlength="50" value="{{up.state|default:zr_user.state|default:''}}" id="state" required>
+                    <input class="form-control" name="state" type="text" maxlength="50" value="{{zr_user.state|default:''}}" id="state" required>
                 </div>
                 <div class="form-group col-sm-3">
                     <label for="city">City</label>
-                    <input class="form-control"  name="city" type="text" maxlength="50" value="{{up.city|default:zr_user.city|default:''}}" id="city" required>
+                    <input class="form-control"  name="city" type="text" maxlength="50" value="{{zr_user.city|default:''}}" id="city" required>
                 </div>
                 <div class="form-group col-sm-3">
                     <label for="pincode">Pincode</label>
-                    <input class="form-control" name="pincode" type="number" maxlength="15" value="{{up.pincode|default:zr_user.pincode|default:''}}" id="pincode" required>
+                    <input class="form-control" name="pincode" type="number" maxlength="15" value="{{zr_user.pincode|default:''}}" id="pincode" required>
                 </div>
             </div>
 
             <div class="row">
                 <div class="form-group col-sm-6">
-                    <label for="locality">Locality</label>
-                    <input class="form-control"  name="locality" type="text" maxlength="512" value="{{up.locality|default:zr_user.address_line_2|default:''}}" id="locality" required>
+                    <label for="address_line_2">Locality</label>
+                    <input class="form-control"  name="address_line_2" type="text" maxlength="512" value="{{zr_user.address_line_2|default:''}}" id="address_line_2" required>
                 </div>
                 <div class="form-group col-sm-6">
-                    <label for="street_address">Street Address</label>
-                    <input class="form-control"  name="street_address" type="text" maxlength="512" value="{{up.street_address|default:zr_user.address_line_1|default:''}}" id="street_address" required>
+                    <label for="address_line_1">Street Address</label>
+                    <input class="form-control"  name="address_line_1" type="text" maxlength="512" value="{{zr_user.address_line_1|default:''}}" id="address_line_1" required>
                 </div>
             </div>
 
@@ -155,21 +155,21 @@
                     <div>
                         <span>
                             <label for="aadhaar_photo_front">Aadhaar Front</label>
-                            {% if up.aadhaar_photo_front %}
-                            <a href="{{up.aadhaar_photo_front}}"><img src={{up.aadhaar_photo_front}} alt="Aadhaar Front" class="m-1"
+                            {% if aadhaar_front.document_link %}
+                            <a href="{{aadhaar_front.document_link}}"><img src={{aadhaar_front.document_link}} alt="Aadhaar Front" class="m-1"
                                                               style="max-height:74px; width:auto;"></a>
                             {% endif %}
 
                         </span>
                         <span>
-                            {% if up.aadhaar_photo_front %}
+                            {% if aadhaar_front.document_link %}
                             <div>
                                 <label>Update Aadhaar Front Photo? </label>
-                                <span><input class="form-control"  type="file" id="aadhaar_photo_front"  style="max-width:200px;" name="aadhaar_photo_front">
+                                <span><input class="form-control"  type="file" id="aadhaar_photo_front"  style="max-width:200px;" name="Aadhaar_Front">
                                 </span>
                             </div>
                             {% else %}
-                            <input class="form-control" type="file" id="aadhaar_photo_front" name="aadhaar_photo_front" required>
+                            <input class="form-control" type="file" id="aadhaar_photo_front" name="Aadhaar_Front" required>
                             {% endif%}
                         </span>
                     </div>
@@ -178,20 +178,20 @@
                     <div>
                         <span>
                             <label for="aadhaar_photo_back">Aadhaar back</label>
-                            {% if up.aadhaar_photo_back %}
-                            <a href="{{up.aadhaar_photo_back}}"><img src={{up.aadhaar_photo_back}} alt="Aadhaar back" class="m-1"
+                            {% if aadhaar_back.document_link %}
+                            <a href="{{aadhaar_back.document_link}}"><img src={{aadhaar_back.document_link}} alt="Aadhaar back" class="m-1"
                                                               style="max-height:74px; width:auto;"></a>
                             {% endif%}
                         </span>
                         <span>
-                            {% if up.aadhaar_photo_back %}
+                            {% if aadhaar_back.document_link %}
                             <div>
                                 <label>Update Aadhaar Back Photo? </label>
-                                <span><input class="form-control"  type="file" id="aadhaar_photo_back"  style="max-width:200px;" name="aadhaar_photo_back">
+                                <span><input class="form-control"  type="file" id="aadhaar_photo_back"  style="max-width:200px;" name="Aadhaar_Back">
                                 </span>
                             </div>
                             {% else %}
-                            <input class="form-control" type="file" id="aadhaar_photo_back" name="aadhaar_photo_back" required>
+                            <input class="form-control" type="file" id="aadhaar_photo_back" name="Aadhaar_Back" required>
                             {% endif%}
                         </span>
                     </div>
@@ -203,21 +203,21 @@
                     <div>
                         <span>
                             <label for="pan_card_photo">Pan Card Photo</label>
-                            {% if up.pan_card_photo %}
-                                <a href="{{up.pan_card_photo}}"><img src={{up.pan_card_photo}} alt="Aadhaar Front" class="m-1"
+                            {% if pan.document_link %}
+                                <a href="{{pan.document_link}}"><img src={{pan.document_link}} alt="Aadhaar Front" class="m-1"
                                                               style="max-height:74px; width:auto;"></a>
                             {% endif%}
 
                         </span>
                         <span>
-                            {% if up.pan_card_photo %}
+                            {% if pan.document_link %}
                             <div>
                                 <label>Update PAN photo? </label>
-                                <span><input class="form-control"  type="file" id="pan_card_photo"  style="max-width:200px;" name="pan_card_photo">
+                                <span><input class="form-control"  type="file" id="pan_card_photo"  style="max-width:200px;" name="PAN">
                                 </span>
                             </div>
                             {% else %}
-                            <input class="form-control" type="file" id="pan_card_photo" name="pan_card_photo" required>
+                            <input class="form-control" type="file" id="pan_card_photo" name="PAN" required>
                             {% endif%}
                         </span>
                     </div>
@@ -226,21 +226,21 @@
                     <div>
                         <span>
                             <label for="profile_photo">Profile Photo</label>
-                            {% if up.profile_photo %}
-                            <a href="{{up.profile_photo}}"><img src={{up.profile_photo}} alt="Aadhaar Front" class="m-1"
+                            {% if profile.document_link %}
+                            <a href="{{profile.document_link}}"><img src={{profile.document_link}} alt="Aadhaar Front" class="m-1"
                                                               style="max-height:74px; width:auto;"></a>
                             {% endif%}
 
                         </span>
                         <span>
-                            {% if up.profile_photo %}
+                            {% if profile.document_link %}
                             <div>
                                 <label>Update Profile Photo? </label>
-                                <span><input class="form-control"  type="file" id="profile_photo"  style="max-width:200px;" name="profile_photo">
+                                <span><input class="form-control"  type="file" id="profile_photo"  style="max-width:200px;" name="Profile">
                                 </span>
                             </div>
                             {% else %}
-                            <input class="form-control" type="file" id="profile_photo" name="profile_photo" required>
+                            <input class="form-control" type="file" id="profile_photo" name="Profile" required>
                             {% endif%}
                         </span>
                     </div>

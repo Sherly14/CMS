@@ -122,6 +122,9 @@ class ZrUser(RowInfo):
 
     sales_agent = models.CharField(max_length=512, null=True, blank=True)
 
+    father_name = models.CharField(max_length=200, blank=True, null=True)
+    date_of_birth = models.DateField(blank=True, null=True)
+
     def save(self, *args, **kwargs):
         # self.pass_word = make_password(self.pass_word)
 
@@ -165,6 +168,9 @@ class ZrUser(RowInfo):
 
     class Meta:
         verbose_name_plural = 'ZrUsers'
+
+    def __getitem__(self, item):
+        return getattr(self, item)
 
     def __unicode__(self):
         return '%s - (%s)' % (self.mobile_no, self.first_name)
