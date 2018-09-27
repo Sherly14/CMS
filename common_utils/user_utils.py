@@ -60,7 +60,7 @@ def file_save_s3_bucket(file_obj, bucket_name):
     except:
         pass
     s3_url = "{}/{}/{}".format('https://s3.ap-south-1.amazonaws.com', bucket_name, file_name)
-    return s3_url
+    return file_name, s3_url
 
 
 def push_file_to_s3(file_path, file_name, bucket_name, timeout=600):
