@@ -23,6 +23,7 @@ PAYMENT_REQUEST_TYPE = (
     (1, 'Commission'),
     (2, 'Topup'),
     (3, 'Loan'),
+    (4, 'LoanRepayment'),
 )
 
 
