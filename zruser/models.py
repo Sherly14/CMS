@@ -121,6 +121,7 @@ class ZrUser(RowInfo):
     business_type = models.ForeignKey(to=BusinesssType, related_name='business_type', null=True, blank=True)
 
     sales_agent = models.CharField(max_length=512, null=True, blank=True)
+    ekyc_ref_no = models.CharField(max_length=10, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         # self.pass_word = make_password(self.pass_word)
@@ -253,6 +254,8 @@ class Sender(RowInfo):
     is_user_active = models.BooleanField(default=True)
     is_mobile_verified = models.BooleanField(default=False)
     is_kyc_verified = models.BooleanField(default=False)
+
+    ekyc_ref_no = models.CharField(max_length=10, null=True, blank=True)
 
     class Meta:
         verbose_name_plural = 'Senders'
