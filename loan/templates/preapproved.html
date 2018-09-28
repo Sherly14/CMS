@@ -1,0 +1,340 @@
+{% extends "loan_base.html" %}
+{% block loan_content %}
+<style>
+
+</style>
+
+<div>
+    <p class="head-right">Preapproved Loan Offers</p>
+    <div>
+        <hr>
+        {% if not offer %}
+        <div class="row">
+            <div class="col-sm-6">
+                <p style="background-color: #f9ab98; border-radius:5px; padding:7px; margin:5px; font-size:20px;">
+                Sorry No offer for you today! Kindly check later.
+                </p>
+            </div>
+        </div>
+        {% else %}
+        <div class="row" >
+            <div class="col-sm-10" >
+                <p style="background-color: #b2ccf7; border-radius:5px; padding:7px;">Congratulations !
+                    You have a preapproved Loan offer of <B>Rs. {{offer.amount|floatformat}}</B> from <b>Happy Loans</b>. <br/>
+                    Please fill the form below to get a Loan
+                </p>
+            </div>
+            <div class="col-sm-2" >
+                 <button type="button" style="border-radius:5px; padding:7px;" class="btn btn-primary float-right" id="update_offer-btn" onclick="updateOffer()">
+                     Request Offer <br/>Update</button>
+            </div>
+
+        </div>
+        <hr>
+        <div class="row" >
+            <div class="col-sm-6" >
+                <p style="background-color: #b2ccf7; border-radius:5px; padding:7px;"><b>Offer Amount</b>:<i> Rs. {{offer.amount|floatformat}}</i></p>
+                <br/>
+            </div>
+            <div class="col-sm-6" >
+                {% if kyc_status == "COMPLETE" or kyc_status == "ACCEPT" %}
+                <p style="background-color: #b2ccf7; border-radius:5px; padding:7px;"><b>KYC status</b>:<i> {{kyc_status}}</i></p>
+                    <br/>
+                {% else %}
+                <p style="background-color: #f9ab98; border-radius:5px; padding:7px;"><b>KYC status</b>:<i>{{kyc_status}}</i></p>
+                    <br/>
+                {% endif %}
+            </div>
+        </div>
+        <br>
+        {%if request.session.offer_data and request.session.offer_data.status == "REJECTED"%}
+        <div class="row">
+            <div class="col-sm-12" >
+            <p style="background-color: #f9ab98; border-radius:5px; padding:7px;" >
+                <i>Sorry !, Your previous loan application has been rejected by <b>Happy Loans</b>. <br/>
+                    <b>Reason: {{request.session.offer_data.reason}}.</b></i> <br/>
+                </p>
+            </div>
+        </div>
+        <br>
+        {% endif %}
+        <hr>
+        {%if 1%}
+        <div>
+            <form action="/loan/loan-apply" id="loan-form-kyc" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+                <div class="form-group col-sm-2">
+                    <label for="loan_amount">Loan Amount</label>
+                    <input class="fill form-control"  name="loan_amount" type="number" value={{offer.amount|default:''|floatformat}} id="loan_amount" required>
+                </div>
+                <div class="form-group col-sm-2">
+                    <label for="first_name">First Name</label>
+                    <input class="fill form-control"  name="first_name" type="text" maxlength="200" value="{{zr_user.first_name}}" id="first_name" required>
+                </div>
+                <div class="form-group col-sm-3">
+                    <label for="last_name">Last Name</label>
+                    <input class="fill form-control"  name="last_name" type="text" maxlength="200" value="{{zr_user.last_name|default:''}}" id="last_name" required>
+                </div>
+                <div class="form-group col-sm-3">
+                    <label for="date_of_birth">Date of Birth</label>
+                    <input class="fill form-control"  name="date_of_birth" type="date" value="{{zr_user.date_of_birth|date:'Y-m-d' |default:''}}" id="date_of_birth" required>
+                </div>
+                <div class="form-group col-sm-2">
+                    <label for="gender">Gender</label>
+                    <select class="fill form-control"  id="gender" name="gender" required>
+                        <option value="{{zr_user.gender|default:''}}">{{zr_user.gender|default:''}}</option>
+                        <option value="M">M</option>
+                        <option value="F">F</option>
+                        <option value="O">O</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-sm-6">
+                    <label for="father_name">Father Name (Optional)</label>
+                    <input class="fill form-control"  name="father_name" maxlength="200" type="text" value="{{zr_user.father_name|default:''}}" id="father_name">
+                </div>
+
+                <div class="form-group col-sm-3">
+                    <label for="at_created">Joined On</label>
+                    <input class="fill form-control"  name="at_created" type="date" value={{zr_user.at_created|date:'Y-m-d'}} id="at_created" required readonly>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-sm-3">
+                    <label for="mobile">Mobile</label>
+                    <input class="fill form-control" name="mobile" type="number" value={{zr_user.mobile_no}} id="mobile" readonly>
+                </div>
+                <div class="form-group col-sm-3">
+                    <label for="email">Email</label>
+                    <input class="fill form-control"  name="email" type="email" value="{{zr_user.email|default:''}}" id="email" required>
+                </div>
+                <div class="form-group col-sm-3">
+                    <label for="aadhaar_no">Aadhaar No</label>
+                    <input class="fill form-control"  name="aadhaar_no" type="number"
+                           value={{zr_user.aadhaar_no|default:''}} id="aadhaar_no"
+                           required>
+                </div>
+                <div class="form-group col-sm-3">
+                    <label for="pan_no">PAN</label>
+                    <input class="fill form-control"  name="pan_no" type="text" maxlength="15" value="{{zr_user.pan_no|default:''}}" id="pan_no" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-sm-3">
+                    <label for="state">State</label>
+                    <input class="form-control" name="state" type="text" maxlength="50" value="{{zr_user.state|default:''}}" id="state" required>
+                </div>
+                <div class="form-group col-sm-3">
+                    <label for="city">City</label>
+                    <input class="form-control"  name="city" type="text" maxlength="50" value="{{zr_user.city|default:''}}" id="city" required>
+                </div>
+                <div class="form-group col-sm-3">
+                    <label for="pincode">Pincode</label>
+                    <input class="form-control" name="pincode" type="number" maxlength="15" value="{{zr_user.pincode|default:''}}" id="pincode" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-sm-6">
+                    <label for="address_line_2">Locality</label>
+                    <input class="form-control"  name="address_line_2" type="text" maxlength="512" value="{{zr_user.address_line_2|default:''}}" id="address_line_2" required>
+                </div>
+                <div class="form-group col-sm-6">
+                    <label for="address_line_1">Street Address</label>
+                    <input class="form-control"  name="address_line_1" type="text" maxlength="512" value="{{zr_user.address_line_1|default:''}}" id="address_line_1" required>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-sm-6">
+                    <div>
+                        <span>
+                            <label for="aadhaar_photo_front">Aadhaar Front</label>
+                            {% if aadhaar_front.document_link %}
+                            <a href="{{aadhaar_front.document_link}}"><img src={{aadhaar_front.document_link}} alt="Aadhaar Front" class="m-1"
+                                                              style="max-height:74px; width:auto;"></a>
+                            {% endif %}
+
+                        </span>
+                        <span>
+                            {% if aadhaar_front.document_link %}
+                            <div>
+                                <label>Update Aadhaar Front Photo? </label>
+                                <span><input class="form-control"  type="file" id="aadhaar_photo_front"  style="max-width:200px;" name="Aadhaar_Front">
+                                </span>
+                            </div>
+                            {% else %}
+                            <input class="form-control" type="file" id="aadhaar_photo_front" name="Aadhaar_Front" required>
+                            {% endif%}
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <div>
+                        <span>
+                            <label for="aadhaar_photo_back">Aadhaar back</label>
+                            {% if aadhaar_back.document_link %}
+                            <a href="{{aadhaar_back.document_link}}"><img src={{aadhaar_back.document_link}} alt="Aadhaar back" class="m-1"
+                                                              style="max-height:74px; width:auto;"></a>
+                            {% endif%}
+                        </span>
+                        <span>
+                            {% if aadhaar_back.document_link %}
+                            <div>
+                                <label>Update Aadhaar Back Photo? </label>
+                                <span><input class="form-control"  type="file" id="aadhaar_photo_back"  style="max-width:200px;" name="Aadhaar_Back">
+                                </span>
+                            </div>
+                            {% else %}
+                            <input class="form-control" type="file" id="aadhaar_photo_back" name="Aadhaar_Back" required>
+                            {% endif%}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="form-group col-sm-6">
+                    <div>
+                        <span>
+                            <label for="pan_card_photo">Pan Card Photo</label>
+                            {% if pan.document_link %}
+                                <a href="{{pan.document_link}}"><img src={{pan.document_link}} alt="Aadhaar Front" class="m-1"
+                                                              style="max-height:74px; width:auto;"></a>
+                            {% endif%}
+
+                        </span>
+                        <span>
+                            {% if pan.document_link %}
+                            <div>
+                                <label>Update PAN photo? </label>
+                                <span><input class="form-control"  type="file" id="pan_card_photo"  style="max-width:200px;" name="PAN">
+                                </span>
+                            </div>
+                            {% else %}
+                            <input class="form-control" type="file" id="pan_card_photo" name="PAN" required>
+                            {% endif%}
+                        </span>
+                    </div>
+                </div>
+                <div class="form-group col-sm-6">
+                    <div>
+                        <span>
+                            <label for="profile_photo">Profile Photo</label>
+                            {% if profile.document_link %}
+                            <a href="{{profile.document_link}}"><img src={{profile.document_link}} alt="Aadhaar Front" class="m-1"
+                                                              style="max-height:74px; width:auto;"></a>
+                            {% endif%}
+
+                        </span>
+                        <span>
+                            {% if profile.document_link %}
+                            <div>
+                                <label>Update Profile Photo? </label>
+                                <span><input class="form-control"  type="file" id="profile_photo"  style="max-width:200px;" name="Profile">
+                                </span>
+                            </div>
+                            {% else %}
+                            <input class="form-control" type="file" id="profile_photo" name="Profile" required>
+                            {% endif%}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <input name="kyc_status" type="text" value="{{offer.kyc_status|default:'None'}}" hidden>
+            <input type="hidden" name="preapproved_path" value="{{ request.path }}">
+            <hr>
+            <div class="row mt-4 mb-4">
+                <div class="form-group col-sm-12 text-center">
+                    <input class="btn btn-primary p-2" type="submit" value="Apply for Loan" id="submit-btn">
+                </div>
+            </div>
+        </form>
+        </div>
+        {% else %}
+        <form action="/loan/loan-apply" id="loan-form-wo-kyc" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="row">
+                <div class="form-group col-sm-2">
+                    <label for="loan_amount">Loan Amount</label>
+                    <input class="fill form-control" name="loan_amount" type="number" value={{offer.amount|default:''|floatformat}} id="loan_amount" required>
+                </div>
+            </div>
+            <hr>
+            <div class="row mt-4 mb-4">
+                <div class="form-group col-sm-12 text-center">
+                     <input class="btn btn-primary p-2" type="submit" value="Apply for Loan">
+                </div>
+            </div>
+            <input name="kyc_status" type="text" value="{{offer.kyc_status|default:'None'}}" hidden>
+            <input type="hidden" name="preapproved_path" value="{{ request.path }}">
+        </form>
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+{% endblock loan_content %}
+
+{% block loan_javascript %}
+<script>
+    $('#loan-form-kyc').submit(function() {
+        //before_submit();
+        $('#loader').css('display', 'block');
+        $('#submit-btn').attr('disabled', true);
+        $('#update_offer-btn').attr('disabled', true);
+
+        $('#loan-form-kyc').find('input, textarea, select').attr('readonly', true);
+    });
+
+    function updateOffer() {
+        var loader_el = document.getElementById("loader");
+        loader_el.style.display = "block";
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (this.readyState == 4 && this.status == 200) {
+                loader_el.style.display = "none";
+                location.reload(true);
+
+            }
+        };
+        xhttp.open("GET", "/loan/cohort-pq", true);
+        xhttp.send();
+    }
+    var tosubmit = []
+    function add(name) {
+        if(tosubmit.indexOf(name) == -1)
+            tosubmit.push(name);
+    }
+
+    function is_changed(name) {
+        for(var k = 0; k < tosubmit.length; k++)
+            if(name == tosubmit[k])
+                return name && true;
+        return false;
+    }
+
+    function before_submit() {
+        var allInputs = document.getElementsByTagName("input");
+        var allSelects = document.getElementsByTagName("select");
+        for(var k = 0; k < allInputs.length; k++) {
+            var name = allInputs[k].name;
+            if (name == "csrfmiddlewaretoken" || name == "loan_amount" || name == "preapproved_path") {
+                continue;
+            }
+            if(!is_changed(name))
+                allInputs[k].disabled = true;
+        }
+        for(var k = 0; k < allSelects.length; k++) {
+            var name = allSelects[k].name;
+            if(!is_changed(name))
+                allSelects[k].disabled = true;
+        }
+    }
+</script>
+{% endblock loan_javascript %}
