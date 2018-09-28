@@ -304,3 +304,7 @@ a.button.red{
 .modal-header {
     justify-content: center;
 }
+
+select.form-control:not([size]):not([multiple]) {
+    height: none;
+}

@@ -1,0 +1,119 @@
+{% extends "loan_base.html" %}
+
+{% block loan_content %}
+<div>
+    <div class="row">
+        {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF"%}
+
+        <div class="col-sm-6">
+            <input id="date_in" type="date">
+            <button onclick="getRepayments()">Get Repayment</button>
+            <div id="response"></div>
+        </div>
+        <div class="col-sm-6">
+            <button onclick="uploadPayments()">Upload Payment</button>
+            <div id="payments_response"></div>
+        </div>
+        {% endif %}
+
+    </div>
+    <div class="row">
+        <p class="mt-2 mb-4" style="font-size: 20px;"><b>Repayment History</b></p>
+        <table class="display" id="repayments">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Date</th>
+                    <th>ZrUser ID</th>
+                    <th>Name</th>
+                    <th>Mobile</th>
+                    <th>Role</th>
+                    <th>Repayments Request Ref</th>
+                    <th>loan UID</th>
+                    <th>Amount Repaid</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for repayment in repayment_history %}
+                    <tr>
+                        <td>{{ repayment.id }}</td>
+                        <td>{{ repayment.at_created|date:'Y-m-d H:i:s'  }}</td>
+                        <td>{{ repayment.user.pk }}</td>
+                        <td>{{ repayment.user.first_name }} {{ repayment.user.last_name }}</td>
+                        <td>{{ repayment.user.mobile_no }}</td>
+                        <td>{{ repayment.user.role.name }}</td>
+                        <td>{{ repayment.repayments_request_ref }}</td>
+                        <td>{{ repayment.loan_uid }}</td>
+                        <td>{{ repayment.amount_repaid }}</td>
+                        <td>{{ repayment.status }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock loan_content %}
+
+{% block loan_javascript %}
+<Script>
+
+   $('#repayments').DataTable({
+       dom: 'Bfrtip',
+       buttons: [
+           'copy', 'excel'
+       ],
+       "order": [[ 0, 'desc' ]]
+   });
+
+
+var repayments = document.getElementById("repayments");
+
+//repayments.style.display = "none"
+
+function getRepayments() {
+
+  var date = document.getElementById("date_in").value;
+  if (!date) {
+    alert("please select a date");
+    return;
+  }
+
+  var loader_el = document.getElementById("loader");
+  loader_el.style.display = "block";
+
+
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      //console.log(this.responseText);
+      document.getElementById("response").innerHTML = this.responseText;
+       loader_el.style.display = "none";
+    } else{
+       loader_el.style.display = "none";
+    }
+  };
+  var upload = "false";
+  xhttp.open("GET", "/loan/get-repayments" + "/" + upload + "/" + date, true);
+  xhttp.send();
+}
+
+function uploadPayments() {
+    var loader_el = document.getElementById("loader");
+    loader_el.style.display = "block";
+    var date = document.getElementById("date_in").value;
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+        //console.log(this.responseText);
+        document.getElementById("response").innerHTML = this.responseText;
+        loader_el.style.display = "none";
+        repayments.style.display = "block"
+    }
+    };
+    xhttp.open("GET", "/loan/upload-repayments", true);
+    xhttp.send();
+}
+
+</Script>
+{% endblock loan_javascript%}

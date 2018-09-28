@@ -56,11 +56,11 @@
                             <th scope="col">DMT Amount</th>
                             <th scope="col">NON DMT Amount</th>
                             <th scope="col">Payment Mode</th>
-                            <th scope="col">Challan document</th>
+                            <!--<th scope="col">Challan document</th>-->
                             <th scope="col">To User Name</th>
-                            <th scope="col">From Bank Account Number</th>
+                            <!--<th scope="col">From Bank Account Number</th>-->
                             <th scope="col">To Bank Account Number</th>
-                            <th scope="col">From bank</th>
+                            <!--<th scope="col">From bank</th>-->
                             <th scope="col">To bank</th>
                             <th scope="col">Ref Id</th>
                         </tr>
@@ -82,7 +82,7 @@
                             <td>{{ payment_request.dmt_amount }}</td>
                             <td>{{ payment_request.non_dmt_amount }}</td>
                             <td>{{ payment_request.payment_mode }}</td>
-                            <td><a class="btn btn-outline-success btn-xs" href="{{ payment_request.document }}">Download</a></td>
+                            <!--<td><a class="btn btn-outline-success btn-xs" href="{{ payment_request.document }}">Download</a></td>-->
                             <td>
                                 {% if payment_request.to_user.role.name == 'ADMINSTAFF' %}
                                 ADMIN
@@ -90,9 +90,9 @@
                                 {{ payment_request.to_user.get_full_name }}
                                 {% endif %}
                             </td>
-                            <td>{{ payment_request.from_account_no }}</td>
+                            <!--<td>{{ payment_request.from_account_no }}</td>-->
                             <td>{{ payment_request.to_account_no }}</td>
-                            <td>{{ payment_request.from_bank.bank_name }}</td>
+                            <!--<td>{{ payment_request.from_bank.bank_name }}</td>-->
                             <td>{{ payment_request.to_bank.bank_name }}</td>
                             <td>{{ payment_request.ref_no|default_if_none:"N/A" }}</td>
                         </tr>

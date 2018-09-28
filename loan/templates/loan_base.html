@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block content %}
+
+    <style>
+	#loader {
+	  display: none;
+	  border: 16px solid #f3f3f3;
+	  border-radius: 50%;
+	  border-top: 16px solid #3498db;
+	  width: 120px;
+	  height: 120px;
+	  position: absolute;
+	  top:200px;
+	  left:630px;
+	   -webkit-animation: spin 2s linear infinite; /* Safari */
+	  animation: spin 2s linear infinite;
+	}
+	/* Safari */
+	@-webkit-keyframes spin {
+	  0% { -webkit-transform: rotate(0deg); }
+	  100% { -webkit-transform: rotate(360deg); }
+	}
+
+	@keyframes spin {
+	  0% { transform: rotate(0deg); }
+	  100% { transform: rotate(360deg); }
+	}
+	.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    color: white;
+    text-align: center;
+	}
+	body{
+		font-family: "Georgia, serif";
+	}
+
+    </style>
+    {% block css%}{% endblock %}
+
+    <script type="text/javascript">
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = jQuery.trim(cookies[i]);
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    </script>
+
+<div class="content-wrapper scrollbar scrollbar-black bordered-black" style="background: #e6eff3">
+
+    <div class="header">
+        {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "OPERATIONS"%}
+            <a href="/loan/repayments" class="btn btn-outline-primary m-3">Repayments</a>
+            <a href="/loan/user-loans" class="btn btn-outline-primary m-3">User Loans</a>
+            <a href="{% url 'loan:cohort-pq' %}" class="btn btn-outline-primary m-3">Create Cohort Pre-Qualifications</a>
+            <a href="/loan/loan-status" class="btn btn-outline-primary m-3">Loan Status</a>
+        {% endif %}
+
+        {% if request.user.zr_admin_user.role.name == "DISTRIBUTOR" or request.user.zr_admin_user.role.name == "SUBDISTRIBUTOR" %}
+            <a href="{% url 'loan:preapproved' %}" class="btn btn-outline-primary m-3">Avail Loan</a>
+
+            <a href="/loan/user-loans" class="btn btn-outline-primary m-3">My Loans</a>
+        {% endif %}
+    </div>
+    <div class="border ml-3 mr-3 mb-3 p-3 border-primary rounded" style="background: #fff"   >
+        {% block loan_content %}
+        {% endblock loan_content %}
+        <div id="loader"></div>
+    </div>
+
+    {% block loan_javascript %}
+    {% endblock loan_javascript %}
+
+</div>
+
+{% endblock %}
+

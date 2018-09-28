@@ -48,7 +48,8 @@ PROJECT_APPS = [
     'zruser',
     'zrutils',
     'zrwallet',
-    'debug_toolbar'
+    'debug_toolbar',
+    'loan'
 ]
 
 EXTERNAL_APPS = [
@@ -274,3 +275,17 @@ except ImportError:
 TO_BANK = {'UTIB': '918020030276406', 'ICIC': '001105026711', 'INDB': '201001458436', 'SBIN': '32910001AADCL2120N'}
 
 INTERNAL_IPS = ('127.0.0.1', 'localhost',)
+
+HAPPYLOAN_DISBURSE_ACC = {
+    'ACCOUNT_NAME': 'Lalwani Innovations Private Limited',
+    'CODE': 'UTIB',
+    'ACCOUNT_NO': '918020030276406',
+    'IFSC': 'UTIB0000373'
+}
+
+HAPPYLOAN_REPAYMENT_ACC = {
+    'ACCOUNT_NAME': 'Arthimpact Finserve Private Limited',
+    'CODE': 'RBLL',
+    'ACCOUNT_NO': '409000578256',
+    'IFSC': 'RATN0000088'
+}
