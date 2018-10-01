@@ -300,7 +300,7 @@ def cohort_pq(request=None):
         user = initiator = ZrUser.objects.filter(id=request.user.zr_admin_user.zr_user.id).first()
         users = [user]
     else:
-        users = list(ZrUser.objects.filter(role__name="DISTRIBUTOR", id=187))
+        users = list(ZrUser.objects.filter(role__name="DISTRIBUTOR"))
         print('users', users)
         initiator = admin()
 
@@ -316,19 +316,12 @@ def cohort_pq(request=None):
     cohort_url = HAPPYLOAN_BASE_URL + cohort_api_url + sent_at()
     headers = get_headers(cohort_url)
 
-    # print 'data', data
-    print 'cohort_url', cohort_url
-
     req_obj = RequestLog(request_type='cc', url=cohort_url, user=initiator)
     r = None
     try:
         r = requests.post(cohort_url, data=json.dumps(data), headers=headers)
     except requests.exceptions.RequestException as err:
-        print ("OOps: Something Else", err)
-
-    from pprint import pprint
-    print '%%%%%%%%%%%%%'
-    print pprint(vars(r))
+        print err
 
     req_obj.response = r.json()
     req_obj.save()
