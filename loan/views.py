@@ -149,7 +149,7 @@ def transactions_by_month(user, cohort=True):
         ]
 
     prod = ''' 
-        COALESCE(volume, 0)::int volume,                             
+        COALESCE(dmt_volume + non_dmt_volume, 0)::int volume,                             
         COALESCE(dmt_volume, 0)::int dmt_volume,                     
         COALESCE(non_dmt_volume, 0)::int non_dmt_volume,             
         COALESCE(dmt_count, 0) dmt_count,                            
@@ -190,8 +190,15 @@ def transactions_by_month(user, cohort=True):
                  - '1 DAY'::INTERVAL
              ))::int
         else 
+        ( 
+        case when (to_date(d.ym, 'YYYY-MM') + interval '1 month' - interval '1 day')::date - 
+        (select at_created::date from zruser_zruser where id=''' + str(user.id) + ''') <=0 
+        then 0
+        else
         (to_date(d.ym, 'YYYY-MM') + interval '1 month' - interval '1 day')::date - 
         (select at_created::date from zruser_zruser where id=''' + str(user.id) + ''')
+        end
+        )
         end as total_days  
         from 
         (
