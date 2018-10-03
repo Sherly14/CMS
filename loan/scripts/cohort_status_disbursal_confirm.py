@@ -52,6 +52,7 @@ def calculate_signature(api_url):
 
 
 def check_cohort_status():
+    print "* check_cohort_status - ", datetime.datetime.today()
     cohort_uids = list(RequestLog.objects.filter(request_type='pq').exclude(response__status__in=['successful']).
                        # values_list('url', flat=True))
                        annotate(uid=RawSQL("((response->>%s))", ('uid',))).
@@ -66,8 +67,6 @@ def check_cohort_status():
 
         r = requests.get(cohort_status_url, headers=headers)
 
-        print('r', r.json())
-
         status = str(r.json()["status"]).lower() if "status" in r.json() else None
 
         if status == "successful":
@@ -77,6 +76,7 @@ def check_cohort_status():
 
                 user = ZrUser.objects.filter(id=pq['customer_uid']).first()
 
+                print "user - ", user, " | amount - ", pq['amount_offered'], " | time - ", datetime.datetime.today()
                 HappyOffer(user=user, amount=pq['amount_offered'], cohort_uid=r.json()['uid'],
                            kyc_status=pq['kyc_status'], tenure=pq['tenure'], pq_response=pq,
                            calculated_on=datetime.datetime.today()
@@ -88,17 +88,12 @@ def check_cohort_status():
                 if not req_log:
                     continue
                 req_log.response = r.json()
-                # req_log.comment = status
                 req_log.save()
 
 
 def check_disbursal_confirmation():
-    # loan_uids = list(RequestLog.objects.filter(request_type='ldc').exclude(response__loan_status='DISBURSED').
-    #                  annotate(loan_uid=RawSQL("((response->>%s))", ('loan_uid',))).
-    #                  values_list('loan_uid', flat=True))
-
+    print "* check_disbursal_confirmation - ", datetime.datetime.today()
     loan_uids = list(HappyLoan.objects.filter(status='WILL_BE_DISBURSED').
-                     # annotate(loan_uid=RawSQL("((response->>%s))", ('loan_uid',))).
                      values_list('loan_uid', flat=True))
 
     print('-----------------loan_uids', loan_uids)

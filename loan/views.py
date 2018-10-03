@@ -149,7 +149,7 @@ def transactions_by_month(user, cohort=True):
         ]
 
     prod = ''' 
-        COALESCE(volume, 0)::int volume,                             
+        COALESCE(dmt_volume + non_dmt_volume, 0)::int volume,                             
         COALESCE(dmt_volume, 0)::int dmt_volume,                     
         COALESCE(non_dmt_volume, 0)::int non_dmt_volume,             
         COALESCE(dmt_count, 0) dmt_count,                            
@@ -190,8 +190,15 @@ def transactions_by_month(user, cohort=True):
                  - '1 DAY'::INTERVAL
              ))::int
         else 
+        ( 
+        case when (to_date(d.ym, 'YYYY-MM') + interval '1 month' - interval '1 day')::date - 
+        (select at_created::date from zruser_zruser where id=''' + str(user.id) + ''') <=0 
+        then 0
+        else
         (to_date(d.ym, 'YYYY-MM') + interval '1 month' - interval '1 day')::date - 
         (select at_created::date from zruser_zruser where id=''' + str(user.id) + ''')
+        end
+        )
         end as total_days  
         from 
         (
@@ -300,7 +307,7 @@ def cohort_pq(request=None):
         user = initiator = ZrUser.objects.filter(id=request.user.zr_admin_user.zr_user.id).first()
         users = [user]
     else:
-        users = list(ZrUser.objects.filter(role__name="DISTRIBUTOR", id=187))
+        users = list(ZrUser.objects.filter(role__name="DISTRIBUTOR"))
         print('users', users)
         initiator = admin()
 
@@ -316,19 +323,12 @@ def cohort_pq(request=None):
     cohort_url = HAPPYLOAN_BASE_URL + cohort_api_url + sent_at()
     headers = get_headers(cohort_url)
 
-    # print 'data', data
-    print 'cohort_url', cohort_url
-
     req_obj = RequestLog(request_type='cc', url=cohort_url, user=initiator)
     r = None
     try:
         r = requests.post(cohort_url, data=json.dumps(data), headers=headers)
     except requests.exceptions.RequestException as err:
-        print ("OOps: Something Else", err)
-
-    from pprint import pprint
-    print '%%%%%%%%%%%%%'
-    print pprint(vars(r))
+        print err
 
     req_obj.response = r.json()
     req_obj.save()
