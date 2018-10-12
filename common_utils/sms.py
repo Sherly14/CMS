@@ -1,8 +1,7 @@
 import requests
 
-BHASHSMS_BASE_URL = 'http://bhashsms.com/api/'
-BHASHSMS_USERNAME = 'zrupee'
-BHASHSMS_PASSWORD = 'lipl@1712'
+from zrcms.env_vars import BHASHSMS_BASE_URL, BHASHSMS_USERNAME, BHASHSMS_PASSWORD
+
 BHASHSMS_PRIORITY = {
     'ndnd': 'ndnd',
     'dnd': 'dnd'
@@ -22,9 +21,9 @@ def send_sms(sender='ZRUPEE', phone='', text='', priority='', stype='normal'):
         print 'Incomplete parameters'
         return
     sms_url = BHASHSMS_BASE_URL + BHASHSMS_SERVICE['sendmsg'] + '.php?' + 'user=' + BHASHSMS_USERNAME \
-                     + '&pass=' + BHASHSMS_PASSWORD \
-                     + '&sender=' + sender + '&phone=' + phone \
-                     + '&text=' + text + '&priority=' + priority + '&stype=' + stype
+        + '&pass=' + BHASHSMS_PASSWORD \
+        + '&sender=' + sender + '&phone=' + phone \
+        + '&text=' + text + '&priority=' + priority + '&stype=' + stype
 
     try:
         sms_req = requests.get(url=sms_url)
@@ -33,20 +32,23 @@ def send_sms(sender='ZRUPEE', phone='', text='', priority='', stype='normal'):
         print 'error - ', e
 
 
-def wallet_sms(payment_request, zr_wallet):
-    if not payment_request or not zr_wallet:
-        print 'payment_request or zr_wallet is None'
+def wallet(wallet_transaction):
+    if not wallet_transaction:
+        print 'SMS: wallet_transaction is None'
         return
 
-    phone = payment_request.from_user.mobile_no  # prod
-    accounting_entry = "credited" if payment_request.amount >= 0 else "debited"
-    text = 'Hi ' + str(payment_request.from_user.first_name).title() + ' ' + \
-           str(payment_request.from_user.last_name).title() + \
+    phone = wallet_transaction.wallet.merchant.mobile_no  # prod
+    amount = wallet_transaction.dmt_balance + wallet_transaction.non_dmt_balance
+    balance = wallet_transaction.dmt_closing_balance + wallet_transaction.non_dmt_closing_balance
+    accounting_entry = "credited" if amount >= 0 else "debited"
+    text = 'Hi ' + str(wallet_transaction.wallet.merchant.first_name).title() + ' ' + \
+           str(wallet_transaction.wallet.merchant.last_name).title() + \
            ', your Zrupee Wallet is ' + accounting_entry + ' with Rs. ' + \
-           str(abs(payment_request.amount)) + '. Your current Wallet Balance is Rs. ' + \
-           str(zr_wallet.get_total_balance())
+           str(abs(amount)) + '. Wallet Balance - Rs. ' + \
+           str(balance)
     try:
-        send_sms(sender='ZRUPEE', phone=phone,
+        send_sms(sender='ZRUPEE', phone=str(phone),
                  text=text, priority=BHASHSMS_PRIORITY['ndnd'], stype='normal')
     except Exception as e:
-        print 'error - ', e
+        print 'Error - ', e
+
