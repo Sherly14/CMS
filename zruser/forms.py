@@ -51,8 +51,6 @@ class MerchantDistributorForm(forms.ModelForm):
         else:
             raise forms.ValidationError('PAN number is compulsory')
 
-        return pan_no
-
     def clean_mobile_no(self):
         mobile_no = self.cleaned_data['mobile_no']
         if not mobile_no.isdigit():
@@ -88,7 +86,7 @@ class MerchantDistributorForm(forms.ModelForm):
             'id', 'mobile_no', 'first_name', 'last_name', 'email', 'gender', 'city',
             'state', 'pincode', 'address_line_1', 'address_line_2',
             'business_name', 'pan_no', 'aadhaar_no', 'gstin', 'UPIID', 'residence_address', 'business_type',
-            'sales_agent'
+            'sales_agent', 'direct_distributor'
         ]
 
 
@@ -168,7 +166,7 @@ class UpdateMerchantDistributorForm(forms.ModelForm):
             'first_name', 'last_name', 'email', 'gender', 'city',
             'state', 'pincode', 'address_line_1', 'address_line_2',
             'business_name', 'pan_no', 'aadhaar_no', 'gstin', 'UPIID', 'residence_address',
-            'business_type', 'sales_agent', 'father_name', 'date_of_birth'
+            'business_type', 'sales_agent', 'father_name', 'date_of_birth', 'direct_distributor'
         ]
 
 

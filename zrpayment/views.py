@@ -96,6 +96,9 @@ class GeneratePaymentRequestView(APIView):
             main_distributor = get_main_admin()
         elif request.user.zr_admin_user.role.name == user_map.SUBDISTRIBUTOR:
             main_distributor = get_distributor_from_sub_distributor(request.user.zr_admin_user.zr_user)
+
+            if main_distributor.direct_distributor:
+                main_distributor = get_main_admin()
         if not main_distributor:
             response_data = {
                 "message": error_message,
@@ -500,7 +503,7 @@ def payments_csv_download(request):
 class PaymentRequestListView(ListView):
     context_object_name = 'payment_request_list'
     template_name = 'payment_request_list.html'
-    paginate_by = 10
+    paginate_by = 100
 
     def get_context_data(self, **kwargs):
         q = self.request.GET.get('q', '')

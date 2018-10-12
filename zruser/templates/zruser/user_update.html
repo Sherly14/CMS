@@ -244,11 +244,21 @@ Update {{zr_user.role.name|title}}
                 <p class="heading-bg">OTHERS:</p>
             </div>
             <div class="row margin-top">
-                <label class="fill" for="sales_agent">Sales Agent</label>
-                {{ merchant_form.sales_agent|attr:"id:sales_agent"|attr:"class:form-control" }}
-                {% if merchant_form.sales_agent.errors %}
-                    {{ merchant_form.sales_agent.errors }}
-                {% endif %}
+                <div class="col-md-12">
+                    <label class="fill" for="sales_agent">Sales Agent</label>
+                    {{ merchant_form.sales_agent|attr:"id:sales_agent"|attr:"class:form-control" }}
+                    {% if merchant_form.sales_agent.errors %}
+                        {{ merchant_form.sales_agent.errors }}
+                    {% endif %}
+                </div>
+
+                <div class="col-md-12">
+                    <label class="fill" for="direct_distributor">Direct Distributor</label>
+                    {{ merchant_form.direct_distributor|attr:"id:direct_distributor"|attr:"class:form-control"|attr:"required:true"}}
+                    {% if merchant_form.direct_distributor.errors %}
+                        {{ merchant_form.direct_distributor.errors }}
+                    {% endif %}
+                </div>
             </div>
             <div class="row margin-top float-right mt-4">
                 <input class="btn btn-outline-danger btn-md float-right" type="submit" name="cancel" value="Cancel" />
