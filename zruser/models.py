@@ -126,6 +126,8 @@ class ZrUser(RowInfo):
     father_name = models.CharField(max_length=200, blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)
 
+    direct_distributor = models.NullBooleanField(default=None)
+
     def save(self, *args, **kwargs):
         # self.pass_word = make_password(self.pass_word)
 
