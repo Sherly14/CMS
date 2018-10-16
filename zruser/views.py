@@ -891,41 +891,6 @@ class DashBoardView(ListView):
                             transaction.append(payment)
                             count = count + 1
                     context['payments'] = transaction
-
-                    #from pprint import pprint
-                    # print 'response', pprint(vars(response))
-                    # print 'content', response.content
-                    res = json.loads(response.content)
-                    data = []
-                    for p in res['data']['payments']:
-                        # print p
-
-                        import datetime
-                        createdat = datetime.datetime.strptime(p['createdat'], '%Y-%m-%dT%H:%M:%S.%fZ')
-                        # print '1', createdat
-                        import pytz
-                        createdat = createdat.replace(tzinfo=pytz.UTC)
-                        # from dateutil import tz
-
-                        # print 'tz2', tz.tzlocal()
-                        from django.utils import timezone
-                        # createdat = createdat.astimezone(tz.tzlocal())
-                        createdat = timezone.localtime(createdat)
-                        # createdat = createdat.date()
-                        # print createdat
-                        data.append(["{}-{}-{}".format(createdat.year, createdat.month, createdat.day), p['amount'], p['cashback']])
-
-                    print 'data', data
-
-                    import itertools
-                    payment_per_day = [[dt.encode('ascii', 'ignore'), sum(a for d, a, c in grp), sum(c for d, a, c in grp),
-                                        len(list(dt))] for dt, grp in
-                                       itertools.groupby(data, key=lambda x: x[0])]
-                    print 'payment_per_day', payment_per_day
-                    context['payment_per_day'] = payment_per_day
-
-                    context['retailer'] = 1
-
                     return context
                 except:
                     pass
@@ -1159,8 +1124,6 @@ class DashBoardView(ListView):
             topup_form = zr_payment_form.TopupForm()
             # topup_form = zr_payment_form.TopupForm(initial={'to_user': request.user.zr_admin_user.zr_user.id, 'payment_type' : 2 , 'payment_mode' : 3})
             context['topup_form']=topup_form
-
-            context['retailer'] = 0
 
             return context
 
@@ -3146,7 +3109,6 @@ class PaymentHistoryView(View):
 
     @transaction.atomic
     def get(self, request, pk, **kwargs):
-        print 'paymenthistory', pk
         if pk != '0':
             user = ZrTerminal.objects.get(id=pk)
             response = requests.post(QUICKWALLET_PAYMENT_HISTORY_URL, json={"secret": QUICKWALLET_SECRET,
@@ -3162,8 +3124,6 @@ class PaymentHistoryView(View):
             user = None
             response = requests.post(QUICKWALLET_PAYMENT_HISTORY_URL, json={"secret": QUICKWALLET_SECRET})
 
-
-
         if response.status_code >= 500:
             return render(
                 request, self.template_name, {"zr_user": user, "api_error": "Api Gateway Server Error", "url_name": "payment-history"}
@@ -3173,8 +3133,7 @@ class PaymentHistoryView(View):
                 json_data = json.loads(response.text)
                 payments = json_data['data']['payments']
                 return render(
-                    request, self.template_name, {"payments": payments, "zr_user": user, "url_name": "payment-history",
-                                                  "payment_per_day": payment_per_day}
+                    request, self.template_name, {"payments": payments, "zr_user": user, "url_name": "payment-history"}
                 )
             except:
                 pass

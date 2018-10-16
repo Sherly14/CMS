@@ -207,14 +207,6 @@
     {% endif %}
     {% if request.user.zr_admin_user.role.name == "RETAILER" %}
         <div class="content-wrapper scrollbar scrollbar-black bordered-black">
-            <div class="col-md-12">
-                <div class="row scroll">
-                    <p>Dashboard</p>
-                    <!--<div id="chartdiv" style="width:80%; height:500px; background-color:#212529 !important;"></div>-->
-                    <div id="chartdiv" style="width:80%; height:500px;"></div>
-                </div>
-            </div>
-
             <p class="head-right">Transaction History</p>
 
             {% if no_payments %}
@@ -485,7 +477,6 @@
     <!-- /.modal -->
 
     <script>
-    if (!{{retailer| safe}}) {
         $('#to_bank').select2();
         $('#payment_mode').select2();
         $('#from_user').select2();
@@ -567,8 +558,6 @@
 {#            console.log(url)#}
 {#            window.location.assign(url)#}
 {#        });#}
-
-    }
     </script>
 {% endblock %}
 
@@ -591,8 +580,6 @@
             }
         });
 
-        if (!{{retailer| safe}}) {
-
         function bank_account() {
             var bank_account = JSON.parse('{{bank_account | escapejs }}');
             var bankVal = $('#to_bank').val();
@@ -611,7 +598,6 @@
                 $('#to_account_no_form').hide();
             }
         }
-
 
         $(document).ready(bank_account);
 
@@ -967,108 +953,6 @@
             errorPlacement: function (error, element) {
             }
         });
-     }
-    </script>
 
-    <script>
-    if ({{retailer| safe}}) {
-    //Retailer Dashboard report
-        var chartData = generateChartData();
-        var chart = AmCharts.makeChart("chartdiv", {
-            "type": "serial",
-            "theme": "dark",
-            "marginRight": 80,
-            "autoMarginOffset": 20,
-            "marginTop": 7,
-            "dataProvider": chartData,
-            "valueAxes": [{
-                "axisAlpha": 0.2,
-                "dashLength": 1,
-                "position": "left"
-            }],
-            "mouseWheelZoomEnabled": true,
-            "graphs": [{
-                "id": "g1",
-                "balloonText": "[[value]]",
-                "bullet": "round",
-                "bulletBorderAlpha": 1,
-                "bulletColor": "#FFFFFF",
-                "hideBulletsCount": 50,
-                "title": "red line",
-                "valueField": "payment",
-                "useLineColorForBulletBorder": true,
-                "balloon":{
-                    "drop":true
-                }
-            }],
-            "chartScrollbar": {
-                "autoGridCount": true,
-                "graph": "g1",
-                "scrollbarHeight": 40
-            },
-            "chartCursor": {
-               "limitToGraph":"g1"
-            },
-            "categoryField": "date",
-            "categoryAxis": {
-                "parseDates": true,
-                "axisColor": "#DADADA",
-                "dashLength": 1,
-                "minorGridEnabled": true
-            },
-            "export": {
-                "enabled": true
-            }
-        });
-
-        chart.addListener("rendered", zoomChart);
-        zoomChart();
-
-        // this method is called when chart is first inited as we listen for "rendered" event
-        function zoomChart() {
-            // different zoom methods can be used - zoomToIndexes, zoomToDates, zoomToCategoryValues
-            chart.zoomToIndexes(chartData.length - 40, chartData.length - 1);
-        }
-
-        // generate some random data, quite different range
-        function generateChartData() {
-            var chartData = [];
-            var firstDate = new Date();
-            firstDate.setDate(firstDate.getDate() - 5);
-            var visits = 1200;
-            for (var i = 0; i < 1000; i++) {
-                // we create date objects here. In your data, you can have date strings
-                // and then set format of your dates using chart.dataDateFormat property,
-                // however when possible, use date objects, as this will speed up chart rendering.
-                //var newDate = new Date(firstDate);
-                //newDate.setDate(newDate.getDate() + i);
-
-                //visits += Math.round((Math.random()<0.5?1:-1)*Math.random()*10);
-
-                //chartData.push({
-                //    date: newDate,
-                //    visits: visits
-                //});
-            }
-            payment_per_day = {{payment_per_day| safe}}
-            console.log('payment_per_day ', payment_per_day);
-            var date = [];
-            var payment = [];
-            for (var i = 0; i < payment_per_day.length; i++) {
-                console.log(payment_per_day[i][0]);
-                date.push(payment_per_day[i][0]);
-                payment.push(payment_per_day[i][1]);
-
-                chartData.push({
-                    date: date,
-                    payment: payment
-                });
-            }
-            console.log('date', date);
-            console.log('payment', payment);
-            return chartData;
-
-        }
-    }
     </script>
 {% endblock extrascripts %}
