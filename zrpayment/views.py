@@ -83,7 +83,7 @@ class GeneratePaymentRequestView(APIView):
                 #data[detail] = file_save_s3(value)
                 pass
             else:
-                print detail, value
+                # print detail, value
                 data[detail] = value if value else ""
 
         data["from_user"] = request.user.zr_admin_user.zr_user.id

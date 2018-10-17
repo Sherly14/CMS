@@ -830,7 +830,6 @@
 
                 // Create an FormData object
                 var data = new FormData($('#report_mail_form')[0]);
-                {# console.log(data);#}
                 $('#submit_request')
                     .prop('disabled', true)
                     .addClass('disabled');
@@ -902,9 +901,10 @@
                 $('#top_up_modal_message').html("");
                 // Create an FormData object
                 var data = new FormData($('#topup_request_form')[0]);
-                {# console.log(data);#}
                 $('#submit_request').prop('disabled', true);
                 $('#submit_request').addClass('disabled');
+                $('#top_up_submit_request').prop('disabled', true);
+                $('#top_up_submit_request').addClass('disabled');
                 $.ajax({
                     type: "POST",
                     enctype: 'multipart/form-data',
