@@ -123,7 +123,7 @@ class PassbookListView(ListView):
             except:
                 w.type = None
             try:
-                w.bank_ref = w.transaction.transaction_response_json.data.bank_ref_num
+                w.bank_ref = w.transaction.transaction_response_json['data']['bank_ref_num']
             except:
                 w.bank_ref = None
             try:

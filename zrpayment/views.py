@@ -83,7 +83,7 @@ class GeneratePaymentRequestView(APIView):
                 #data[detail] = file_save_s3(value)
                 pass
             else:
-                print detail, value
+                # print detail, value
                 data[detail] = value if value else ""
 
         data["from_user"] = request.user.zr_admin_user.zr_user.id
@@ -159,7 +159,7 @@ class RefundRequestView(APIView):
         )
 
         payment_request_instance.status = 3
-        payment_request_instance.save(update_fields=['status'])
+        payment_request_instance.save()
 
         zrwallet_models.WalletTransactions.objects.create(
             wallet=from_user_wallet,
@@ -198,7 +198,7 @@ class AcceptPaymentRequestView(APIView):
         if payment_request:
             if payment_request.status == 0:
                 payment_request.comments = comments
-                payment_request.save(update_fields=['comments'])
+                payment_request.save()
                 if is_user_superuser(self.request) and payment_request.to_user.role.name == 'ADMINSTAFF':
                     zr_wallet = zrwallet_models.Wallet.objects.get(
                         merchant=payment_request.from_user
@@ -223,7 +223,7 @@ class AcceptPaymentRequestView(APIView):
                     )
                     message = "Wallet updated successfully"
                     payment_request.status = 1
-                    payment_request.save(update_fields=['status'])
+                    payment_request.save()
                 elif self.request.user.zr_admin_user.role.name in ['DISTRIBUTOR', 'SUBDISTRIBUTOR']:
                     supervisor_wallet = zrwallet_models.Wallet.objects.get(
                         merchant=payment_request.to_user
@@ -287,7 +287,7 @@ class AcceptPaymentRequestView(APIView):
                             is_success=True
                         )
                         payment_request.status = 1
-                        payment_request.save(update_fields=['status'])
+                        payment_request.save()
                     else:
                         message = "Insufficient balance in (%s), Please recharge you wallet" % (','.join(balance_insufficient))
             else:
@@ -311,12 +311,12 @@ class RejectPaymentRequestView(APIView):
                     message = "Payment request rejected successfully"
                     payment_request.status = 2
                     payment_request.reject_comments = rejection_reason
-                    payment_request.save(update_fields=['status', 'reject_comments'])
+                    payment_request.save()
                 elif is_user_superuser(request) and payment_request.to_user.role.name == 'ADMINSTAFF':
                     message = "Payment request rejected successfully"
                     payment_request.status = 2
                     payment_request.reject_comments = rejection_reason
-                    payment_request.save(update_fields=['status', 'reject_comments'])
+                    payment_request.save()
                 else:
                     message = "Not allowed to accept payment request"
             else:
@@ -879,7 +879,7 @@ class GenerateTopUpRequestView(APIView):
                     )
                     # "Wallet updated successfully"
                     payment_request.status = 1
-                    payment_request.save(update_fields=['status'])
+                    payment_request.save()
                 elif self.request.user.zr_admin_user.role.name in ['DISTRIBUTOR', 'SUBDISTRIBUTOR']:
                     # Amount from supervisor_wallet transferred to zr_wallet
                     # supervisor_wallet is self(from) wallet for TOPUP
@@ -946,7 +946,7 @@ class GenerateTopUpRequestView(APIView):
                             is_success=True
                         )
                         payment_request.status = 1
-                        payment_request.save(update_fields=['status'])
+                        payment_request.save()
                         message = '{0} {1} {2}'.format(SUCCESS_MESSAGE_START,
                                                                "TopUp sent successfully",
                                                                MESSAGE_END)
