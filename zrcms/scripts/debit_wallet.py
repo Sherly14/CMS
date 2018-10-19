@@ -24,8 +24,9 @@ from zrcommission.models import DMTCommissionStructure
 from common_utils.transaction_utils import get_main_distributor_from_merchant
 
 from decimal import Decimal
+import datetime
 
-input_file = os.path.join(cur_dir, 'TID_DATA.xlsx')
+input_file = os.path.join(cur_dir, 'TID_DATA_final.xls')
 
 
 if not os.path.exists(input_file):
@@ -42,21 +43,23 @@ exl = pd.read_excel(
 @transaction.atomic
 def debit_wallet():
     print "----------------------"
-    print "debit_wallet begins .."
+    print "debit_wallet begins ..", datetime.datetime.now()
     for index, df in exl.iterrows():
         print '         '
         print('-->' + str(index + 1))
 
-        tid = df[0]
-        date = df[1]
+        tid = str(df[0])
+        date = str(df[1])
         status = str(df[2]).encode('utf-8').strip()
         request_log_raw = str(df[3])
         response_log = str(df[4])
-        # zr_user_id = str(df[5])
+        merchant_id = str(df[5])
 
-        if 'nan' in [tid, date, status, request_log_raw, response_log]:
-            print 'nan found'
+        if 'nan' in [tid, date, status, request_log_raw, response_log, merchant_id]:
+            print 'Incomplete input data, nan found'
             continue
+
+        print 'merchant_id -', int(float(merchant_id)), ', tid -', tid
 
         request_log_list = request_log_raw.strip()[1: -1].split(',')
 
@@ -66,11 +69,11 @@ def debit_wallet():
             if k in ["state", "amount", "channel", "merchant_document_id_type"]:
                 request_log[k] = int(v)
 
-        print "amount - ", request_log["amount"], ', pan - ', request_log["user_pan"]
+        print "amount -", request_log["amount"], ', pan -', request_log["user_pan"]
 
         response_log = json.loads(response_log)
 
-        print "status - ", response_log["status"]
+        print "status -", response_log["status"]
 
         if str(tid) != str(response_log["data"]["tid"]) or str(request_log["client_ref_id"]) != str(response_log["data"]["client_ref_id"]):
             print "tid or client_ref_id mis-match"
@@ -86,9 +89,9 @@ def debit_wallet():
             print "Request and Response amount mismatch"
             continue
 
-        zr_user = ZrUser.objects.filter(pan_no=request_log["user_pan"], role__name='MERCHANT', is_active=True).\
+        zr_user = ZrUser.objects.filter(id=int(float(merchant_id)), pan_no=request_log["user_pan"], role__name='MERCHANT', is_active=True).\
             order_by('-id').first()
-        print 'zr_user - ', zr_user
+        print 'zr_user -', zr_user
 
         if not zr_user:
             print "zr_user not found"
@@ -121,11 +124,11 @@ def debit_wallet():
             eko_beneficiary_id=str(response_log["data"]["recipient_id"])
         ).first()
 
-        print 'sender_beneficiary_map ', sender_beneficiary_map.pk
-
         if sender_beneficiary_map is None:
             print 'sender_beneficiary_map not found'
             continue
+
+        print 'sender_beneficiary_map ', sender_beneficiary_map.pk
 
         transaction_type = TransactionType.objects.filter(name='DMT').first()
 
@@ -168,7 +171,7 @@ def debit_wallet():
             wallet=zr_wallet,
             transaction=zr_transaction,
             payment_request=None,
-            dmt_balance=total_amount,
+            dmt_balance=-total_amount,
             non_dmt_balance=0,
             dmt_closing_balance=zr_wallet.dmt_balance,
             non_dmt_closing_balance=zr_wallet.non_dmt_balance,
