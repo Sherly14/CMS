@@ -172,10 +172,15 @@ def get_comission_csv(request):
     response['Content-Disposition'] = 'attachment; filename="commissions.csv"'
     writer = csv.writer(response)
     writer.writerow([
-        'My Commission After TDS',
-        'Merchant commission',
-        'Merchant ID',
-        'Name'
+        'Tran. ID',
+        'Tran. Amount',
+        'Tran. Type',
+        'Gross Commission',
+        'Net of GST',
+        'TDS amount',
+        'GST amount',
+        'Net Commission',
+        'Settled'
     ])
 
     for commission in commission_qs:
@@ -185,10 +190,15 @@ def get_comission_csv(request):
 
         writer.writerow(
             [
-                commission.get_commission_without_comm(),
-                commission.get_merchant_commission(),
-                commission.transaction.user.pk,
-                ' '.join(name)
+                commission.transaction_id,
+                commission.transaction.amount,
+                commission.transaction.type,
+                str(round(float(commission.gross_amount()), 2)),
+                str(round(float(commission.user_commission), 2)),
+                str(round(float(commission.user_tds), 2)),
+                str(round(float(commission.user_gst), 2)),
+                str(round(float(commission.net_commission), 2)),
+                commission.is_settled
             ]
         )
 
