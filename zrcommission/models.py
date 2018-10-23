@@ -42,7 +42,7 @@ class Commission(RowInfo):
     is_settled = models.BooleanField(default=False)
 
     def gross_amount(self):
-        return  self.net_commission + self.user_tds - self.user_gst
+        return round(self.user_commission + self.user_gst, 2)  # + self.user_tds - self.user_gst
 
     def save(self, *args, **kwargs):
         self.user_commission = Decimal(self.user_commission).quantize(Decimal("0.0000"), context=Context(prec=10))
