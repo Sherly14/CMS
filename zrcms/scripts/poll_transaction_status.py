@@ -1,3 +1,14 @@
+# coding: utf-8
+import os
+import django
+
+import sys
+
+sys.path.append('../')
+sys.path.append('../../')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
+django.setup()
+
 import json
 from time import sleep
 
@@ -114,3 +125,6 @@ def poll_transaction_status_for_refund():
                 else:
                     transaction.transaction_response_json['poll_refunded_response'] = json.dumps(response_data)
                 transaction.save()
+
+
+poll_transaction_status_for_refund()
