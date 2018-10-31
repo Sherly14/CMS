@@ -5,9 +5,13 @@
 
 
 {% block content %}
+
     {% if request.user.zr_admin_user.role.name != "RETAILER" %}
     <div class="content-wrapper scrollbar scrollbar-black bordered-black">
         <p class="head-right">Dashboard</p>
+        <div class="text-center center item active">
+      <figure><img class="center"  src="/static/images/offers.jpeg" style="height: 440px;" alt="Slide 2"></figure>
+</div>
             <div class="row">
                 <div class="col-6 col-lg-2 mt-2">
                     <input id="start-date" name="startDate" value="{{startDate}}" placeholder="From" data-toggle="tooltip" data-placement="top" title="Commission Created: From"/>
