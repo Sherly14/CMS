@@ -49,13 +49,15 @@
                     <table id="data" class="table table-hover table-data">
                         <thead>
                             <tr style="border-bottom-style: solid;">
-                                <th scope="col">Transaction ID</th>
-                                <th scope="col">Tr. Amount</th>
-                                <th scope="col">Tr. Type</th>
+                                <th scope="col">Tran. ID</th>
+                                <th scope="col">Tran. Amount</th>
+                                <th scope="col">Tran. Type</th>
                                 <th scope="col">Gross Commission</th>
+                                <th scope="col">Net of GST</th>
                                 <th scope="col">TDS amount</th>
                                 <th scope="col">GST amount</th>
                                 <th scope="col">Net Commission</th>
+                                <th scope="col">Settled</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -64,10 +66,12 @@
                                     <td>{{ com.transaction_id }}</td>
                                     <td>{{ com.transaction.amount }}</td>
                                     <td>{{ com.transaction.type }}</td>
-                                    <td>{{ com.gross_amount }}</td>
-                                    <td>{{ com.user_tds }}</td>
-                                    <td>{{ com.user_gst }}</td>
-                                    <td>{{ com.net_commission }}</td>
+                                    <td>{{ com.gross_amount|floatformat:"2" }}</td>
+                                    <td>{{ com.user_commission|floatformat:"2" }}</td>
+                                    <td>{{ com.user_tds|floatformat:"2" }}</td>
+                                    <td>{{ com.user_gst|floatformat:"2" }}</td>
+                                    <td>{{ com.net_commission|floatformat:"2" }}</td>
+                                    <td>{{ com.is_settled }}</td>
                                 </tr>
                             {% endfor %}
                         </tbody>

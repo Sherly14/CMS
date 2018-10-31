@@ -790,7 +790,7 @@ class DistributorListView(ListView):
         activate = self.request.GET.get('activate')
         disable = self.request.GET.get('disable')
         queryset = self.get_queryset()
-        distributor_list = ZrUser.objects.select_related('role')
+        distributor_list = ZrUser.objects.select_related('role').filter(role__name=DISTRIBUTOR).order_by('-at_created')
         q = self.request.GET.get('q', '')
         pg_no = self.request.GET.get('page_no', 1)
         start_date = self.request.GET.get('startDate', '')
@@ -965,7 +965,7 @@ class DashBoardView(ListView):
                 merchants = transaction_utils.get_merchants_from_distributor(
                     self.request.user.zr_admin_user.zr_user
                 )
-                context["dmt_commission_value"] = "%.2f" % (commission_models.Commission.objects.filter(
+                context["dmt_commission_value"] = "%.2f" % (commission_models.Commission.objects.select_related('transaction__type__name').filter(
                     transaction__type__name='DMT',
                     commission_user=self.request.user.zr_admin_user.zr_user,
                     is_settled=False,
@@ -974,7 +974,7 @@ class DashBoardView(ListView):
                     value=Sum(F('user_commission') - F('user_tds'))
                 )['value'] or 0)
 
-                context["total_bill_pay_commission_value"] = "%.2f" % (commission_models.Commission.objects.filter(
+                context["total_bill_pay_commission_value"] = "%.2f" % (commission_models.Commission.objects.select_related('transaction__type__name').filter(
                     transaction__type__name__in=BILLS_TYPE,
                     commission_user=self.request.user.zr_admin_user.zr_user,
                     is_settled=False,
@@ -983,7 +983,7 @@ class DashBoardView(ListView):
                     value=Sum(F('user_commission') - F('user_tds'))
                 )['value'] or 0)
 
-                context["total_recharge_commission_value"] = "%.2f" % (commission_models.Commission.objects.filter(
+                context["total_recharge_commission_value"] = "%.2f" % (commission_models.Commission.objects.select_related('transaction__type__name').filter(
                     transaction__type__name__in=RECHARGES_TYPE,
                     commission_user=self.request.user.zr_admin_user.zr_user,
                     is_settled=False,
