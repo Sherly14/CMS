@@ -4,10 +4,12 @@ import django
 
 import sys
 
-sys.path.append('../')
-sys.path.append('../../')
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "settings")
-django.setup()
+cur_dir = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.join(cur_dir, '..'))  # NOQA
+sys.path.append(os.path.join(cur_dir, '..', '..'))
+import settings  # NOQA
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')  # NOQA
+django.setup()  # NOQA
 
 import json
 from time import sleep
