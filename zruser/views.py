@@ -3492,3 +3492,11 @@ class WalletListView(ListView):
 
     def get_queryset(self):
         return get_wallets_qs(self.request)
+
+
+class OfferView(View):
+  template_name = 'zruser/offer.html'
+
+  def get(self,request,*args,**kwargs):
+    
+    return render(request,self.template_name) 
