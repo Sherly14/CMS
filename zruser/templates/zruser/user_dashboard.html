@@ -57,6 +57,28 @@
                         </div>
                     </div>
                 {% endif %}
+
+                {% if is_user_superuser %}
+                <div class="col-xl-4 col-sm-6 mb-3">
+                    <div class="card bg-light">
+                        <div class="card-header">
+                            Systemwide Balance
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                Zrupee Wallet Balance
+                            </h5>
+                            <p class="card-text">INR {{ zrupee_wallet_balance | floatformat:2 }}</p>
+                            <hr>
+                            <h5 class="card-title">
+                                Eko Wallet Balance
+                            </h5>
+                            <p class="card-text">INR {{ eko_wallet_balance }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
                 {% if not is_user_superuser %}
                 <div class="col-xl-3 col-sm-6 mb-3">
                     <div class="card bg-light">
