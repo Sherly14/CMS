@@ -961,6 +961,25 @@ class DashBoardView(ListView):
                     value=Sum(F('user_commission') - F('user_tds'))
                 )['value'] or 0)
 
+                context["zrupee_wallet_balance"] = "%.2f" % (zrwallet_models.Wallet.objects.aggregate(
+                    value=Sum(F('dmt_balance') + F('non_dmt_balance'))
+                )['value'] or 0)
+
+                try:
+                    eko_last = list(transaction_models.Transaction.objects.filter(
+                        type__name='DMT',
+                        status=TRANSACTION_STATUS_SUCCESS,
+                        transaction_response_json__has_key='data'
+                    ).order_by('-id')[:1].
+                        values_list('transaction_response_json', flat=True))[0]
+
+                    if eko_last and 'data' in eko_last and 'balance' in eko_last['data']:
+                        context["eko_wallet_balance"] = "%.2f" % float(eko_last['data']['balance'])
+                    else:
+                        context["eko_wallet_balance"] = "--"
+                except Exception as e:
+                    context["eko_wallet_balance"] = "--"
+
             else:
                 merchants = transaction_utils.get_merchants_from_distributor(
                     self.request.user.zr_admin_user.zr_user
