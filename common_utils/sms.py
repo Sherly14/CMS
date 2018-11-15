@@ -1,6 +1,6 @@
 import requests
 
-from zrcms.env_vars import BHASHSMS_BASE_URL, BHASHSMS_USERNAME, BHASHSMS_PASSWORD
+from zrcms.env_vars import BHASHSMS_BASE_URL, BHASHSMS_USERNAME, BHASHSMS_PASSWORD, ENVIRONMENT
 
 BHASHSMS_PRIORITY = {
     'ndnd': 'ndnd',
@@ -26,8 +26,11 @@ def send_sms(sender='ZRUPEE', phone='', text='', priority='', stype='normal'):
         + '&text=' + text + '&priority=' + priority + '&stype=' + stype
 
     try:
-        sms_req = requests.get(url=sms_url)
-        print 'sms_req response' + sms_req.content
+        if ENVIRONMENT == 'PRODUCTION':
+            sms_req = requests.get(url=sms_url)
+            print 'sms_req response' + sms_req.content
+        else:
+            print "ENVIRONMENT not PRODUCTION"
     except requests.RequestException as e:
         print 'error - ', e
 
@@ -45,7 +48,7 @@ def wallet(wallet_transaction):
            str(wallet_transaction.wallet.merchant.last_name).title() + \
            ', your Zrupee Wallet is ' + accounting_entry + ' with Rs. ' + \
            str(abs(amount)) + '. Wallet Balance - Rs. ' + \
-           str(balance)
+           str(balance) + '\n. Keep up the Balance. Zrupee.'
     try:
         send_sms(sender='ZRUPEE', phone=str(phone),
                  text=text, priority=BHASHSMS_PRIORITY['ndnd'], stype='normal')
