@@ -402,7 +402,7 @@
                     <form class="form-horizontal" method="POST" id="topup_request_form" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="row">
-                            <div class="form-group col-sm-6">
+                            <div class="form-group col-sm-12">
                                 <label class="control-label"><b>To User</b></label>
                                 <div>
                                     <select id="from_user" name="from_user" class="form-control" required style="padding-left:5px">
@@ -504,10 +504,10 @@
     <!-- /.modal -->
 
     <script>
-        $('#to_bank').select2();
-        $('#payment_mode').select2();
-        $('#from_user').select2();
-        $('#type').select2();
+        $('#to_bank').select2({ dropdownAutoWidth : true });
+        $('#payment_mode').select2({ dropdownAutoWidth : true });
+        $('#from_user').select2({ dropdownAutoWidth : true });
+        $('#type').select2({ dropdownAutoWidth : true });
 
         $('#search-btn').click(function()
         {

@@ -41,7 +41,7 @@ from itertools import chain
 from django.urls import reverse
 from django.db import transaction
 
-
+from common_utils import sms
 
 SUCCESS_MESSAGE_START = '<div class="alert alert-success" role="alert"><div class="alert-content"><i class="glyphicon glyphicon-ok-circle"></i><strong>'
 ERROR_MESSAGE_START = '<div class="alert alert-danger" role="alert"><div class="alert-content"><i class="glyphicon glyphicon-remove-circle"></i><strong>'
@@ -211,7 +211,7 @@ class AcceptPaymentRequestView(APIView):
                             'non_dmt_balance'
                         ]
                     )
-                    zrwallet_models.WalletTransactions.objects.create(
+                    wallet_transaction = zrwallet_models.WalletTransactions.objects.create(
                         wallet=zr_wallet,
                         transaction=None,
                         payment_request=payment_request,
@@ -224,6 +224,9 @@ class AcceptPaymentRequestView(APIView):
                     message = "Wallet updated successfully"
                     payment_request.status = 1
                     payment_request.save()
+
+                    sms.wallet(wallet_transaction)
+
                 elif self.request.user.zr_admin_user.role.name in ['DISTRIBUTOR', 'SUBDISTRIBUTOR']:
                     supervisor_wallet = zrwallet_models.Wallet.objects.get(
                         merchant=payment_request.to_user
@@ -266,7 +269,7 @@ class AcceptPaymentRequestView(APIView):
                                 'non_dmt_balance'
                             ]
                         )
-                        zrwallet_models.WalletTransactions.objects.create(
+                        wallet_transaction_supervisor = zrwallet_models.WalletTransactions.objects.create(
                             wallet=supervisor_wallet,
                             transaction=None,
                             payment_request=payment_request,
@@ -276,7 +279,7 @@ class AcceptPaymentRequestView(APIView):
                             non_dmt_closing_balance=supervisor_wallet.non_dmt_balance,
                             is_success=True
                         )
-                        zrwallet_models.WalletTransactions.objects.create(
+                        wallet_transaction = zrwallet_models.WalletTransactions.objects.create(
                             wallet=zr_wallet,
                             transaction=None,
                             payment_request=payment_request,
@@ -288,6 +291,9 @@ class AcceptPaymentRequestView(APIView):
                         )
                         payment_request.status = 1
                         payment_request.save()
+
+                        sms.wallet(wallet_transaction)
+                        sms.wallet(wallet_transaction_supervisor)
                     else:
                         message = "Insufficient balance in (%s), Please recharge you wallet" % (','.join(balance_insufficient))
             else:
@@ -867,7 +873,7 @@ class GenerateTopUpRequestView(APIView):
                             'non_dmt_balance'
                         ]
                     )
-                    zrwallet_models.WalletTransactions.objects.create(
+                    wallet_transaction = zrwallet_models.WalletTransactions.objects.create(
                         wallet=zr_wallet,
                         transaction=None,
                         payment_request=payment_request,
@@ -880,6 +886,8 @@ class GenerateTopUpRequestView(APIView):
                     # "Wallet updated successfully"
                     payment_request.status = 1
                     payment_request.save()
+
+                    sms.wallet(wallet_transaction)
                 elif self.request.user.zr_admin_user.role.name in ['DISTRIBUTOR', 'SUBDISTRIBUTOR']:
                     # Amount from supervisor_wallet transferred to zr_wallet
                     # supervisor_wallet is self(from) wallet for TOPUP
@@ -925,7 +933,7 @@ class GenerateTopUpRequestView(APIView):
                                 'non_dmt_balance'
                             ]
                         )
-                        zrwallet_models.WalletTransactions.objects.create(
+                        wallet_transaction_supervisor = zrwallet_models.WalletTransactions.objects.create(
                             wallet=supervisor_wallet,
                             transaction=None,
                             payment_request=payment_request,
@@ -935,7 +943,7 @@ class GenerateTopUpRequestView(APIView):
                             non_dmt_closing_balance=supervisor_wallet.non_dmt_balance,
                             is_success=True
                         )
-                        zrwallet_models.WalletTransactions.objects.create(
+                        wallet_transaction = zrwallet_models.WalletTransactions.objects.create(
                             wallet=zr_wallet,
                             transaction=None,
                             payment_request=payment_request,
@@ -951,6 +959,8 @@ class GenerateTopUpRequestView(APIView):
                                                                "TopUp sent successfully",
                                                                MESSAGE_END)
 
+                        sms.wallet(wallet_transaction_supervisor)
+                        sms.wallet(wallet_transaction)
                     else:
                         message = "Insufficient balance in (%s), Please recharge you wallet" % (
                         ','.join(balance_insufficient))
