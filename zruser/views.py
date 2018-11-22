@@ -3432,7 +3432,7 @@ def download_wallet_list_csv(request):
     response['Content-Disposition'] = 'attachment; filename="wallets.csv"'
     writer = csv.writer(response)
     writer.writerow([
-        'User Id', 'User Name', 'DOJ', 'Mobile', 'Role', 'DMT Bal', 'Non-DMT Bal'
+        'User Id', 'User Name', 'DOJ', 'Mobile', 'Role', 'Bal'
     ])
     for wallet in wallet_qs:
         writer.writerow([
@@ -3441,8 +3441,7 @@ def download_wallet_list_csv(request):
             wallet.merchant.at_created,
             wallet.merchant.mobile_no,
             wallet.merchant.role,
-            wallet.dmt_balance,
-            wallet.non_dmt_balance,
+            wallet.dmt_balance
         ])
 
     return response

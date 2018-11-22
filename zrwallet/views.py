@@ -180,7 +180,7 @@ def get_passbook_report_csv(request):
     response['Content-Disposition'] = 'attachment; filename="passbook.csv"'
     writer = csv.writer(response)
     writer.writerow(['Date', 'User name', 'Mobile No', 'Role', 'Transaction ID', 'Transaction type',
-                     'Payment ID', 'DMT Transaction', 'Non DMT Transaction', 'DMT Balance', 'Non DMT Balance',
+                     'Payment ID', 'DMT Transaction', 'Non DMT Transaction', 'Balance',
                      'Bank UTR', 'Sender Mobile', 'Beneficiary Mobile', 'Beneficiary Account No', 'Transaction Status'
                      ])
     for passbook in passbook_qs:
@@ -215,7 +215,6 @@ def get_passbook_report_csv(request):
             passbook.dmt_balance,
             passbook.non_dmt_balance,
             passbook.dmt_closing_balance,
-            passbook.non_dmt_closing_balance,
             utr,
             customer,
             beneficiary,

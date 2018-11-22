@@ -47,8 +47,8 @@
                             <th scope="col">DOJ</th>
                             <th scope="col">Mobile</th>
                             <th scope="col">Role</th>
-                            <th scope="col">DMT Balance</th>
-                            <th scope="col">NON-DMT Balance</th>
+                            <th scope="col">Balance</th>
+                            <!--<th scope="col">NON-DMT Balance</th>-->
                         </tr>
                         {% for wallet in queryset %}
                             <tr>
@@ -58,7 +58,7 @@
                                 <td>{{ wallet.merchant.mobile_no }}</td>
                                 <td>{{ wallet.merchant.role }}</td>
                                 <td>{{ wallet.dmt_balance }}</td>
-                                <td>{{ wallet.non_dmt_balance }}</td>
+                                <!--<td>{{ wallet.non_dmt_balance }}</td>-->
                             </tr>
                         {% endfor %}
                     </table>

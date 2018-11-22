@@ -57,8 +57,8 @@
                                 <th scope="col">Payment ID</th>
                                 <th scope="col">DMT Transaction</th>
                                 <th scope="col">Non DMT Transaction</th>
-                                <th scope="col">DMT Balance</th>
-                                <th scope="col">Non DMT Balance</th>
+                                <th scope="col">Balance</th>
+                                <!--<th scope="col">Non DMT Balance</th>-->
                                 <th scope="col">Bank UTR</th>
                                 <th scope="col">Sender Mobile</th>
                                 <th scope="col">Beneficiary Mobile</th>
@@ -77,7 +77,7 @@
                                     <td>{{ passbook.dmt_balance }}</td>
                                     <td>{{ passbook.non_dmt_balance }}</td>
                                     <td>{{ passbook.dmt_closing_balance }}</td>
-                                    <td>{{ passbook.non_dmt_closing_balance }}</td>
+                                    <!--<td>{{ passbook.non_dmt_closing_balance }}</td>-->
                                     <td>{{ passbook.bank_ref | default_if_none:"NA" }}</td>
                                     <td>{{ passbook.customer | default_if_none:"NA"}}</td>
                                     <td>{{ passbook.beneficiary | default_if_none:"NA"}}</td>
