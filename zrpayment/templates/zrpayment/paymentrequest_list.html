@@ -58,13 +58,13 @@
                                 <!--<th scope="col">Challan document</th>-->
                                 <th scope="col">From User</th>
                                 <th scope="col">Ref Id</th>
-                                <th scope="col">To bank</th>
+                                <th scope="col">Payment Mode</th>
 
                                 <th scope="col">Sales Agent</th>
                                 <!--<th scope="col">From Bank Account Number</th>-->
                                 <th scope="col">To Bank Acc. No.</th>
                                 <!--<th scope="col">From bank</th>-->
-                                <th scope="col">Payment Mode</th>
+                                <th scope="col">To bank</th>
                             </tr>
                             {% for payment_request in queryset %}
                                 <tr>
@@ -118,9 +118,8 @@
                                         {{ payment_request.from_user.get_full_name }}
                                     </td>
                                     <td>{{ payment_request.ref_no|default_if_none:"N/A" }}</td>
-                                    <td>
-                                        {{ payment_request.to_bank.bank_name }}
-                                    </td>
+                                    <td>{{ payment_request.payment_mode }}</td>
+                                    
                                     <td>
                                         {{payment_request.from_user.sales_agent}}
                                     </td>
@@ -133,8 +132,10 @@
                                     <!--<td>-->
                                         <!--{{ payment_request.from_bank.bank_name }}-->
                                     <!--</td>-->
-
-                                    <td>{{ payment_request.payment_mode }}</td>
+                                    <td>
+                                        {{ payment_request.to_bank.bank_name }}
+                                    </td>
+                                    
                                     <!--<td>-->
                                        <!--{# {% if payment_request.status == 1 and not payment_request.status == 3 %}#}-->
                                           <!--{#   <input type="button" class="btn btn-outline-success payment change_request_id confirm_refund_select" value="Revoke" data-toggle="modal" data-target="#confirm_refund" data-slug-id="{{ payment_request.pk }}">#}-->

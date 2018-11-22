@@ -122,6 +122,7 @@ class ZrUser(RowInfo):
 
     sales_agent = models.CharField(max_length=512, null=True, blank=True)
     ekyc_ref_no = models.CharField(max_length=10, null=True, blank=True)
+    user_code = models.CharField(max_length=10, null=True, blank=True)
 
     father_name = models.CharField(max_length=200, blank=True, null=True)
     date_of_birth = models.DateField(blank=True, null=True)

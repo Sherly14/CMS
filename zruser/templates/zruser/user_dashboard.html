@@ -10,9 +10,12 @@
     <div class="content-wrapper scrollbar scrollbar-black bordered-black">
         <div style="margin-bottom: 40px;background-color: #333333;" class="alert bg-success alert-icon-left mb-2" role="alert">
       <p style="color:#fff;display: flex;" class="announcement"><i class="fa-2x fa fa-bullhorn" aria-hidden="true"></i>&nbsp;&nbsp;<span><b>Announcement</b></span>  &nbsp; 
-      <marquee onmouseover="this.stop()" onmouseout="this.start()" style="color:#fff">Zrupee special festive season offers for it's merchants & distributors.&nbsp;&nbsp;&nbsp;<a href="{% url 'user:offer' %}" class="btn btn-outline-dark">Get Details</a></marquee>
+      <marquee onmouseover="this.stop()" onmouseout="this.start()" style="color:#fff">Zrupee special cashback offer for it's merchants & distributors.&nbsp;&nbsp;&nbsp;<a href="{% url 'user:offer' %}" class="btn btn-outline-dark">Get Details</a></marquee>
     </div>
         <p class="head-right">Dashboard</p>
+        <div class="text-center center item active">
+     <figure><a href="{% url 'user:offer' %}"><img class="center"  src="/static/images/cb.jpeg" style="height: 340px;" alt="Slide 2"></a></figure>
+</div>
             <div class="row">
                 <div class="col-6 col-lg-2 mt-2">
                     <input id="start-date" name="startDate" value="{{startDate}}" placeholder="From" data-toggle="tooltip" data-placement="top" title="Commission Created: From"/>
@@ -289,7 +292,7 @@
 
                         <div class="row">
                              <div class="form-group col-6 col-sm-6">
-                                <label class="control-label"><b>To bank</b></label>
+                                <label class="control-label"><b>To bank</b><span style="color: red">*</span></label>
                                 <div>
                                     <select id="to_bank" name="to_bank" class="form-control">
                                         {% for b in bank %}
@@ -301,7 +304,7 @@
                             </div>
 
                             <div class="form-group col-sm-6" id="to_account_no_form"  style="display:none">
-                                <label class="control-label"><b>To bank(Others)</b></label>
+                                <label class="control-label"><b>To bank(Others)</b><span style="color: red">*</span></label>
                                 <div>
                                     <select id="to_bank_other" name="to_bank_other" class="form-control">
                                         {% for b in bank_all %}
@@ -313,7 +316,7 @@
 
 
                             <div class="form-group col-sm-6">
-                                <label class="control-label"><b>To Account Number</b></label>
+                                <label class="control-label"><b>To Account Number</b><span style="color: red">*</span></label>
                                 <div>
                                     <input type="text" class="form-control" name="to_account_no" id="to_account_no" style="box-shadow: 0px 0px;border-style: solid;" required>
                                 </div>
@@ -322,7 +325,7 @@
                         </div>
                         <div class="row" >
                             <div class="form-group col-sm-6">
-                                <label class="control-label"><b>Enter Amount ₹</b></label>
+                                <label class="control-label"><b>Enter Amount ₹</b><span style="color: red">*</span></label>
                                 <div>
                                     <input type="number" class="form-control" name="amount" id="amount"
                                            placeholder="INR ">
@@ -330,7 +333,7 @@
                             </div>
 
                             <div class="form-group col-sm-6">
-                                <label class="control-label"><b>Enter DMT Amount ₹</b></label>
+                                <label class="control-label"><b>Enter DMT Amount ₹</b><span style="color: red">*</span></label>
                                 <div>
                                     <input type="number" class="form-control" name="dmt_amount" id="dmt_amount"
                                            placeholder="INR ">
@@ -341,7 +344,7 @@
 
                         <div class="row" >
                             <div class="form-group col-sm-6">
-                                <label class="control-label"><b>Non DMT Amount ₹</b></label>
+                                <label class="control-label"><b>Non DMT Amount ₹</b><span style="color: red">*</span></label>
                                 <div>
                                     <input type="number" class="form-control" name="non_dmt_amount" id="non_dmt_amount"
                                            placeholder="INR " style="box-shadow: 0px; 0px">
@@ -349,9 +352,10 @@
                             </div>
 
                             <div class="form-group col-sm-6">
-                                <label class="control-label"><b>Payment Mode</b></label>
+                                <label class="control-label"><b>Payment Mode</b><span style="color: red">*</span></label>
                                 <div>
                                     <select type="text" class="form-control" name="payment_mode" id="payment_mode" style="box-shadow: 0px 0px;font-size:80%">
+                                        <option>Please Select</option>
                                         {% for mod in payment_mods %}
                                         <option value="{{ mod.id }}">{{ mod.name }}</option>
                                         {% endfor %}
@@ -362,14 +366,14 @@
 
                         <div class="row" >
                             <div class="form-group col-sm-6">
-                                <label class="control-label"><b>Reference Id</b></label>
+                                <label class="control-label"><b>Reference Id</b><span style="color: red">*</span></label>
                                 <div>
-                                    <input type="text" class="form-control" style="box-shadow: 0px 0px;border-style: solid;" name="ref_no" id="ref_no" required>
+                                    <input type="text" class="form-control" style="box-shadow: 0px 0px;border-style: solid;" required name="ref_no" id="ref_no" required>
                                 </div>
                             </div>
                             <input type="text" id="document" name="document" value="" hidden>
+                            <p><small><span style="color: red">*</span> Indicates required field.</small></p>
                         </div>
-
                         <div class="row" >
                             <div class="form-group col-sm-6"></div>
                             <div class="form-group col-sm-6">
