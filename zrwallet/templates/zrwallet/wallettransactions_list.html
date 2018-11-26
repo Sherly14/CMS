@@ -55,8 +55,8 @@
                                 <th scope="col">Transaction ID</th>
                                 <th scope="col">Transaction type</th>
                                 <th scope="col">Payment ID</th>
-                                <th scope="col">DMT Transaction</th>
-                                <th scope="col">Non DMT Transaction</th>
+                                <th scope="col">Txn Amount</th>
+                                <!--<th scope="col">Non DMT Transaction</th>-->
                                 <th scope="col">Balance</th>
                                 <!--<th scope="col">Non DMT Balance</th>-->
                                 <th scope="col">Bank UTR</th>
@@ -74,9 +74,9 @@
                                     <td>{{ passbook.transaction_id | default_if_none:"NA"}}</td>
                                     <td>{{ passbook.type | default_if_none:"NA"}}</td>
                                     <td>{{ passbook.payment_request_id | default_if_none:"NA"}}</td>
-                                    <td>{{ passbook.dmt_balance }}</td>
-                                    <td>{{ passbook.non_dmt_balance }}</td>
-                                    <td>{{ passbook.dmt_closing_balance }}</td>
+                                    <td>{{ passbook.amount_sum }}</td>
+                                    <!--<td>{{ passbook.non_dmt_balance }}</td>-->
+                                    <td>{{ passbook.balance_sum }}</td>
                                     <!--<td>{{ passbook.non_dmt_closing_balance }}</td>-->
                                     <td>{{ passbook.bank_ref | default_if_none:"NA" }}</td>
                                     <td>{{ passbook.customer | default_if_none:"NA"}}</td>
