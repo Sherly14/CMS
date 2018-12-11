@@ -52,9 +52,7 @@
                         <tr style="border-bottom-style: solid;">
                             <th scope="col">Status</th>
                             <th scope="col">Date</th>
-                            <!--<th scope="col">Amount</th>-->
                             <th scope="col">Amount</th>
-                            <!--<th scope="col">NON DMT Amount</th>-->
                             <th scope="col">Payment Mode</th>
                             <!--<th scope="col">Challan document</th>-->
                             <th scope="col">To User Name</th>
@@ -78,9 +76,7 @@
                                 {% endif %}
                             </td>
                             <td>{{ payment_request.at_created }}</td>
-                            <!--<td>{{ payment_request.amount }}</td>-->
-                            <td>{{ payment_request.dmt_amount }}</td>
-                            <!--<td>{{ payment_request.non_dmt_amount }}</td>-->
+                            <td>{{ payment_request.amount }}</td>
                             <td>{{ payment_request.payment_mode }}</td>
                             <!--<td><a class="btn btn-outline-success btn-xs" href="{{ payment_request.document }}">Download</a></td>-->
                             <td>
