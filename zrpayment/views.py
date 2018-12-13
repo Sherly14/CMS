@@ -53,6 +53,8 @@ BENEFICIARY = 'BENEFICIARY'
 CHECKER = 'CHECKER'
 ADMINSTAFF = 'ADMINSTAFF'
 
+LIMIT_ERR_MSG = "Something went wrong, please try again later"
+
 
 class PaymentRequestDetailView(DetailView):
     queryset = PaymentRequest.objects.all()
@@ -238,8 +240,9 @@ class AcceptPaymentRequestView(APIView):
 
                     balance_insufficient = []
                     if (
-                                    supervisor_wallet.dmt_balance >= payment_request.dmt_amount and
-                                    supervisor_wallet.non_dmt_balance >= payment_request.non_dmt_amount
+                        supervisor_wallet.dmt_balance >= payment_request.dmt_amount and
+                        supervisor_wallet.non_dmt_balance >= payment_request.non_dmt_amount and
+                        supervisor_wallet.dmt_limit >= payment_request.dmt_amount
                     ):
                         # For DMT
                         zr_wallet.dmt_balance += payment_request.dmt_amount
@@ -295,7 +298,10 @@ class AcceptPaymentRequestView(APIView):
                         sms.wallet(wallet_transaction)
                         sms.wallet(wallet_transaction_supervisor)
                     else:
-                        message = "Insufficient balance in (%s), Please recharge you wallet" % (','.join(balance_insufficient))
+                        if supervisor_wallet.dmt_limit < payment_request.dmt_amount:
+                            message = LIMIT_ERR_MSG
+                        else:
+                            message = "Insufficient balance in (%s), Please recharge you wallet" % (','.join(balance_insufficient))
             else:
                 message = "Payment request already {status}".format(status=payment_request.get_status_display())
 
@@ -903,7 +909,8 @@ class GenerateTopUpRequestView(APIView):
                     balance_insufficient = []
                     if (
                             supervisor_wallet.dmt_balance >= payment_request.dmt_amount and
-                            supervisor_wallet.non_dmt_balance >= payment_request.non_dmt_amount
+                            supervisor_wallet.non_dmt_balance >= payment_request.non_dmt_amount and
+                            supervisor_wallet.dmt_limit >= payment_request.dmt_amount
                     ):
                         # For DMT
                         zr_wallet.dmt_balance += payment_request.dmt_amount
@@ -956,14 +963,17 @@ class GenerateTopUpRequestView(APIView):
                         payment_request.status = 1
                         payment_request.save()
                         message = '{0} {1} {2}'.format(SUCCESS_MESSAGE_START,
-                                                               "TopUp sent successfully",
-                                                               MESSAGE_END)
+                                                       "TopUp sent successfully",
+                                                       MESSAGE_END)
 
                         sms.wallet(wallet_transaction_supervisor)
                         sms.wallet(wallet_transaction)
                     else:
-                        message = "Insufficient balance in (%s), Please recharge you wallet" % (
-                        ','.join(balance_insufficient))
+                        if supervisor_wallet.dmt_limit < payment_request.dmt_amount:
+                            message = LIMIT_ERR_MSG
+                        else:
+                            message = "Insufficient balance in (%s), Please recharge you wallet" % (
+                                ','.join(balance_insufficient))
 
                     response_data = {
                         "responser": "payment_request",
