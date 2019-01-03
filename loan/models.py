@@ -80,3 +80,10 @@ class HappyRepayment(RowInfo):
 
     def __str__(self):
         return '%s - (%s)' % (self.user, self.amount_repaid)
+
+
+class LoanLead(RowInfo):
+    role_id = models.CharField(max_length=50,null=True, blank=True)
+    mobile_no = models.CharField(max_length=50)
+    request_json = JSONField(null=True, blank=True)
+    loan_json = JSONField(null=True, blank=True)

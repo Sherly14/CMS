@@ -6,6 +6,7 @@ from django.conf import settings as dj_settings
 from django.contrib.auth.hashers import check_password
 from django.contrib.auth.models import User
 from django.db import models
+from django.contrib.postgres.fields import JSONField
 
 from common_utils import email_utils
 from zruser.utils.constants import KYC_APPROVAL_CHOICES, GENDER_CHOICES, BANK_ACCOUNT_TYPES, BANK_CHANNEL_TYPES
