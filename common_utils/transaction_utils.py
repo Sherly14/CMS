@@ -129,6 +129,14 @@ def calculate_commission():
                 dmt_commission_struct = None
                 distributor = get_main_distributor_from_merchant(merchant)
 
+                res = transaction.transaction_response_json
+                txn_wallet = None
+
+                if 'txn_wallet' in res:
+                    txn_wallet = res['txn_wallet']
+                else:
+                    continue
+
                 if not distributor:
                     continue
 
@@ -157,7 +165,8 @@ def calculate_commission():
                         is_default=False,
                         distributor=distributor,
                         minimum_amount__lte=transaction.amount,
-                        maximum_amount__gte=transaction.amount
+                        maximum_amount__gte=transaction.amount,
+                        is_customer_kyc=(True if txn_wallet is "1" else False)
                     ).last()
 
                     if not dmt_commission_struct:
@@ -166,7 +175,8 @@ def calculate_commission():
                             minimum_amount__lte=transaction.amount,
                             maximum_amount__gte=transaction.amount,
                             is_enabled=True,
-                            is_default=True
+                            is_default=True,
+                            is_customer_kyc=(True if txn_wallet is "1" else False)
                         ).last()
                     if not dmt_commission_struct:
                         raise Exception("DMT structure not found for transaction(%s)")
@@ -200,7 +210,8 @@ def calculate_commission():
                         user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
                 else:
                     commission_amt = (customer_fee * dmt_commission_struct.commission_for_merchant) / 100
-                    commission_amt = (commission_amt * decimal.Decimal(84.745)) / 100
+                    # commission_amt = (commission_amt * decimal.Decimal(84.745)) / 100
+                    commission_amt = commission_amt / ((dmt_commission_struct * decimal.Decimal(0.01)) + 1)
                     tds_value = (commission_amt * dmt_commission_struct.tds_value) / 100
                     user_gst = (commission_amt * dmt_commission_struct.gst_value) / 100
 
@@ -252,7 +263,8 @@ def calculate_commission():
                         commission_for_distributor = dmt_commission_struct.commission_for_distributor + dmt_commission_struct.commission_for_sub_distributor
 
                     commission_amt = (customer_fee * commission_for_distributor) / 100
-                    commission_amt = (commission_amt * decimal.Decimal(84.745)) / 100
+                    # commission_amt = (commission_amt * decimal.Decimal(84.745)) / 100
+                    commission_amt = commission_amt / ((dmt_commission_struct * decimal.Decimal(0.01)) + 1)
                     tds_value = (commission_amt * dmt_commission_struct.tds_value) / 100
                     user_gst = (commission_amt * dmt_commission_struct.gst_value) / 100
 
@@ -292,7 +304,8 @@ def calculate_commission():
                             user_gst = (commission_amt * bill_pay_comm.gst_value) / 100
                     else:
                         commission_amt = (customer_fee * dmt_commission_struct.commission_for_sub_distributor) / 100
-                        commission_amt = (commission_amt * decimal.Decimal(84.745)) / 100
+                        # commission_amt = (commission_amt * decimal.Decimal(84.745)) / 100
+                        commission_amt = commission_amt / ((dmt_commission_struct * decimal.Decimal(0.01)) + 1)
                         tds_value = (commission_amt * dmt_commission_struct.tds_value) / 100
                         user_gst = (commission_amt * dmt_commission_struct.gst_value) / 100
 
