@@ -968,7 +968,7 @@ class DashBoardView(ListView):
                 try:
                     eko_last = list(transaction_models.Transaction.objects.filter(
                         type__name='DMT',
-                        status=TRANSACTION_STATUS_SUCCESS,
+                        status__in=[TRANSACTION_STATUS_SUCCESS, TRANSACTION_STATUS_PENDING],
                         transaction_response_json__has_key='data'
                     ).order_by('-id')[:1].
                         values_list('transaction_response_json', flat=True))[0]
