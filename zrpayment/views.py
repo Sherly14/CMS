@@ -77,6 +77,7 @@ class GeneratePaymentRequestView(APIView):
     queryset = PaymentRequest.objects.all()
     permission_classes = (IsAuthenticated,)
 
+    @transaction.atomic
     def post(self, request):
         data = {}
         for detail, value in request.data.items():
@@ -191,6 +192,7 @@ class RefundRequestView(APIView):
 class AcceptPaymentRequestView(APIView):
     permission_classes = (IsAuthenticated,)
 
+    @transaction.atomic
     def post(self, request):
         data = dict(json.loads(request.data.keys()[0]))
         request_id = data.get("request_id")
@@ -260,18 +262,9 @@ class AcceptPaymentRequestView(APIView):
 
                     if updated:
                         message = "Wallet updated successfully"
-                        zr_wallet.save(
-                            update_fields=[
-                                'dmt_balance',
-                                'non_dmt_balance'
-                            ]
-                        )
-                        supervisor_wallet.save(
-                            update_fields=[
-                                'dmt_balance',
-                                'non_dmt_balance'
-                            ]
-                        )
+                        zr_wallet.save()
+                        supervisor_wallet.save()
+
                         wallet_transaction_supervisor = zrwallet_models.WalletTransactions.objects.create(
                             wallet=supervisor_wallet,
                             transaction=None,
@@ -311,6 +304,7 @@ class AcceptPaymentRequestView(APIView):
 class RejectPaymentRequestView(APIView):
     permission_classes = (IsAuthenticated,)
 
+    @transaction.atomic
     def post(self, request):
         data = dict(json.loads(request.data.keys()[0]))
         request_id = data.get("request_id")

@@ -140,7 +140,7 @@ class DMTCommissionStructure(RowInfo):
     gst_value = models.DecimalField(max_digits=7, decimal_places=4, default=0.00)
     is_enabled = models.BooleanField(default=True)
     is_default = models.BooleanField(default=False)
-
+    sender_kyc_benefit = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         self.commission_for_zrupee = Decimal(self.commission_for_zrupee).quantize(Decimal("0.00"))
