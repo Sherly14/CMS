@@ -1,5 +1,6 @@
 import requests
 import locale
+from datetime import datetime
 
 from zrcms.env_vars import BHASHSMS_BASE_URL, BHASHSMS_USERNAME, BHASHSMS_PASSWORD, ENVIRONMENT
 
@@ -28,14 +29,14 @@ def send_sms(sender='ZRUPEE', phone='', text='', priority='', stype='normal'):
 
     try:
         if ENVIRONMENT == 'PRODUCTION':
-            sms_req = requests.get(url=sms_url)
-            print 'sms_req response' + sms_req.content
+            sms_req = requests.get(url=sms_url, timeout=5)
+            print str(datetime.now()), 'sms_req response' + sms_req.content
         else:
             print "ENVIRONMENT not PRODUCTION"
             print "sms text - \n", text
             pass
     except requests.RequestException as e:
-        print 'error - ', e
+        print str(datetime.now()), 'error - ', e
 
 
 def wallet(wallet_transaction):
