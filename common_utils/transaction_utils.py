@@ -132,11 +132,12 @@ def calculate_commission():
                 res = transaction.transaction_response_json
                 txn_wallet = None
 
-                if 'data' in res and 'txn_wallet' in res['data']:
-                    txn_wallet = res['data']['txn_wallet']
-                else:
-                    print 'txn_wallet not found'
-                    continue
+                if transaction.type.name == TRANSACTION_TYPE_DMT:
+                    if 'data' in res and 'txn_wallet' in res['data']:
+                        txn_wallet = res['data']['txn_wallet']
+                    else:
+                        print 'txn_wallet not found'
+                        continue
 
                 if not distributor:
                     continue
