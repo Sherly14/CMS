@@ -57,7 +57,7 @@ class WalletTransactions(RowInfo):
         verbose_name_plural = 'WalletTransactions'
 
     def __unicode__(self):
-        return '%s' % (self.wallet)
+        return '%s' % self.wallet
 
     def save(self, *args, **kwargs):
         self.dmt_balance = Decimal(self.dmt_balance).quantize(Decimal("0.00"))
@@ -84,3 +84,9 @@ class WalletTransactions(RowInfo):
 
     def nondmtnegate(self):
         return -self.non_dmt_balance
+
+    def amount_sum(self):
+        return Decimal(self.dmt_balance + self.non_dmt_balance).quantize(Decimal("0.00"))
+
+    def balance_sum(self):
+        return Decimal(self.dmt_closing_balance + self.non_dmt_closing_balance).quantize(Decimal("0.00"))

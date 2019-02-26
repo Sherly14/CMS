@@ -89,6 +89,8 @@ class GeneratePaymentRequestView(APIView):
                 # print detail, value
                 data[detail] = value if value else ""
 
+        data['amount'] = data['dmt_amount']
+
         data["from_user"] = request.user.zr_admin_user.zr_user.id
         main_distributor = None
         error_message = '{0} {1} {2}'.format(ERROR_MESSAGE_START,
@@ -209,12 +211,7 @@ class AcceptPaymentRequestView(APIView):
                     )
                     zr_wallet.dmt_balance += payment_request.dmt_amount
                     zr_wallet.non_dmt_balance += payment_request.non_dmt_amount
-                    zr_wallet.save(
-                        update_fields=[
-                            'dmt_balance',
-                            'non_dmt_balance'
-                        ]
-                    )
+                    zr_wallet.save()
                     wallet_transaction = zrwallet_models.WalletTransactions.objects.create(
                         wallet=zr_wallet,
                         transaction=None,
