@@ -5,6 +5,7 @@ from django.db import models
 
 from zruser.models import ZrUser, Sender, Beneficiary, ZrTerminal
 from zrutils.common.modelutils import RowInfo
+from zrcommission.models import AEPSCommissionStructure
 
 
 class DistributorMerchant(RowInfo):
@@ -117,3 +118,16 @@ class RetailerTerminal(RowInfo):
 
     def __unicode__(self):
         return '%s - %s' % (self.retailer, self.terminal)
+
+
+class AEPSCommission(RowInfo):
+    distributor = models.ForeignKey(to=ZrUser, related_name='dist_aeps_comm_mappings', null=True, blank=False)
+    merchant = models.ForeignKey(to=ZrUser, related_name='merc_aeps_comm_mappings', null=True, blank=True)
+    aeps_commission_structure = models.ForeignKey(to=AEPSCommissionStructure, related_name='aeps_comm_mappings', null=True, blank=False)
+    is_active = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name_plural = 'AEPSCommissionMappings'
+
+    def __unicode__(self):
+        return '%s: %s - %s' % (self.pk, self.distributor, self.merchant)
