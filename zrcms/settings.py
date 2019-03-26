@@ -107,11 +107,11 @@ if ENVIRONMENT == 'local':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'dfsgpmoh5tgdjp',
-            'USER': 'mmbunvblidzaqk',
-            'PASSWORD': 'e11a7554a633d40c59256c91db24712310769e494652d3fce09862305ca4d754',
-            'HOST': 'ec2-54-75-239-237.eu-west-1.compute.amazonaws.com',
-            'PORT': 5432
+            'NAME': 'zrupee',
+            'USER': 'zrupee',
+            'PASSWORD': 'zrupee',
+            'HOST': 'localhost',
+            'PORT': '',
 
         }
     }
