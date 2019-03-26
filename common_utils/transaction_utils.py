@@ -111,6 +111,15 @@ def get_main_admin():
 
 
 TRANSACTION_TYPE_DMT = 'DMT'
+TRANSACTION_TYPE_AEPS_CASH_OUT = 'AEPS_CASH_OUT'
+
+
+class Struct:
+    def __init__(self, **entries):
+        self.__dict__.update(entries)
+
+    def __str__(self):
+        return str(self.__class__) + ": " + str(self.__dict__)
 
 
 def calculate_commission():
@@ -118,15 +127,20 @@ def calculate_commission():
     index = 0
     for transaction in zr_transaction_models.Transaction.objects.filter(
         is_commission_created=False,
-        status='S',
-    ).exclude(type__name__in=['DMT_ACC_VERIFICATION', 'SERVICE_ACTIVATION_CDM']).order_by('id'):
+        status='S'
+    ).exclude(type__name__in=['DMT_ACC_VERIFICATION',
+                              'SERVICE_ACTIVATION_CDM',
+                              'SERVICE_ACTIVATION_AEPS']).order_by('-id'):
         index = index + 1
         print('-->', index, transaction.pk)
+        print transaction.type.name, TRANSACTION_TYPE_AEPS_CASH_OUT
+
         try:
             with dj_transaction.atomic():
                 merchant = transaction.user
                 bill_pay_comm = None
                 dmt_commission_struct = None
+                aeps_commission_struct = None
                 distributor = get_main_distributor_from_merchant(merchant)
 
                 res = transaction.transaction_response_json
@@ -142,7 +156,34 @@ def calculate_commission():
                 if not distributor:
                     continue
 
-                if not transaction.type.name == TRANSACTION_TYPE_DMT:
+                rule = None
+                if transaction.type.name == TRANSACTION_TYPE_AEPS_CASH_OUT:
+                    try:
+                        req = transaction.transaction_request_json
+                        aeps_commission_struct = zr_commission_models.AEPSCommissionStructure.objects.get(
+                            pk=req['data']['comm_struct_id'])
+                    except Exception as e:
+                        print 'err - ', e
+
+                    if not aeps_commission_struct:
+                        print 'aeps_commission_struct not found'
+                        continue
+
+                    rule_set = aeps_commission_struct.rule
+
+                    for r in rule_set:
+                        r = Struct(**r)
+                        if r.minimum_amount <= transaction.amount <= r.maximum_amount:
+                            rule = r
+                    customer_fee = 0
+                    if rule.commission_type == 'P':
+                        customer_fee = (transaction.amount * decimal.Decimal(rule.customer_fee)) / 100
+                    elif rule.commission_type == 'F':
+                        customer_fee = decimal.Decimal(rule.customer_fee)
+                    if customer_fee < rule.min_charge:
+                        customer_fee = rule.min_charge
+
+                elif not transaction.type.name == TRANSACTION_TYPE_DMT:
                     sp = transaction.service_provider
                     if not sp:
                         continue
@@ -183,8 +224,6 @@ def calculate_commission():
                     if not dmt_commission_struct:
                         raise Exception("DMT structure not found for transaction(%s)")
 
-                    print 'dmt_commission_struct.pk -', dmt_commission_struct.pk
-
                     customer_fee = 0
                     if dmt_commission_struct.commission_type == 'P':
                         customer_fee = (transaction.amount * dmt_commission_struct.customer_fee) / 100
@@ -198,7 +237,19 @@ def calculate_commission():
                         continue
 
                 # For merchant
-                if not transaction.type.name == TRANSACTION_TYPE_DMT:
+                if transaction.type.name == TRANSACTION_TYPE_AEPS_CASH_OUT:
+                    commission_amt = 0
+
+                    if rule.commission_type == 'P':
+                        commission_amt = (customer_fee * decimal.Decimal(rule.merchant_commission)) / 100
+                    elif rule.commission_type == 'F':
+                        commission_amt = decimal.Decimal(rule.merchant_commission)
+
+                    commission_amt = commission_amt / ((rule.gst_value * decimal.Decimal(0.01)) + 1)
+                    tds_value = (commission_amt * rule.tds_value) / 100
+                    user_gst = (commission_amt * rule.gst_value) / 100
+
+                elif not transaction.type.name == TRANSACTION_TYPE_DMT:
                     commission_amt = 0
                     tds_value = 0
                     user_gst = 0
@@ -243,7 +294,19 @@ def calculate_commission():
                 user_gst = 0
                 commission_for_distributor = 0
 
-                if not transaction.type.name == TRANSACTION_TYPE_DMT:
+                if transaction.type.name == TRANSACTION_TYPE_AEPS_CASH_OUT:
+                    commission_amt = 0
+
+                    if rule.commission_type == 'P':
+                        commission_amt = (customer_fee * decimal.Decimal(rule.distributor_commission)) / 100
+                    elif rule.commission_type == 'F':
+                        commission_amt = decimal.Decimal(rule.distributor_commission)
+
+                    commission_amt = commission_amt / ((rule.gst_value * decimal.Decimal(0.01)) + 1)
+                    tds_value = (commission_amt * rule.tds_value) / 100
+                    user_gst = (commission_amt * rule.gst_value) / 100
+
+                elif not transaction.type.name == TRANSACTION_TYPE_DMT:
                     if sub_distr:
                         commission_for_distributor = bill_pay_comm.commission_for_distributor
                     else:
@@ -291,7 +354,19 @@ def calculate_commission():
 
                 # For subdistributor
                 if sub_distr:
-                    if not transaction.type.name == TRANSACTION_TYPE_DMT:
+                    if transaction.type.name == TRANSACTION_TYPE_AEPS_CASH_OUT:
+                        commission_amt = 0
+
+                        if rule.commission_type == 'P':
+                            commission_amt = (customer_fee * decimal.Decimal(rule.sub_distributor_commission)) / 100
+                        elif rule.commission_type == 'F':
+                            commission_amt = decimal.Decimal(rule.sub_distributor_commission)
+
+                        commission_amt = commission_amt / ((rule.gst_value * decimal.Decimal(0.01)) + 1)
+                        tds_value = (commission_amt * rule.tds_value) / 100
+                        user_gst = (commission_amt * rule.gst_value) / 100
+
+                    elif not transaction.type.name == TRANSACTION_TYPE_DMT:
                         commission_amt = 0
                         tds_value = 0
                         user_gst = 0
@@ -332,7 +407,19 @@ def calculate_commission():
 
                 # For zrupee
                 commission_amt = 0
-                if not transaction.type.name == TRANSACTION_TYPE_DMT:
+                if transaction.type.name == TRANSACTION_TYPE_AEPS_CASH_OUT:
+                    commission_amt = 0
+
+                    if rule.commission_type == 'P':
+                        commission_amt = (customer_fee * decimal.Decimal(rule.zrupee_commission)) / 100
+                    elif rule.commission_type == 'F':
+                        commission_amt = decimal.Decimal(rule.zrupee_commission)
+
+                    commission_amt = commission_amt / ((rule.gst_value * decimal.Decimal(0.01)) + 1)
+                    tds_value = (commission_amt * rule.tds_value) / 100
+                    user_gst = (commission_amt * rule.gst_value) / 100
+
+                elif not transaction.type.name == TRANSACTION_TYPE_DMT:
                     if bill_pay_comm.commission_type == 'P':
                         if bill_pay_comm.is_chargable:
                             commission_amt = transaction.additional_charges

@@ -172,4 +172,4 @@ class AEPSCommissionStructure(RowInfo):
         verbose_name_plural = 'AEPSCommissionStructure'
 
     def __unicode__(self):
-        return '%s' % self.transaction_vendor
+        return '%s - %s' % (self.transaction_vendor, self.pk)
