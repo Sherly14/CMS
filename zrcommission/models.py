@@ -7,7 +7,6 @@ from django.db import models
 
 from zrcommission.utils.constants import COMMISSION_CHOICES
 from zruser.models import ZrUser
-from zrmapping import models as zr_mappings
 from zrutils.common.modelutils import RowInfo
 from django.contrib.postgres.fields import JSONField
 
