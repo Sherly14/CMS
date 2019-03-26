@@ -9,6 +9,7 @@ from zrcommission.utils.constants import COMMISSION_CHOICES
 from zruser.models import ZrUser
 from zrmapping import models as zr_mappings
 from zrutils.common.modelutils import RowInfo
+from django.contrib.postgres.fields import JSONField
 
 
 class Commission(RowInfo):
@@ -155,3 +156,20 @@ class DMTCommissionStructure(RowInfo):
 
     def __unicode__(self):
         return '%s - net margin %s' % (self.transaction_vendor, self.customer_fee)
+
+
+class AEPSCommissionStructure(RowInfo):
+
+    rule = JSONField(null=True, blank=True)
+    transaction_vendor = models.ForeignKey(to='zrtransaction.Vendor')
+    is_enabled = models.BooleanField(default=True)
+    is_default = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        super(AEPSCommissionStructure, self).save(*args, **kwargs)
+
+    class Meta:
+        verbose_name_plural = 'AEPSCommissionStructure'
+
+    def __unicode__(self):
+        return '%s - %s' % (self.transaction_vendor, self.pk)
