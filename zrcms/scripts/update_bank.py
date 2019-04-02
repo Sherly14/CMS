@@ -5,6 +5,8 @@ import decimal
 import math
 import numbers
 import pandas as pd
+import datetime
+from pytz import timezone
 
 
 cur_dir = os.path.dirname(os.path.realpath(__file__))
@@ -16,7 +18,7 @@ django.setup()  # NOQA
 from zruser.models import Bank
 
 # input_file = os.path.join(cur_dir, 'NON-DMT DEFAULT COMMISSION STRUCTURE new.xls')
-input_file = os.path.join(cur_dir, 'Bank_Detail_sheet_5.7.18.xlsx')
+input_file = os.path.join(cur_dir, 'Bank_list.xlsx')
 
 
 if not os.path.exists(input_file):
@@ -28,7 +30,8 @@ exl = pd.read_excel(
     sheetname='Sheet1',
     skiprows=0
 )
-
+ist = timezone('Asia/Calcutta')
+print '\nUpdate Bank| ', str(datetime.datetime.now(ist)), '->\n'
 
 for index, df in exl.iterrows():
     print('-->' + str(index + 1))

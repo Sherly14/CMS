@@ -8,9 +8,13 @@ SECRET_KEY = os.getenv('APP_SECRET_KEY', LOCAL_SECRET_KEY)
 # EKO credentials
 # Trying to get the credentials from environment Variables, falling back to sandbox environment
 EKO_INITIATOR_ID = os.getenv('EKO_INITIATOR_ID', '7506988914')
+EKO_AEPS_INITIATOR_ID = os.getenv('EKO_AEPS_INITIATOR_ID', '7506988914')
+EKO_AEPS_USER_CODE = os.getenv('EKO_AEPS_USER_CODE', '20810200')
 EKO_DEVELOPER_KEY = os.getenv('EKO_DEVELOPER_KEY', 'becbbce45f79c6f5109f848acd540567')
 EKO_TRANSACTION_ENQUIRY_URL = os.getenv('EKO_TRANSACTION_ENQUIRY_URL',
                                         'https://staging.eko.co.in:25004/ekoapi/v1/transactions/')
+EKO_USER_SERVICES_ENQUIRY_URL = os.getenv('EKO_USER_SERVICES_ENQUIRY_URL',
+                                          'https://staging.eko.in:25004/ekoapi/v1/user/services/')
 
 
 QUICKWALLET_ZR_PARTERNERID = os.getenv('QUICKWALLET_ZR_PARTERNERID', '293')
