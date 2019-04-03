@@ -88,7 +88,7 @@ def debit_wallet():
         transaction_request_json = {"data": "AePS Activation: Manual Debit"}
 
         zr_transaction = Transaction.objects.create(
-            status='S',
+            status='I',
             type=transaction_type,
             vendor=vendor,
             service_provider=None,

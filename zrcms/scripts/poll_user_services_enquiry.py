@@ -28,7 +28,7 @@ from django.db import transaction as dj_transaction
 
 def poll_user_services_enquiry():
     transactions = Transaction.objects.filter(type__name='SERVICE_ACTIVATION_AEPS')\
-        .exclude(status=AEPS_ONBOARDING_STATUS['ACTIVATED'])
+        .exclude(status=AEPS_ONBOARDING_STATUS['ACTIVATED'], amount=0)
     # exclude success
     print 'polling user services status for queryset ', transactions, transactions
 
@@ -66,16 +66,27 @@ def poll_user_services_enquiry():
                     transaction.save()
 
                     if transaction.transaction_response_json is None:
-                        transaction.transaction_response_json = dict(poll_activated_response=json.dumps(response_data))
+                        transaction.transaction_response_json = dict(poll_activated_response=aeps_service)
                     else:
-                        transaction.transaction_response_json['poll_activated_response'] = json.dumps(response_data)
+                        transaction.transaction_response_json['poll_activated_response'] = aeps_service
                     transaction.save()
 
                 elif aeps_service['status'] == PENDING and transaction.status == AEPS_ONBOARDING_STATUS['PENDING'] or \
-                        aeps_service['status'] == APPROVED and transaction.status == AEPS_ONBOARDING_STATUS['APPROVED'] or \
-                        aeps_service['status'] == RESUBMISSION and transaction.status == AEPS_ONBOARDING_STATUS['RESUBMISSION']:
-
+                        aeps_service['status'] == APPROVED and transaction.status == AEPS_ONBOARDING_STATUS['APPROVED']:
                     pass
+
+                elif transaction.transaction_response_json is not None and 'poll_resubmission_response' in \
+                        transaction.transaction_response_json and aeps_service['comments'] != \
+                        transaction.transaction_response_json['poll_resubmission_response']['comments']:
+
+                    transaction.status = AEPS_ONBOARDING_STATUS['RESUBMISSION']
+                    transaction.save()
+
+                    if transaction.transaction_response_json is None:
+                        transaction.transaction_response_json = dict(poll_resubmission_response=aeps_service)
+                    else:
+                        transaction.transaction_response_json['poll_resubmission_response'] = aeps_service
+                    transaction.save()
 
                 elif aeps_service['status'] == PENDING:
 
@@ -83,9 +94,9 @@ def poll_user_services_enquiry():
                     transaction.save()
 
                     if transaction.transaction_response_json is None:
-                        transaction.transaction_response_json = dict(poll_pending_response=json.dumps(response_data))
+                        transaction.transaction_response_json = dict(poll_pending_response=aeps_service)
                     else:
-                        transaction.transaction_response_json['poll_pending_response'] = json.dumps(response_data)
+                        transaction.transaction_response_json['poll_pending_response'] = aeps_service
                     transaction.save()
 
                 elif aeps_service['status'] == APPROVED:
@@ -94,9 +105,9 @@ def poll_user_services_enquiry():
                     transaction.save()
 
                     if transaction.transaction_response_json is None:
-                        transaction.transaction_response_json = dict(poll_approved_response=json.dumps(response_data))
+                        transaction.transaction_response_json = dict(poll_approved_response=aeps_service)
                     else:
-                        transaction.transaction_response_json['poll_approved_response'] = json.dumps(response_data)
+                        transaction.transaction_response_json['poll_approved_response'] = aeps_service
                     transaction.save()
 
                 elif aeps_service['status'] == RESUBMISSION:
@@ -105,9 +116,13 @@ def poll_user_services_enquiry():
                     transaction.save()
 
                     if transaction.transaction_response_json is None:
-                        transaction.transaction_response_json = dict(poll_resubmission_response=json.dumps(response_data))
+                        transaction.transaction_response_json = dict(poll_resubmission_response=aeps_service)
+                    elif 'poll_resubmission_response' in transaction.transaction_response_json and \
+                            aeps_service['comments'] == \
+                            transaction.transaction_response_json['poll_resubmission_response']['comments']:
+                        pass
                     else:
-                        transaction.transaction_response_json['poll_resubmission_response'] = json.dumps(response_data)
+                        transaction.transaction_response_json['poll_resubmission_response'] = aeps_service
                     transaction.save()
 
                 else:
