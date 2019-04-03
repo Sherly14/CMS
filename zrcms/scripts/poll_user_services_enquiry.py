@@ -75,19 +75,6 @@ def poll_user_services_enquiry():
                         aeps_service['status'] == APPROVED and transaction.status == AEPS_ONBOARDING_STATUS['APPROVED']:
                     pass
 
-                elif transaction.transaction_response_json is not None and 'poll_resubmission_response' in \
-                        transaction.transaction_response_json and aeps_service['comments'] != \
-                        transaction.transaction_response_json['poll_resubmission_response']['comments']:
-
-                    transaction.status = AEPS_ONBOARDING_STATUS['RESUBMISSION']
-                    transaction.save()
-
-                    if transaction.transaction_response_json is None:
-                        transaction.transaction_response_json = dict(poll_resubmission_response=aeps_service)
-                    else:
-                        transaction.transaction_response_json['poll_resubmission_response'] = aeps_service
-                    transaction.save()
-
                 elif aeps_service['status'] == PENDING:
 
                     transaction.status = AEPS_ONBOARDING_STATUS['PENDING']
