@@ -28,7 +28,7 @@ import datetime
 
 from random import randint
 
-input_file = os.path.join(cur_dir, 'aeps_activation.xls')
+input_file = os.path.join(cur_dir, 'cdm_activation.xls')
 
 
 if not os.path.exists(input_file):
@@ -37,7 +37,7 @@ if not os.path.exists(input_file):
 
 exl = pd.read_excel(
     input_file,
-    sheetname='Sheet1',
+    sheetname='Sheet2',
     skiprows=0
 )
 
@@ -59,9 +59,9 @@ def debit_wallet():
 
         print 'merchant_id -', int(float(merchant_id))
 
-        amount = 499
+        amount = 118
 
-        zr_user = ZrUser.objects.filter(id=int(float(merchant_id)), role__name='MERCHANT', is_active=True).\
+        zr_user = ZrUser.objects.filter(id=int(float(merchant_id))).\
             order_by('-id').first()
         print 'zr_user -', zr_user
 
@@ -69,7 +69,7 @@ def debit_wallet():
             print "zr_user not found"
             continue
 
-        vendor = Vendor.objects.filter(name='EKO').first()
+        vendor = Vendor.objects.filter(name='ZRUPEE').first()
 
         zr_wallet = Wallet.objects.get(
             merchant=zr_user
@@ -81,18 +81,18 @@ def debit_wallet():
             print "Not enough balance in Wallet - amount =", amount, "balance =", zr_wallet.dmt_balance
             continue
 
-        transaction_type = TransactionType.objects.filter(name='SERVICE_ACTIVATION_AEPS').first()
+        transaction_type = TransactionType.objects.filter(name='SERVICE_ACTIVATION_CDM_ZRUPEE').first()
 
-        transaction_request_json = {"data": "AePS Activation: Manual Debit"}
+        transaction_request_json = {"data": "SERVICE_ACTIVATION_CDM_ZRUPEE: Manual Debit"}
 
         zr_transaction = Transaction.objects.create(
-            status='I',
+            status='S',
             type=transaction_type,
             vendor=vendor,
             service_provider=None,
             amount=amount,
             vendor_txn_id='NA',
-            txn_id=str(randint(1000000000000, 9999999999999)) + 'AEPS',
+            txn_id=str(randint(1000000000000, 9999999999999)) + 'CDM',
             customer=zr_user.mobile_no,
             beneficiary=get_main_admin().mobile_no,
             user=zr_user,
