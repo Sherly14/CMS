@@ -18,6 +18,7 @@ class Wallet(RowInfo):
     dmt_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     non_dmt_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     dmt_limit = models.DecimalField(max_digits=10, decimal_places=3, default=0.00, null=True)
+    aeps_amount = models.DecimalField(max_digits=10, decimal_places=3, default=0.00, null=True)
 
     class Meta:
         verbose_name_plural = 'Wallets'
@@ -50,6 +51,10 @@ class WalletTransactions(RowInfo):
 
     non_dmt_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     non_dmt_closing_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+
+    aeps_amount = models.DecimalField(max_digits=10, decimal_places=3, default=0.00, null=True)
+    aeps_closing_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00, null=True)
+
     is_success = models.BooleanField(default=False)
     zr_dmt_closing_balance = models.DecimalField(max_digits=10, decimal_places=3, default=0.00, null=True)
 

@@ -88,6 +88,7 @@ class PaymentRequest(RowInfo):
     amount = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     dmt_amount = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
     non_dmt_amount = models.DecimalField(max_digits=10, decimal_places=3, default=0.00)
+    aeps_amount = models.DecimalField(max_digits=10, decimal_places=3, default=0.00, null=True)
 
     to_bank = models.ForeignKey(to=Bank, related_name='to_bank')
     to_account_no = models.CharField(max_length=30)
