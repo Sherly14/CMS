@@ -6,6 +6,7 @@ import decimal
 import pandas as pd
 import json
 
+
 cur_dir = os.path.dirname(os.path.realpath(__file__))
 sys.path.append(os.path.join(cur_dir, '..'))  # NOQA
 sys.path.append(os.path.join(cur_dir, '..', '..'))
@@ -21,8 +22,8 @@ from zruser.models import ZrUser
 from decimal import Decimal
 import datetime
 
-input_file = os.path.join(cur_dir, 'debit_refund.xls')
 
+input_file = os.path.join(cur_dir, 'debit_refund_220719.xlsx')
 
 if not os.path.exists(input_file):
     print('No Input file found')
@@ -30,7 +31,7 @@ if not os.path.exists(input_file):
 
 exl = pd.read_excel(
     input_file,
-    sheetname='Sheet1',
+    sheetname='220719',
     skiprows=0
 )
 
@@ -59,6 +60,15 @@ def debit_refund():
             print "zr_user not found"
             continue
 
+        zr_tran = Transaction.objects.filter(id=dmt_transaction_id).\
+            order_by('-id').first()
+
+        print 'zr_tran -', zr_tran
+
+        if not zr_tran:
+            print "zr_tran not found"
+            continue
+
         zr_wallet = Wallet.objects.get(
             merchant=zr_user
         )
@@ -77,7 +87,7 @@ def debit_refund():
 
         wallet_transaction = WalletTransactions.objects.create(
             wallet=zr_wallet,
-            transaction=dmt_transaction_id,
+            transaction=zr_tran,
             payment_request=None,
             dmt_balance=-diff_upon_refund,
             non_dmt_balance=0,
@@ -88,3 +98,5 @@ def debit_refund():
 
         print 'wallet_transaction - ', wallet_transaction.pk
 
+
+debit_refund()
