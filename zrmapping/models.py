@@ -134,7 +134,7 @@ class AEPSCommission(RowInfo):
 
 
 class UserBeneficiary(RowInfo):
-    merchant = models.ForeignKey(to=ZrUser, related_name='user_beneficiary_mappings', null=True, blank=True)
+    user = models.ForeignKey(to=ZrUser, related_name='user_beneficiary_mappings', null=True, blank=True)
     beneficiary = models.ForeignKey(to=Beneficiary, related_name='beneficiary_user_mappings', null=True, blank=True)
     is_active = models.BooleanField(default=False)
 
@@ -142,4 +142,4 @@ class UserBeneficiary(RowInfo):
         verbose_name_plural = 'UserBeneficiaryMappings'
 
     def __unicode__(self):
-        return '%s: %s - %s' % (self.pk, self.merchant, self.beneficiary)
+        return '%s: %s - %s' % (self.pk, self.user, self.beneficiary)
