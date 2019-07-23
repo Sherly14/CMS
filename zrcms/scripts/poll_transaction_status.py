@@ -32,13 +32,13 @@ def poll_transaction_status_for_refund():
 
     try:
         with dj_transaction.atomic():
-            transactions = Transaction.objects.select_for_update().exclude(status__in=POLL_EXCLUDED_STATUS)
+            transactions = Transaction.objects.select_for_update().exclude(status__in=POLL_EXCLUDED_STATUS).order_by('id')
             # exclude success, failure, refunded only take transactions with pending and refund pending status
             print 'polling transaction status for queryset ', transactions
 
             for transaction in transactions:
                 try:
-                    sleep(1)
+                    # sleep(1)
                     txn_id = transaction.vendor_txn_id
                     headers = {'developer_key': EKO_DEVELOPER_KEY, 'cache-control': "no-cache"}
                     url = EKO_TRANSACTION_ENQUIRY_URL + txn_id + '?initiator_id=' + EKO_INITIATOR_ID
