@@ -24,18 +24,18 @@ from zrtransaction.utils.constants import POLL_EXCLUDED_STATUS, TX_STATUS_AWAITE
     TRANSACTION_STATUS_REFUND_PENDING, \
     TRANSACTION_STATUS_REFUNDED
 from zrwallet.models import WalletTransactions
-
 from django.db import transaction as dj_transaction
 
 
 def poll_transaction_status_for_refund():
-    transactions = Transaction.objects.exclude(status__in=POLL_EXCLUDED_STATUS)
-    # exclude success, failure, refunded only take transactions with pending and refund pending status
-    print 'polling transaction status for queryset ', transactions
 
-    for transaction in transactions:
-        try:
-            with dj_transaction.atomic():
+    try:
+        with dj_transaction.atomic():
+            transactions = Transaction.objects.select_for_update().exclude(status__in=POLL_EXCLUDED_STATUS)
+            # exclude success, failure, refunded only take transactions with pending and refund pending status
+            print 'polling transaction status for queryset ', transactions
+
+            for transaction in transactions:
                 sleep(1)
                 txn_id = transaction.vendor_txn_id
                 headers = {'developer_key': EKO_DEVELOPER_KEY, 'cache-control': "no-cache"}
@@ -94,7 +94,8 @@ def poll_transaction_status_for_refund():
                         transaction.status = TRANSACTION_STATUS_REFUND_PENDING
                         transaction.save()
 
-                    elif int(response_data['data']['tx_status']) == TX_STATUS_REFUNDED:
+                    elif int(response_data['data']['tx_status']) == TX_STATUS_REFUNDED and \
+                            transaction.status != 'R':
                         merchant_wallet = transaction.user.wallet
                         refund_amount = transaction.amount + transaction.additional_charges
 
@@ -105,21 +106,12 @@ def poll_transaction_status_for_refund():
                         if transaction.type.name.upper() == 'DMT':
 
                             merchant_wallet.dmt_balance += refund_amount
-
-                            merchant_wallet.save(
-                                update_fields=[
-                                    'dmt_balance'
-                                ]
-                            )
+                            merchant_wallet.save()
                             wallet_log.dmt_balance = refund_amount
                             wallet_log.dmt_closing_balance = merchant_wallet.dmt_balance
                         else:
                             merchant_wallet.non_dmt_balance += refund_amount
-                            merchant_wallet.save(
-                                update_fields=[
-                                    'non_dmt_balance'
-                                ]
-                            )
+                            merchant_wallet.save()
                             wallet_log.non_dmt_balance = refund_amount
                             wallet_log.non_dmt_closing_balance = wallet_log.non_dmt_balance
                         wallet_log.save()
@@ -131,8 +123,11 @@ def poll_transaction_status_for_refund():
                         else:
                             transaction.transaction_response_json['poll_refunded_response'] = json.dumps(response_data)
                         transaction.save()
-        except Exception as e:
-            print(transaction, e)
+
+    except Exception as e:
+        # print(transaction, transaction.pk, transaction.is_commission_created)
+
+        print 'error- ', e
 
 
 poll_transaction_status_for_refund()
