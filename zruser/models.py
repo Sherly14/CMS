@@ -129,7 +129,7 @@ class ZrUser(RowInfo):
     date_of_birth = models.DateField(blank=True, null=True)
 
     direct_distributor = models.NullBooleanField(default=None)
-    misc = JSONField(default={})
+    terms = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         # self.pass_word = make_password(self.pass_word)
