@@ -172,3 +172,20 @@ class AEPSCommissionStructure(RowInfo):
 
     def __unicode__(self):
         return '%s - %s' % (self.transaction_vendor, self.pk)
+
+
+class InsuranceCommissionStructure(RowInfo):
+
+    rule = JSONField(null=True, blank=True)
+    transaction_vendor = models.ForeignKey(to='zrtransaction.Vendor')
+    is_enabled = models.BooleanField(default=True)
+    is_default = models.BooleanField(default=False)
+
+    def save(self, *args, **kwargs):
+        super(InsuranceCommissionStructure, self).save(*args, **kwargs)
+
+    class Meta:
+        verbose_name_plural = 'InsuranceCommissionStructure'
+
+    def __unicode__(self):
+        return '%s - %s' % (self.pk, self.transaction_vendor)
