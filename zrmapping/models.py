@@ -6,6 +6,7 @@ from django.db import models
 from zruser.models import ZrUser, Sender, Beneficiary, ZrTerminal
 from zrutils.common.modelutils import RowInfo
 from zrcommission.models import AEPSCommissionStructure
+from zrcommission.models import InsuranceCommissionStructure
 
 
 class DistributorMerchant(RowInfo):
@@ -143,3 +144,16 @@ class UserBeneficiary(RowInfo):
 
     def __unicode__(self):
         return '%s: %s - %s' % (self.pk, self.user, self.beneficiary)
+
+
+class InsuranceCommission(RowInfo):
+    distributor = models.ForeignKey(to=ZrUser, related_name='dist_insurance_comm_mappings', null=True, blank=False)
+    merchant = models.ForeignKey(to=ZrUser, related_name='merc_insurance_comm_mappings', null=True, blank=True)
+    insurance_commission_structure = models.ForeignKey(to=InsuranceCommissionStructure, related_name='ins_comm_mappings', null=True, blank=False)
+    is_active = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name_plural = 'InsuranceCommission'
+
+    def __unicode__(self):
+        return '%s: %s - %s' % (self.pk, self.distributor, self.merchant)
