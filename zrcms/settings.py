@@ -49,7 +49,8 @@ PROJECT_APPS = [
     'zrutils',
     'zrwallet',
     'debug_toolbar',
-    'loan'
+    'loan',
+    'feedback'
 ]
 
 EXTERNAL_APPS = [
