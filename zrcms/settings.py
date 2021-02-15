@@ -10,8 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
-from env_vars import ENVIRONMENT
+from zrcms.env_vars import ENVIRONMENT
 from zrcms.env_vars import *
+import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -108,10 +109,10 @@ if ENVIRONMENT == 'local':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': 'dfsgpmoh5tgdjp',
-            'USER': 'mmbunvblidzaqk',
-            'PASSWORD': 'e11a7554a633d40c59256c91db24712310769e494652d3fce09862305ca4d754',
-            'HOST': 'ec2-54-75-239-237.eu-west-1.compute.amazonaws.com',
+            'NAME': 'zrupee',
+            'USER': 'zrupee_admin',
+            'PASSWORD': '5KFYVcZrZzRs6gBxAvCS63UEx85X',
+            'HOST': 'zrupee.cxdqkttjmgam.ap-south-1.rds.amazonaws.com',
             'PORT': '5432'
 
         }

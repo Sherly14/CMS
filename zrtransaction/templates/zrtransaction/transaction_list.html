@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 
 {% block title %} Transactions List {% endblock %}
 
@@ -48,11 +48,11 @@
         </div>
         <div class="col-2 col-lg-1 mt-2">
             <a href="{% url 'transaction:transaction-list' %}" data-toggle="tooltip" data-placement="top" title="Clear Filters">
-                <img src="https://png.icons8.com/ios/50/000000/clear-filters.png" height="30">
+                <img src="{% static 'images/clearfilter.png' %}" height="30">
             </a>
         </div>
         <div class="col-2 col-lg-1 mt-2 float-right" data-toggle="tooltip" data-placement="top" title="Download CSV">
-            <img src="https://png.icons8.com/ios/50/000000/export-csv.png" height="30" id="csv-download" class="float-right"
+            <img src="{% static 'images/downloadcsv.png' %}" height="30" id="csv-download" class="float-right"
              style="cursor: pointer;">
         </div>
         <input hidden id="is_data_exists" value="{% if queryset %}1{% else %}0{% endif %}">
@@ -84,12 +84,12 @@
                                 <td>{{ transaction.vendor_txn_id }}</td>
                                 <td>{{ transaction.get_status_display }}</td>
                                 <td>{{ transaction.amount }}</td>
-                                <td>{{ transaction.type }}</td>
+                                <td>{{ transaction.type.name }}</td>
                                 <td>{{ transaction.user.mobile_no }}</td>
                                 <td>{{ transaction.customer }}</td>
                                 <td>{{ transaction.amount }}</td>
                                 <td>{{ transaction.additional_charges }}</td>
-                                <td>{{ transaction.type }}</td>
+                                <td>{{ transaction.type.name }}</td>
                                 <td>{{ transaction.service_provider | default_if_none:"NA" }}</td>
                             </tr>
                          {% endfor %}

@@ -18,9 +18,11 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
 from zrcms.utils.healthutil import health_check
-from zruser.views import login_view
+from zruser.views import login_view,terms_and_conditions,privacy_policy
 import debug_toolbar
 
+
+"""
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', login_view, name='login'),
@@ -42,4 +44,31 @@ urlpatterns = [
         name='password_reset_complete'),
     url(r'^__debug__/', include(debug_toolbar.urls)),
     url(r'^loan/', include('loan.urls', namespace='loan'))
+]"""
+
+
+urlpatterns = [
+    url(r'^admin/', admin.site.urls),
+    url(r'^$', login_view, name='login'),
+    url(r'^terms_and_conditions/$', terms_and_conditions, name='terms_and_conditions'),
+    url(r'^privacy_policy/$', privacy_policy, name='privacy_policy'),
+    #url(r'^logout/$', auth_views.logout, {'next_page': 'login'}, name='logout'),
+    url(r'^logout/$', auth_views.LogoutView.as_view(), {'next_page': 'login'}, name='logout'),
+    url(r'^user/', include(('zruser.urls','user'), namespace='user')),
+    url(r'^transactions/', include(('zrtransaction.urls','transaction'), namespace='transaction')),
+    url(r'^payment_request/', include(('zrpayment.urls','payment-requests'), namespace='payment-requests')),
+    url(r'^commission/', include(('zrcommission.urls','commission'), namespace='commission')),
+    url(r'^wallet/', include(('zrwallet.urls','wallet'), namespace='wallet')),
+    url(r'^health_check/', health_check),
+    url(r'^password_reset/$', auth_views.PasswordResetView.as_view(), {'template_name': 'password_reset_form.html'},
+        name="password_reset"),
+    url(r'^password_reset/done/$', auth_views.PasswordResetDoneView.as_view(), {'template_name': 'password_reset_done.html'},
+        name='password_reset_done'),
+    url(r'^reset/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/$',
+        auth_views.PasswordResetConfirmView.as_view(), {'template_name': 'password_reset_confirm.html'},
+        name='password_reset_confirm'),
+    url(r'^reset/done/$', auth_views.PasswordResetCompleteView.as_view(), {'template_name': 'password_reset_complete.html'},
+        name='password_reset_complete'),
+    url(r'^__debug__/', include(debug_toolbar.urls)),
+    url(r'^loan/',  include(('loan.urls','loan'), namespace='loan'))
 ]

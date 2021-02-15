@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
-
+{% load static %}
 {% block title %} Dashboard {% endblock %}
 
 
@@ -16,7 +16,7 @@
     </div>
         <p class="head-right">Dashboard</p>
         <div class="text-center center item active">
-     <figure><img class="center" src="/static/images/aeps6.png" style="height: 250px;border-radius: 15px" alt="AePS Live!"></figure>
+    <!-- <figure><img class="center" src="/static/images/aeps6.png" style="height: 250px;border-radius: 15px" alt="AePS Live!"></figure> -->
 </div>
             <div class="row">
                 <div class="col-6 col-lg-2 mt-2">
@@ -32,13 +32,13 @@
                 </div>
                 <div class="col-2 col-lg-1 mt-2">
                     <a href="{% url 'user:dashboard' %}" data-toggle="tooltip" data-placement="top" title="Clear Filters">
-                        <img src="https://png.icons8.com/ios/50/000000/clear-filters.png" height="30">
+                        <img src="{% static 'images/clearfilter.png' %}" height="30">
                     </a>
                 </div>
-                <div class="col-2 col-lg-1 mt-2 row-float-right" data-toggle="tooltip" data-placement="top" title="Download CSV">
+               <!-- <div class="col-2 col-lg-1 mt-2 row-float-right" data-toggle="tooltip" data-placement="top" title="Download CSV">
                     <img src="https://png.icons8.com/ios/50/000000/export-csv.png" data-toggle="modal" data-target="#get_email_modal" height="30" id="csv-download" class="float-right"
                      style="cursor: pointer;">
-                </div>
+                </div> -->
             </div>
             <br>
             <!-- Icon Cards -->

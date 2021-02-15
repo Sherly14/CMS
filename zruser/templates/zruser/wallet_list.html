@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block title %} Wallet List {% endblock %}
 
 {% block content %}
@@ -26,11 +26,11 @@
         </div>
         <div class="col-2 col-lg-1 mt-2">
             <a href="{% url 'user:wallet-list' %}" data-toggle="tooltip" data-placement="top" title="Clear Filters">
-                <img src="https://png.icons8.com/ios/50/000000/clear-filters.png" height="30">
+                <img src="{% static 'images/clearfilter.png' %}" height="30">
             </a>
         </div>
-        <div class="col-2 col-lg-1 mt-2 row-float-right" data-toggle="tooltip" data-placement="top" title="Download CSV">
-            <img src="https://png.icons8.com/ios/50/000000/export-csv.png" height="30" id="csv-download" class="float-right"
+        <div class="col-2 col-lg-1 mt-2" data-toggle="tooltip" data-placement="top" title="Download CSV">
+            <img src="{% static 'images/downloadcsv.png' %}" height="30" id="csv-download" class="float-right"
              style="cursor: pointer;">
         </div>
 
@@ -56,7 +56,7 @@
                                 <td>{{ wallet.merchant.first_name }} {{ wallet.merchant.last_name }}</td>
                                 <td>{{ wallet.at_created }}</td>
                                 <td>{{ wallet.merchant.mobile_no }}</td>
-                                <td>{{ wallet.merchant.role }}</td>
+                                <td>{{ wallet.merchant.role.name }}</td>
                                 <td>{{ wallet.dmt_balance }}</td>
                                 <!--<td>{{ wallet.non_dmt_balance }}</td>-->
                             </tr>

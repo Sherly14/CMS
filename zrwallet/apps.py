@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-from django.apps import AppConfig
-
-
-class ZrwalletConfig(AppConfig):
-    name = 'zrwallet'
+# -*- coding: utf-8 -*-
+
+
+from django.apps import AppConfig
+
+
+class ZrwalletConfig(AppConfig):
+    name = 'zrwallet'

@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from zrpayment import views as zr_payment_views
+from . import views as zr_payment_views
 
 urlpatterns = [
     url(r'^$', zr_payment_views.PaymentRequestListView.as_view(), name='payment-request-list'),

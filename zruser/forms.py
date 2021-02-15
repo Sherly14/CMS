@@ -2,8 +2,8 @@ import re
 
 from django import forms
 from django.contrib.auth import authenticate
-
-from zruser.models import ZrAdminUser, ZrUser, BankDetail, ZrTerminal, KYCDocumentType
+from django.shortcuts import HttpResponse
+from .models import ZrAdminUser, ZrUser, BankDetail, ZrTerminal, KYCDocumentType
 from zrpayment.forms import forms
 
 

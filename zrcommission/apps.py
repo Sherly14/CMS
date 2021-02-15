@@ -1,8 +1,8 @@
-# -*- coding: utf-8 -*-
-from __future__ import unicode_literals
-
-from django.apps import AppConfig
-
-
-class ZrcommissionConfig(AppConfig):
-    name = 'zrcommission'
+# -*- coding: utf-8 -*-
+
+
+from django.apps import AppConfig
+
+
+class ZrcommissionConfig(AppConfig):
+    name = 'zrcommission'

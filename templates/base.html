@@ -13,11 +13,13 @@
     <meta name="author" content="">
     <title>{% block title %} {% endblock title %} | Zrupee CMS</title>
 
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">    <link href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css" rel="stylesheet">
+    <!--<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/pretty-checkbox@3.0/dist/pretty-checkbox.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
-
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
-    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/all.js" integrity="sha384-xymdQtn1n3lH2wcu0qhcdaOpQwyoarkgLVxC/wZ5q7h9gHtxICrpcaSUfygqZGOe" crossorigin="anonymous"></script>
+    <!--<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css" integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/all.js" integrity="sha384-xymdQtn1n3lH2wcu0qhcdaOpQwyoarkgLVxC/wZ5q7h9gHtxICrpcaSUfygqZGOe" crossorigin="anonymous"></script>-->
 
 
 
@@ -30,7 +32,7 @@
         <link href="{% static 'css/app/for_commissions.css' %}" rel="stylesheet">
 
     {% else %}
-        <link href="{% static 'css/app/login.css' %}" rel="stylesheet">
+        <link href="{% static 'css/app/login_form.css' %}" rel="stylesheet">
     {% endif %}
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
@@ -130,12 +132,13 @@
                 <li class="nav-item leftMargin headerText {% if url_name == 'distributor-create' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'user:distributor-create' %}">Add Distributor</a>
                 </li>
+                <!--
                 <li class="nav-item leftMargin headerText {% if url_name == 'retailer-create' %}active{% endif %}">
                     <a class="nav-link" href="{% url 'user:retailer-create' %}">Add Retailer</a>
-                </li>
+                </li> -->
                 {% endif %}
                 <li class="nav-item leftMargin headerText {% if url_name == 'merchant-create' %}active{% endif %}">
-                    <a class="nav-link redTextColor" href="{% url 'logout' %}">Logout</a>
+                    <a class="nav-link redTextColor" href="{% url 'logout' %}?next=/">Logout</a>
                 </li>
             </ul>
             <hr class="white-line">
@@ -210,6 +213,7 @@
                 </li>
                 {% endif %}
 
+                <!--
                 {% if request.user.zr_admin_user.role.name != "RETAILER" and zr_user.role.name != "TERMINAL" and request.user.zr_admin_user.role.name != "DISTRIBUTOR" and request.user.zr_admin_user.role.name != "SUBDISTRIBUTOR"%}
                 <li class="nav-item">
                     <a class="nav-link side-nav-pl" style="font-size:20px; margin-right:0px;" href="#">Loyalty - </a>
@@ -227,6 +231,7 @@
                      <a class="nav-link side-nav-pl" href="{% url 'user:terminal-list' %}">Terminals</a>
                 </li>
                 {% endif %}
+                -->
                 {% if request.user.zr_admin_user.role.name == "RETAILER" and zr_user.role.name != "TERMINAL"%}
                 <li class="nav-item {% if url_name == 'loyaltycard-list' %}active{% endif %}">
                      <a class="nav-link side-nav-pl" href="{% url 'user:loyaltycard-list' %}">Loyalty Cards</a>
@@ -262,7 +267,7 @@
                     <a class="nav-link side-nav-pl" href="{% url 'user:dashboard' %}">Back to Retailer</a>
                 </li>
                 {% endif %}
-
+                <!--
                 {% if request.user.is_superuser or request.user.zr_admin_user.role.name == "ADMINSTAFF" or request.user.zr_admin_user.role.name == "RETAILER" and zr_user.role.name != "TERMINAL" or request.user.zr_admin_user.role.name == "OPERATIONS" %}
                 <li class="nav-item {% if url_name == 'offer-list' %}active{% endif %}">
                     <a class="nav-link side-nav-pl" href="{% url 'user:offer-list' %}">Offers</a>
@@ -280,7 +285,7 @@
                 <li class="nav-item {% if url_name == 'payment-history' %}active{% endif %}">
                     <a class="nav-link side-nav-pl" href="{% url 'user:payment-history' pk=0 %}">Payment History</a>
                 </li>
-                {% endif %}
+                {% endif %} -->
             </ul>
         </div>
     </nav>

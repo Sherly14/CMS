@@ -1,0 +1,345 @@
+#home
+{
+    background: url("/static/images/bg.jpg");
+    padding-top: 10px;
+    padding-bottom: 105px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    height: 100%;
+    width: 100%
+
+}
+.zrupee-container {
+    margin-top: 97px;
+    margin-bottom: 97px;
+}
+
+.zrupee-container1 {
+    margin-left: 570px;
+    margin-top: 97px;
+    margin-bottom: 97px;
+}
+
+.logo{
+    width: 135px;
+    align-items: center;
+    height: 135px;
+}
+.panel-left{
+    background-color: rgba(38, 43, 72, 0.92);
+    color: #ffffff;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    -webkit-box-shadow: 0px 3px 6px #1d2030;
+    box-shadow: 0px 3px 6px #1d2030;
+}
+.zrupee-col{
+    display: table;
+    width: 100%;
+    padding: 25px;
+}
+.zrupee-logo{
+    display: flex;
+    justify-content: center;
+}
+
+.social-btn{
+    padding: 10px 30px;
+}
+.fontAwe{
+    margin-right: 5px;
+}
+.btn-fb{
+    background: #395590;
+    color: #ffff;
+    border: 1px solid transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    height: 37px;
+    border-radius: 4px;
+}
+.twitter{
+    background-color: #00aced !important;
+}
+.instagram{
+    background-color: #8a3ab9 !important;
+}
+
+.panel-right{
+    background-color: #ffffff;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    -webkit-box-shadow: 0px 2px 6px 0px #1d2030;
+    box-shadow: 0px 2px 6px 0px #1d2030;
+}
+.login-panel{
+    padding: 40px 20px;
+}
+.login-section{
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+    border-bottom: 2px solid #d9d9d9;
+    margin-bottom: 50px;
+}
+.heading{
+    color: #666666;
+    font-weight: 600;
+    padding: 10px 0px;
+    width: 32rem;
+}
+.heading1
+{
+    color:#ff0040;
+    font-weight: 600;
+    padding: 10px 0px;
+}
+.login-form input{
+    color: #333333;
+    font-size: 16px;
+    height: 50px;
+    padding: 12px 0px;
+    outline: none;
+    border: 0 none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    width: 100%;
+}
+
+.signup-form input{
+    color: #333333;
+    font-size: 16px;
+    height: 50px;
+    padding: 12px 0px;
+    outline: none;
+    border: 0 none;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+    width: 100%;
+}
+.focus-input {
+    display: block;
+    width: 100%;
+    border-bottom: 2px solid #d9d9d9;
+}
+.focus-input:before {
+    background-color: #4f77ff;
+    content: "";
+    width: 0;
+    height: 2px;
+    display: block;
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    -webkit-transition: all 0.4s;
+    -o-transition: all 0.4s;
+    -moz-transition: all 0.4s;
+    transition: all 0.4s;
+}
+.remember input{
+    width: 17px;
+    height: 17px;
+}
+.remember{
+    padding-left: 10px;
+    display: flex;
+    align-items: center;
+}
+.rem-text{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0px 10px;
+    font-size: 16px;
+    font-weight: 400;
+}
+.forgot-pass{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+.pass-text{
+    color: #df3c26;
+    font-weight: 600;
+    font-size: 16px;
+}
+.btn-submit {
+    padding-top: 30px;
+}
+.login-panel .btn{
+    border-radius: 3px;
+    box-shadow: 0px 2px 3px #9c9c9c;
+}
+.btn-login{
+    background-color: #df3c26 ;
+    color: #ffff;
+    border-color: #df3c26 ;
+}
+.panel-left, .login-panel, .zrupee-col{
+    height: 480px;
+}
+.hide{
+    display: none;
+}
+.active-tab{
+    border-bottom: 3px solid #df3c26;
+    /* padding-bottom: 13px; */
+  }
+
+a:link {
+  text-decoration: none;
+}
+
+a:visited {
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: none;
+  color:blue;
+}
+
+a:active {
+  text-decoration: none;
+}
+
+.conditions {
+  text-decoration: underline;
+  color: white
+}
+
+input[type=text],input[type=password],input[type=email]
+{
+     border: 1px solid #ccc;
+     border-radius: 4px;
+     padding: 14px 15px;
+}
+.submitbutton
+{
+    color : white;
+    font-size : 20px;
+}
+.terms
+{
+    font-family: "Lato",Arial,sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.7;
+    color: black;
+    background: #fff;
+}
+
+.websites
+{
+    width : 164px;
+    height : 30px;
+    object-fit : contain
+}
+
+.zrupeelogo
+{
+    width: 150px;
+    height: 50px;
+    margin-top: 21px;
+    margin-bottom: 15px;
+}
+
+.tag
+{
+    margin-bottom : 29px;
+}
+h6.intro-header
+ {
+    margin-top : 20px;
+    font-size: 3.4rem;
+    color: #151515;
+    position: relative;
+    padding-bottom: 2rem;
+    font-family: "montserrat-regular",sans-serif;
+    letter-spacing: -.1rem;
+    border-bottom: 2px solid red;
+
+}
+
+.button
+{
+    margin-top : 76px;
+    margin-bottom : 70px;
+}
+
+
+/* Small devices (landscape phones, 576px and up)*/
+@media (min-width:300px) and (max-width: 576px)
+ {
+    .zrupee-container1
+    {
+        margin-left : 0px;
+    }
+    .forgot-pass
+    {
+        justify-content: left;
+        margin-left: 20px;
+    }
+    h6.intro-header
+    {
+        font-size: 2rem;
+    }
+    .heading
+    {
+        width: 18rem;
+    }
+    .zrupee-col
+    {
+        display: initial;
+    }
+}
+
+
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) and (max-width: 999px)
+{
+    .zrupee-col
+    {
+        display: initial;
+    }
+    .zrupee-container1
+    {
+        margin-left: 240px;
+        margin-top: 250px;
+    }
+    .zrupee-container
+    {
+        margin-top: 250px;
+    }
+    #home
+    {
+        height : 100vh;
+    }
+}
+
+@media (min-width: 1000px) and (max-width:1024px)
+{
+    .zrupee-col
+    {
+        display: initial;
+    }
+    .zrupee-container
+    {
+        margin-top: 400px;
+    }
+    #home
+    {
+        height : 100vh;
+    }
+    .zrupee-container1
+    {
+        margin-left: 350px;
+        margin-top: 400px;
+    }
+}
+

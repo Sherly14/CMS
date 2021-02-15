@@ -82,10 +82,16 @@
                 <div class="col-sm-3">
                     <div class="form-group">
                         <label for="business_type">Business Type</label>
-                        {{ merchant_form.business_type|attr:"class:fill, form-control"|attr:"id:business_type" }}
+                        <!--{{ merchant_form.business_type|attr:"class:fill, form-control"|attr:"id:business_type" }}-->
                         {% if merchant_form.business_type.errors %}
                             {{ merchant_form.business_type.errors }}
                         {% endif %}
+                        <select id="business_type" class="fill form-control" name="business_type">
+                                <option>---------</option>
+                           {% for business_type in business_type %}
+                                <option value="{{ business_type.id }}">{{ business_type.name }}</option>
+                            {% endfor %}
+                        </select>
                     </div>
                 </div>
             </div>

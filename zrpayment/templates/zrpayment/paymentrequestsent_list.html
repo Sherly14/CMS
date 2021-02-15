@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block title %} Payment Requests List {% endblock %}
 
 {% block content %}
@@ -33,11 +33,11 @@
         </div>
         <div class="col-2 col-lg-1 mt-2">
             <a href="{% url 'payment-requests:payment-request-sent-view' %}" data-toggle="tooltip" data-placement="top" title="Clear Filters">
-                <img src="https://png.icons8.com/ios/50/000000/clear-filters.png" height="30">
+                <img src="{% static 'images/clearfilter.png' %}" height="30">
             </a>
         </div>
         <div class="col-2 col-lg-1 mt-2 float-right" data-toggle="tooltip" data-placement="top" title="Download CSV">
-            <img src="https://png.icons8.com/ios/50/000000/export-csv.png" height="30" id="csv-download" class="float-right"
+            <img src="{% static 'images/downloadcsv.png' %}" height="30" id="csv-download" class="float-right"
              style="cursor: pointer;">
         </div>
         
@@ -77,7 +77,7 @@
                             </td>
                             <td>{{ payment_request.at_created }}</td>
                             <td>{{ payment_request.amount }}</td>
-                            <td>{{ payment_request.payment_mode }}</td>
+                            <td>{{ payment_request.payment_mode.name }}</td>
                             <!--<td><a class="btn btn-outline-success btn-xs" href="{{ payment_request.document }}">Download</a></td>-->
                             <td>
                                 {% if payment_request.to_user.role.name == 'ADMINSTAFF' %}
@@ -214,7 +214,7 @@ $(document).ready(function(){
         }
     });
 
-    $('#download-csv').click(function(){
+    $('#csv-download').click(function(){
         if(window.location.search) {
             url = '{% url "payment-requests:payment-request-csv" %}' + window.location.search + "&sent=true"
         } else {

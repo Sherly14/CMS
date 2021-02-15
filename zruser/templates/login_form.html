@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block logincontent %}
+
+<script>
+ $(document).ready(function(){
+    $("#username").focus();
+ });
+
+</script>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<section id="home">
+    <div class="container zrupee-container col-xs-12 col-sm-10 col-md-8 col-lg-6 col-sm-offset-1 col-md-offset-2 col-lg-offset-3">
+        <div class="col-sm-12" align="center">
+            <div class="row homepage">
+                <div class="col-sm-5 panel-left">
+                    <div class="zrupee-col">
+                        <div class="headline">
+                            <div class="zrupee-logo">
+
+                                <img src="{% static 'images/zrupeelogo1.png' %}" class="zrupeelogo">
+                            </div>
+                            <h6 align="center" class="tag">Vyapar Aapka Sahyog Hamara</h6>
+
+
+                            <div class="social-links button">
+                                <div class="social-btn">
+                                    <!--<a href="https://www.facebook.com/ZrupeeMerchant" target="_blank">-->
+                                    <a href="https://www.zrupeetravel.com" target="_blank">
+                                        <div class="btn-fb">
+                                            <!-- <i class="fa fa-facebook fontAwe"></i>Facebook -->
+                                            <img  src="{% static 'images/ZrupeeTravels1.png' %}" class="websites">
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="social-btn">
+                                    <a href="https://www.zrupee.co.in" target="_blank">
+                                        <div class="btn-fb twitter">
+                                            <!--<i class="fa fa-twitter fontAwe"></i>Twitter</div>-->
+                                            <img src="{% static 'images/ZrupeeMerchant1.png' %}" class="websites">
+                                        </div>
+                                    </a>
+                                </div>
+                                <!--
+                                <div class="social-btn">
+                                    <a href="https://www.facebook.com/ZrupeeMerchant" target="_blank">
+                                        <div class="btn-fb instagram">
+                                            <i class="fa fa-instagram fontAwe"></i>Instagram</div>
+                                    </a>
+                                </div>
+                                -->
+
+                            </div>
+                             <div align="center" class="doc">
+                                    <a href="{% url 'terms_and_conditions' %}" style="color:white"><u>Terms And Conditions</u></a> <br>
+                                    <a href="{% url 'privacy_policy' %}" style="color:white"><u>Privacy Policy</u></a>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="col-sm-7 panel-right" >
+                    <div class="login-panel">
+                            <div class="col-xs-12">
+                               <!--<div class="login-section" > -->
+
+                                        <div class="login-head title">
+                                            <div class="heading1 title" align="left"><h5>LOGIN</h5></div>
+                                        </div>
+                                        <br>
+                               <!-- </div> -->
+
+                                <div class="login-form">
+                                    <form class="loginForm" role="form" action="{% url 'login' %}" name="loginForm" id="login-form" method="post" role="form">
+                                        {% csrf_token %}
+                                        <div class="form-group username">
+                                            <input type="text" class="form-control"  placeholder="Username" name="username" id="username" value="{{cookie1}}">
+                                        </div>
+
+                                        <div class="form-group password">
+                                            <input type="password" class="form-control" placeholder="Password" name="password" id="password" value="{{cookie2}}">
+                                        </div>
+
+
+                                        {% if login_form.non_field_errors %}
+                                            <ul class='form-errors'>
+                                            {% for error in login_form.non_field_errors %}
+                                                <li class="title"><b>{{ error }}</b></li>
+                                            {% endfor %}
+                                            </ul>
+                                        {% endif %}
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                <div class="row remember">
+                                                    <span class="rem-text"><input type="checkbox" tabindex="3" class="" name="remember" id="remember">&nbsp;&nbsp; Remember me</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-sm-6 forgot-pass">
+                                                <div class="row remember">
+                                                    <span class="pass-text"><a href="{% url 'password_reset'%}" class="title">Forgot Password?</a></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group btn-submit d-grid gap-2">
+                                            <b><input type="submit" class="btn btn-lg  btn-danger"  value="Login" style="color : white ;font-size : 20px; "></b>
+                                        </div>
+                                        <br>
+                                        <div class="form-group row justify-content-center text-center">
+                                            <p>For Help/Inquiry - Call Us On +91 8800889463</p>
+                                        </div>
+
+                                    </form>
+                                </div>
+
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
